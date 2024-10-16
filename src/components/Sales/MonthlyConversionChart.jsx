@@ -7,12 +7,6 @@ import { getDealsBack } from '../../methods/dataFetches/getDealsBack';
 const MonthlyConversionChart = ({title, leadsSeries}) => {
   const [ selectedMonth, setSelectedMonth ] = useState('September');
   const { leads, dateRanges } = useStateContext();
-//   const [ series, setSeries ] = useState(leads.series);
-
-  // useEffect(() => {
-
-  //   setSeries(data)
-  // }, [series]);
 
   const cities = [  "January",
   "February",

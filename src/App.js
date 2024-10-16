@@ -20,22 +20,21 @@ const App = () => {
   useEffect(()=> {
     async function collector() {
       try {
-        const [ bitrixData,  kkm, receipts, spisanie ] = await Promise.all([
+        const [ bitrixData, spisanie ] = await Promise.all([
           getLeadsBack(),
-          getKKMReceiptsFront(dateRanges),
-          getSalesReceiptsFront(dateRanges),
+          // getKKMReceiptsFront(dateRanges),
+          // getSalesReceiptsFront(dateRanges),
           getSpisanie(dateRanges),
         ]);
+console.log('speedCheck');
         setLeads(JSON.parse(bitrixData.leads));
         setDeals(JSON.parse(bitrixData.deals));
-        const kkmData = JSON.parse(bitrixData.kkmData);
-        console.log(kkmData)
-        setKKM(kkm);
-        console.log('realKKM', kkm)
-        setReceipts(receipts);
+        // const kkmData = JSON.parse(bitrixData.kkmData);
+        setKKM(JSON.parse(bitrixData.kkmData));
+        setReceipts(JSON.parse(bitrixData.salesReceipt));
         setSpisanie(spisanie);
         
-        if ( !kkm || !spisanie || !receipts) {
+        if ( !spisanie ) {
           // console.error("Data is missing or undefined");
           setTechProblem(true);
           setLoading(false);

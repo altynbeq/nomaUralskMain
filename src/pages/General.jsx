@@ -14,6 +14,7 @@ import { fetchDeals } from '../methods/dataFetches/getDealsBitrix';
 const General = () => {
 
   const { kkm, skeletonUp, spisanie, dateRanges, deals, setDeals } = useStateContext();
+  console.log(dateRanges)
   const [ ready, setReady ] = useState(false)
   const [ salesShare, setSalesShare ] = useState([]);
   const [ financeShare, setFinanceShare ] = useState([]);

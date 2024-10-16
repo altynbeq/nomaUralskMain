@@ -12,6 +12,28 @@ import ProductStatsComp  from '../components/demo/ProductsStatComp'
 import { getLeadsBack } from '../methods/dataFetches/getLeadsBack';
 import { parse } from 'postcss';
 
+function generateConversionSeries(leadsSeries, dealsSeries) {
+    return leadsSeries.map((lead, index) => {
+        const leadValue = lead.y;
+        const dealValue = dealsSeries[index].y;
+        
+        // Avoid division by zero by checking if leadValue is greater than 0
+        const conversion = leadValue > 0 ? (dealValue * 100) / leadValue : 0;
+        
+        return { x: lead.x, y: conversion.toFixed(2) }; // Round conversion to 2 decimal places
+    });
+}
+
+
+function formData(leadsSeries, conversionSeries) {
+    return leadsSeries.map((lead, index) => ({
+      name: `Day ${lead.x}`,
+      lead: lead.y, // leads
+      conversion: parseFloat(conversionSeries[index].y), // conversion percentage
+      amt: 0 // placeholder for any additional data, or you can remove this if not needed
+    }));
+}
+
 const Sales = () => {
     const [ salesShare, setSalesShare ] = useState([]);
     const { skeletonUp, kkm, receipts, leads, deals, setLeads, dateRanges } = useStateContext();
@@ -20,32 +42,10 @@ const Sales = () => {
     const [ productStats, setProductStats ] = useState({});
     const [ barSeriesAll, setBarSeriesAll ] = useState([]);
     const [ barSeriesByStore, setBarSeriesByStore ] = useState([]);
-    const [ leadsSeries, setLeadsSeries ] = useState(leads.series);
+    const [ leadsSeries, setLeadsSeries ] = useState([]);
     const [ totalSeries, setTotalSerues ] = useState([]);
-    console.log(dateRanges)
+
     useEffect( () => {
-        function generateConversionSeries(leadsSeries, dealsSeries) {
-            return leadsSeries.map((lead, index) => {
-                const leadValue = lead.y;
-                const dealValue = dealsSeries[index].y;
-                
-                // Avoid division by zero by checking if leadValue is greater than 0
-                const conversion = leadValue > 0 ? (dealValue * 100) / leadValue : 0;
-                
-                return { x: lead.x, y: conversion.toFixed(2) }; // Round conversion to 2 decimal places
-            });
-        }
-        const conversion = generateConversionSeries(leads.series, deals.salesSeries);
-        function formData(leadsSeries, conversionSeries) {
-            return leadsSeries.map((lead, index) => ({
-              name: `Day ${lead.x}`,
-              lead: lead.y, // leads
-              conversion: parseFloat(conversionSeries[index].y), // conversion percentage
-              amt: 0 // placeholder for any additional data, or you can remove this if not needed
-            }));
-          }
-        const totalSeriesL = formData(leads.series, conversion);
-        setTotalSerues(totalSeriesL)
         if(kkm.monthFormedKKM && receipts.monthReceiptsData){
             setSalesShare(SaleShare(kkm.monthFormedKKM));
             setProductGridRows(ProductSoldGridList(kkm.monthFormedKKM));
@@ -53,8 +53,14 @@ const Sales = () => {
             setBarSeriesAll(SalesBarSeriesAll(kkm.monthFormedKKM));
             setBarSeriesByStore(SalesBarSeriesByStore(kkm.monthFormedKKM));
         }
+        if(leads.series && deals.dealsMonth.salesSeries){
+            setLeadsSeries(leads.series);
+            const conversion = generateConversionSeries(leads.series, deals.dealsMonth.salesSeries);
+            const totalSeriesL = formData(leads.series, conversion);
+            setTotalSerues(totalSeriesL)
+        }
         window.scrollTo(0, 0);
-    }, [kkm]);
+    }, []);
     // console.log("barSeriesAll", barSeriesAll);
     if(skeletonUp){
         return(
