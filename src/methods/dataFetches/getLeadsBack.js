@@ -1,5 +1,5 @@
 export async function getLeadsBack() {
-  const url = "https://nomalytica-back.onrender.com/api/users/67042877bf2a6d9b31acfe1e";
+  const url = "http://localhost:8888/api/users/67042877bf2a6d9b31acfe1e";
 
   try {
     const response = await fetch(url);
