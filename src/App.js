@@ -22,20 +22,15 @@ const App = () => {
       try {
         const [ bitrixData, spisanie ] = await Promise.all([
           getLeadsBack(),
-          // getKKMReceiptsFront(dateRanges),
-          // getSalesReceiptsFront(dateRanges),
           getSpisanie(dateRanges),
         ]);
-console.log('speedCheck');
         setLeads(JSON.parse(bitrixData.leads));
         setDeals(JSON.parse(bitrixData.deals));
-        // const kkmData = JSON.parse(bitrixData.kkmData);
         setKKM(JSON.parse(bitrixData.kkmData));
         setReceipts(JSON.parse(bitrixData.salesReceipt));
         setSpisanie(spisanie);
         
         if ( !spisanie ) {
-          // console.error("Data is missing or undefined");
           setTechProblem(true);
           setLoading(false);
           return;
