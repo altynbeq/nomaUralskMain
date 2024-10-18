@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { Navbar, Footer, Sidebar } from './components';
-import { General, Sales, ComingSoon, Sklad, Finance, Workers, TechProb } from './pages';
+import { General, Sales, ComingSoon, Sklad, Finance, Workers, TechProb, LogInForm } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import { getKKMReceiptsFront } from './methods/dataFetches/getKKM'
@@ -16,8 +16,20 @@ const App = () => {
   const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie } = useStateContext();
   const [ loading, setLoading ] = useState(true);
   const [ techProblem, setTechProblem ] = useState(false);
+  const [ localStorageState, setLocalStorageState] = useState(false)
 
   useEffect(()=> {
+    const checkStorage =  () => {
+    let result = (localStorage.getItem('_id') === null
+     && localStorage.getItem('token') === null);
+      if (result){
+        setLocalStorageState(result)
+        // window.location.href ='/general';
+      }
+      return result;
+    };
+    checkStorage();
+    console.log('checking storage: ' + localStorageState);
     async function collector() {
       try {
         const [ bitrixData, spisanie ] = await Promise.all([
@@ -46,14 +58,15 @@ const App = () => {
   if(techProblem){
     return <TechProb />
   }
+
   return (
 
     <div className={currentMode === 'Dark' ? 'dark' : ''}>
       {loading  ? (
         <Loader />
       ) : (
-        <BrowserRouter>
-         <>
+          localStorageState ? <LogInForm /> : <BrowserRouter>
+          <>
           <div className="flex relative dark:bg-main-dark-bg">
             <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
               <TooltipComponent
@@ -84,26 +97,27 @@ const App = () => {
               
               <div>
                 <Routes>
-                  {/* dashboard  */}
-                  <Route path="/" element={<General />} />
-                  <Route path="/general" element={ <General /> }/>
-                  <Route path="/finance" element={<Finance/>} />
-                  <Route path="/sales" element={<Sales />} />
-                  <Route path="/workers" element={ <Workers />} />
-                  <Route path="/sklad" element={ <Sklad />} />
-
-                  {/* pages  */}
-                  <Route path="/docs" element={<ComingSoon />} />
-                  <Route path="/resources" element={<ComingSoon />} />
-                  <Route path="/support" element={<ComingSoon />} />
-                  <Route path="/Q&A" element={<ComingSoon />} />
+                      <>
+                        <Route path="/" element={<General />} />
+                        <Route path="/general" element={ <General /> }/>
+                        <Route path="/finance" element={<Finance/>} />
+                        <Route path="/sales" element={<Sales />} />
+                        <Route path="/workers" element={ <Workers />} />
+                        <Route path="/sklad" element={ <Sklad />} />
+                        <Route path="/docs" element={<ComingSoon />} />
+                        <Route path="/resources" element={<ComingSoon />} />
+                        <Route path="/support" element={<ComingSoon />} />
+                        <Route path="/Q&A" element={<ComingSoon />} />
+                        <Route path="/login" element={<LogInForm />} />
+                      </>
                 </Routes>
               </div>
               <Footer />
             </div>
           </div>
          </>
-        </BrowserRouter>)}
+        </BrowserRouter>
+      )}
       </div>
   )
 };

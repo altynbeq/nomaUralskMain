@@ -1,36 +1,54 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useStateContext } from './../contexts/ContextProvider';
 import { FaChartPie, FaEye, FaEyeSlash } from "react-icons/fa";
 import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
 
-const LogInForm = () => {
-  const { handleLogIn } = useStateContext();
 
+const LogInForm = () => {
+  const { handleLogin, userId } = useStateContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [localStorageData, setLocalStorageData] = useState([]);
+
+    useEffect(() => {
+      if(userId) {
+        console.log('context userId', userId);
+      }
+      if (!localStorageData.length) {
+        return
+      }
+      localStorage.setItem('_id', localStorageData[0]);
+      localStorage.setItem('token', localStorageData[1]);
+      window.location.href=('/general');
+    }, [localStorageData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if(email == "romantic_zhez" && password == "director123"){
-      handleLogIn({
-        id: 1,
-        userRole: 'admin'
-      });
-    } else if(email == 'romanticZhez_sklad' && password == 'sklad2024') {
-      handleLogIn({
-        id: 2,
-        userRole: 'sklad'
-      });
-    } else if(email == 'romanticZhez_rop' && password == 'rop_qwe') {
-      handleLogIn({
-        id: 3,
-        userRole: 'rop'
-      });
-    } else {
-      alert('Wrong password')
-    }
+   //fetch
+    const handleLogIn = (email, password) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        };
+        const url = `https://nomalytica-back.onrender.com/api/users/login`
+        console.log(email,password)
+        fetch(url, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Login successful') {
+                  setLocalStorageData([data.user._id, data.token]);
+                  handleLogin(data.user._id);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+    };
+    handleLogIn(email, password);
   };
 
   return (

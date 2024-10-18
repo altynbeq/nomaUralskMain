@@ -25,6 +25,7 @@ export const ContextProvider = ({ children }) => {
   const [ spisanie, setSpisanie ] = useState({});
   const [ leads, setLeads ] = useState({});
   const [ deals, setDeals ] = useState({});
+  const [ userId, setUserId] = useState('');
 
   const setMode = (e) => {
     setCurrentMode(e.target.value);
@@ -45,10 +46,12 @@ export const ContextProvider = ({ children }) => {
   };
 
   const handleClick = (clicked) => setIsClicked({ ...initialState, [clicked]: true });
-
+  const handleLogin = (id) => {
+    setUserId(id);
+  };
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <StateContext.Provider value={{ leads, setLeads, deals, setDeals, receipts, setReceipts, spisanie, setSpisanie, isLoading, setLoading, kkm, setKKM, skeletonUp, setSkeletonUp, dateRanges, currentColor, currentMode, activeMenu, screenSize, setScreenSize, handleClick, isClicked, initialState, setIsClicked, setActiveMenu, setCurrentColor, setCurrentMode, setMode, setColor, themeSettings, setThemeSettings }}>
+    <StateContext.Provider value={{ leads, setLeads, deals, setDeals, receipts, setReceipts, spisanie, setSpisanie, isLoading, setLoading, kkm, setKKM, skeletonUp, setSkeletonUp, dateRanges, currentColor, currentMode, activeMenu, screenSize, setScreenSize, handleClick, isClicked, initialState, setIsClicked, setActiveMenu, setCurrentColor, setCurrentMode, setMode, setColor, themeSettings, setThemeSettings, handleLogin, userId }}>
       {children}
     </StateContext.Provider>
   );
