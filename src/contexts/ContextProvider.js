@@ -49,9 +49,14 @@ export const ContextProvider = ({ children }) => {
   const handleLogin = (id) => {
     setUserId(id);
   };
+  const handleLogOut = () => {
+    setUserId('');
+    localStorage.clear();
+    window.location.reload();
+  }
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <StateContext.Provider value={{ leads, setLeads, deals, setDeals, receipts, setReceipts, spisanie, setSpisanie, isLoading, setLoading, kkm, setKKM, skeletonUp, setSkeletonUp, dateRanges, currentColor, currentMode, activeMenu, screenSize, setScreenSize, handleClick, isClicked, initialState, setIsClicked, setActiveMenu, setCurrentColor, setCurrentMode, setMode, setColor, themeSettings, setThemeSettings, handleLogin, userId }}>
+    <StateContext.Provider value={{ leads, setLeads, deals, setDeals, receipts, setReceipts, spisanie, setSpisanie, isLoading, setLoading, kkm, setKKM, skeletonUp, setSkeletonUp, dateRanges, currentColor, currentMode, activeMenu, screenSize, setScreenSize, handleClick, isClicked, initialState, setIsClicked, setActiveMenu, setCurrentColor, setCurrentMode, setMode, setColor, themeSettings, setThemeSettings, handleLogin, userId, handleLogOut }}>
       {children}
     </StateContext.Provider>
   );

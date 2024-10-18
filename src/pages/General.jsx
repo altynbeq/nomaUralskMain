@@ -29,14 +29,14 @@ const General = () => {
       setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
       setReady(true);
     }
-    if(!deals.avgCheck){
-        const getter = async () => {
-          const data =  await fetchDeals(dateRanges[2]);
-          setDeals(data);
-          setDealsStats(data);
-        }
-        getter();
-    }
+    // if(!deals.avgCheck){
+    //     const getter = async () => {
+    //       const data =  await fetchDeals(dateRanges[2]);
+    //       setDeals(data);
+    //       setDealsStats(data);
+    //     }
+    //     getter();
+    // }
   }, [kkm])
   
   if(!ready && skeletonUp){
