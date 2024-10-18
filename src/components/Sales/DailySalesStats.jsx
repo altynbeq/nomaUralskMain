@@ -5,21 +5,38 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart'
 import { FaShare, FaFileDownload } from "react-icons/fa";
 import { SalesHolePie, FinanceStats, FormatAmount, SpisanieStats } from '../../data/MainDataSource';
+import {getUserUrls}  from '../../methods/getUserUrls';
+import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
+
+function convertUrl(apiUrl) {
+  // Replace the base URL with '/api'
+  return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
+}
 
 const DailySalesStats = () => {
-    const { dateRanges, kkm, spisanie } = useStateContext();
+    const { dateRanges, kkm, spisanie, setSpisanie } = useStateContext();
     const date = dateRanges[0].bitrixStartDate.split(' ')[0];
     const [ pieData, setPieData ] = useState([]);
     const [ stats, setStats ] = useState({});
     const [ spisanieSum, steSpisanieSum ] = useState({});
 
     useEffect(() => {
-      if(kkm.dayFormedKKM && spisanie.daySpisanie){
+      const reqDate = dateRanges[0];
+      const getter = async() => {
+        const userId = localStorage.getItem('_id');
+        const userUrls = await getUserUrls(userId);
+
+        const userSpisanieUrl = convertUrl(userUrls.externalApis.apiUrlSpisanie);
+        const spisanieData = await getSpisanie(userSpisanieUrl, reqDate);
+
+        const spis = SpisanieStats(spisanieData).totalSpisanieSum;
+        const numericValue = parseFloat(spis.replace(/,/g, ''));
+        steSpisanieSum(numericValue);
+      }
+      getter();
+      if(kkm.dayFormedKKM){
         setPieData(SalesHolePie(kkm.dayFormedKKM));
         setStats(FinanceStats(kkm.dayFormedKKM));
-        const spis = SpisanieStats(spisanie.daySpisanie).totalSpisanieSum
-        const numericValue = parseFloat(spis.replace(/,/g, ''))
-        steSpisanieSum(numericValue);
       }
     }, [])
     return (
@@ -34,7 +51,7 @@ const DailySalesStats = () => {
           </div>
           <div className="mt-5 flex gap-2 flex-col md:flex-col w-[100%] items-center text-center justify-center">
             <div className='w-[100%] h-[300px]  flex text-center flex-col align-center justify-center'>
-              <h2>Online/Offline</h2>
+              <h2>Store Sales</h2>
               <HolePie data={pieData} />
             </div>
             <div className=" w-[100%] py-2 border-t-1 border-b-1 pr-2 flex flex-row md:w-[100%] gap-8 justify-center ">

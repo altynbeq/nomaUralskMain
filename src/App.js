@@ -38,14 +38,14 @@ const currentUserId = localStorage.getItem('_id');
       try {
         const [ bitrixData, spisanie ] = await Promise.all([
           getLeadsBack(userId),
-          getSpisanie(dateRanges),
+          getSpisanie(dateRanges)
         ]);
-
+        console.log("LocalSpisanieStats", spisanie);
         setLeads(JSON.parse(bitrixData.leads));
         setDeals(JSON.parse(bitrixData.deals));
         setKKM(JSON.parse(bitrixData.kkmData));
         setReceipts(JSON.parse(bitrixData.salesReceipt));
-        setSpisanie(spisanie);
+        setSpisanie(JSON.parse(bitrixData.productsSpisanie));
         
         if ( !spisanie ) {
           setTechProblem(true);

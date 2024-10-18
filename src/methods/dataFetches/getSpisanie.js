@@ -11,12 +11,12 @@ function encodeBase64(string) {
 const credentials = `${username}:${password}`;
 const encodedCredentials = encodeBase64(credentials);
 
-async function fetchDataForRange(startDate, endDate) {
+async function fetchDataForRange(api, startDate, endDate) {
     // Decode URL-encoded dates
     const decodedStartDate = decodeURIComponent(startDate).split(' ')[0].replace(/-/g, '');
     const decodedEndDate = decodeURIComponent(endDate).split(' ')[0].replace(/-/g, '');
 
-    const url = `/api/ut_uralsk1/hs/sales-product/GetSales/${decodedStartDate}/${decodedEndDate}`;
+    const url = `${api}${decodedStartDate}/${decodedEndDate}`;
     const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -33,25 +33,29 @@ async function fetchDataForRange(startDate, endDate) {
     return await response.json();
 }
 
-export async function getSpisanie(dateRanges) {
-    if (Array.isArray(dateRanges) && dateRanges[0]) {
-        const [dayRange, weekRange, monthRange] = dateRanges;
+export async function getSpisanie(api, dateRanges) {
 
-        // Fetch data for each time period
-        const [dayData, weekData, monthData] = await Promise.all([
-            fetchDataForRange(dayRange.startDate, dayRange.endDate),
-            fetchDataForRange(weekRange.startDate, weekRange.endDate),
-            fetchDataForRange(monthRange.startDate, monthRange.endDate),
-        ]);
-        const final = {
-            daySpisanie: calculateSpisanieStats(dayData),
-            weekSpisanie: calculateSpisanieStats(weekData),
-            monthSpisanie: calculateSpisanieStats(monthData)
-        }
-        return final;
-    } else {
-        const data = await fetchDataForRange(dateRanges.startDate, dateRanges.endDate);
-        const formedSpisanieData = await calculateSpisanieStats(data);
-        return formedSpisanieData;
-    }
+    const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
+    const formedSpisanieData = await calculateSpisanieStats(data);
+    return formedSpisanieData;
+    // if (Array.isArray(dateRanges) && dateRanges[0]) {
+    //     const [dayRange, weekRange, monthRange] = dateRanges;
+ 
+    //     // Fetch data for each time period
+    //     const [dayData, weekData, monthData] = await Promise.all([
+    //         fetchDataForRange(dayRange.startDate, dayRange.endDate),
+    //         fetchDataForRange(weekRange.startDate, weekRange.endDate),
+    //         fetchDataForRange(monthRange.startDate, monthRange.endDate),
+    //     ]);
+    //     const final = {
+    //         daySpisanie: calculateSpisanieStats(dayData),
+    //         weekSpisanie: calculateSpisanieStats(weekData),
+    //         monthSpisanie: calculateSpisanieStats(monthData)
+    //     }
+    //     return final;
+    // } else {
+    //     const data = await fetchDataForRange(dateRanges.startDate, dateRanges.endDate);
+    //     const formedSpisanieData = await calculateSpisanieStats(data);
+    //     return formedSpisanieData;
+    // }
 }

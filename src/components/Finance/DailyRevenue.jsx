@@ -2,19 +2,39 @@ import React, { useEffect, useState } from 'react'
 import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart'
 import { FinanceHolePie, FinanceStats, FormatAmount } from '../../data/MainDataSource'
+import {getUserUrls}  from '../../methods/getUserUrls';
+import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
+
+function convertUrl(apiUrl) {
+  // Replace the base URL with '/api'
+  return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
+}
 
 const DailyRevenue = () => {
-  const { dateRanges, kkm } = useStateContext();
+  const { dateRanges, kkm, userId, setKKM } = useStateContext();
   const [ pieData, setPieData ] = useState([]);
   const [ financeStats, setFinanceStats ] = useState({});
   const date = dateRanges[0].bitrixStartDate.split(' ')[0];
-  
   useEffect(() => {
-    if(kkm.dayFormedKKM){
-      setPieData(FinanceHolePie(kkm.dayFormedKKM));
-      setFinanceStats(FinanceStats(kkm.dayFormedKKM));
+    const getter = async() => {
+      const userId = localStorage.getItem('_id');
+      const userUrls = await getUserUrls(userId);
+      console.log(userUrls)
+      const userKkmUrl = convertUrl(userUrls.externalApis.apiUrlKKM);
+      const kkmData = await getKKMReceiptsFront(userKkmUrl, dateRanges[0]);
+      setKKM({
+        ...kkm,
+        dayFormedKKM: kkmData
+      });
+      setPieData(FinanceHolePie(kkmData));
+      setFinanceStats(FinanceStats(kkmData));
     }
-  }, [kkm])
+    getter();
+    // if(kkm.dayFormedKKM){
+    //   setPieData(FinanceHolePie(kkm.dayFormedKKM));
+    //   setFinanceStats(FinanceStats(kkm.dayFormedKKM));
+    // }
+  }, [])
 
   return (
     <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">

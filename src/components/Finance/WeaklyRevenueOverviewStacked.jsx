@@ -18,16 +18,14 @@ const WeaklyRevenueOverviewStacked = () => {
         'Sunday': 'Вс'
     };
     useEffect(() => {
-        const getter = async () => {
-            const week = true;
-            const data = deals;
-            const russianSalesSeries = data.series.map(item => ({
+        if(deals.dealsWeek){
+            const russianSalesSeries = deals.dealsWeek.series.map(item => ({
                 ...item,
                 x: russianDaysMap[item.x] || item.x 
             }));
             setrussianSalesSeries(russianSalesSeries)
-        }
-            getter();
+        } 
+            
     }, [deals])
 
     return (

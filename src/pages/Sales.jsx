@@ -53,7 +53,7 @@ const Sales = () => {
             setBarSeriesAll(SalesBarSeriesAll(kkm.monthFormedKKM));
             setBarSeriesByStore(SalesBarSeriesByStore(kkm.monthFormedKKM));
         }
-        if(leads.series && deals.dealsMonth.salesSeries){
+        if(leads.series && deals.dealsMonth){
             setLeadsSeries(leads.series);
             const conversion = generateConversionSeries(leads.series, deals.dealsMonth.salesSeries);
             const totalSeriesL = formData(leads.series, conversion);

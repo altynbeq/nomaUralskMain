@@ -18,14 +18,9 @@ const Finance = () => {
     if(kkm.monthFormedKKM){
       setFinanceShare(FinanceShare(kkm.monthFormedKKM));
     }
-    // if(!weekDeals.avgCheck){
-    //   const getter = async () => {
-    //     const week = true;
-    //     const data = await fetchDeals(dateRanges[1], week);
-    //     setWeekDeals(data);
-    //   }
-    //   getter();
-    // }
+    if(!weekDeals.avgCheck){
+        setWeekDeals(deals.dealsWeek);
+    }
     window.scrollTo(0, 0);
   }, []);
 

@@ -22,11 +22,11 @@ function base64ArrayBuffer(arrayBuffer){
 
 const encodedCredentials = base64ArrayBuffer(utf8Credentials);
 
-async function fetchDataForRange(startDate, endDate){
+async function fetchDataForRange(api,startDate, endDate){
     const decodedStartDate = decodeURIComponent(startDate).split(' ')[0].replace(/-/g, '');
     const decodedEndDate = decodeURIComponent(endDate).split(' ')[0].replace(/-/g, '');
 
-    const url = `/api/ut_uralsk1/hs/sales-kkm-receipts-list/GetSalesReceipts/${decodedStartDate}/${decodedEndDate}`;
+    const url = `${api}${decodedStartDate}/${decodedEndDate}`;
     const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -43,27 +43,30 @@ async function fetchDataForRange(startDate, endDate){
     return await response.json();
 }
 
-export async function getKKMReceiptsFront(dateRanges) {
+export async function getKKMReceiptsFront(api, dateRanges) {
     //if dateRanges has more than one date
-    if (Array.isArray(dateRanges)) {
-        const [dayRange, weekRange, monthRange] = dateRanges;
+    const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
+    const formedKKMData = kkmReceiptsDataFormer(data);
+    return formedKKMData;
+    // if (Array.isArray(dateRanges)) {
+    //     const [dayRange, weekRange, monthRange] = dateRanges;
 
-        const [dayData, weekData, monthData] = await Promise.all([
-            fetchDataForRange(dayRange.startDate, dayRange.endDate),
-            fetchDataForRange(weekRange.startDate, weekRange.endDate),
-            fetchDataForRange(monthRange.startDate, monthRange.endDate),
-        ]);
-        const final = {
-            monthFormedKKM: kkmReceiptsDataFormer(monthData),
-            weekFormedKKM: kkmReceiptsDataFormer(weekData),
-            dayFormedKKM: kkmReceiptsDataFormer(dayData)
-        };
-        return final; 
-    } else {
-        // if request for one time period
-        const data = await fetchDataForRange(dateRanges.startDate, dateRanges.endDate);
+    //     const [dayData, weekData, monthData] = await Promise.all([
+    //         fetchDataForRange(dayRange.startDate, dayRange.endDate),
+    //         fetchDataForRange(weekRange.startDate, weekRange.endDate),
+    //         fetchDataForRange(monthRange.startDate, monthRange.endDate),
+    //     ]);
+    //     const final = {
+    //         monthFormedKKM: kkmReceiptsDataFormer(monthData),
+    //         weekFormedKKM: kkmReceiptsDataFormer(weekData),
+    //         dayFormedKKM: kkmReceiptsDataFormer(dayData)
+    //     };
+    //     return final; 
+    // } else {
+    //     // if request for one time period
+    //     const data = await fetchDataForRange(dateRanges.startDate, dateRanges.endDate);
 
-        const formedKKMData = kkmReceiptsDataFormer(data);
-        return formedKKMData;
-    }
+    //     const formedKKMData = kkmReceiptsDataFormer(data);
+    //     return formedKKMData;
+    // }
 }
