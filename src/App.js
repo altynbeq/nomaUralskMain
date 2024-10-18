@@ -13,12 +13,16 @@ import { getLeadsBack } from './methods/dataFetches/getLeadsBack';
 import { fetchDeals } from './methods/dataFetches/getDealsBitrix';
 
 const App = () => {
-  const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie } = useStateContext();
+  const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie  } = useStateContext();
   const [ loading, setLoading ] = useState(true);
   const [ techProblem, setTechProblem ] = useState(false);
   const [ localStorageState, setLocalStorageState] = useState(false)
 
   useEffect(()=> {
+    console.log(localStorage.getItem('_id'));
+const currentUserId = localStorage.getItem('_id');
+
+
     const checkStorage =  () => {
     let result = (localStorage.getItem('_id') === null
      && localStorage.getItem('token') === null);
@@ -30,12 +34,13 @@ const App = () => {
     };
     checkStorage();
     console.log('checking storage: ' + localStorageState);
-    async function collector() {
+    async function collector(userId) {
       try {
         const [ bitrixData, spisanie ] = await Promise.all([
-          getLeadsBack(),
+          getLeadsBack(userId),
           getSpisanie(dateRanges),
         ]);
+
         setLeads(JSON.parse(bitrixData.leads));
         setDeals(JSON.parse(bitrixData.deals));
         setKKM(JSON.parse(bitrixData.kkmData));
@@ -52,7 +57,13 @@ const App = () => {
         setSkeletonUp(false);
       }
     }
-    collector();
+      if(currentUserId) {
+        collector(currentUserId);
+      }
+      if(!currentUserId){
+        setLoading(false);
+        setSkeletonUp(false);
+      }
   },  []);
 
   if(techProblem){
