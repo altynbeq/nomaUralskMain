@@ -7,7 +7,7 @@ import { StoresList, FormatAmount, TotalCounter, ConvertCalendarDate } from '../
 import { FaDollarSign, FaMoneyBillAlt, FaBoxOpen, FaRegThumbsDown, FaMoneyBill, FaBox, FaFilter, FaChartBar } from "react-icons/fa";
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
-const PeriodStats = ({ idcomp, title }) => {
+const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
     const stepperRef = useRef(null);
     const { dateRanges, receipts, kkm, spisanie, deals } = useStateContext();
     const [ total, setTotal ] = useState(0);
@@ -18,7 +18,7 @@ const PeriodStats = ({ idcomp, title }) => {
     const handleDateChange = async (e) => {
         if(e[1]){
             const properDate = ConvertCalendarDate(e);
-            const kkmList = await getKKMReceiptsFront(properDate);
+            const kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
             setKkmStats(kkmList);
 
             setTotal(TotalCounter(kkmList));

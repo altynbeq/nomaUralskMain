@@ -7,8 +7,10 @@ import { StepperPanel } from 'primereact/stepperpanel';
 import { TotalCounter, PaidToData, ConvertCalendarDate } from '../../data/MainDataSource';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
+import { getUserUrls } from '../../methods/getUserUrls';
 
-const PaidToAmount = ({ comb, title, height }) => {
+
+const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
   const { dateRanges, receipts, kkm } = useStateContext();
   const [ totalSum, setTotalSum ] = useState();
   const stepperRef = useRef(null);
@@ -22,10 +24,11 @@ const PaidToAmount = ({ comb, title, height }) => {
   const handleDateChange = async (e) => {
     if(e[1]){
       const properDate = ConvertCalendarDate(e);
-      const salesList = await getSalesReceiptsFront(properDate);
+      
+      const salesList = await getSalesReceiptsFront(userReceiptsUrl, properDate);
       setPanelData(PaidToData(salesList));
 
-      const kkmList = await getKKMReceiptsFront(properDate);
+      const kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
 
       setTotal(TotalCounter(kkmList))
     }

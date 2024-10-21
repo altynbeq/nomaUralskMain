@@ -8,7 +8,7 @@ import PieChartRe from '../ReCharts/PieChart'
 import { MonthDropdownToDate, FinanceShare } from '../../data/MainDataSource';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
-const Slider = ({ title, data }) => {
+const Slider = ({ title, data, userKkmUrl }) => {
     const stepperRef = useRef(null);
     const { kkm } = useStateContext();
     const [ shares, setShare ] = useState([]);
@@ -19,7 +19,7 @@ const Slider = ({ title, data }) => {
         setSelectedMonth(e);
         const properDate = MonthDropdownToDate(e);
         if(title == "Доли финансов"){
-            const kkmData = await getKKMReceiptsFront(properDate);
+            const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
             setShare(FinanceShare(kkmData));
         }
     }

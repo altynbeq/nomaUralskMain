@@ -11,16 +11,27 @@ import ProductStats from '../components/demo/ProductStats';
 import { FinanceShare, SaleShare, GridSpisanieListRows, GridSpisanieListCols, SpisanieStats } from '../data/MainDataSource';
 import { fetchDeals } from '../methods/dataFetches/getDealsBitrix';
 
-const General = () => {
+
+
+function convertUrl(apiUrl) {
+  // Replace the base URL with '/api'
+  return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
+}
+
+
+const General = ({urls}) => {
 
   const { kkm, skeletonUp, spisanie, dateRanges, deals, setDeals } = useStateContext();
-  console.log(dateRanges)
   const [ ready, setReady ] = useState(false)
   const [ salesShare, setSalesShare ] = useState([]);
   const [ financeShare, setFinanceShare ] = useState([]);
   const [ tableRows, setTableRows ] = useState([]);
   const [ spisanieStats, setSpisanieStats ] = useState([]);
   const [ dealsStats, setDealsStats ] = useState({});
+  const [ userKkmUrl, setUserKkmUrl ] = useState("");
+  const [ userReceiptsUrl , setUserReceiptsUrl ] = useState("");
+  const [ userSpisanieUrl , setUserSpisanieUrl ] = useState("");
+
   useEffect(()=> {
     if(kkm.monthFormedKKM && spisanie.monthSpisanie){
       setSalesShare(SaleShare(kkm.monthFormedKKM));
@@ -29,17 +40,21 @@ const General = () => {
       setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
       setReady(true);
     }
-    // if(!deals.avgCheck){
-    //     const getter = async () => {
-    //       const data =  await fetchDeals(dateRanges[2]);
-    //       setDeals(data);
-    //       setDealsStats(data);
-    //     }
-    //     getter();
-    // }
-  }, [kkm])
+    console.log("urls", urls);
+    if(urls.externalApis && urls.externalApis.apiUrlKKM){
+      const convKkm = urls.externalApis.apiUrlKKM ? convertUrl(urls.externalApis.apiUrlKKM) : null;
+      const convReceipt = urls.externalApis.apiUrlReceipts ? convertUrl(urls.externalApis.apiUrlReceipts) : null;
+      const convSpis = urls.externalApis.apiUrlSpisanie ? convertUrl(urls.externalApis.apiUrlSpisanie) : null;
+      console.log(convKkm)
+      if(convKkm != null && convReceipt != null && convSpis != null){
+        setUserKkmUrl(convKkm);
+        setUserReceiptsUrl(convReceipt);
+        setUserSpisanieUrl(convSpis)
+      }
+    }
+  }, [])
   
-  if(!ready && skeletonUp){
+  if(!ready && skeletonUp && userSpisanieUrl != ""){
     return(
       <div className='flex m-10 flex-col gap-6 justify-evenly align-center text-center w-[100%]'>
         <LoadingSkeleton />
@@ -47,17 +62,17 @@ const General = () => {
         <LoadingSkeleton />
       </div>
     )
-  }
+  } 
   
   return ( 
     <div className="mt-12 flex flex-col gap-6 align-center  justify-center">
       <div className="flex mt-5 gap-4  w-[100%] flex-col md:flex-row  justify-center align-top      items-center">
-        <CardWithStats />
+        <CardWithStats userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
       </div>
      
       <div className="flex w-[100%] flex-wrap  justify-center align-top xs:flex-col    gap-4 items-center">
-        <PaidToAmount height="520px" comb={true} id="PaidToWeek" title="Выручка"  />
-        <PeriodStats title="Финансы"  />
+        <PaidToAmount userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} height="520px" comb={true} id="PaidToWeek" title="Выручка"  />
+        <PeriodStats title="Финансы" userKkmUrl={userKkmUrl}  />
       </div>
       {/* <div className="flex w-[100%] mt-5  gap-4  items-center flex-col md:flex-row justify-center"> */}
         {/* <ProductStats title="Товары" /> */}
@@ -66,7 +81,7 @@ const General = () => {
         {/* <CarouselCard carousel={true}  data={salesShare} title="Доли продаж" />
       </div> */}
       <div className="flex   w-[100%] flex-wrap  justify-center align-top xs:flex-col   gap-4 items-center">
-        <TableSort title="Списания" spisanieStats={spisanieStats} rows={tableRows} columns={GridSpisanieListCols} />
+        <TableSort title="Списания" userSpisanieUrl={userSpisanieUrl} userKkmUrl={userKkmUrl} spisanieStats={spisanieStats} rows={tableRows} columns={GridSpisanieListCols} urls={urls} />
       </div>
     </div>
   );

@@ -25,7 +25,6 @@ const WeaklyRevenueOverviewStacked = () => {
             }));
             setrussianSalesSeries(russianSalesSeries)
         } 
-            
     }, [deals])
 
     return (

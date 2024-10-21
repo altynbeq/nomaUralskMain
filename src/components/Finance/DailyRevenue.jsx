@@ -5,22 +5,13 @@ import { FinanceHolePie, FinanceStats, FormatAmount } from '../../data/MainDataS
 import {getUserUrls}  from '../../methods/getUserUrls';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
-function convertUrl(apiUrl) {
-  // Replace the base URL with '/api'
-  return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
-}
-
-const DailyRevenue = () => {
+const DailyRevenue = ({userKkmUrl}) => {
   const { dateRanges, kkm, userId, setKKM } = useStateContext();
   const [ pieData, setPieData ] = useState([]);
   const [ financeStats, setFinanceStats ] = useState({});
   const date = dateRanges[0].bitrixStartDate.split(' ')[0];
   useEffect(() => {
     const getter = async() => {
-      const userId = localStorage.getItem('_id');
-      const userUrls = await getUserUrls(userId);
-      console.log(userUrls)
-      const userKkmUrl = convertUrl(userUrls.externalApis.apiUrlKKM);
       const kkmData = await getKKMReceiptsFront(userKkmUrl, dateRanges[0]);
       setKKM({
         ...kkm,

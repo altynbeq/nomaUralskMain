@@ -11,16 +11,17 @@ import { getSpisanie } from './methods/dataFetches/getSpisanie'
 import {Loader} from './pages';
 import { getLeadsBack } from './methods/dataFetches/getLeadsBack';
 import { fetchDeals } from './methods/dataFetches/getDealsBitrix';
+import { getUserUrls } from './methods/getUserUrls';
 
 const App = () => {
   const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie  } = useStateContext();
   const [ loading, setLoading ] = useState(true);
   const [ techProblem, setTechProblem ] = useState(false);
   const [ localStorageState, setLocalStorageState] = useState(false)
+  const [ urls, setUrls ] = useState("");
 
   useEffect(()=> {
-    console.log(localStorage.getItem('_id'));
-const currentUserId = localStorage.getItem('_id');
+    const currentUserId = localStorage.getItem('_id');
 
 
     const checkStorage =  () => {
@@ -36,15 +37,19 @@ const currentUserId = localStorage.getItem('_id');
     console.log('checking storage: ' + localStorageState);
     async function collector(userId) {
       try {
-        const [ bitrixData  ] = await Promise.all([
+        const [ bitrixData, urls  ] = await Promise.all([
           getLeadsBack(userId),
+          getUserUrls(userId)
         ]);
         setLeads(JSON.parse(bitrixData.leads));
         setDeals(JSON.parse(bitrixData.deals));
         setKKM(JSON.parse(bitrixData.kkmData));
         setReceipts(JSON.parse(bitrixData.salesReceipt));
         setSpisanie(JSON.parse(bitrixData.productsSpisanie));
-        
+
+        setUrls(urls);
+
+        console.log(bitrixData)
         if ( !bitrixData ) {
           setTechProblem(true);
           setLoading(false);
@@ -107,12 +112,12 @@ const currentUserId = localStorage.getItem('_id');
               <div>
                 <Routes>
                       <>
-                        <Route path="/" element={<General />} />
-                        <Route path="/general" element={ <General /> }/>
-                        <Route path="/finance" element={<Finance/>} />
-                        <Route path="/sales" element={<Sales />} />
-                        <Route path="/workers" element={ <Workers />} />
-                        <Route path="/sklad" element={ <Sklad />} />
+                        <Route path="/" element={<General urls={urls} />} />
+                        <Route path="/general" element={ <General urls={urls} /> }/>
+                        <Route path="/finance" element={<Finance urls={urls} />} />
+                        <Route path="/sales" element={<Sales urls={urls} />} />
+                        <Route path="/workers" element={ <Workers urls={urls} />} />
+                        <Route path="/sklad" element={ <Sklad urls={urls} />} />
                         <Route path="/docs" element={<ComingSoon />} />
                         <Route path="/resources" element={<ComingSoon />} />
                         <Route path="/support" element={<ComingSoon />} />

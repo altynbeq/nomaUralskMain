@@ -9,7 +9,7 @@ import { FinanceStats, FinanceLineChartSeries, FormatAmount, ConvertCalendarDate
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
-const  CardWithStats = () => {
+const  CardWithStats = ({userKkmUrl, userReceiptsUrl}) => {
     const { dateRanges, receipts, kkm } = useStateContext();
     const [ chartSeries, setChartSeries ] = useState([]);
     const [ stats, setStats ] = useState({});
@@ -18,13 +18,11 @@ const  CardWithStats = () => {
     const handleDateChange = async (e) => {
         if(e[1]){
             const properDate = ConvertCalendarDate(e);
-            const dataListReceipts = await getSalesReceiptsFront(properDate);
-            console.log("SALESRECEIPTD", dataListReceipts);
-            setChartSeries(FinanceLineChartSeries(dataListReceipts));
-
-            const dataListKKM = await getKKMReceiptsFront(properDate);
-
+            const dataListKKM = await getKKMReceiptsFront(userKkmUrl, properDate);
             setStats(FinanceStats(dataListKKM));
+
+            const dataListReceipts = await getSalesReceiptsFront(userReceiptsUrl, properDate);
+            setChartSeries(FinanceLineChartSeries(dataListReceipts));
         }
     }
     useEffect(() => {

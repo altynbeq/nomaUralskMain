@@ -8,7 +8,7 @@ const TotalRevenuePie = () => {
         <div className="w-full h-[120px] mt-5">
           <HalfPie />
         </div>
-          <p className="text-gray-400">Годовой заработок</p>
+          <p className="text-gray-400">Your info</p>
           <p className="text-2xl font-semibold ">$43,246</p>
     </div>
   )

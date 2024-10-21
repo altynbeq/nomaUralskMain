@@ -34,7 +34,13 @@ function formData(leadsSeries, conversionSeries) {
     }));
 }
 
-const Sales = () => {
+function convertUrl(apiUrl) {
+    // Replace the base URL with '/api'
+    return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
+}
+
+  
+const Sales = ({urls}) => {
     const [ salesShare, setSalesShare ] = useState([]);
     const { skeletonUp, kkm, receipts, leads, deals, setLeads, dateRanges } = useStateContext();
     const [ ready, setReady ] = useState(false);
@@ -44,6 +50,9 @@ const Sales = () => {
     const [ barSeriesByStore, setBarSeriesByStore ] = useState([]);
     const [ leadsSeries, setLeadsSeries ] = useState([]);
     const [ totalSeries, setTotalSerues ] = useState([]);
+    const [ userKkmUrl, setUserKkmUrl ] = useState("");
+    const [ userReceiptsUrl , setUserReceiptsUrl ] = useState("");
+    const [ userSpisanieUrl , setUserSpisanieUrl ] = useState("");
 
     useEffect( () => {
         if(kkm.monthFormedKKM && receipts.monthReceiptsData){
@@ -59,6 +68,16 @@ const Sales = () => {
             const totalSeriesL = formData(leads.series, conversion);
             setTotalSerues(totalSeriesL)
         }
+        if(urls.externalApis && urls.externalApis.apiUrlKKM){
+            const convKkm = urls.externalApis.apiUrlKKM ? convertUrl(urls.externalApis.apiUrlKKM) : null;
+            const convReceipt = urls.externalApis.apiUrlReceipts ? convertUrl(urls.externalApis.apiUrlReceipts) : null;
+            const convSpis = urls.externalApis.apiUrlSpisanie ? convertUrl(urls.externalApis.apiUrlSpisanie) : null;
+            if(convKkm != null && convReceipt != null && convSpis != null){
+              setUserKkmUrl(convKkm);
+              setUserReceiptsUrl(convReceipt);
+              setUserSpisanieUrl(convSpis)
+            }
+        }
         window.scrollTo(0, 0);
     }, []);
     // console.log("barSeriesAll", barSeriesAll);
@@ -71,7 +90,7 @@ const Sales = () => {
           </div>
         )
     }
-    return (
+    return ( 
         <div className='mt-12 flex flex-col gap-3  justify-center '>
              <div className="flex  w-[100%] flex-wrap  justify-center align-top xs:flex-col    gap-[0.5rem] items-center">
                 <DailySalesStats />
@@ -81,10 +100,10 @@ const Sales = () => {
                 <StatsBoxes title="Продукты" rows={productsGridRows} columns={GridProductListCols} />
             </div>
             <div className='flex w-[100%] flex-wrap align-center justify-center gap-[1.5rem] items-center'> 
-                <TableSort title="Продано товаров" displayStats={true} width="25%" spisanieStats={productStats} rows={productsGridRows} columns={GridProductListCols}  />
+                <TableSort title="Продано товаров" userSpisanieUrl={userSpisanieUrl} userKkmUrl={userKkmUrl} displayStats={true} width="25%" spisanieStats={productStats} rows={productsGridRows} columns={GridProductListCols}  />
             </div>
             <div className="flex w-[100%]   gap-6 align-center  flex-wrap justify-center   items-center">
-                <CarouselCard carousel={true} data={salesShare} title="Доли магазинов" />
+                <CarouselCard carousel={true} userKkmUrl={userKkmUrl} data={salesShare} title="Доли магазинов" />
                 <ProductStatsComp title="Товары" stats={productStats} />
                 {/* <PeriodStats title="Товары" stats={salesStats} statsTwo={salesStatsTwo} statsThree={salesStats} /> */}
             </div> 

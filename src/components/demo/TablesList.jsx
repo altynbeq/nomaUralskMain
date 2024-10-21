@@ -122,7 +122,7 @@ const handleStoreChange = async (e) => {
 
 };
 
-const TableSort = ({title, w, displayStats, rows, columns, spisanieStats}) => {
+const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userSpisanieUrl, userKkmUrl }) => {
   const [search, setSearch] = useState('');
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState(null);
@@ -141,11 +141,11 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats}) => {
       const properDate = ConvertCalendarDate(e);
 
       if(title == 'Списания'){
-        const spisanieList = await getSpisanie(properDate);
+        const spisanieList = await getSpisanie(userSpisanieUrl, properDate);
         setListRows(GridSpisanieListRows(spisanieList));
         setSpisanieStats(SpisanieStats(spisanieList));
       } else if(title == 'Продано товаров'){
-        const productData = await getKKMReceiptsFront(properDate);
+        const productData = await getKKMReceiptsFront(userKkmUrl, properDate);
         setListRows(ProductSoldGridList(productData));
         setSpisanieStats(ProductsStats(productData));
       }
