@@ -10,23 +10,20 @@ const DailyRevenue = ({userKkmUrl}) => {
   const [ pieData, setPieData ] = useState([]);
   const [ financeStats, setFinanceStats ] = useState({});
   const date = dateRanges[0].bitrixStartDate.split(' ')[0];
-  useEffect(() => {
-    const getter = async() => {
+
+
+  const getter = async() => {
+      
       const kkmData = await getKKMReceiptsFront(userKkmUrl, dateRanges[0]);
+      setPieData(FinanceHolePie(kkm.dayFormedKKM));
+      setFinanceStats(FinanceStats(kkm.dayFormedKKM));
       setKKM({
         ...kkm,
         dayFormedKKM: kkmData
       });
-      setPieData(FinanceHolePie(kkmData));
-      setFinanceStats(FinanceStats(kkmData));
     }
-    getter();
-    // if(kkm.dayFormedKKM){
-    //   setPieData(FinanceHolePie(kkm.dayFormedKKM));
-    //   setFinanceStats(FinanceStats(kkm.dayFormedKKM));
-    // }
-  }, [])
-
+  getter();
+  
   return (
     <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">
           <div className="flex justify-between">

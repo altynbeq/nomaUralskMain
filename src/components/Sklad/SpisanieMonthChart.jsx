@@ -1,35 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useStateContext } from "../../contexts/ContextProvider";
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import BarChartRe from '../demo/BarChart';
+import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
+import { ConvertCalendarDate, SpisanieBarSeriesByStore } from '../../data/MainDataSource';
 
-const SpisanieMonthChart = ({ title, series, short }) => {
+const SpisanieMonthChart = ({ title, series, short, userSpisanieUrl }) => {
   const { dateRanges } = useStateContext();
   const [ selectedMonth, setSelectedMonth ] = useState('September');
   const [ selectedStore, setSelectedStore ] = useState('Все магазины');
+  const [ barSeries, setBarSeries ] = useState(series);
+  
   const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
-  const cities = [  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"];
   const stores = [ "Все магазины", "Алматы", "Сатпаева", "Панфилова",];
-  const handleMonthChange = async (e) => {
-    setSelectedMonth(e);
-  }
+  
+  useEffect(() => {
+    setBarSeries(series)
+  }, [series]);
+
   const handleStoreChange = async (e) => {
     setSelectedStore(e);
   };
-  const handleDateChange = (e) => {
-
+  
+  const handleDateChange = async(e) => {
+    if(e[1]){
+      const properDate = ConvertCalendarDate(e);
+      const spisanieData = await getSpisanie(userSpisanieUrl, properDate);
+      setBarSeries(SpisanieBarSeriesByStore(spisanieData));
+    } 
   }
 
   return (
@@ -56,7 +55,7 @@ const SpisanieMonthChart = ({ title, series, short }) => {
         </div>
         </div>
         <div className="w-[100%] h-[400px]">
-          <BarChartRe data={series} />
+          <BarChartRe data={barSeries} />
         </div>
     </div>
   )

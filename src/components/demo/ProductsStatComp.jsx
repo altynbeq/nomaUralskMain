@@ -3,14 +3,23 @@ import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { Calendar } from 'primereact/calendar';
 import { FaDollarSign, FaMoneyBillAlt, FaBox, FaFilter } from "react-icons/fa";
-import { FormatAmount } from '../../data/MainDataSource';
+import { FormatAmount, ConvertCalendarDate } from '../../data/MainDataSource';
 import { useStateContext } from "../../contexts/ContextProvider";
+import { getKKMReceiptsFront } from "../../methods/dataFetches/getKKM";
 
-const ProductsStatsComp = ({ idcomp, title }) => {
+const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
     const stepperRef = useRef(null);
     const { dateRanges, kkm } = useStateContext();
     const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
+    const [ productStats, setProductsStats ] = useState(kkm.monthFormedKKM);
 
+    const handleDateChange = async(e) => {
+        if(e[1]){
+            const properDate = ConvertCalendarDate(e);
+            const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
+            setProductsStats(kkmData);
+        }
+    }
     const productStatsTemplate = (storeStats) => [
         {
             id: '1',
@@ -61,7 +70,10 @@ const ProductsStatsComp = ({ idcomp, title }) => {
                 <div className="flex flex-wrap border-solid border-1 rounded-xl border-black px-2 gap-1">
                     <Calendar
                         value={dates}
-                        onChange={(e) => setDates(e.value)}
+                        onChange={(e) => { 
+                            setDates(e.value)
+                            handleDateChange(e.value)
+                        } }
                         selectionMode="range"
                         readOnlyInput
                         hideOnRangeSelection
@@ -70,7 +82,7 @@ const ProductsStatsComp = ({ idcomp, title }) => {
             </div>
 
             <Stepper ref={stepperRef}>
-                {Object.entries(kkm.monthFormedKKM).map(([storeName, storeStats]) => (
+                {Object.entries(productStats).map(([storeName, storeStats]) => (
                     <StepperPanel key={storeName} header={storeName}>
                         <div className="mt-2">
                             {productStatsTemplate(storeStats).map((stat) => (

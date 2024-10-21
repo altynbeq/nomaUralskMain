@@ -5,20 +5,29 @@ import { useStateContext } from "../../contexts/ContextProvider";
 import { Button } from '../';
 import BarChartRe from './BarChart'
 import { FaShare, FaFileDownload } from "react-icons/fa";
-import { FinanceStats, FormatAmount } from '../../data/MainDataSource';
+import { FinanceStats, FormatAmount, SalesBarSeriesByStore, ConvertCalendarDate } from '../../data/MainDataSource';
+import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
-const  CardWithBarChart = ({title, series, dataKey}) => {
+const  CardWithBarChart = ({title, series, dataKey, userKkmUrl}) => {
     const { dateRanges, kkm, deals } = useStateContext();
     const [ stats, setStats ] = useState({});
+    const [ barSeries, setBarSeries ] = useState([]);
     const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
     
-    const handleDateChange = async () => {
+    const handleDateChange = async (e) => {
+        if(e[1]){
+            console.log("KKKMMM")
+            const properDate = ConvertCalendarDate(e);
+            const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
+            setBarSeries(SalesBarSeriesByStore(kkmData));
+        }
     }
     useEffect(() => {
         if(kkm.monthFormedKKM){
           setStats(FinanceStats(kkm.monthFormedKKM));
         }
-    }, [])
+        setBarSeries(series);
+    }, [series])
 
     return (
         <Card withBorder padding="lg" className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[87%]  rounded-2xl subtle-border">
@@ -36,7 +45,7 @@ const  CardWithBarChart = ({title, series, dataKey}) => {
             </div>
             
         <div className='w-[100%] h-[300px] mt-6 '>
-            <BarChartRe data={series} />
+            <BarChartRe data={barSeries} />
         </div>
         <div className="  border-t-1 pr-2 flex py-2 flex-col md:flex-row md:w-[100%] gap-8 justify-center ">
             <div className='flex flex-row  gap-4 justify-evenly '>

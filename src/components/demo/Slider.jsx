@@ -5,7 +5,7 @@ import { useStateContext } from "../../contexts/ContextProvider";
 import { StepperPanel } from 'primereact/stepperpanel';
 import { FaDollarSign, FaMoneyBillAlt, FaMoneyBill, FaBox, FaFilter, FaChartBar } from "react-icons/fa";
 import PieChartRe from '../ReCharts/PieChart'
-import { MonthDropdownToDate, FinanceShare } from '../../data/MainDataSource';
+import { MonthDropdownToDate, FinanceShare, SaleShare } from '../../data/MainDataSource';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
 const Slider = ({ title, data, userKkmUrl }) => {
@@ -21,6 +21,9 @@ const Slider = ({ title, data, userKkmUrl }) => {
         if(title == "Доли финансов"){
             const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
             setShare(FinanceShare(kkmData));
+        } else if(title == "Доли продаж"){
+            const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
+            setShare(SaleShare(kkmData));
         }
     }
 

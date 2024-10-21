@@ -103,13 +103,13 @@ const Sales = ({urls}) => {
                 <TableSort title="Продано товаров" userSpisanieUrl={userSpisanieUrl} userKkmUrl={userKkmUrl} displayStats={true} width="25%" spisanieStats={productStats} rows={productsGridRows} columns={GridProductListCols}  />
             </div>
             <div className="flex w-[100%]   gap-6 align-center  flex-wrap justify-center   items-center">
-                <CarouselCard carousel={true} userKkmUrl={userKkmUrl} data={salesShare} title="Доли магазинов" />
-                <ProductStatsComp title="Товары" stats={productStats} />
+                <CarouselCard carousel={true} userKkmUrl={userKkmUrl} data={salesShare} title="Доли продаж" />
+                <ProductStatsComp title="Товары" userKkmUrl={userKkmUrl} stats={productStats} />
                 {/* <PeriodStats title="Товары" stats={salesStats} statsTwo={salesStatsTwo} statsThree={salesStats} /> */}
             </div> 
             <div className="flex w-[100%] align-center  flex-wrap justify-center gap-[1.5rem]  items-center">
                 {/* <CardWithBarChart title="Общие продажи" series={barSeriesAll} dataKey="Все" /> */}
-                <CardWithBarChart title="Продажи по магазинам" series={barSeriesByStore} dataKey="Все" />
+                <CardWithBarChart title="Продажи по магазинам" series={barSeriesByStore} userKkmUrl={userKkmUrl} dataKey="Все" />
             </div>
             <div className="flex w-[100%] align-center  flex-wrap justify-center gap-[1.5rem]  items-center">
                 {/* <MonthlyTotalSalesChart leadsSeries={leadsSeries} title="Лиды за месяц" type="leads" /> */}

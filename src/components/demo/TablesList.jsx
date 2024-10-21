@@ -144,6 +144,7 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
         const spisanieList = await getSpisanie(userSpisanieUrl, properDate);
         setListRows(GridSpisanieListRows(spisanieList));
         setSpisanieStats(SpisanieStats(spisanieList));
+        console.log("doingSomething")
       } else if(title == 'Продано товаров'){
         const productData = await getKKMReceiptsFront(userKkmUrl, properDate);
         setListRows(ProductSoldGridList(productData));

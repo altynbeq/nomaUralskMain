@@ -93,7 +93,7 @@ export const GridSpisanieListRows = (data) => {
   
 
 export const GridSpisanieListCols = [
-  { field: 'id', headerName: 'ID', width: 120 },
+  { field: 'id', headerName: 'ID', width: 150 },
   // {
   //   field: 'Дата',
   //   headerName: 'Дата',

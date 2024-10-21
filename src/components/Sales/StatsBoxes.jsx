@@ -27,7 +27,7 @@ const StatsBoxes = () => {
         >
           <div className="flex justify-between">
             <p className="text-xs uppercase font-semibold text-gray-500">
-              {stat.title}
+              Demo
             </p>
             <Icon className="text-gray-400" size={22} stroke={1.5} />
           </div>
