@@ -52,8 +52,8 @@ const Orders = ({ordersData, defVal, title, width }) => {
     const orders = Object.entries(data.itemName).map(([name, details], index) => {
       return {
         Count: details.count,
-        Price: details.price + ' тг',
-        TotalAmount: Math.round(details.totalSum) + ' тг',
+        Price: details.price + ' ₸',
+        TotalAmount: Math.round(details.totalSum) + ' ₸',
         OrderItems: name,
         Status: 'Продано',
         StatusBg: '#8BE78B',
@@ -77,8 +77,8 @@ const Orders = ({ordersData, defVal, title, width }) => {
       const orders = Object.entries(ordersData).map(([name, details], index) => {
         return {
           Count: details.count,
-          Price: details.price + ' тг',
-          TotalAmount: Math.round(details.totalSum) + ' тг',
+          Price: details.price + ' ₸',
+          TotalAmount: Math.round(details.totalSum) + ' ₸',
           OrderItems: name,
           Status: 'Продано',
           StatusBg: '#8BE78B',

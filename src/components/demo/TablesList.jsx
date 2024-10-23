@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 // import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
 import { FaChevronDown, FaChevronUp, FaFileDownload, FaCheckCircle, FaSearch } from "react-icons/fa";
 import { Calendar } from 'primereact/calendar';
@@ -9,20 +9,21 @@ import  {  StoresList, FormatAmount, ConvertCalendarDate, SpisanieStats, Product
 import { GridSpisanieListRows } from '../../data/MainDataSource';
 import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
+import LoadingSkeleton from "../LoadingSkeleton";
 
-function Th({ children, reversed, sorted, onSort }) {
-  const Icon = sorted ? (reversed ? FaChevronDown : FaChevronUp) : FaChevronDown;
-  return (
-    <th className="p-0">
-      <button onClick={onSort} className="w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 flex justify-between">
-        <span className="font-medium text-sm">{children}</span>
-        <span className="w-[21px] h-[21px] rounded-full flex justify-center items-center">
-          <Icon className="w-4 h-4" stroke={1.5} />
-        </span>
-      </button>
-    </th>
-  );
-}
+// function Th({ children, reversed, sorted, onSort }) {
+//   const Icon = sorted ? (reversed ? FaChevronDown : FaChevronUp) : FaChevronDown;
+//   return (
+//     <th className="p-0">
+//       <button onClick={onSort} className="w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 flex justify-between">
+//         <span className="font-medium text-sm">{children}</span>
+//         <span className="w-[21px] h-[21px] rounded-full flex justify-center items-center">
+//           <Icon className="w-4 h-4" stroke={1.5} />
+//         </span>
+//       </button>
+//     </th>
+//   );
+// }
 
 function filterData(data, search) {
   const query = search.toLowerCase().trim();
@@ -118,9 +119,9 @@ const data = [
 
   const stores = [ "Все магазины", ...StoresList];
 
-const handleStoreChange = async (e) => {
-
-};
+// const handleStoreChange = async (e) => {
+//
+// };
 
 const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userSpisanieUrl, userKkmUrl }) => {
   const [search, setSearch] = useState('');
@@ -132,12 +133,16 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
   const [ selectedStore, setSelectedStore ] = useState('Все магазины');
   const { dateRanges, spisanie } = useStateContext();
   const stepperRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const componentRef = useRef(null)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const handleStoreChange = async (e) => {
     setSelectedStore(e);
   };
   const handleDateChange = async(e) => {
     if(e[1]){
+      setLoading(true);
       const properDate = ConvertCalendarDate(e);
 
       if(title == 'Списания'){
@@ -150,6 +155,7 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
         setListRows(ProductSoldGridList(productData));
         setSpisanieStats(ProductsStats(productData));
       }
+      setLoading(false);
     }
   }
 
@@ -158,7 +164,14 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
       setListRows([...rows])
       setSpisanieStats(spisanieStats)
     }
-  }, [listRows])
+    if (componentRef.current) {
+      const {offsetWidth, offsetHeight} = componentRef.current;
+      setDimensions({
+        width: offsetWidth,
+        height: offsetHeight,
+      })
+    }
+  }, [listRows,loading])
 
   const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
   const setSorting = (field) => {
@@ -200,13 +213,19 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
         </div>
         
       </div>
+      {loading ? <div className="pr-4 pt-2">
+        <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
+      </div> : '' }
+
+      {!loading ? <div ref={componentRef}>
+
       {
-        displayStats ? 
+        displayStats ?
         <div className=" w-[100%] py-2 border-t-1  pr-2  flex flex-col  md:flex-row md:w-[100%]  md:gap-8 justify-center ">
           <div className='md:flex md:flex-row mb-1'>
             <div className='flex justify-start md:justify-center gap-2  mb-1 border-color flex-row md:flex-col text-start md:mr-5'>
                 <p className="text-gray-500 ">Сумма:</p>
-                <span className="text-1xl text-green-500">{FormatAmount(Math.round(spisanieStatsState.productSum))} тг</span>
+                <span className="text-1xl text-green-500">{FormatAmount(Math.round(spisanieStatsState.productSum))} ₸</span>
             </div>
             <div className='flex md:border-l-1 justify-start md:justify-center gap-2 md:pl-2 flex-row md:flex-col text-start'>
                 <p className="text-gray-500 ">Всего продано товаров:</p>
@@ -216,7 +235,7 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
           <div className='md:flex md:flex-row'>
             <div className='flex justify-start md:border-l-1 mb-1  md:pl-2 flex-col text-start '>
                 <p className="text-gray-500 md:mt-1">Сред.выручка за товаров:</p>
-                <p className="text-1xl font-semibold mt-1">{FormatAmount(Math.round(spisanieStatsState.avgRevProduct))} тг</p>
+                <p className="text-1xl font-semibold mt-1">{FormatAmount(Math.round(spisanieStatsState.avgRevProduct))} ₸</p>
             </div>
           </div>
           <div className='md:flex md:flex-row'>
@@ -225,12 +244,12 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
                 <p className="text-1xl font-semibold">{FormatAmount(Math.round(spisanieStatsState.productsUniqSold))}</p>
             </div>
           </div>
-        </div> : 
+        </div> :
           <div className="w-[100%] py-2 border-t-1 pr-2 mb-4 flex flex-col md:flex-row gap-8 justify-evenly">
             <div className='md:flex md:flex-row md:justify-evenly'>
               <div className='flex justify-start border-color flex-row gap-2 md:gap-0 md:flex-col text-start md:mr-5'>
                 <p className="text-gray-500 md:mt-1">На сумму:</p>
-                <span className="text-1xl text-green-500">{spisanieStatsState.totalSpisanieSum} тг</span>
+                <span className="text-1xl text-green-500">{spisanieStatsState.totalSpisanieSum} ₸</span>
               </div>
               <div className='flex md:border-l-1 mt-2 md:mt-0 md:pl-2 pr-2 gap-2 md:gap-0 flex-row md:flex-col justify-start text-start'>
                 <p className="text-gray-500 md:mt-1">Количество списаний:</p>
@@ -247,9 +266,11 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
             </div>
           </div>
       }
+
       <div className="mb-4 flex justify-center align-center items-center w-[100%] ">
         <DataGridMaterial rows={listRows} columns={columns} />
       </div>
+    </div>:''}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useStateContext } from "../../contexts/ContextProvider";
 import { StoresList, FormatAmount, TotalCounter, ConvertCalendarDate } from '../../data/MainDataSource';
 import { FaDollarSign, FaMoneyBillAlt, FaBoxOpen, FaRegThumbsDown, FaMoneyBill, FaBox, FaFilter, FaChartBar } from "react-icons/fa";
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
+import LoadingSkeleton from "../LoadingSkeleton";
 
 const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
     const stepperRef = useRef(null);
@@ -14,14 +15,20 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
     const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
     const [panelData, setPanelData] = useState([]);
     const [ kkmStats, setKkmStats ] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const componentRef = useRef(null)
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
 
     const handleDateChange = async (e) => {
         if(e[1]){
+            setLoading(true);
             const properDate = ConvertCalendarDate(e);
             const kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
             setKkmStats(kkmList);
 
             setTotal(TotalCounter(kkmList));
+            setLoading(false);
         }
     } 
     useEffect(()=> {
@@ -29,7 +36,14 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
           setTotal(TotalCounter(kkm.monthFormedKKM))
           setKkmStats(kkm.monthFormedKKM);
         }
-      }, [receipts])
+        if (componentRef.current && document.readyState === 'complete') {
+            const {offsetWidth, offsetHeight} = componentRef.current;
+            setDimensions({
+                width: offsetWidth,
+                height: offsetHeight,
+            })
+        }
+      }, [receipts,loading])
     
     const financeStatsTemplate = [
         { id: '1', title: 'Выручка', icon: <FaDollarSign />, iconBg: '#1d4db7', pcColor: 'black-600', valueKey: 'totalSum', format: true },
@@ -39,7 +53,7 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
         { id: '5', title: 'Средний чек Bitrix', icon: <FaFilter />, iconBg: '#1d4db7', pcColor: 'black-600', btrx: true, valueKey: 'conversion', format: false, desc: 'Все магазины' },
     ];
     return (
-        <div className={`bg-white dark:text-gray-200 overflow-hidden  dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] p-6 flex flex-col subtle-border`}>
+        <div style={{alignSelf:'flex-start', minHeight: 520}} className={`bg-white dark:text-gray-200 overflow-hidden  dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] p-6 flex flex-col subtle-border`}>
             <div className="flex flex-row justify-between mb-4">
                 <p className="text-[1rem] font-semibold">{title}</p>
                 <div className="flex flex-wrap border-solid border-1 rounded-xl border-black px-2 gap-1">
@@ -55,9 +69,14 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
                 />
                 </div>
             </div>
+            {loading ? <div className="pr-4 pt-2">
+                <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
+            </div> : '' }
+
+            {!loading ? <div ref={componentRef}>
             <div className="flex flex-row mb-1">
                 <h3>Общая: &nbsp;</h3>
-                <p className="text-green-400 text-1xl">{total} тг</p> {/* Update this total dynamically if needed */}
+                <p className="text-green-400 text-1xl">{total} ₸</p> {/* Update this total dynamically if needed */}
             </div>
             <Stepper ref={stepperRef}>
                 {Object.entries(kkmStats).map(([storeName, storeData]) => {
@@ -97,6 +116,7 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
                     
                 })}
             </Stepper>
+            </div> : ""}
     </div>
     )
 }

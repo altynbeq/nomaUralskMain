@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import { Dropdown } from 'primereact/dropdown';
 import DoubleLineChart from '../../components/demo/DoubleLineChart';
 import { useStateContext } from '../../contexts/ContextProvider';
 import { getDealsBack } from '../../methods/dataFetches/getDealsBack';
+import LoadingSkeleton from "../LoadingSkeleton";
 
 const MonthlyConversionChart = ({title, leadsSeries}) => {
   const [ selectedMonth, setSelectedMonth ] = useState('September');
   const { leads, dateRanges } = useStateContext();
+  const [loading, setLoading] = useState(false);
+  const componentRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const cities = [  "January",
   "February",
@@ -22,9 +26,26 @@ const MonthlyConversionChart = ({title, leadsSeries}) => {
   "December"];
 
   const handleMonthChange = async (e) => {
-    setSelectedMonth(e);
+      setLoading(true);
+      setSelectedMonth(e);
+   setTimeout( ()=>{
+       setLoading(false)
+   },3000);
+
   }
 
+    useEffect(()=> {
+        let updateDimensions = () => {
+            if (componentRef.current) {
+                const {offsetWidth, offsetHeight} = componentRef.current;
+                setDimensions({
+                    width: offsetWidth,
+                    height: offsetHeight,
+                })
+            }
+        };
+        updateDimensions();
+    }, [loading])
   return (
     <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 md:w-[85%] w-[90%] rounded-2xl subtle-border">
         <div className="flex justify-between items-center gap-2 mb-10">
@@ -34,9 +55,15 @@ const MonthlyConversionChart = ({title, leadsSeries}) => {
                 placeholder="Выберите месяц" className="w-full md:w-14rem" />
         </div>
         </div>
+        {loading ? <div className="pr-4 pt-3">
+            <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
+        </div> : '' }
+
+        {!loading ? <div ref={componentRef}>
         <div className="w-[100%] h-[250px]">
           <DoubleLineChart data={leadsSeries} />
         </div>
+        </div>:''}
     </div>
   )
 }

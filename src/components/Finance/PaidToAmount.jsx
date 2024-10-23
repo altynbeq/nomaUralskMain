@@ -8,6 +8,7 @@ import { TotalCounter, PaidToData, ConvertCalendarDate } from '../../data/MainDa
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import { getUserUrls } from '../../methods/getUserUrls';
+import LoadingSkeleton from "../LoadingSkeleton";
 
 
 const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
@@ -20,28 +21,49 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
     new Date(dateRanges[1].endDate.replace('%20', ' '))
   ]);
   const [panelData, setPanelData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const componentRef = useRef(null)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const handleDateChange = async (e) => {
+
     if(e[1]){
+      setLoading(true);
       const properDate = ConvertCalendarDate(e);
       
       const salesList = await getSalesReceiptsFront(userReceiptsUrl, properDate);
       setPanelData(PaidToData(salesList));
 
-      const kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
+      let  kkmList = ''
+      try {kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);} catch (e) {
+        console.log("=>(PaidToAmount.jsx:29) e", e);
+      }
 
       setTotal(TotalCounter(kkmList))
+      setLoading(false);
     }
   };
   useEffect(()=> {
+    let updateDimensions = () => {
+      if (componentRef.current) {
+        const {offsetWidth, offsetHeight} = componentRef.current;
+        setDimensions({
+          width: offsetWidth,
+          height: offsetHeight,
+        })
+      }
+    };
+    updateDimensions();
+
     if(kkm.monthFormedKKM && receipts.monthReceiptsData){
       setPanelData(PaidToData(receipts.monthReceiptsData));
       setTotal(TotalCounter(kkm.monthFormedKKM))
     }
-  }, [receipts])
+
+  }, [receipts,loading])
 
   return (
-    <div className={`bg-white dark:text-gray-200 overflow-hidden min-h-[${height}] dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[${comb ? '43%' : '43%'}] p-4 flex flex-col subtle-border`}>
+    <div style={{alignSelf: 'flex-start', minHeight: 520}} className={`bg-white dark:text-gray-200 overflow-hidden min-h-[${height}] dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[${comb ? '43%' : '43%'}] p-6 flex flex-col subtle-border`}>
       <div className="flex flex-row justify-between mb-4">
         <p className="text-[1rem] font-semibold">{title}</p>
         <div className="flex flex-wrap border-solid border-1 rounded-xl border-black px-2 gap-1">
@@ -57,41 +79,48 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
           />
         </div>
       </div>
-      <div className="flex flex-row mb-5">
-        <h3>Общая: &nbsp;</h3>
-        <p className="text-green-400 text-1xl">{total} тг</p> {/* Update this total dynamically if needed */}
-      </div>
+      {loading ? <div className="pr-4 pt-2">
+        <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
+      </div> : '' }
 
-      <Stepper ref={stepperRef}>
-        {panelData.map((panel, index) => (
-          <StepperPanel key={index} header={panel.header}>
-            <div>
-              <section className="flex flex-wrap mb-4">
-                <div className="flex flex-row">
-                  <h3>{panel.header}: &nbsp;</h3>
-                  <p className="text-1xl">{panel.value}</p>
-                  <span className="p-1 hover:drop-shadow-xl cursor-pointer rounded-full text-white bg-green-400 ml-3 text-[10px]">
+      {!loading ? <div ref={componentRef}>
+        <div className="flex flex-row mb-5">
+          <h3>Общая: &nbsp;</h3>
+          <p className="text-green-400 text-1xl">{total} ₸</p> {/* Update this total dynamically if needed */}
+        </div>
+
+        <Stepper ref={stepperRef}>
+          {panelData.map((panel, index) => (
+              <StepperPanel key={index} header={panel.header}>
+                <div>
+                  <section className="flex flex-wrap mb-4">
+                    <div className="flex flex-row">
+                      <h3>{panel.header}: &nbsp;</h3>
+                      <p className="text-1xl">{panel.value}</p>
+                      <span
+                          className="p-1 hover:drop-shadow-xl cursor-pointer rounded-full text-white bg-green-400 ml-3 text-[10px]">
                     {panel.percentage}%
                   </span>
-                </div>
-              </section>
-              <section className="flex flex-col justify-between gap-6">
-                {panel.kaspiStats.map((stat, index) => (
-                  <div key={index} className="flex flex-col">
-                    <div className="flex flex-row justify-between gap-2">
-                      <h3>{stat.title}</h3>
-                      <p>{stat.current}тг 
-                      {/* {stat.value}% */}
-                      </p>
                     </div>
-                    <ProgressCardColored value={stat.value} />
-                  </div>
-                ))}
-              </section>
-            </div>
-          </StepperPanel>
-        ))}
-      </Stepper>
+                  </section>
+                  <section className="flex flex-col justify-between gap-6">
+                    {panel.kaspiStats.map((stat, index) => (
+                        <div key={index} className="flex flex-col">
+                          <div className="flex flex-row justify-between gap-2">
+                            <h3>{stat.title}</h3>
+                            <p>{stat.current} ₸
+                              {/* {stat.value}% */}
+                            </p>
+                          </div>
+                          <ProgressCardColored value={stat.value}/>
+                        </div>
+                    ))}
+                  </section>
+                </div>
+              </StepperPanel>
+          ))}
+        </Stepper></div>:''}
+
     </div>
   );
 };

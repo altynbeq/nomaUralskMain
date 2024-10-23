@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { Calendar } from 'primereact/calendar';
@@ -6,20 +6,40 @@ import { FaDollarSign, FaMoneyBillAlt, FaBox, FaFilter } from "react-icons/fa";
 import { FormatAmount, ConvertCalendarDate } from '../../data/MainDataSource';
 import { useStateContext } from "../../contexts/ContextProvider";
 import { getKKMReceiptsFront } from "../../methods/dataFetches/getKKM";
+import LoadingSkeleton from "../LoadingSkeleton";
 
 const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
     const stepperRef = useRef(null);
     const { dateRanges, kkm } = useStateContext();
     const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
     const [ productStats, setProductsStats ] = useState(kkm.monthFormedKKM);
+    const [loading, setLoading] = useState(false);
+    const componentRef = useRef(null)
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
     const handleDateChange = async(e) => {
         if(e[1]){
+            setLoading(true);
             const properDate = ConvertCalendarDate(e);
             const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
             setProductsStats(kkmData);
+            setLoading(false);
         }
     }
+
+    useEffect(()=> {
+        let updateDimensions = () => {
+            if (componentRef.current) {
+                const {offsetWidth, offsetHeight} = componentRef.current;
+                setDimensions({
+                    width: offsetWidth,
+                    height: offsetHeight,
+                })
+            }
+        };
+        updateDimensions();
+    }, [loading])
+
     const productStatsTemplate = (storeStats) => [
         {
             id: '1',
@@ -64,7 +84,7 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
     ];
 
     return (
-        <div className={`bg-white dark:text-gray-200 overflow-hidden dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] px-6 py-2 flex flex-col subtle-border`}>
+        <div className={`bg-white dark:text-gray-200 overflow-hidden dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] px-6 py-6 flex flex-col subtle-border`}>
             <div className="flex flex-row justify-between mb-4">
                 <p className="text-[1rem] font-semibold">{title}</p>
                 <div className="flex flex-wrap border-solid border-1 rounded-xl border-black px-2 gap-1">
@@ -80,7 +100,11 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
                     />
                 </div>
             </div>
+            {loading ? <div className="pr-4 pt-2">
+                <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
+            </div> : '' }
 
+            {!loading ? <div ref={componentRef}>
             <Stepper ref={stepperRef}>
                 {Object.entries(productStats).map(([storeName, storeStats]) => (
                     <StepperPanel key={storeName} header={storeName}>
@@ -109,6 +133,7 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
                     </StepperPanel>
                 ))}
             </Stepper>
+            </div>:''}
         </div>
     );
 };

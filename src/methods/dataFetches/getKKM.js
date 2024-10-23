@@ -33,12 +33,14 @@ async function fetchDataForRange(api,startDate, endDate){
             'Content-Type': 'application/json',
             'Authorization': `Basic ${encodedCredentials}`
         }
-    });
+    })
 
-    if (!response.ok) {
+    if (!response && !response.ok) {
         console.error('Error fetching KKM list');
         throw new Error('Network response was not ok');
     }
+    let res = await response;
+    console.log("=>(getKKM.js:44) res", res);
 
     return await response.json();
 }
@@ -47,7 +49,9 @@ export async function getKKMReceiptsFront(api, dateRanges) {
     //if dateRanges has more than one date
     const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
     const formedKKMData = kkmReceiptsDataFormer(data);
-    return formedKKMData;
+    if(formedKKMData) {
+        return formedKKMData;
+    }
     // if (Array.isArray(dateRanges)) {
     //     const [dayRange, weekRange, monthRange] = dateRanges;
 

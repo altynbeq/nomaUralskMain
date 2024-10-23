@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import { useStateContext } from "../../contexts/ContextProvider";
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import BarChartRe from '../demo/BarChart';
 import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
 import { ConvertCalendarDate, SpisanieBarSeriesByStore } from '../../data/MainDataSource';
+import LoadingSkeleton from "../LoadingSkeleton";
 
 const SpisanieMonthChart = ({ title, series, short, userSpisanieUrl }) => {
   const { dateRanges } = useStateContext();
@@ -14,21 +15,41 @@ const SpisanieMonthChart = ({ title, series, short, userSpisanieUrl }) => {
   
   const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
   const stores = [ "Все магазины", "Алматы", "Сатпаева", "Панфилова",];
-  
+  const [loading, setLoading] = useState(false);
+  const componentRef = useRef(null)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
   useEffect(() => {
+    let updateDimensions = () => {
+      if (componentRef.current) {
+        const {offsetWidth, offsetHeight} = componentRef.current;
+        setDimensions({
+          width: offsetWidth,
+          height: offsetHeight,
+        })
+      }
+    };
+    updateDimensions();
     setBarSeries(series)
-  }, [series]);
+  }, [series,loading]);
 
   const handleStoreChange = async (e) => {
     setSelectedStore(e);
+    setTimeout( ()=>{
+      setLoading(false)
+    },3000);
   };
   
   const handleDateChange = async(e) => {
+    setLoading(true);
     if(e[1]){
       const properDate = ConvertCalendarDate(e);
       const spisanieData = await getSpisanie(userSpisanieUrl, properDate);
       setBarSeries(SpisanieBarSeriesByStore(spisanieData));
-    } 
+    }
+    setTimeout( ()=>{
+      setLoading(false)
+    },3000);
   }
 
   return (
@@ -54,9 +75,14 @@ const SpisanieMonthChart = ({ title, series, short, userSpisanieUrl }) => {
           </div>
         </div>
         </div>
+      {loading ? <div className="pr-4 pt-2">
+        <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
+      </div> : '' }
+
+      {!loading ? <div ref={componentRef}>
         <div className="w-[100%] h-[400px]">
           <BarChartRe data={barSeries} />
-        </div>
+        </div></div>:''}
     </div>
   )
 }

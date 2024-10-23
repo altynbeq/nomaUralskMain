@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart'
 import { FinanceHolePie, FinanceStats, FormatAmount } from '../../data/MainDataSource'
@@ -10,7 +10,19 @@ const DailyRevenue = ({userKkmUrl}) => {
   const [ pieData, setPieData ] = useState([]);
   const [ financeStats, setFinanceStats ] = useState({});
   const date = dateRanges[0].bitrixStartDate.split(' ')[0];
+  const [loading, setLoading] = useState(false);
+  const componentRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
+    useEffect(() => {
+        if (componentRef.current) {
+            const {offsetWidth, offsetHeight} = componentRef.current;
+            setDimensions({
+                width: offsetWidth,
+                height: offsetHeight,
+            })
+        }
+  }, [loading]);
 
   const getter = async() => {
       
@@ -25,6 +37,7 @@ const DailyRevenue = ({userKkmUrl}) => {
   getter();
   
   return (
+      <>
     <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">
           <div className="flex justify-between">
             <p className="font-semibold text-1xl">Доходы за день</p>
@@ -63,6 +76,7 @@ const DailyRevenue = ({userKkmUrl}) => {
             </div>
           </div>
         </div>
+      </>
   )
 }
 
