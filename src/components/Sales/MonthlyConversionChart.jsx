@@ -45,7 +45,7 @@ const MonthlyConversionChart = ({title, leadsSeries}) => {
             }
         };
         updateDimensions();
-    }, [loading])
+    }, [])
   return (
     <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 md:w-[85%] w-[90%] rounded-2xl subtle-border">
         <div className="flex justify-between items-center gap-2 mb-10">

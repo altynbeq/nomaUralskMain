@@ -38,7 +38,7 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
             }
         };
         updateDimensions();
-    }, [loading])
+    }, [])
 
     const productStatsTemplate = (storeStats) => [
         {

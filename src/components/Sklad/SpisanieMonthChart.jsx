@@ -31,7 +31,7 @@ const SpisanieMonthChart = ({ title, series, short, userSpisanieUrl }) => {
     };
     updateDimensions();
     setBarSeries(series)
-  }, [series,loading]);
+  }, [series]);
 
   const handleStoreChange = async (e) => {
     setSelectedStore(e);

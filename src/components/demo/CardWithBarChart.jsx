@@ -43,7 +43,7 @@ const  CardWithBarChart = ({title, series, dataKey, userKkmUrl}) => {
           setStats(FinanceStats(kkm.monthFormedKKM));
         }
         setBarSeries(series);
-    }, [series,loading])
+    }, [series])
 
     return (
         <Card withBorder padding="lg" className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[87%]  rounded-2xl subtle-border">

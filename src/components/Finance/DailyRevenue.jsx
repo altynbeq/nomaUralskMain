@@ -22,7 +22,7 @@ const DailyRevenue = ({userKkmUrl}) => {
                 height: offsetHeight,
             })
         }
-  }, [loading]);
+  }, []);
 
   const getter = async() => {
       

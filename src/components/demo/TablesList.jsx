@@ -171,7 +171,7 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
         height: offsetHeight,
       })
     }
-  }, [listRows,loading])
+  }, [listRows])
 
   const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
   const setSorting = (field) => {

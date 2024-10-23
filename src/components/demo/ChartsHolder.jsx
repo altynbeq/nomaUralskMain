@@ -44,7 +44,7 @@ const  CardWithStats = ({userKkmUrl, userReceiptsUrl}) => {
             setChartSeries(FinanceLineChartSeries(receipts.monthReceiptsData));
             setStats(FinanceStats(kkm.monthFormedKKM));
         }
-    }, [receipts, loading])
+    }, [receipts])
 
     return (
         <>

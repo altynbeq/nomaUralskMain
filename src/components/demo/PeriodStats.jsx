@@ -43,7 +43,7 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
                 height: offsetHeight,
             })
         }
-      }, [receipts,loading])
+      }, [receipts])
     
     const financeStatsTemplate = [
         { id: '1', title: 'Выручка', icon: <FaDollarSign />, iconBg: '#1d4db7', pcColor: 'black-600', valueKey: 'totalSum', format: true },

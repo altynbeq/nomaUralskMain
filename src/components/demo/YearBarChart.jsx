@@ -27,7 +27,7 @@ const YearBarChart = () => {
                 })
             }
         };
-        updateDimensions()},[loading]);
+        updateDimensions()},[]);
     const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
     return (
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[87%]  rounded-2xl subtle-border">
