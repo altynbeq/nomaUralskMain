@@ -76,12 +76,12 @@ const Scheduler = () => {
         const endTime = eventInfo.event.end;
 
         // Format the times as desired (e.g., "HH:mm")
-        const startTimeFormatted = startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-        const endTimeFormatted = endTime ? endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        const startTimeFormatted = startTime ? startTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' }) : '';
+        const endTimeFormatted = endTime ? endTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' }) : '';
 
         return (
             <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal} >
-                <span className="text-white">{startTimeFormatted} - {endTimeFormatted} </span>   <strong className="text-white">{eventInfo.event.title}</strong><br />
+                <span className="md:scale-10 lg:scale-100 text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">{startTimeFormatted} - {endTimeFormatted} </span>   <strong className="text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">{eventInfo.event.title}</strong><br />
             </div>
         );
     }
@@ -90,7 +90,7 @@ const Scheduler = () => {
 
     }, [currentShifts]);
     return (
-        <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white rounded-3xl">
+        <div className="m-2 mb-0 p-2 pb-0  bg-white rounded-3xl">
             <Header category="Учёт" title="Смены" />
             <CalendarModal open={modal} setOpen={setModal} />
             <CalendarModalAddShift open={modalAddShift} setOpen={setModalAddShift} currentShifts={currentShifts} setCurrentShifts={setCurrentShifts} />
@@ -102,6 +102,7 @@ const Scheduler = () => {
                 eventContent={renderEventContent}
                 locale={ruLocale}
                 firstDay={1}
+                fixedWeekCount={false}
                 headerToolbar={{
                     left: 'dayGridMonth,dayGridWeek,dayGridDay',
                     center: 'title',

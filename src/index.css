@@ -41,7 +41,8 @@ body{
 /*  calendar */
 .fc-daygrid-day-frame {
     height: 100px; /* Set your desired height */
-    overflow: scroll; /* Hide overflow content */
+    overflow-y: scroll; /* Hide overflow content */
+    overflow-x: hidden; /* Hide overflow content */
 }
 .fc .fc-button {
     background-color: rgb(59 130 246); /* Button background color */
