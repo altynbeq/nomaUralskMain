@@ -46,6 +46,11 @@ export const links = [
         text: 'Смены',
         icon: <FaCalendar />,
       },
+      {
+        name: 'accounting-warehouse',
+        text: 'Склад',
+        icon: <FaBoxOpen />,
+      },
     ],
   },
   {

@@ -12,6 +12,7 @@ import {Loader} from './pages';
 import { getLeadsBack } from './methods/dataFetches/getLeadsBack';
 import { fetchDeals } from './methods/dataFetches/getDealsBitrix';
 import { getUserUrls } from './methods/getUserUrls';
+import AccountingWarehouse from "./pages/AccountingWarehouse";
 
 const App = () => {
   const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie  } = useStateContext();
@@ -124,6 +125,7 @@ const App = () => {
                         <Route path="/Q&A" element={<ComingSoon />} />
                         <Route path="/login" element={<LogInForm />} />
                         <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/accounting-warehouse" element={<AccountingWarehouse/>} />
                       </>
                 </Routes>
               </div>
