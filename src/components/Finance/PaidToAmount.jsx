@@ -4,7 +4,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import ProgressCardColored from '../demo/ProgressLine';
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
-import { TotalCounter, PaidToData, ConvertCalendarDate } from '../../data/MainDataSource';
+import { totalCounterReceipts, TotalCounter, PaidToData, ConvertCalendarDate } from '../../data/MainDataSource';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import { getUserUrls } from '../../methods/getUserUrls';
@@ -36,10 +36,10 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
 
       let  kkmList = ''
       try {kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);} catch (e) {
-        console.log("=>(PaidToAmount.jsx:29) e", e);
+        // console.log("=>(PaidToAmount.jsx:29) e", e);
       }
 
-      setTotal(TotalCounter(kkmList))
+      setTotal(totalCounterReceipts(salesList))
       setLoading(false);
     }
   };
@@ -57,7 +57,7 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
 
     if(kkm.monthFormedKKM && receipts.monthReceiptsData){
       setPanelData(PaidToData(receipts.monthReceiptsData));
-      setTotal(TotalCounter(kkm.monthFormedKKM))
+      setTotal(totalCounterReceipts(receipts.monthReceiptsData))
     }
 
   }, [receipts])

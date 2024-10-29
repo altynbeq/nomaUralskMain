@@ -39,8 +39,7 @@ async function fetchDataForRange(api,startDate, endDate){
         console.error('Error fetching KKM list');
         throw new Error('Network response was not ok');
     }
-    let res = await response;
-    console.log("=>(getKKM.js:44) res", res);
+    // let res = await response;
 
     return await response.json();
 }

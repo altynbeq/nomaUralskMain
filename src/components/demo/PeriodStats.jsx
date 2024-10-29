@@ -25,8 +25,8 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
             setLoading(true);
             const properDate = ConvertCalendarDate(e);
             const kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
+            console.log("LIIISTTTKKKMMM", kkmList)
             setKkmStats(kkmList);
-
             setTotal(TotalCounter(kkmList));
             setLoading(false);
         }

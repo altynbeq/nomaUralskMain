@@ -51,6 +51,42 @@ export const sales1CMonthFormer = (data) => {
 
     });
 
+    const storeStatsTotal = data.reduce((result, item) => {
+        const storeName = item["КассаККМНаименование"];
+        const receiptNumber = item["Номер"];
+    
+        // Initialize store entry if it doesn't exist
+        if (!result[storeName]) {
+            result[storeName] = {
+                receiptsNumbers: [],
+                receipts: [],
+                totalSum: 0  // Initialize totalSum to 0
+            };
+        }
+    
+        const store = result[storeName];
+    
+        // Only add receipt if "Номер" is not already in receiptsNumbers
+        if (!store.receiptsNumbers.includes(receiptNumber)) {
+            store.receiptsNumbers.push(receiptNumber);
+            store.receipts.push(item);
+            store.totalSum += item['СуммаДокумента'];  // Add СуммаДокумента to totalSum
+        }
+    
+        return result;
+    }, {});
+
+    Object.keys(storeStatsTotal).forEach(fullStoreName => {
+        // Extract the simplified store name
+        const simplifiedStoreName = fullStoreName.replace(/.*Склад\s*([^\s)]+).*/, '$1');
+        
+        // Check if this simplified store name exists in `stats`
+        if (stats[simplifiedStoreName]) {
+            // Update the totalSum in `stats` with the correct totalSum from `storeStatsTotal`
+            stats[simplifiedStoreName].totalSum = storeStatsTotal[fullStoreName].totalSum;
+        }
+    });
+
     // After all data is processed, calculate the cash for each store
     Object.keys(stats).forEach(store => {
         const storeStats = stats[store];
@@ -59,12 +95,16 @@ export const sales1CMonthFormer = (data) => {
         const totalPaidToSum = Object.values(storeStats.paidTo).reduce((sum, amount) => sum + amount, 0);
 
         // Calculate cash as the difference between totalSum and terminal payments
-        const cashDifference = storeStats.totalSum - totalPaidToSum;
-
+        const cashDifference = storeStats.totalSum - Math.abs(totalPaidToSum);
+        console.log(cashDifference)
+        if(cashDifference < 0){
+            console.log("NIHHHAA", cashDifference);
+        }
         // Add the cash difference to paidTo under the key 'Наличные'
         storeStats.paidTo["Наличные"] = cashDifference;
     });
-
+    // stats.total = 0;
+    // Object.keys(stats).forEach(store =>  stats.total += Math.round(store.totalSum));
     return stats;
 };
 

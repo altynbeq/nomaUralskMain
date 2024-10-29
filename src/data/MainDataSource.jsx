@@ -1,8 +1,29 @@
 import { useStateContext } from "../contexts/ContextProvider";
 
+export const totalCounterReceipts = (receipts) => {
+  let totalSum = 0;
+
+  // Iterate over each key in receipts and add only valid numeric totalSum values
+  Object.keys(receipts).forEach(storeName => {
+      const store = receipts[storeName];
+      // Check if store has a valid numeric totalSum property
+      if (store && typeof store.totalSum === 'number' && !isNaN(store.totalSum)) {
+          totalSum += store.totalSum;
+      }
+  });
+
+  Object.keys(receipts).forEach(item => {
+    const store = receipts[item];
+    console.log(store)
+  })
+
+  const formattedTotal = new Intl.NumberFormat('ru-RU').format(Math.round(totalSum));
+  return formattedTotal;
+};
 
 // count total amount of money earned
 export const  TotalCounter = (receipts) => {
+  console.log(receipts)
     const total = Object.values(receipts).reduce((accumulator, store) => {
         return accumulator + store.totalSum;
     }, 0);
@@ -20,7 +41,7 @@ export const PaidToData = (list) => {
             title,
             value: ((value / data.totalSum) * 100).toFixed(2), // Calculate percentage based on totalSum
             current: value,
-            total: data.totalSum
+            total: Math.round(data.totalSum)
           };
         });
 
