@@ -36,9 +36,26 @@ body{
   .slider-number:hover {
     background: #e3f2fe; /* Hover effect for all numbers */
   }
-  
-  
-  
+
+
+/*  calendar */
+.fc-daygrid-day-frame {
+    height: 100px; /* Set your desired height */
+    overflow: scroll; /* Hide overflow content */
+}
+.fc .fc-button {
+    background-color: rgb(59 130 246); /* Button background color */
+    color: #ffffff; /* Button text color */
+    border: none; /* Remove button border or set a specific border */
+    border-radius: 0.5rem;
+}
+.fc .fc-button:hover {
+    background-color: rgba(59,130,246,0.8); /* Button background color */
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:disabled {
+    background-color: rgb(30, 77, 183); /* Button background color */
+    opacity:1;
+}
 
 @tailwind base;
 @tailwind components;

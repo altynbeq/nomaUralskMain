@@ -1,62 +1,122 @@
-// import React, { useState } from 'react';
-// import { ScheduleComponent, ViewsDirective, ViewDirective, Day, Week, WorkWeek, Month, Agenda, Inject, Resize, DragAndDrop } from '@syncfusion/ej2-react-schedule';
-// import { DatePickerComponent } from '@syncfusion/ej2-react-calendars';
+import React, { useEffect, useState } from 'react';
+import { Header } from '../components';
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import CalendarModal from "../components/Calendar/CalendarModal";
+import CalendarModalAddShift from "../components/Calendar/CalendarModalAddShift";
+import ruLocale from '@fullcalendar/core/locales/ru';
 
-// import { scheduleData } from '../data/calendarData';
-// import { Header } from '../components';
+const events = [
+    { title: 'Петров', start: new Date(2024, 9, 1, 9, 0), end: new Date(2024, 9, 1, 17, 0) },
+    { title: 'Сидоров', start: new Date(2024, 9, 2, 10, 0), end: new Date(2024, 9, 2, 18, 0) },
 
-// // eslint-disable-next-line react/destructuring-assignment
-// const PropertyPane = (props) => <div className="mt-5">{props.children}</div>;
+    // October 4th (Friday) - 10 workers scheduled
+    { title: 'Иванов', start: new Date(2024, 9, 4, 7, 0), end: new Date(2024, 9, 4, 15, 0) },
+    { title: 'Смирнов', start: new Date(2024, 9, 4, 8, 0), end: new Date(2024, 9, 4, 16, 0) },
+    { title: 'Кузнецов', start: new Date(2024, 9, 4, 9, 0), end: new Date(2024, 9, 4, 17, 0) },
+    { title: 'Попов', start: new Date(2024, 9, 4, 10, 0), end: new Date(2024, 9, 4, 18, 0) },
+    { title: 'Васильев', start: new Date(2024, 9, 4, 11, 0), end: new Date(2024, 9, 4, 19, 0) },
+    { title: 'Новиков', start: new Date(2024, 9, 4, 12, 0), end: new Date(2024, 9, 4, 20, 0) },
+    { title: 'Морозов', start: new Date(2024, 9, 4, 13, 0), end: new Date(2024, 9, 4, 21, 0) },
+    { title: 'Алексеев', start: new Date(2024, 9, 4, 14, 0), end: new Date(2024, 9, 4, 22, 0) },
+    { title: 'Федоров', start: new Date(2024, 9, 4, 15, 0), end: new Date(2024, 9, 4, 23, 0) },
+    { title: 'Михайлов', start: new Date(2024, 9, 4, 16, 0), end: new Date(2024, 9, 5, 0, 0) },
 
-// const Scheduler = () => {
-//   const [scheduleObj, setScheduleObj] = useState();
+    // Other weekdays with random workers
+    { title: 'Сергеев', start: new Date(2024, 9, 7, 7, 0), end: new Date(2024, 9, 7, 15, 0) },
+    { title: 'Зайцев', start: new Date(2024, 9, 7, 10, 0), end: new Date(2024, 9, 7, 18, 0) },
 
-//   const change = (args) => {
-//     scheduleObj.selectedDate = args.value;
-//     scheduleObj.dataBind();
-//   };
+    { title: 'Крылов', start: new Date(2024, 9, 9, 9, 0), end: new Date(2024, 9, 9, 17, 0) },
+    { title: 'Борисов', start: new Date(2024, 9, 9, 13, 0), end: new Date(2024, 9, 9, 21, 0) },
+    { title: 'Киселёв', start: new Date(2024, 9, 9, 11, 0), end: new Date(2024, 9, 9, 19, 0) },
 
-//   const onDragStart = (arg) => {
-//     // eslint-disable-next-line no-param-reassign
-//     arg.navigation.enable = true;
-//   };
+    { title: 'Григорьев', start: new Date(2024, 9, 11, 8, 0), end: new Date(2024, 9, 11, 16, 0) },
+    { title: 'Павлов', start: new Date(2024, 9, 11, 9, 30), end: new Date(2024, 9, 11, 17, 30) },
+    { title: 'Степанов', start: new Date(2024, 9, 11, 13, 0), end: new Date(2024, 9, 11, 21, 0) },
 
-//   return (
-//     <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white rounded-3xl">
-//       <Header category="App" title="Calendar" />
-//       <ScheduleComponent
-//         height="650px"
-//         ref={(schedule) => setScheduleObj(schedule)}
-//         selectedDate={new Date(2021, 0, 10)}
-//         eventSettings={{ dataSource: scheduleData }}
-//         dragStart={onDragStart}
-//       >
-//         <ViewsDirective>
-//           { ['Day', 'Week', 'WorkWeek', 'Month', 'Agenda'].map((item) => <ViewDirective key={item} option={item} />)}
-//         </ViewsDirective>
-//         <Inject services={[Day, Week, WorkWeek, Month, Agenda, Resize, DragAndDrop]} />
-//       </ScheduleComponent>
-//       <PropertyPane>
-//         <table
-//           style={{ width: '100%', background: 'white' }}
-//         >
-//           <tbody>
-//             <tr style={{ height: '50px' }}>
-//               <td style={{ width: '100%' }}>
-//                 <DatePickerComponent
-//                   value={new Date(2021, 0, 10)}
-//                   showClearButton={false}
-//                   placeholder="Current Date"
-//                   floatLabelType="Always"
-//                   change={change}
-//                 />
-//               </td>
-//             </tr>
-//           </tbody>
-//         </table>
-//       </PropertyPane>
-//     </div>
-//   );
-// };
+    { title: 'Савельев', start: new Date(2024, 9, 14, 11, 0), end: new Date(2024, 9, 14, 19, 0) },
+    { title: 'Орлов', start: new Date(2024, 9, 14, 8, 30), end: new Date(2024, 9, 14, 16, 30) },
 
-// export default Scheduler;
+    { title: 'Романов', start: new Date(2024, 9, 16, 10, 0), end: new Date(2024, 9, 16, 18, 0) },
+    { title: 'Громов', start: new Date(2024, 9, 16, 7, 30), end: new Date(2024, 9, 16, 15, 30) },
+    { title: 'Смоляков', start: new Date(2024, 9, 16, 12, 0), end: new Date(2024, 9, 16, 20, 0) },
+
+    { title: 'Лебедев', start: new Date(2024, 9, 18, 9, 0), end: new Date(2024, 9, 18, 17, 0) },
+    { title: 'Тихомиров', start: new Date(2024, 9, 18, 14, 0), end: new Date(2024, 9, 18, 22, 0) },
+
+    { title: 'Филатов', start: new Date(2024, 9, 21, 8, 0), end: new Date(2024, 9, 21, 16, 0) },
+    { title: 'Беляев', start: new Date(2024, 9, 21, 9, 30), end: new Date(2024, 9, 21, 17, 30) },
+
+    { title: 'Пономарев', start: new Date(2024, 9, 23, 10, 0), end: new Date(2024, 9, 23, 18, 0) },
+    { title: 'Макаров', start: new Date(2024, 9, 23, 12, 0), end: new Date(2024, 9, 23, 20, 0) },
+
+    { title: 'Шевченко', start: new Date(2024, 9, 25, 11, 0), end: new Date(2024, 9, 25, 19, 0) },
+    { title: 'Волков', start: new Date(2024, 9, 25, 8, 0), end: new Date(2024, 9, 25, 16, 0) },
+
+    { title: 'Ершов', start: new Date(2024, 9, 28, 10, 0), end: new Date(2024, 9, 28, 18, 0) },
+    { title: 'Копылов', start: new Date(2024, 9, 28, 7, 30), end: new Date(2024, 9, 28, 15, 30) },
+    { title: 'Суханов', start: new Date(2024, 9, 28, 13, 0), end: new Date(2024, 9, 28, 21, 0) }
+];
+
+const Scheduler = () => {
+    const [modal, setModal] = useState(false);
+    const [currentShifts, setCurrentShifts] = useState(events);
+    const [modalAddShift, setModalAddShift] = useState(false);
+
+    function  openModal() {
+        setModal(true);
+    }
+    function  openModalAddShift() {
+        setModalAddShift(true);
+    }
+
+// a custom render function
+    function renderEventContent(eventInfo) {
+        const startTime = eventInfo.event.start;
+        const endTime = eventInfo.event.end;
+
+        // Format the times as desired (e.g., "HH:mm")
+        const startTimeFormatted = startTime ? startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        const endTimeFormatted = endTime ? endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+        return (
+            <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal} >
+                <span className="text-white">{startTimeFormatted} - {endTimeFormatted} </span>   <strong className="text-white">{eventInfo.event.title}</strong><br />
+            </div>
+        );
+    }
+
+    useEffect(() => {
+
+    }, [currentShifts]);
+    return (
+        <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white rounded-3xl">
+            <Header category="Учёт" title="Смены" />
+            <CalendarModal open={modal} setOpen={setModal} />
+            <CalendarModalAddShift open={modalAddShift} setOpen={setModalAddShift} currentShifts={currentShifts} setCurrentShifts={setCurrentShifts} />
+            <FullCalendar
+                plugins={[dayGridPlugin]}
+                initialView='dayGridMonth'
+                weekends={true}
+                events={currentShifts}
+                eventContent={renderEventContent}
+                locale={ruLocale}
+                firstDay={1}
+                headerToolbar={{
+                    left: 'dayGridMonth,dayGridWeek,dayGridDay',
+                    center: 'title',
+                    right: 'customButton prev,next,today', // Add the custom button here
+                }}
+                customButtons={{
+                    customButton: {
+                        text: 'Добавить',
+                        click: openModalAddShift,
+                    },
+                }}
+            />
+        </div>
+    );
+};
+
+
+export default Scheduler;

@@ -1,73 +1,83 @@
 import React from 'react';
 import { FiCreditCard } from 'react-icons/fi';
 import { BsCurrencyDollar, BsShield } from 'react-icons/bs';
-import { FaShoppingBasket , FaDollarSign , FaQuestionCircle , FaUserTie , FaBook , FaPhotoVideo , FaBoxOpen , FaChartLine , FaHeadset } from 'react-icons/fa';
+import { FaShoppingBasket , FaDollarSign , FaQuestionCircle , FaUserTie , FaBook , FaPhotoVideo , FaBoxOpen , FaChartLine , FaHeadset, FaCalendar } from 'react-icons/fa';
 import avatar from './avatar.jpg';
 import avatar2 from './avatar2.jpg';
 import avatar3 from './avatar3.png';
 import avatar4 from './avatar4.jpg';
 
 export const links = [
-    {
-      title: 'аналитика',
-      links: [
-        {
-          name: 'general',
-          text: 'Общий обзор',
-          icon: <FaChartLine />,
-        },
-        {
-          name: 'finance',
-          text: 'Финансы',
-          icon: <FaDollarSign />,
-        },
-        {
-          name: 'sales',
-          text: 'Продажи',
-          icon: <FaShoppingBasket />,
-        },
-        {
-          name: 'workers',
-          text: 'Сотрудники',
-          icon: <FaUserTie />,
-        },
-        {
-          name: 'sklad',
-          text: 'Склад',
-          icon: <FaBoxOpen />,
-        },
-      ],
-    },
-    {
-      title: 'Информация',
-      links: [
-        {
-          name: 'docs',
-          text: 'Документация',
-          icon: <FaBook />,
-        },
-        {
-          name: 'resources',
-          text: 'Обучение',
-          icon: <FaPhotoVideo />,
-        },
-      ],
-    },
-    {
-      title: 'Помощь',
-      links: [
-        {
-          name: 'support',
-          text: 'Служка поддержки',
-          icon: <FaHeadset />
-        },
-        {
-          name: 'Q&A',
-          text: 'Q&A',
-          icon: <FaQuestionCircle />,
-        }
-      ]
-    }
+  {
+    title: 'аналитика',
+    links: [
+      {
+        name: 'general',
+        text: 'Общий обзор',
+        icon: <FaChartLine />,
+      },
+      {
+        name: 'finance',
+        text: 'Финансы',
+        icon: <FaDollarSign />,
+      },
+      {
+        name: 'sales',
+        text: 'Продажи',
+        icon: <FaShoppingBasket />,
+      },
+      {
+        name: 'workers',
+        text: 'Сотрудники',
+        icon: <FaUserTie />,
+      },
+      {
+        name: 'sklad',
+        text: 'Склад',
+        icon: <FaBoxOpen />,
+      },
+    ],
+  },
+  {
+    title: 'Учёт',
+    links: [
+      {
+        name: 'calendar',
+        text: 'Смены',
+        icon: <FaCalendar />,
+      },
+    ],
+  },
+  {
+    title: 'Информация',
+    links: [
+      {
+        name: 'docs',
+        text: 'Документация',
+        icon: <FaBook />,
+      },
+      {
+        name: 'resources',
+        text: 'Обучение',
+        icon: <FaPhotoVideo />,
+      },
+    ],
+  },
+  {
+    title: 'Помощь',
+    links: [
+      {
+        name: 'support',
+        text: 'Служка поддержки',
+        icon: <FaHeadset />
+      },
+      {
+        name: 'Q&A',
+        text: 'Q&A',
+        icon: <FaQuestionCircle />,
+      }
+    ]
+  }
 ];
 
 
@@ -98,28 +108,28 @@ export const cartData = [
 export const chatData = [
   {
     image:
-      avatar2,
+    avatar2,
     message: 'Roman Joined the Team!',
     desc: 'Congratulate him',
     time: '9:08 AM',
   },
   {
     image:
-      avatar3,
+    avatar3,
     message: 'New message received',
     desc: 'Salma sent you new message',
     time: '11:56 AM',
   },
   {
     image:
-      avatar4,
+    avatar4,
     message: 'New Payment received',
     desc: 'Check your earnings',
     time: '4:39 AM',
   },
   {
     image:
-      avatar,
+    avatar,
     message: 'Jolly completed tasks',
     desc: 'Assign her new tasks',
     time: '1:12 AM',

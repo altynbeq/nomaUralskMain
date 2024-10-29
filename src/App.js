@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { Navbar, Footer, Sidebar } from './components';
-import { General, Sales, ComingSoon, Sklad, Finance, Workers, TechProb, LogInForm } from './pages';
+import { General, Sales, ComingSoon, Sklad, Finance, Workers, TechProb, LogInForm, Calendar } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import { getKKMReceiptsFront } from './methods/dataFetches/getKKM'
@@ -123,6 +123,7 @@ const App = () => {
                         <Route path="/support" element={<ComingSoon />} />
                         <Route path="/Q&A" element={<ComingSoon />} />
                         <Route path="/login" element={<LogInForm />} />
+                        <Route path="/calendar" element={<Calendar />} />
                       </>
                 </Routes>
               </div>
