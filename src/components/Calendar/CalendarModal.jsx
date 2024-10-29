@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { FaEdit, FaTimes, FaTrash } from 'react-icons/fa';
 
 const ScheduleWithEdit = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
@@ -85,7 +86,7 @@ const ScheduleWithEdit = (props) => {
         const [endTime, setEndTime] = useState(employee.endTime);
 
         return (
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg ">
                 <div className="flex-1">
                     <h3 className="font-medium">{employee.name}</h3>
                     <div className="flex items-center gap-4 mt-2">
@@ -134,12 +135,12 @@ const ScheduleWithEdit = (props) => {
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6">
                         <div className="flex justify-between">
-                            <h2 className="text-xl font-bold">Schedule for 12 October</h2>
+                            <h2 className="text-xl font-bold  mr-10">Schedule for 12 October</h2>
                             <button
                                 onClick={() => props.setOpen(false)}
                                 className="text-gray-500 hover:text-gray-800"
                             >
-                                Close
+                                <FaTimes/>
                             </button>
                         </div>
 
@@ -160,11 +161,13 @@ const ScheduleWithEdit = (props) => {
                                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                                     >
                                         <div className="flex-1">
-                                            <h3 className="font-medium">{employee.name}</h3>
-                                            <div className="flex items-center text-gray-600 mt-1">
-                        <span className="text-sm">
-                          {employee.startTime} - {employee.endTime}
-                        </span>
+                                            <div className="flex justify-between">
+                                                <h3 className="font-medium mr-4">{employee.name}</h3>
+                                                <div className="flex items-center text-gray-600 mt-1">
+                                            <span className="text-sm mr-2">
+                                              {employee.startTime} - {employee.endTime}
+                                            </span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -173,13 +176,13 @@ const ScheduleWithEdit = (props) => {
                                                 onClick={() => handleEdit(employee.id)}
                                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                                             >
-                                                Edit
+                                                <FaEdit/>
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(employee.id)}
                                                 className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                                             >
-                                                Delete
+                                                <FaTrash/>
                                             </button>
                                         </div>
                                     </div>
