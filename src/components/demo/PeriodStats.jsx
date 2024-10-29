@@ -3,7 +3,7 @@ import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { Calendar } from 'primereact/calendar';
 import { useStateContext } from "../../contexts/ContextProvider";
-import { StoresList, FormatAmount, TotalCounter, ConvertCalendarDate } from '../../data/MainDataSource';
+import { StoresList, FormatAmount, totalCounterReceipts, TotalCounter, ConvertCalendarDate } from '../../data/MainDataSource';
 import { FaDollarSign, FaMoneyBillAlt, FaBoxOpen, FaRegThumbsDown, FaMoneyBill, FaBox, FaFilter, FaChartBar } from "react-icons/fa";
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import LoadingSkeleton from "../LoadingSkeleton";
@@ -33,7 +33,7 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
     } 
     useEffect(()=> {
         if(kkm.monthFormedKKM && receipts.monthReceiptsData){
-          setTotal(TotalCounter(kkm.monthFormedKKM))
+          setTotal(totalCounterReceipts(receipts.monthReceiptsData))
           setKkmStats(kkm.monthFormedKKM);
         }
         if (componentRef.current && document.readyState === 'complete') {

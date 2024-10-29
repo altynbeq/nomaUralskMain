@@ -5,7 +5,7 @@ import { Calendar } from 'primereact/calendar';
 import { useStateContext } from "../../contexts/ContextProvider";
 import { Button } from '../';
 import { FaShare, FaFileDownload } from "react-icons/fa";
-import { FinanceStats, FinanceLineChartSeries, FormatAmount, ConvertCalendarDate } from '../../data/MainDataSource';
+import { FinanceStats, FinanceLineChartSeries, totalCounterReceipts, FormatAmount, ConvertCalendarDate } from '../../data/MainDataSource';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import LoadingSkeleton from '../LoadingSkeleton'
@@ -14,6 +14,8 @@ const  CardWithStats = ({userKkmUrl, userReceiptsUrl}) => {
     const { dateRanges, receipts, kkm } = useStateContext();
     const [ chartSeries, setChartSeries ] = useState([]);
     const [ stats, setStats ] = useState({});
+    const [ totalSum, setTotalSum ] = useState(0);
+    const [ plainTotal, setPlainTotal ] = useState(0);
     const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
     const [loading, setLoading] = useState(false);
     const componentRef = useRef(null)
@@ -26,7 +28,13 @@ const  CardWithStats = ({userKkmUrl, userReceiptsUrl}) => {
             setStats(FinanceStats(dataListKKM));
 
             const dataListReceipts = await getSalesReceiptsFront(userReceiptsUrl, properDate);
+            const total = totalCounterReceipts(dataListReceipts);
             setChartSeries(FinanceLineChartSeries(dataListReceipts));
+
+            setTotalSum(total);
+
+            const plainNumber = Number(total.replace(/\s/g, ''));
+            setPlainTotal(plainNumber);
             setLoading(false);
         }
     }
@@ -41,6 +49,10 @@ const  CardWithStats = ({userKkmUrl, userReceiptsUrl}) => {
             })
         }
         if(kkm.monthFormedKKM && receipts.monthReceiptsData){
+            const total = totalCounterReceipts(receipts.monthReceiptsData);
+            const plainNumber = Number(total.replace(/\s/g, ''));
+            setTotalSum(total)
+            setPlainTotal(plainNumber);
             setChartSeries(FinanceLineChartSeries(receipts.monthReceiptsData));
             setStats(FinanceStats(kkm.monthFormedKKM));
         }
@@ -87,11 +99,11 @@ const  CardWithStats = ({userKkmUrl, userReceiptsUrl}) => {
                     <div className="  border-t-1 pr-2 flex  py-2 flex-row md:w-[100%] gap-8 justify-center ">
                         <div className='flex justify-center  border-color  flex-col text-start '>
                             <p className="text-gray-500 mt-1">Выручка</p>
-                            <span className="text-1xl ">{FormatAmount(stats.totalSum)} ₸</span>
+                            <span className="text-1xl ">{totalSum} ₸</span>
                         </div>
                         <div className='flex md:border-l-1 pl-2 flex-col text-start'>
                             <p className="text-gray-500 mt-1">Средний чек</p>
-                            <p className="text-[1rem] font-semibold">{FormatAmount(stats.avgCheck)} ₸</p>
+                            <p className="text-[1rem] font-semibold">{FormatAmount(Math.round(plainTotal/stats.salesCount))} ₸</p>
                         </div>
                         <div className='flex justify-center border-l-1  pl-2 flex-col text-start '>
                             <p className="text-gray-500 mt-1">Продаж</p>
