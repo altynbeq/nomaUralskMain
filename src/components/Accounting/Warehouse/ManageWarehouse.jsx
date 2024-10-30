@@ -123,7 +123,7 @@ const ManageWarehouse = () => {
 
 
     return (
-        <div className=" bg-gray-100 flex items-center justify-center">
+        <div className="flex items-center justify-center">
             <div className="flex gap-8">
                 {/* First Component */}
                 <div className="w-100 h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
