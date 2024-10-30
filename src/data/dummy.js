@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiCreditCard } from 'react-icons/fi';
 import { BsCurrencyDollar, BsShield } from 'react-icons/bs';
-import { FaShoppingBasket , FaDollarSign , FaQuestionCircle , FaUserTie , FaBook , FaPhotoVideo , FaBoxOpen , FaChartLine , FaHeadset, FaCalendar } from 'react-icons/fa';
+import { FaShoppingBasket , FaDollarSign , FaQuestionCircle , FaUserTie , FaBook , FaPhotoVideo , FaBoxOpen , FaChartLine , FaHeadset, FaCalendar, FaCoins } from 'react-icons/fa';
 import avatar from './avatar.jpg';
 import avatar2 from './avatar2.jpg';
 import avatar3 from './avatar3.png';
@@ -50,6 +50,11 @@ export const links = [
         name: 'accounting-warehouse',
         text: 'Склад',
         icon: <FaBoxOpen />,
+      },
+      {
+        name: 'accounting-expenses',
+        text: 'Затраты',
+        icon: <FaCoins />,
       },
     ],
   },

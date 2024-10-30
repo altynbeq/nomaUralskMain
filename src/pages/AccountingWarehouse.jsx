@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import ManageWarehouse from "../components/Warehouse/ManageWarehouse"; // Replace with appropriate icons
+import ManageWarehouse from "../components/Accounting/Warehouse/ManageWarehouse";
+import ListOfExpenses from "../components/Accounting/Warehouse/ListOfExpenses";
 
 const AccountingWarehouse = () => {
-    return <ManageWarehouse/>
+    return(
+        <>
+            <ManageWarehouse/>
+            <ListOfExpenses/>
+        </>
+    )
+
 };
 
 export default AccountingWarehouse;
