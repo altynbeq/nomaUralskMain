@@ -56,6 +56,11 @@ export const links = [
         text: 'Затраты',
         icon: <FaCoins />,
       },
+      {
+        name: 'accounting-workers',
+        text: 'Сотрудники',
+        icon: <FaUserTie />,
+      },
     ],
   },
   {

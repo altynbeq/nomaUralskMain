@@ -123,20 +123,21 @@ const ManageWarehouse = () => {
 
 
     return (
-        <div className="flex items-center justify-center">
-            <div className="flex gap-8">
+        <div className="w-[90%] mx-auto mt-5 md:mt-0 pt-10 md:pt-0 flex items-center justify-center">
+            <div className="flex flex-col md:flex-row  gap-8">
                 {/* First Component */}
                 <div className="w-100 h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                     <h3 className="text-lg font-medium text-gray-800 mb-4 absolute top-4 left-6">
                         Добавить поступление
                     </h3>
                     <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
-                        <div className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
+                        <div
+                            className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
                             <p className="text-gray-600">Drag and drop your files here</p>
                             <div className="flex gap-4 justify-center my-4">
-                                <MdInsertDriveFile size={32} className="text-blue-500" />
-                                <MdPieChart size={32} className="text-blue-500" />
-                                <MdDescription size={32} className="text-blue-500" />
+                                <MdInsertDriveFile size={32} className="text-blue-500"/>
+                                <MdPieChart size={32} className="text-blue-500"/>
+                                <MdDescription size={32} className="text-blue-500"/>
                             </div>
                             <div className="flex gap-3">
                                 <button
@@ -168,12 +169,13 @@ const ManageWarehouse = () => {
                         Добавить списания
                     </h3>
                     <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
-                        <div className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
+                        <div
+                            className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
                             <p className="text-gray-600">Drag and drop your files here</p>
                             <div className="flex gap-4 justify-center my-4">
-                                <MdInsertDriveFile size={32} className="text-blue-500" />
-                                <MdPieChart size={32} className="text-blue-500" />
-                                <MdDescription size={32} className="text-blue-500" />
+                                <MdInsertDriveFile size={32} className="text-blue-500"/>
+                                <MdPieChart size={32} className="text-blue-500"/>
+                                <MdDescription size={32} className="text-blue-500"/>
                             </div>
                             <div className="flex gap-3">
                                 <button
@@ -206,7 +208,7 @@ const ManageWarehouse = () => {
                 onClose={() => setIsModalOpen1(false)}
                 title="Добавить поступление"
             >
-                <FormContent />
+                <FormContent/>
             </Modal>
 
             {/* Modal for second component */}
@@ -215,7 +217,7 @@ const ManageWarehouse = () => {
                 onClose={() => setIsModalOpen2(false)}
                 title="Добавить списания"
             >
-                <FormContent />
+                <FormContent/>
             </Modal>
         </div>
     );
