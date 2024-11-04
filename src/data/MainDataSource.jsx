@@ -91,26 +91,21 @@ export const SaleShare = (data) => {
 export const GridSpisanieListRows = (data) => {
 
     // Combine all spisanieItems from all stores into one array
-    const allSpisanieItems = Object.values(data).flatMap(store => {
-          if (store.spisanieItems) {
-            {
-              store.spisanieItems.map(item => ({
-                ...item,
-                id: item.Дата + item.Номер + item.НоменклатураНаименование + item.СкладПредставление,
-                Номенклатура: item.НоменклатураНаименование,
-                Организация: item.ОрганизацияНаименование, // Shorten ОрганизацияНаименование
-                Ответственный: item.ОтветственныйНаименование, // Shorten ОтветственныйНаименование
-                Подразделение: item.ПодразделениеНаименование, // Shorten ПодразделениеНаименование
-                Склад: item.СкладПредставление,
-                СтатьяРасходов: item.СтатьяРасходовНаименование,
-                // Remove the original longer fields
-                ОрганизацияНаименование: item.ОрганизацияНаименование,
-                ОтветственныйНаименование: undefined,
-                ПодразделениеНаименование: undefined
-              }))
-            }
-          }
-        }
+  const allSpisanieItems = Object.values(data).flatMap(store =>
+      store.spisanieItems.map(item => ({
+        ...item,
+        id: item.Дата + item.Номер + item.НоменклатураНаименование + item.СкладПредставление,
+        Номенклатура: item.НоменклатураНаименование,
+        Организация: item.ОрганизацияНаименование, // Shorten ОрганизацияНаименование
+        Ответственный: item.ОтветственныйНаименование, // Shorten ОтветственныйНаименование
+        Подразделение: item.ПодразделениеНаименование, // Shorten ПодразделениеНаименование
+        Склад: item.СкладПредставление,
+        СтатьяРасходов: item.СтатьяРасходовНаименование,
+        // Remove the original longer fields
+        ОрганизацияНаименование: item.ОрганизацияНаименование,
+        ОтветственныйНаименование: undefined,
+        ПодразделениеНаименование: undefined
+      }))
     );
   
     return allSpisanieItems;
