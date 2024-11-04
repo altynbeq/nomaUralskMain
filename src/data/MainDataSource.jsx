@@ -91,7 +91,7 @@ export const SaleShare = (data) => {
 export const GridSpisanieListRows = (data) => {
   
     // Combine all spisanieItems from all stores into one array
-    const allSpisanieItems = Object.values(data).flatMap(store => 
+    const allSpisanieItems = Object.values(data).flatMap(store =>
       store.spisanieItems.map(item => ({
         ...item,
         id: item.Дата + item.Номер + item.НоменклатураНаименование + item.СкладПредставление,
@@ -108,7 +108,7 @@ export const GridSpisanieListRows = (data) => {
       }))
     );
   
-    return allSpisanieItems;
+    return allSpisanieItems || [];
 };
   
   
