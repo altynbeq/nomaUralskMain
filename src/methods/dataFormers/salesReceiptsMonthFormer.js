@@ -19,6 +19,7 @@ export const sales1CMonthFormer = (data) => {
                 totalSum: 0, // The total sum across all days for the store
                 totalNumberSales: 0,
                 uniqueDaysTracked: {}, // Track unique days for the store
+                КассаККМНаименование: cashRegister,
                 salesSeries: Array.from({ length: 31 }, (_, i) => ({ x: (i + 1).toString(), y: 0 })), // Number of sales per day
                 salesSumSeries: Array.from({ length: 31 }, (_, i) => ({ x: (i + 1).toString(), y: 0 })), // Sum of sales per day
             };
@@ -50,6 +51,8 @@ export const sales1CMonthFormer = (data) => {
         storeStats.salesSeries[dayOfMonth].y++;
 
     });
+    
+    console.log("data", data)
 
     const storeStatsTotal = data.reduce((result, item) => {
         const storeName = item["КассаККМНаименование"];
@@ -83,9 +86,30 @@ export const sales1CMonthFormer = (data) => {
         // Check if this simplified store name exists in `stats`
         if (stats[simplifiedStoreName]) {
             // Update the totalSum in `stats` with the correct totalSum from `storeStatsTotal`
-            stats[simplifiedStoreName].totalSum = storeStatsTotal[fullStoreName].totalSum;
+            stats[simplifiedStoreName].totalSum = 1;
         }
     });
+
+    Object.keys(stats).forEach(storeName => {
+        // Filter transactions related to this store
+        const storeTransactions = data.filter(item =>
+          item.КассаККМНаименование && item.КассаККМНаименование.includes(storeName)
+        );
+    
+        // Get unique transactions by 'Номер' for this store
+        const uniqueData = storeTransactions.filter((item, index, self) =>
+          index === self.findIndex(t => t.Номер === item.Номер)
+        );
+    
+        // Calculate the total sum of 'СуммаДокумента' for the unique transactions
+        let totalSum = 0;
+        uniqueData.forEach(item => {
+          totalSum += item['СуммаДокумента'];
+        });
+    
+        // Set the calculated total sum to the store's totalSum in the stores object
+        stats[storeName].totalSum = totalSum;
+      });
 
     // After all data is processed, calculate the cash for each store
     Object.keys(stats).forEach(store => {
@@ -96,12 +120,9 @@ export const sales1CMonthFormer = (data) => {
 
         // Calculate cash as the difference between totalSum and terminal payments
         const cashDifference = storeStats.totalSum - Math.abs(totalPaidToSum);
-        console.log(cashDifference)
-        if(cashDifference < 0){
-            console.log("NIHHHAA", cashDifference);
-        }
+       
         // Add the cash difference to paidTo under the key 'Наличные'
-        storeStats.paidTo["Наличные"] = cashDifference;
+        storeStats.paidTo["Наличные"] = Math.abs(Math.round(cashDifference));
     });
     // stats.total = 0;
     // Object.keys(stats).forEach(store =>  stats.total += Math.round(store.totalSum));

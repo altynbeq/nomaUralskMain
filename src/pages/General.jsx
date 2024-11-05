@@ -36,20 +36,22 @@ const General = ({urls}) => {
     if(kkm.monthFormedKKM && spisanie.monthSpisanie){
       setSalesShare(SaleShare(kkm.monthFormedKKM));
       setFinanceShare(FinanceShare(kkm.monthFormedKKM));
-      setTableRows(GridSpisanieListRows(spisanie.monthSpisanie));
-      setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
+      // setTableRows(GridSpisanieListRows(spisanie.monthSpisanie));
+      // setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
       setReady(true);
     }
     console.log("urls", urls);
     if(urls.externalApis && urls.externalApis.apiUrlKKM){
       const convKkm = urls.externalApis.apiUrlKKM ? convertUrl(urls.externalApis.apiUrlKKM) : null;
       const convReceipt = urls.externalApis.apiUrlReceipts ? convertUrl(urls.externalApis.apiUrlReceipts) : null;
-      const convSpis = urls.externalApis.apiUrlSpisanie ? convertUrl(urls.externalApis.apiUrlSpisanie) : null;
+      // const convSpis = urls.externalApis.apiUrlSpisanie ? convertUrl(urls.externalApis.apiUrlSpisanie) : null;
       console.log(convKkm)
-      if(convKkm != null && convReceipt != null && convSpis != null){
+      if(convKkm != null && convReceipt != null 
+        // && convSpis != null
+        ){
         setUserKkmUrl(convKkm);
         setUserReceiptsUrl(convReceipt);
-        setUserSpisanieUrl(convSpis)
+        // setUserSpisanieUrl(convSpis)
       }
     }
   }, [])
@@ -80,9 +82,9 @@ const General = ({urls}) => {
         {/* <PeriodStats title="Товары" stats={salesStats} statsTwo={salesStatsTwo} statsThree={salesStats} /> */}
         {/* <CarouselCard carousel={true}  data={salesShare} title="Доли продаж" />
       </div> */}
-      <div className="flex   w-[100%] flex-wrap  justify-center align-top xs:flex-col   gap-4 items-center">
+      {/* <div className="flex   w-[100%] flex-wrap  justify-center align-top xs:flex-col   gap-4 items-center">
         <TableSort title="Списания" userSpisanieUrl={userSpisanieUrl} userKkmUrl={userKkmUrl} spisanieStats={spisanieStats} rows={tableRows} columns={GridSpisanieListCols} urls={urls} />
-      </div>
+      </div> */}
     </div>
   );
 };

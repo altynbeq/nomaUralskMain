@@ -14,7 +14,6 @@ export const totalCounterReceipts = (receipts) => {
 
   Object.keys(receipts).forEach(item => {
     const store = receipts[item];
-    console.log(store)
   })
 
   const formattedTotal = new Intl.NumberFormat('ru-RU').format(Math.round(totalSum));
@@ -23,7 +22,6 @@ export const totalCounterReceipts = (receipts) => {
 
 // count total amount of money earned
 export const  TotalCounter = (receipts) => {
-  console.log(receipts)
     const total = Object.values(receipts).reduce((accumulator, store) => {
         return accumulator + store.totalSum;
     }, 0);
@@ -44,6 +42,7 @@ export const PaidToData = (list) => {
             total: Math.round(data.totalSum)
           };
         });
+
 
         return {
           header: storeName, // Store name as the header
