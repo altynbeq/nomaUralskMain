@@ -15,6 +15,7 @@ export const monthDealsDataFormer = (list) => {
         bestWorker: {},
         workersStats: {},
         workersMainStats: {},
+        dealsSource: {},
         salesSeries: Array.from({ length: 31 }, (_, index) => ({ x: `${index + 1}`, y: 0 })),
         series: Array.from({ length: 31 }, (_, index) => ({ x: `${index + 1}`, y: 0 }))
     };
@@ -78,6 +79,17 @@ export const monthDealsDataFormer = (list) => {
             workersMainStats[workerId].totalSales += opportunity;
         }
     });
+    // count dealsSource 
+    const dealsBySource = (list) => {
+        return list.reduce((acc, deal) => {
+            const source = deal.SOURCE_ID;
+            if (source) {
+                acc[source] = (acc[source] || 0) + 1;
+            }
+            return acc;
+        }, {});
+    };
+
 
     // Calculate min and max amount from series
     let minAmountInSeries = 0;
@@ -159,6 +171,7 @@ export const monthDealsDataFormer = (list) => {
     dealsStats.avgCheck = dealsStats.leadsCount > 0 ? Math.round(dealsStats.totalSum / dealsStats.leadsCount) : 0;
     dealsStats.maxSalesSeries = maxSalesInSeries;
     dealsStats.minSalesSeries = minSalesInSeries;
+    dealsStats.dealsSource = dealsBySource(list);
 
     return dealsStats;
 };
