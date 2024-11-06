@@ -32,8 +32,23 @@ const data = [
   },
 ];
 
+
+function CustomTooltip({ active, payload }) {
+  if (active && payload && payload.length) {
+    console.log(payload);
+    return (
+        <div className="custom-tooltip bg-white p-4">
+          <p className="label mb-2">{`${payload[0].payload.x}`}</p>
+          <p className="label">{`${payload[0].value} ₸`}</p>
+        </div>
+    );
+  }
+  return null;
+}
+
 export default class BarChartRe extends PureComponent {
   static demoUrl = 'https://codesandbox.io/p/sandbox/simple-bar-chart-72d7y5';
+
 
   render() {
     const { data } = this.props;
@@ -53,7 +68,7 @@ export default class BarChartRe extends PureComponent {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="x" />
           {/* <YAxis dataKey="y" /> */}
-          <Tooltip formatter={(value) => [`${value}`, 'Y Value']} />
+          <Tooltip content={<CustomTooltip />} />
 
           {/* <Legend /> */}
           {/* <Bar dataKey="pv" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} /> */}

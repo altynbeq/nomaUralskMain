@@ -46,7 +46,11 @@ export const AnimatedBeam = ({
 
     useEffect(() => {
         const updatePath = () => {
-            if (containerRef.current && fromRef.current && toRef.current) {
+            console.log("=>(AnimateBeam.jsx:49) containerRef", containerRef);
+            console.log("=>(AnimateBeam.jsx:50) fromRef", fromRef);
+            console.log("=>(AnimateBeam.jsx:51) toRef", toRef);
+
+                if (containerRef.current && fromRef.current && toRef.current) {
                 const containerRect = containerRef.current.getBoundingClientRect();
                 const rectA = fromRef.current.getBoundingClientRect();
                 const rectB = toRef.current.getBoundingClientRect();

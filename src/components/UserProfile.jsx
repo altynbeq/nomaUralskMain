@@ -5,8 +5,11 @@ import { userProfileData } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
 import avatar from '../data/avatar.jpg';
 
+
 const UserProfile = () => {
   const { currentColor, handleLogOut } = useStateContext();
+const {userData, setUserData} = useStateContext();
+console.log("=>(UserProfile.jsx:13) userData", userData);
 
   return (
     <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-8 rounded-lg w-[90%] md:w-[30%] ">
@@ -29,9 +32,9 @@ const UserProfile = () => {
           alt="user-profile"
         />
         <div className='overflow-hidden'>
-          <p className="font-semibold text-xl dark:text-gray-200 break-words">Romantic</p>
-          <p className="text-gray-500 text-sm dark:text-gray-400 break-words">Uralsk</p>
-          <p className="text-gray-500 text-sm font-semibold dark:text-gray-400 break-words">client@gmail.com</p>
+          <p className="font-semibold text-xl dark:text-gray-200 break-words">{userData.name.split('-')[0].charAt(0).toUpperCase() + userData.name.split('-')[0].slice(1)}</p>
+          <p className="text-gray-500 text-sm dark:text-gray-400 break-words">{userData.name.split('-')[1].charAt(0).toUpperCase() + userData.name.split('-')[1].slice(1)}</p>
+          <p className="text-gray-500 text-sm font-semibold dark:text-gray-400 break-words">{userData.email.split('-')[0]}</p>
         </div>
       </div>
       <div>

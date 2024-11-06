@@ -16,7 +16,7 @@ import AccountingWarehouse from "./pages/AccountingWarehouse";
 import AccountingWorkers from "./pages/AccountingWorkers";
 
 const App = () => {
-  const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie  } = useStateContext();
+  const {currentMode, setLeads, setDeals, activeMenu, dateRanges,  setKKM, setSkeletonUp, receipts, setReceipts, spisanie, setSpisanie, userData, setUserData  } = useStateContext();
   const [ loading, setLoading ] = useState(true);
   const [ techProblem, setTechProblem ] = useState(false);
   const [ localStorageState, setLocalStorageState] = useState(false)
@@ -24,7 +24,6 @@ const App = () => {
 
   useEffect(()=> {
     const currentUserId = localStorage.getItem('_id');
-
 
     const checkStorage =  () => {
     let result = (localStorage.getItem('_id') === null
@@ -43,6 +42,12 @@ const App = () => {
           getLeadsBack(userId),
           getUserUrls(userId)
         ]);
+        console.log("=>(App.js:45) bitrixData", bitrixData);
+        setUserData({
+          email: bitrixData.email,
+          name: bitrixData.name,
+        })
+
         setLeads(JSON.parse(bitrixData.leads));
         setDeals(JSON.parse(bitrixData.deals));
         setKKM(JSON.parse(bitrixData.kkmData));
