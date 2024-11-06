@@ -18,8 +18,8 @@ const { deals } = useStateContext();
         <div className="w-full h-[120px] mt-5">
           <HalfPie data={data} />
         </div>
-          <p className="text-gray-400">Your info</p>
-          <p className="text-2xl font-semibold ">Demo</p>
+          <p className="text-gray-400">За месяц</p>
+          <p className="text-2xl font-semibold ">Каналы продаж</p>
     </div>
   )
 }
