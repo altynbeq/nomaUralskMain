@@ -3,7 +3,10 @@ import HalfPie from '../ReCharts/HalfPieChart';
 import { useStateContext } from '../../contexts/ContextProvider';
 
 const TotalRevenuePie = () => {
+
   const { deals } = useStateContext();
+
+const { deals } = useStateContext();
   const [ data, setData ] = useState([]);
   
   useEffect(() => {
@@ -11,6 +14,8 @@ const TotalRevenuePie = () => {
       setData(deals.dealsMonth.dealsSource);
     }
   }, []);
+
+
   return (
     <div className="bg-white dark:text-gray-200  dark:bg-secondary-dark-bg rounded-2xl p-4 m-3 flex flex-col  items-center  subtle-border">
        
