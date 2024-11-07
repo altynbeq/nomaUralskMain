@@ -3,7 +3,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { columns, rows } from './ListOfExpensesData';
 
 export default function ListOfExpenses() {
-    return (<div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[87%]  rounded-2xl subtle-border">
+    return (<div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className='flex flex-col justify-between mb-4 '>
                 <p className="flex text-[1rem] font-semibold align-left mb-4 ">Список списаний</p>
                 <div className="flex flex-wrap border-solid border-1 rounded-xl  px-2 gap-1 w-full">
