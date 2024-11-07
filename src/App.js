@@ -21,7 +21,6 @@ const App = () => {
   const [ techProblem, setTechProblem ] = useState(false);
   const [ localStorageState, setLocalStorageState] = useState(false)
   const [ urls, setUrls ] = useState("");
-
   useEffect(()=> {
     const currentUserId = localStorage.getItem('_id');
 
