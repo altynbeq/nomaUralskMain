@@ -124,9 +124,9 @@ const ManageWarehouse = () => {
 
     return (
         <div className="w-[90%] mx-auto mt-5 md:mt-0 pt-10 md:pt-0 flex items-center justify-center">
-            <div className="flex flex-col md:flex-row  gap-8">
+            <div className=" w-full flex flex-col md:flex-row  gap-8">
                 {/* First Component */}
-                <div className="w-100 h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
+                <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                     <h3 className="text-lg font-medium text-gray-800 mb-4 absolute top-4 left-6">
                         Добавить поступление
                     </h3>
@@ -164,7 +164,7 @@ const ManageWarehouse = () => {
                 </div>
 
                 {/* Second Component */}
-                <div className="w-100 h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
+                <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                     <h3 className="text-lg font-medium text-gray-800 mb-4 absolute top-4 left-6">
                         Добавить списания
                     </h3>
