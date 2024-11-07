@@ -6,7 +6,6 @@ const TotalRevenuePie = () => {
 
   const { deals } = useStateContext();
 
-const { deals } = useStateContext();
   const [ data, setData ] = useState([]);
   
   useEffect(() => {
