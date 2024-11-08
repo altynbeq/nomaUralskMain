@@ -89,9 +89,9 @@ export async function getKKMReceiptsFront(api, dateRanges) {
                 const newTimePart = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
                 // Update item.Дата with the adjusted date in ISO format
-                // console.log("Before update item:", item.Дата, item);
+                console.log("Before update item:", item.Дата, item);
                 item.Дата = `${newDatePart}T${newTimePart}`;
-                // console.log("Updated item:", item.Дата, item);
+                console.log("Updated item:", item.Дата, item);
             }
 
             return item;
