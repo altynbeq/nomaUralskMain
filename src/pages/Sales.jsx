@@ -68,8 +68,8 @@ const Sales = ({urls}) => {
             const conversion = generateConversionSeries(leads.series, deals.dealsMonth.salesSeries);
             const totalSeriesL = formData(leads.series, conversion);
 
-            console.log("Leads:", leads);
-            console.log("Deals:", deals);
+            // console.log("Leads:", leads);
+            // console.log("Deals:", deals);
 
             setTotalSerues(totalSeriesL)
         }

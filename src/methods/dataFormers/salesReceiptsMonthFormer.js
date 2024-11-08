@@ -52,7 +52,7 @@ export const sales1CMonthFormer = (data) => {
 
     });
     
-    console.log("data", data)
+    // console.log("data", data)
 
     const storeStatsTotal = data.reduce((result, item) => {
         const storeName = item["КассаККМНаименование"];

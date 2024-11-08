@@ -5,7 +5,7 @@ import 'tailwindcss/tailwind.css';
 
 const ExportToExcel = ({title, data}) => {
   const handleExport = () => {
-    console.log("Export button pressed");
+    // console.log("Export button pressed");
 
     const worksheet = XLSX.utils.json_to_sheet(data);
 

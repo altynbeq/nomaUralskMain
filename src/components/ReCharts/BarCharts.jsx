@@ -35,7 +35,7 @@ const data = [
 
 function CustomTooltip({ active, payload }) {
   if (active && payload && payload.length) {
-    console.log(payload);
+    // console.log(payload);
     return (
         <div className="custom-tooltip bg-white p-4">
           <p className="label mb-2">{`${payload[0].payload.x}`}</p>

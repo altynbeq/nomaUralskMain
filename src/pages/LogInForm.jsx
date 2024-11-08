@@ -14,7 +14,7 @@ const LogInForm = () => {
 
     useEffect(() => {
       if(userId) {
-        console.log('context userId', userId);
+        // console.log('context userId', userId);
       }
       if (!localStorageData.length) {
         return
@@ -34,7 +34,7 @@ const LogInForm = () => {
             body: JSON.stringify({ email, password })
         };
         const url = `https://nomalytica-back.onrender.com/api/users/login`
-        console.log(email,password)
+        // console.log(email,password)
         fetch(url, requestOptions)
             .then(response => response.json())
             .then(data => {

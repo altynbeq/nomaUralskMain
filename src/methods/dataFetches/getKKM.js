@@ -47,7 +47,7 @@ async function fetchDataForRange(api,startDate, endDate){
 export async function getKKMReceiptsFront(api, dateRanges) {
     //if dateRanges has more than one date
     const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
-    console.log("=>(getKKM.js:50) data", data);
+    // console.log("=>(getKKM.js:50) data", data);
 
     const shiftDate = (data) => {
         return data.map((item) => {
@@ -59,7 +59,7 @@ export async function getKKMReceiptsFront(api, dateRanges) {
             // Check if the time is between 00:00 and 02:00 UTC
 
             if (hours >= 0 && hours < 2) {
-                console.log("=>(getKKM.js:60) hours >= 0", hours < 2);
+                // console.log("=>(getKKM.js:60) hours >= 0", hours < 2);
                 // Subtract 2 hours
                 hours -= 2;
 
@@ -89,9 +89,9 @@ export async function getKKMReceiptsFront(api, dateRanges) {
                 const newTimePart = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
                 // Update item.Дата with the adjusted date in ISO format
-                console.log("Before update item:", item.Дата, item);
+                // console.log("Before update item:", item.Дата, item);
                 item.Дата = `${newDatePart}T${newTimePart}`;
-                console.log("Updated item:", item.Дата, item);
+                // console.log("Updated item:", item.Дата, item);
             }
 
             return item;

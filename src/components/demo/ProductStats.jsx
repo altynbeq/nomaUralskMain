@@ -13,7 +13,7 @@ const ProductStats = ({ title }) => {
     const [panelData, setPanelData] = useState([]);
     const handleDateChange = async (e) => {
         if(e[1]){
-         console.log("hellooo")
+         // console.log("hellooo")
         }
     } 
     

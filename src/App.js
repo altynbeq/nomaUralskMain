@@ -34,14 +34,14 @@ const App = () => {
       return result;
     };
     checkStorage();
-    console.log('checking storage: ' + localStorageState);
+    // console.log('checking storage: ' + localStorageState);
     async function collector(userId) {
       try {
         const [ bitrixData, urls  ] = await Promise.all([
           getLeadsBack(userId),
           getUserUrls(userId)
         ]);
-        console.log("=>(App.js:45) bitrixData", bitrixData);
+        // console.log("=>(App.js:45) bitrixData", bitrixData);
         setUserData({
           email: bitrixData.email,
           name: bitrixData.name,
@@ -55,7 +55,7 @@ const App = () => {
 
         setUrls(urls);
 
-        console.log(bitrixData)
+        // console.log(bitrixData)
         if ( !bitrixData ) {
           setTechProblem(true);
           setLoading(false);

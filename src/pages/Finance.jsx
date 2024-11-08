@@ -27,7 +27,7 @@ const Finance = ({urls}) => {
       setFinanceShare(FinanceShare(kkm.monthFormedKKM));
     }
     if(!weekDeals.avgCheck){
-      console.log(deals)
+      // console.log(deals)
         setWeekDeals(deals.dealsWeek);
     }
     if(urls.externalApis && urls.externalApis.apiUrlKKM){

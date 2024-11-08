@@ -151,7 +151,7 @@ const TableSort = ({title, w, displayStats, rows, columns, spisanieStats,  userS
         setSpisanieStats(SpisanieStats(spisanieList));
       } else if(title == 'Продано товаров'){
         const productData = await getKKMReceiptsFront(userKkmUrl, properDate);
-        console.log(productData)
+        // console.log(productData)
         setListRows(ProductSoldGridList(productData));
         setSpisanieStats(ProductsStats(productData));
       }

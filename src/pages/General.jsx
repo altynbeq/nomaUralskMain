@@ -40,12 +40,12 @@ const General = ({urls}) => {
       // setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
       setReady(true);
     }
-    console.log("urls", urls);
+    // console.log("urls", urls);
     if(urls.externalApis && urls.externalApis.apiUrlKKM){
       const convKkm = urls.externalApis.apiUrlKKM ? convertUrl(urls.externalApis.apiUrlKKM) : null;
       const convReceipt = urls.externalApis.apiUrlReceipts ? convertUrl(urls.externalApis.apiUrlReceipts) : null;
       // const convSpis = urls.externalApis.apiUrlSpisanie ? convertUrl(urls.externalApis.apiUrlSpisanie) : null;
-      console.log(convKkm)
+      // console.log(convKkm)
       if(convKkm != null && convReceipt != null 
         // && convSpis != null
         ){

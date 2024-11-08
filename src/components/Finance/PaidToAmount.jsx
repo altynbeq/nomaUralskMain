@@ -32,14 +32,14 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
       const properDate = ConvertCalendarDate(e);
       
       const salesList = await getSalesReceiptsFront(userReceiptsUrl, properDate);
-      console.log("salesList", salesList)
+      // console.log("salesList", salesList)
       setPanelData(PaidToData(salesList));
 
       let  kkmList = ''
       try {kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);} catch (e) {
         // console.log("=>(PaidToAmount.jsx:29) e", e);
       }
-      console.log('calend')
+      // console.log('calend')
       setTotal(totalCounterReceipts(salesList))
       setLoading(false);
     }

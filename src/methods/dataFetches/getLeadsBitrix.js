@@ -123,7 +123,7 @@ export async function fetchLeads(dateRanges, dateSaved) {
     
     const leadsData = await fetchLeadsForRange(dateProp);
     const formedData = leadsMonthDataFormer(leadsData);
-    console.log("LeadsFormedData", formedData);
+    // console.log("LeadsFormedData", formedData);
     return formedData;
   // }
 }

@@ -9,7 +9,7 @@ import avatar from '../data/avatar.jpg';
 const UserProfile = () => {
   const { currentColor, handleLogOut } = useStateContext();
 const {userData, setUserData} = useStateContext();
-console.log("=>(UserProfile.jsx:13) userData", userData);
+// console.log("=>(UserProfile.jsx:13) userData", userData);
 
   return (
     <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-8 rounded-lg w-[90%] md:w-[30%] ">

@@ -16,7 +16,7 @@ const SoldItems = ({ idcomponent, title, products, rawProducts }) => {
     }));
     
     const handleExport = () => {
-        console.log("Export button pressed");
+        // console.log("Export button pressed");
     
         const worksheet = XLSX.utils.json_to_sheet(rawProducts);
     

@@ -21,7 +21,7 @@ const  CardWithBarChart = ({title, series, dataKey, userKkmUrl}) => {
     const handleDateChange = async (e) => {
         if(e[1]){
             setLoading(true);
-            console.log("KKKMMM")
+            // console.log("KKKMMM")
             const properDate = ConvertCalendarDate(e);
             const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
             setBarSeries(SalesBarSeriesByStore(kkmData));
