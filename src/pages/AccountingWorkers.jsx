@@ -402,8 +402,8 @@ const AccountingWorkers = () => {
 
     const [items, setItems] = useState([
         { icon: <Icons.googleDrive />, id: "main", name: "MAIN", level: 1 },
-        { icon: <Icons.googleDocs />, id: "sales1", name: "SALES DEPARTMENT #1", level: 2, linkedTo: 'main' },
-        { icon: <Icons.googleDocs />, id: "sales2", name: "SALES DEPARTMENT #2", level: 2, linkedTo: 'main' },
+        { icon: <Icons.googleDocs />, id: "sales1", name: "SALES DEPARTMENT #1", level: 2, linkedTo: 'main', link: 'https://google.com' },
+        { icon: <Icons.googleDocs />, id: "sales2", name: "SALES DEPARTMENT #2", level: 2, linkedTo: 'main', link: 'https://google.com' },
         { icon: <Icons.whatsapp />, id: "whatsapp", name: 'Alex Smith', rank: 'Shop Assistant', level: 3, linkedTo: "sales1" },
         { icon: <Icons.messenger />, id: "messenger", name: 'Emily Johnson', rank: 'Shop Assistant', level: 3, linkedTo: "sales1" },
         { icon: <Icons.notion />, id: "notion", name: 'Michael Brown', rank: 'Customer Service Representative', level: 3, linkedTo: "sales1" },
