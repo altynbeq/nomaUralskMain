@@ -19,8 +19,8 @@ const WeeklyStats = ({ idcomp, title }) => {
         { id: '1', title: 'Выручка', icon: <FaDollarSign />, iconBg: '#1d4db7', pcColor: 'black-600', valueKey: 'totalSum', format: true },
         { id: '2', title: 'Средний чек', icon: <FaMoneyBill />, iconBg: '#1d4db7', pcColor: 'black-600', valueKey: 'averageCheck', format: true },
         { id: '3', title: 'Продаж', icon: <FaMoneyBillAlt />, iconBg: '#1d4db7', pcColor: 'black-600', valueKey: 'totalNumberSales', format: false },
-        { id: '4', title: 'Продаж Bitrix', icon: <FaBox />, iconBg: '#1d4db7', pcColor: 'black-600', btrx: true, valueKey: 'spisanie', format: false, desc: 'Все магазины' },
-        { id: '5', title: 'Средний чек Bitrix', icon: <FaFilter />, iconBg: '#1d4db7', pcColor: 'black-600', btrx: true, valueKey: 'conversion', format: false, desc: 'Все магазины' },
+        // { id: '4', title: 'Продаж Bitrix', icon: <FaBox />, iconBg: '#1d4db7', pcColor: 'black-600', btrx: true, valueKey: 'spisanie', format: false, desc: 'Все магазины' },
+        // { id: '5', title: 'Средний чек Bitrix', icon: <FaFilter />, iconBg: '#1d4db7', pcColor: 'black-600', btrx: true, valueKey: 'conversion', format: false, desc: 'Все магазины' },
     ];
 
     return (

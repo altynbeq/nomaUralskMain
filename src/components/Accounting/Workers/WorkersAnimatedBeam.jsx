@@ -42,11 +42,26 @@ export default function AnimatedBeamMultipleOutputDemo({ items,setItems,Icons,cl
     const [renderBeamsOn, setRenderBeamsOn] = useState(true);
     const [workerName, setWorkerName] = useState('');
     const [workerRank, setWorkerRank] = useState('');
+    const [departmnetName, setDepartmentName] = useState('');
     const [selectedLevel2, setSelectedLevel2] = useState('');
     const refs = useRef([]);
     console.log(items, refs)
 
-
+    const handleAddDepartment = (e) => {
+        setRenderBeamsOn(false);
+        e.preventDefault();
+        const newDepartment = {
+            icon: <Icons.googleDrive />, // Default icon, can be customized
+            id: `department-${Date.now()}`, // Unique ID based on timestamp
+            name: departmnetName,
+            level: 2,
+            linkedTo: 'main'
+        };
+        setItems([newDepartment, ...items]);
+        refs.current.push(React.createRef()); // Add a new ref for the new item
+        setDepartmentName('');
+        setTimeout(()=>{        setRenderBeamsOn(true);}, 1000)
+    };
 
     const handleAddWorker = (e) => {
         setRenderBeamsOn(false);
@@ -77,8 +92,26 @@ setTimeout(()=>{        setRenderBeamsOn(true);},1000)
 
     return (
         <>
-        {/* Form to add worker */}
-    <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] m-auto mb-2">
+            {/* Form to add department */}
+            <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] m-auto mb-2">
+                <h3 className="text-xl font-bold mb-2">Add Department</h3>
+                <form onSubmit={handleAddDepartment} className="flex gap-4">
+                    <input
+                        type="text"
+                        placeholder="Department Name"
+                        value={departmnetName}
+                        onChange={(e) => setDepartmentName(e.target.value)}
+                        className="p-2 border rounded"
+                        required
+                    />
+                    <button type="submit" className="p-2 bg-blue-500 text-white rounded">
+                        Add Department
+                    </button>
+                </form>
+            </div>
+
+            {/* Form to add worker */}
+            <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] m-auto mb-2">
         <h3 className="text-xl font-bold mb-2">Add Worker</h3>
         <form onSubmit={handleAddWorker} className="flex  gap-4">
             <input
