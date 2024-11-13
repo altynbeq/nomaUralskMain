@@ -169,38 +169,49 @@ const deleteDepartment = (item) => {
            addDepartmentModal && <>
                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
             {/* Form to add department */}
-        <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%]">
-            <h3 className="text-xl font-bold mb-2">Новый департамент</h3>
-            <form onSubmit={handleAddDepartment} className="flex gap-4">
-                <input
-                    type="text"
-                    placeholder="Название"
-                    value={departmentName}
-                    onChange={(e) => {
-                        setDepartmentName(e.target.value);
+                   <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] relative">
+                       <button onClick={(e) => {
+                           setAddDepartmentModal(false);
+                           setDepartmentName('');
+                           setSelectedLevel1('');
+                       }}
+                               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                           <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                     d="M6 18L18 6M6 6l12 12"/>
+                           </svg>
+                       </button>
+                       <h3 className="text-xl font-bold mb-2">Новый департамент</h3>
+                       <form onSubmit={handleAddDepartment} className="flex gap-4">
+                           <input
+                               type="text"
+                               placeholder="Название"
+                               value={departmentName}
+                               onChange={(e) => {
+                                   setDepartmentName(e.target.value);
 
-                    }}
-                    className="p-2 border rounded"
-                    required
-                />
-                <select
-                    value={selectedLevel1}
-                    onChange={(e) => setSelectedLevel1(e.target.value)}
-                    className="p-2 border rounded"
-                    required
-                >
-                    <option value="">Выбрать магазин</option>
-                            {items.filter(item => item.level === 1).map((item) => (
-                                <option key={item.id} value={item.id}>{item.name}</option>
-                            ))}
-                </select>
-                <button type="submit" className="p-2 bg-blue-500 text-white rounded">
-                    Добавить
-                </button>
-            </form>
-        </div>
+                               }}
+                               className="p-2 border rounded"
+                               required
+                           />
+                           <select
+                               value={selectedLevel1}
+                               onChange={(e) => setSelectedLevel1(e.target.value)}
+                               className="p-2 border rounded"
+                               required
+                           >
+                               <option value="">Выбрать магазин</option>
+                               {items.filter(item => item.level === 1).map((item) => (
+                                   <option key={item.id} value={item.id}>{item.name}</option>
+                               ))}
+                           </select>
+                           <button type="submit" className="p-2 bg-blue-500 text-white rounded">
+                               Добавить
+                           </button>
+                       </form>
+                   </div>
                </div>
-            </>
+           </>
         )
     }
 
