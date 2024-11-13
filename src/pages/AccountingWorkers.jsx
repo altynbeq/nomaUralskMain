@@ -1,8 +1,130 @@
 import React, {useEffect, useState} from 'react';
 import WorkersAnimatedBeam from '../components/Accounting/Workers/WorkersAnimatedBeam';
 
-
 const AccountingWorkers = () => {
+
+    const [structure, setStructure] = useState('');
+    const [itemsFromStructure, setItemsFromStructure] = useState([]);
+    const [stores, setStores] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [subUsers, setSubUsers] = useState([]);
+    const [update, setUpdate] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState('');
+
+    const  fetchStructure = async (id) => {
+        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
+       //   const url = `http://localhost:8888/api/structure/get-structure-by-userId/${id}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        }
+    }
+
+
+
+    const buildStores = (structure) => {
+        structure.stores.forEach((item) => {
+           //if store is not in stores array, add it
+            if(!stores.includes(item)) {
+                stores.push({
+                    id: item._id,
+                    icon: <Icons.googleDrive />,
+                    name: item.storeName,
+                    level: 1,
+                });
+            }
+        });
+        console.log("=>(AccountingWorkers.jsx:25) stores", stores);
+        return stores;
+    }
+
+    const buildDepartments = (structure) => {
+        structure.departments.forEach((item) => {
+            if(!departments.includes(item)) {
+                departments.push({
+                    id: item._id,
+                    icon: <Icons.googleDrive />,
+                    name: item.name,
+                    level: 2,
+                    linkedTo: item.storeId,
+                    link: item.departmentLink,
+                });
+            }
+        });
+        console.log("=>(AccountingWorkers.jsx:44) departments", departments);
+        return departments;
+    }
+
+    const buildSubUsers = (structure) => {
+        structure.subUsers.forEach((item) => {
+            if(!subUsers.includes(item)) {
+                subUsers.push({
+                    id: item._id,
+                    icon: <Icons.googleDrive />,
+                    name: item.name,
+                    level: 3,
+                    linkedTo: item.departmentId,
+                });
+            }
+        });
+        console.log("=>(AccountingWorkers.jsx:54) subUsers", subUsers);
+        return subUsers;
+    }
+
+    const buildItems = () => {
+        console.log("=>(AccountingWorkers.jsx:82) ", stores,departments,subUsers);
+        const items = stores.concat(departments, subUsers);
+
+        console.log("=>(AccountingWorkers.jsx:60) items", items);
+        return items;
+    }
+
+
+    useEffect(() => {
+
+        if(update){
+            setDepartments([]);
+            setStores([]);
+            setSubUsers([]);
+            setStructure('');
+            setItemsFromStructure([]);
+            setUpdate(false);
+        }
+
+        setCurrentUserId(localStorage.getItem('_id'));
+        if(!structure) {
+            fetchStructure(currentUserId).then(result => {
+                setStructure(result);
+            });
+        }
+
+        if(structure && departments.length === 0) {
+            setDepartments(buildDepartments(structure));
+        }
+        if(structure && stores.length === 0) {
+            setStores(buildStores(structure));
+        }
+        if(structure && subUsers.length === 0) {
+            setSubUsers(buildSubUsers(structure));
+        }
+
+        if(structure && itemsFromStructure.length === 0) {
+            setItemsFromStructure(buildItems());
+        }
+
+
+        console.log("=>(AccountingWorkers.jsx:111) update", structure);
+
+    }, [structure])
+
+
+
     const Icons = {
         notion: () => (
             <svg
@@ -399,7 +521,6 @@ const AccountingWorkers = () => {
         ),
     };
 
-
     const [items, setItems] = useState([
         { icon: <Icons.googleDrive />, id: "main", name: "MAIN", level: 1 },
         { icon: <Icons.googleDocs />, id: "sales1", name: "SALES DEPARTMENT #1", level: 2, linkedTo: 'main', link: 'https://google.com' },
@@ -428,9 +549,27 @@ const AccountingWorkers = () => {
         return a.level - b.level;
     });
 
+    let itemsFromStructureSorted =  itemsFromStructure.sort((a, b) => {
+        // Sort by linkedTo
+        if (a.linkedTo !== b.linkedTo) {
+            if (a.linkedTo && !b.linkedTo) return -1; // a comes first if a has linkedTo but b does not
+            if (!a.linkedTo && b.linkedTo) return 1; // b comes first if b has linkedTo but a does not
+            return a.linkedTo > b.linkedTo ? 1 : -1; // Compare linkedTo alphabetically
+        }
+
+        // Sort by level if linkedTo is the same
+        return a.level - b.level;
+    });
+
     return(
         <>
-<WorkersAnimatedBeam items={itemsSorted} setItems={setItems} Icons={Icons}/>
+            {items.length &&
+                <WorkersAnimatedBeam
+                    id={currentUserId}
+                    items={itemsFromStructureSorted}
+                    Icons={Icons}
+                    setItems={setItemsFromStructure}
+                    setUpdate={setUpdate}/>}
         </>
     )
 

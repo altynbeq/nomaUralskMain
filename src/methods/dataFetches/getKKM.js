@@ -27,6 +27,7 @@ async function fetchDataForRange(api,startDate, endDate){
     const decodedEndDate = decodeURIComponent(endDate).split(' ')[0].replace(/-/g, '');
 
     const url = `${api}${decodedStartDate}/${decodedEndDate}`;
+    console.log("=>(getKKM.js:30) api", api);
     const response = await fetch(url, {
         method: 'GET',
         headers: {

@@ -1,5 +1,5 @@
 "use client";
-import {FaLink, FaEdit, FaTrashAlt, FaSave} from "react-icons/fa";
+import {FaLink, FaEdit, FaTrashAlt, FaSave, FaPlus} from "react-icons/fa";
 
 import React, {forwardRef, useRef, useState, useEffect} from "react";
 
@@ -40,13 +40,14 @@ function renderBeams (items, refs, containerRef) {
 
 
 
-export default function AnimatedBeamMultipleOutputDemo({ items,setItems,Icons,className }) {
+export default function AnimatedBeamMultipleOutputDemo({ update,setUpdate,items,setItems,Icons,id,setStructure, fetchStructure,className, }) {
     const containerRef = useRef(null);
-    const [renderBeamsOn, setRenderBeamsOn] = useState(true);
+    const [renderBeamsOn, setRenderBeamsOn] = useState(false);
     const [workerName, setWorkerName] = useState('');
     const [workerRank, setWorkerRank] = useState('');
     const [departmentName, setDepartmentName] = useState('');
-    const [selectedLevel2, setSelectedLevel2] = useState('');
+    const [addDepartmentModal, setAddDepartmentModal] = useState(false);
+    const [selectedLevel1, setSelectedLevel1] = useState('');
     const refs = useRef([]);
     const [tooltipModalMode, setTooltipModalMode] = useState(null);
     const [tooltipModalItem, setTooltipModalItem] = useState(null)
@@ -54,23 +55,6 @@ export default function AnimatedBeamMultipleOutputDemo({ items,setItems,Icons,cl
     const [editedDepartmentName, setEditedDepartmentName] = useState('');
 
     // console.log(items, refs)
-
-    const handleAddDepartment = (e) => {
-        setRenderBeamsOn(false);
-        e.preventDefault();
-        const newDepartment = {
-            icon: <Icons.googleDrive />, // Default icon, can be customized
-            id: `department-${Date.now()}`, // Unique ID based on timestamp
-            name: departmentName,
-            level: 2,
-            linkedTo: 'main',
-            link: 'https://google.com'
-        };
-        setItems([newDepartment, ...items]);
-        refs.current.push(React.createRef()); // Add a new ref for the new item
-        setDepartmentName('');
-        setTimeout(()=>{        setRenderBeamsOn(true);}, 1000)
-    };
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -180,96 +164,170 @@ const deleteDepartment = (item) => {
 
         )
     }
+    const renderAddDepartmentModal = () => {
+        return (
+           addDepartmentModal && <>
+               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
+            {/* Form to add department */}
+        <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%]">
+            <h3 className="text-xl font-bold mb-2">Новый департамент</h3>
+            <form onSubmit={handleAddDepartment} className="flex gap-4">
+                <input
+                    type="text"
+                    placeholder="Название"
+                    value={departmentName}
+                    onChange={(e) => {
+                        setDepartmentName(e.target.value);
 
+                    }}
+                    className="p-2 border rounded"
+                    required
+                />
+                <select
+                    value={selectedLevel1}
+                    onChange={(e) => setSelectedLevel1(e.target.value)}
+                    className="p-2 border rounded"
+                    required
+                >
+                    <option value="">Выбрать магазин</option>
+                            {items.filter(item => item.level === 1).map((item) => (
+                                <option key={item.id} value={item.id}>{item.name}</option>
+                            ))}
+                </select>
+                <button type="submit" className="p-2 bg-blue-500 text-white rounded">
+                    Добавить
+                </button>
+            </form>
+        </div>
+               </div>
+            </>
+        )
+    }
 
-    const handleAddWorker = (e) => {
+    // const handleAddWorker = (e) => {
+    //     setRenderBeamsOn(false);
+    //     e.preventDefault();
+    //     const newWorker = {
+    //         icon: <Icons.whatsapp/>, // Default icon, can be customized
+    //         id: `worker-${Date.now()}`, // Unique ID based on timestamp
+    //         name: workerName,
+    //         rank: workerRank,
+    //         level: 3,
+    //         linkedTo: selectedLevel1
+    //     };
+    //     // console.log(selectedLevel2);
+    //     // console.log(newWorker);
+    //     setItems([...items, newWorker]);
+    //     refs.current.push(React.createRef()); // Add a new ref for the new item
+    //     setWorkerName('');
+    //     setWorkerRank('');
+    //     setSelectedLevel2('');
+    //     setTimeout(() => {
+    //         setRenderBeamsOn(true);
+    //     }, 1000)
+    // };
+
+    const handleAddDepartment = (e) => {
+        console.log(localStorage);
         setRenderBeamsOn(false);
         e.preventDefault();
-        const newWorker = {
-            icon: <Icons.whatsapp/>, // Default icon, can be customized
-            id: `worker-${Date.now()}`, // Unique ID based on timestamp
-            name: workerName,
-            rank: workerRank,
-            level: 3,
-            linkedTo: selectedLevel2
+
+        const fetchAddDepartment = async () => {
+            const response = await fetch(`https://nomalytica-back.onrender.com/api/departments/create-department/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    storeId: selectedLevel1,
+                    name: departmentName,
+                }),
+            });
+            const data = await response.json();
+            if(response.status === 201) {
+                const newDepartment = {
+                    icon: <Icons.googleDrive />, // Default icon, can be customized
+                    id: data.department._id, // Unique ID based on timestamp
+                    name: departmentName,
+                    level: 2,
+                    linkedTo: data.department.storeId,
+                    link: data.department.departmentLink
+                };
+                setItems([newDepartment, ...items]);
+                refs.current.push(React.createRef()); // Add a new ref for the new item
+                setDepartmentName('');
+                setAddDepartmentModal(false);
+                setTimeout(()=>{        setRenderBeamsOn(true);}, 1000);
+            }
+
         };
+
+        fetchAddDepartment();
+
         // console.log(selectedLevel2);
         // console.log(newWorker);
-        setItems([...items, newWorker]);
         refs.current.push(React.createRef()); // Add a new ref for the new item
-        setWorkerName('');
-        setWorkerRank('');
-        setSelectedLevel2('');
         setTimeout(() => {
             setRenderBeamsOn(true);
-        }, 1000)
+        }, 300)
+        setWorkerName('');
+        setWorkerRank('');
+        setSelectedLevel1('');
+
     };
 
     useEffect(() => {
         // Update refs to match the current items length
         refs.current = items.map((_, i) => refs.current[i] || React.createRef());
-
-    }, [items, renderBeamsOn,tooltipModalItem]);
+        if(items.length){
+            setRenderBeamsOn(true)
+        }
+    }, [items, renderBeamsOn,tooltipModalItem, update]);
 
     return (
         <>
             {
                 renderTooltipModal(tooltipModalItem, tooltipModalMode)
             }
-            {/* Form to add department */}
-            <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] m-auto mb-2">
-                <h3 className="text-xl font-bold mb-2">Add Department</h3>
-                <form onSubmit={handleAddDepartment} className="flex gap-4">
-                    <input
-                        type="text"
-                        placeholder="Department Name"
-                        value={departmentName}
-                        onChange={(e) => setDepartmentName(e.target.value)}
-                        className="p-2 border rounded"
-                        required
-                    />
-                    <button type="submit" className="p-2 bg-blue-500 text-white rounded">
-                        Add Department
-                    </button>
-                </form>
-            </div>
-
+            {
+                renderAddDepartmentModal()
+            }
             {/* Form to add worker */}
-            <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] m-auto mb-2">
-        <h3 className="text-xl font-bold mb-2">Add Worker</h3>
-        <form onSubmit={handleAddWorker} className="flex  gap-4">
-            <input
-                type="text"
-                placeholder="Worker Name"
-                value={workerName}
-                onChange={(e) => setWorkerName(e.target.value)}
-                className="p-2 border rounded"
-                required
-            />
-            <input
-                type="text"
-                placeholder="Worker Rank"
-                value={workerRank}
-                onChange={(e) => setWorkerRank(e.target.value)}
-                className="p-2 border rounded"
-                required
-            />
-            <select
-                value={selectedLevel2}
-                onChange={(e) => setSelectedLevel2(e.target.value)}
-                className="p-2 border rounded"
-                required
-            >
-                <option value="">Select Level 2 Department</option>
-                {items.filter(item => item.level === 2).map((item) => (
-                    <option key={item.id} value={item.id}>{item.name}</option>
-                ))}
-            </select>
-            <button type="submit" className="p-2 bg-blue-500 text-white rounded ml-auto ">
-                Add Worker
-            </button>
-        </form>
-    </div>
+    {/*        <div className="top-4 left-4 bg-white p-6 border rounded-lg shadow-lg max-w-[90%] m-auto mb-2">*/}
+    {/*    <h3 className="text-xl font-bold mb-2">Add Worker</h3>*/}
+    {/*    <form onSubmit={handleAddWorker} className="flex  gap-4">*/}
+    {/*        <input*/}
+    {/*            type="text"*/}
+    {/*            placeholder="Worker Name"*/}
+    {/*            value={workerName}*/}
+    {/*            onChange={(e) => setWorkerName(e.target.value)}*/}
+    {/*            className="p-2 border rounded"*/}
+    {/*            required*/}
+    {/*        />*/}
+    {/*        <input*/}
+    {/*            type="text"*/}
+    {/*            placeholder="Worker Rank"*/}
+    {/*            value={workerRank}*/}
+    {/*            onChange={(e) => setWorkerRank(e.target.value)}*/}
+    {/*            className="p-2 border rounded"*/}
+    {/*            required*/}
+    {/*        />*/}
+    {/*        <select*/}
+    {/*            value={selectedLevel2}*/}
+    {/*            onChange={(e) => setSelectedLevel2(e.target.value)}*/}
+    {/*            className="p-2 border rounded"*/}
+    {/*            required*/}
+    {/*        >*/}
+    {/*            <option value="">Select Level 2 Department</option>*/}
+    {/*            {items.filter(item => item.level === 2).map((item) => (*/}
+    {/*                <option key={item.id} value={item.id}>{item.name}</option>*/}
+    {/*            ))}*/}
+    {/*        </select>*/}
+    {/*        <button type="submit" className="p-2 bg-blue-500 text-white rounded ml-auto ">*/}
+    {/*            Add Worker*/}
+    {/*        </button>*/}
+    {/*    </form>*/}
+    {/*</div>*/}
 
         <div
             className={`mt-10 md:mt-0 ml-auto mr-auto relative flex h-[500px] max-w-[90%] items-center justify-center overflow-hidden rounded-lg border bg-white p-10 md:shadow-xl ${className}`}
@@ -277,7 +335,7 @@ const deleteDepartment = (item) => {
         >
             <div className="flex size-full  flex-col h-full items-stretch justify-between gap-10">
                 {/* Top center circle (Level 1) */}
-                <div className="flex justify-center">
+                <div className="flex justify-center gap-10">
                     {items.map((item, index) => (
                         item.level === 1 && (
                             <div key={item.id} className="flex flex-col max-w-[120px] items-center gap-4">
@@ -296,16 +354,18 @@ const deleteDepartment = (item) => {
                         item.level === 2 && (
                             <div
                                 key={item.id}
-                                className="flex flex-col max-w-[150px] items-center gap-4 relative group"
+                                className="flex flex-col max-w-[120px] items-center gap-4 relative group"
                             >
-                                <Circle ref={refs.current[index]} className="size-16">
+                                <Circle ref={refs.current[index]}>
                                     {item.icon}
                                 </Circle>
                                 <p className="text-center">{item.name}</p>
                                 {/* Tooltip with icons and triangle */}
-                                <div className="absolute left-full -ml-8 p-2 bg-white text-black text-sm rounded-lg border-2 border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2 z-[9999] ">
+                                <div
+                                    className="absolute left-full -ml-8 p-2 bg-white text-black text-sm rounded-lg border-2 border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2 z-[9999] ">
                                     {/* Triangle */}
-                                    <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div>
+                                    <div
+                                        className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div>
 
                                     {/* First row: Link and Edit icons */}
                                     <div className="flex gap-2">
@@ -314,26 +374,37 @@ const deleteDepartment = (item) => {
                                                 tooltipIconsClickHandler(item, 'link')
                                             }}
                                             className="w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer">
-                                            <FaLink />
+                                            <FaLink/>
                                         </div>
                                         <div
-                                            onClick={(e)=>{
-                                                tooltipIconsClickHandler(item,'edit')}}
+                                            onClick={(e) => {
+                                                tooltipIconsClickHandler(item, 'edit')
+                                            }}
                                             className="w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer">
                                             <FaEdit/>
                                         </div>
                                     </div>
                                     {/* Second row: Trash bin icon */}
                                     <div
-                                        onClick={(e)=>{
-                                            tooltipIconsClickHandler(item, 'delete')}}
+                                        onClick={(e) => {
+                                            tooltipIconsClickHandler(item, 'delete')
+                                        }}
                                         className="mx-auto w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer">
-                                        <FaTrashAlt />
+                                        <FaTrashAlt/>
                                     </div>
                                 </div>
                             </div>
                         )
                     ))}
+                    <div key={'newDep'}
+                         className="flex flex-col max-w-[120px] items-center gap-4 group cursor-pointer"
+                         onClick={(e)=>setAddDepartmentModal(true)}
+                    >
+                        <Circle key={'newDep'}>
+                            <FaPlus color={'#3b82f6'}/>
+                        </Circle>
+                        <p className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">Добавить</p>
+                    </div>
                 </div>
 
                 {/* Bottom row of circles (Level 3) */}
@@ -342,7 +413,7 @@ const deleteDepartment = (item) => {
                         item.level === 3 && (
                             <div key={item.id} className="flex flex-col max-w-[120px] items-center gap-1">
                                 <Circle ref={refs.current[index]}>
-                                    {item.icon}
+                                {item.icon}
                                 </Circle>
                                 <p className="text-center">{item.name}</p>
                                 <p className="text-xs font-bold text-center">{item.rank}</p>
@@ -353,7 +424,7 @@ const deleteDepartment = (item) => {
             </div>
 
             {/* AnimatedBeams */}
-            {renderBeamsOn && renderBeams(items, refs, containerRef)}
+            {renderBeamsOn && items.length && renderBeams(items, refs, containerRef)}
 
         </div>
         </>
