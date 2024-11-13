@@ -40,7 +40,7 @@ function renderBeams (items, refs, containerRef) {
 
 
 
-export default function AnimatedBeamMultipleOutputDemo({ update,setUpdate,items,setItems,Icons,id,setStructure, fetchStructure,className, }) {
+export default function AnimatedBeamMultipleOutputDemo({ update,setUpdate,items,setItems,Icons,id,setStructure, fetchStructure,className,defaultImage }) {
     const containerRef = useRef(null);
     const [renderBeamsOn, setRenderBeamsOn] = useState(false);
     const [workerName, setWorkerName] = useState('');
@@ -257,7 +257,7 @@ const deleteDepartment = (item) => {
             const data = await response.json();
             if(response.status === 201) {
                 const newDepartment = {
-                    icon: <Icons.googleDrive />, // Default icon, can be customized
+                    icon: defaultImage(), // Default icon, can be customized
                     id: data.department._id, // Unique ID based on timestamp
                     name: departmentName,
                     level: 2,
@@ -351,8 +351,8 @@ const deleteDepartment = (item) => {
                         item.level === 1 && (
                             <div key={item.id} className="flex flex-col max-w-[120px] items-center gap-4">
                                 <p className="text-center">{item.name}</p>
-                                <Circle key={item.id} ref={refs.current[index]}>
-                                    {item.icon}
+                                <Circle key={item.id} ref={refs.current[index]} className="overflow-hidden">
+                                    <img src={defaultImage()} style={{transform: 'scale(3)'}}/>
                                 </Circle>
                             </div>
                         )
@@ -367,8 +367,8 @@ const deleteDepartment = (item) => {
                                 key={item.id}
                                 className="flex flex-col max-w-[120px] items-center gap-4 relative group"
                             >
-                                <Circle ref={refs.current[index]}>
-                                    {item.icon}
+                                <Circle key={item.id} ref={refs.current[index]} className="overflow-hidden">
+                                    <img src={defaultImage()} style={{transform: 'scale(3)'}}/>
                                 </Circle>
                                 <p className="text-center">{item.name}</p>
                                 {/* Tooltip with icons and triangle */}
@@ -423,8 +423,8 @@ const deleteDepartment = (item) => {
                     {items.map((item, index) => (
                         item.level === 3 && (
                             <div key={item.id} className="flex flex-col max-w-[120px] items-center gap-1">
-                                <Circle ref={refs.current[index]}>
-                                {item.icon}
+                                <Circle key={item.id} ref={refs.current[index]} className="overflow-hidden">
+                                    <img src={defaultImage()} style={{transform: 'scale(3)'}}/>
                                 </Circle>
                                 <p className="text-center">{item.name}</p>
                                 <p className="text-xs font-bold text-center">{item.rank}</p>
