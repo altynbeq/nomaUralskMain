@@ -15,8 +15,11 @@ const LogInForm = () => {
   const [department, setDepartment] = useState('');
   const [token, setToken] = useState('');
   const [name, setName] = useState('');
+const [regBtnActive, setRegBtnActive] = useState(true);
 
-
+  const  deactivateRegBtn = () =>{
+      setRegBtnActive(false)
+  }
 
     useEffect(() => {
       // console.log("=>(LogInForm.jsx:15) currentUrl", currentUrl, typeof currentUrl);
@@ -74,17 +77,22 @@ const LogInForm = () => {
       const url = `https://nomalytica-back.onrender.com/api/subUsers/create-subuser/`
       // const url = `http://localhost:8888/api/subUsers/create-subuser/`
       // console.log(email, password)
+
       fetch(url, requestOptions)
-        .then(response => response.json())
-        .then(data => {
-          console.log(JSON.stringify(data));
-          if ( data.role) {
-  alert(`Пользователь ${data.email} успешно зарегисрирован`)
-          } else {
-            alert(data.message);
-          }
-        })
-        .catch(error => console.error('Error:', error));
+        .then(res => {
+            if(!res.ok) {
+                res.text().then(error =>
+                    alert(error)
+                )
+            }
+            if(res.ok){
+               res.json().then(data =>  alert(`Пользователь ${data.email} успешно зарегисрирован`))
+                deactivateRegBtn();
+            }
+        });
+
+
+
     };
 
 
@@ -237,9 +245,10 @@ handleRegistration();
 
           <div>
             <button
+                disabled={!regBtnActive}
                 type="submit"
                 onClick={handleSubmitRegistration}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className={`${!regBtnActive ? 'opacity-10' : ''} group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <svg className="h-5 w-5 text-blue-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg"
