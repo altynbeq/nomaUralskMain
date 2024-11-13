@@ -83,6 +83,20 @@ const saveEditedDepartmentName = () => {
             }
             return item;
         });
+        const updateFetch = async () => {
+            const response = await fetch(`https://nomalytica-back.onrender.com/api/departments/update-department/${tooltipModalItem.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: editedDepartmentName,
+                }),
+            });
+            const data = await response.json();
+            // console.log(data);
+        }
+        updateFetch();
         setItems(updatedItems);
         setTooltipModalMode(null);
         setTooltipModalItem(null);
