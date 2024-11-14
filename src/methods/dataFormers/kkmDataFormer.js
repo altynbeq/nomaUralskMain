@@ -4,8 +4,14 @@ export const kkmReceiptsDataFormer = (receipts) => {
     const processedSales = new Set(); // To track unique combinations of Дата and СуммаДокумента
 
     receipts.forEach(receipt => {
-        const storeName = receipt.КассирНаименование.split(' ')[1]; 
+        let storeName = receipt.КассирНаименование.replace(/(\s|\d|Касса)/g, '');
+        // console.log("=>(kkmDataFormer.js:8) storeName", storeName);
         const kkmName = receipt.КассаККМНаименование.replace(/ОФД Фискальный регистратор |\(Склад.*\)/g, '').trim(); // Simplify KKM name
+        // console.log("=>(kkmDataFormer.js:10) kkmName", kkmName);
+
+        if(storeName === 'БухарЖырау'){
+            storeName = 'Бухар'
+        }
 
         if (!storeStats[storeName]) {
             storeStats[storeName] = {

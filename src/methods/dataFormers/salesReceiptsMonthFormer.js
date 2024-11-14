@@ -2,8 +2,21 @@ export const sales1CMonthFormer = (data) => {
     const stats = {};
 
     data.forEach(item => {
-        const cashRegisterFullName = item["КассаККМНаименование"];
-        const cashRegister = cashRegisterFullName.replace(/.*Склад\s*([^\s)]+).*/, '$1'); // Extract the store name
+        // const cashRegisterFullName = item["КассаККМНаименование"];
+        let cashRegisterFullName = item["КассирНаименование"];
+        // const cashRegister = cashRegisterFullName.replace(/.*Склад\s*([^\s)]+).*/, '$1'); // Extract the store name
+        let cashRegister;
+        if(!cashRegisterFullName){
+            cashRegisterFullName = item["КассаККМНаименование"]
+            cashRegister = cashRegisterFullName.replace(/.*Склад\s*([^\s)]+).*/, '$1');
+        } else {
+            cashRegister = cashRegisterFullName.replace(/(\s|\d|Касса)/g, ''); // Extract the store name
+        }
+        if(cashRegister === "Сатпаева"){
+            cashRegister = "Сатпаев"
+        }
+
+        // console.log("=>(salesReceiptsMonthFormer.js:7) cashRegister", cashRegister);
 
         const terminalName = item["ЭквайринговыйТерминалНаименование"] || "Неопределено";
         const terminalPayment = parseFloat(item["Сумма"]); // The actual payment to the terminal
