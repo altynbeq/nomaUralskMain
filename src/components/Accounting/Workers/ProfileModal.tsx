@@ -10,6 +10,8 @@ import {
     DEPARTMENT_ANALYTICS_PRIVILEGES,
 } from '../../../models/index';
 import { useFetch } from '../../../methods/hooks/useFetch';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -81,10 +83,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         });
 
         if (error) {
-            
+            toast.error('Не удалось сохранить, попробуйте еще.');
             return;
         }
-
+        toast.success('Данные сохранены');
         onClose();
     };
 
@@ -110,6 +112,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     selectedValues={dataEditingAccess}
                     setSelectedValues={setDataEditingAccess}
                 />
+                <ToastContainer position="top-center" autoClose={5000} />
                 <div className="flex justify-center items-center">
                     {isLoading ? (
                         <p>Загрузка</p>
