@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MultiSelect } from '../../../components/CustomMultiselect';
 
-export const AnalyticsAccess = () => {
+export const DataEditing = () => {
     const options = [
         { label: 'Finance', value: 'react' },
         { label: 'Sales', value: 'angular' },
@@ -21,7 +21,7 @@ export const AnalyticsAccess = () => {
                 options={options}
                 onChange={handleChange}
                 selectedValues={selectedValues}
-                tooltipText="Department user will access to selected analytics modules"
+                tooltipText="Department user will be able to edit and add new data records"
             />
         </div>
     );

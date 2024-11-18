@@ -1,6 +1,7 @@
 import React from 'react';
 import { ProfileModalHeader } from './ProfileModalHeader';
 import { AnalyticsAccess } from './AnalyticsAccess';
+import { DataEditing } from './DataEditing';
 
 export const ProfileModal = ({ isOpen, onClose, user }) => {
     if (!isOpen) return null;
@@ -10,6 +11,7 @@ export const ProfileModal = ({ isOpen, onClose, user }) => {
             <div className="bg-white rounded-xl shadow-lg w-[300px] p-6 relative font-comfortaa flex flex-col gap-10">
                 <ProfileModalHeader onClose={onClose} />
                 <AnalyticsAccess />
+                <DataEditing />
             </div>
         </div>
     );
