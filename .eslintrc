@@ -37,7 +37,7 @@
           ]
         },
         "alias" : {
-          "map": [["@", "./src"]],
+          "map": [["@", "./src" ]],
           "extensions": [".js", ".jsx", ".ts", ".tsx"]
         }
       }

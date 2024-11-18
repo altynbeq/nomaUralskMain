@@ -61,7 +61,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
                     <span className="text-base">{option.label}</span>
 
                     <div
-                        className={`w-5 h-5 border-2 rounded-full transition-colors ${
+                        className={`w-8 h-8 border-4 rounded-full transition-colors ${
                             selected.includes(option.value) ? 'bg-blue-500' : 'bg-white'
                         }`}
                     ></div>
