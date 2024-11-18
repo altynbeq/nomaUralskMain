@@ -16,12 +16,7 @@ import {
 } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
-import { getKKMReceiptsFront } from './methods/dataFetches/getKKM';
-import { getSalesReceiptsFront } from './methods/dataFetches/getSalesReceipts';
-import { getSpisanie } from './methods/dataFetches/getSpisanie';
-
 import { getLeadsBack } from './methods/dataFetches/getLeadsBack';
-import { fetchDeals } from './methods/dataFetches/getDealsBitrix';
 import { getUserUrls } from './methods/getUserUrls';
 import AccountingWarehouse from './pages/AccountingWarehouse';
 import AccountingWorkers from './pages/AccountingWorkers';
@@ -32,14 +27,10 @@ const App = () => {
         setLeads,
         setDeals,
         activeMenu,
-        dateRanges,
         setKKM,
         setSkeletonUp,
-        receipts,
         setReceipts,
-        spisanie,
         setSpisanie,
-        userData,
         setUserData,
     } = useStateContext();
     const [loading, setLoading] = useState(true);
@@ -54,19 +45,16 @@ const App = () => {
                 localStorage.getItem('_id') === null && localStorage.getItem('token') === null;
             if (result) {
                 setLocalStorageState(result);
-                // window.location.href ='/general';
             }
             return result;
         };
         checkStorage();
-        // console.log('checking storage: ' + localStorageState);
         async function collector(userId) {
             try {
                 const [bitrixData, urls] = await Promise.all([
                     getLeadsBack(userId),
                     getUserUrls(userId),
                 ]);
-                // console.log("=>(App.js:45) bitrixData", bitrixData);
                 setUserData({
                     email: bitrixData.email,
                     name: bitrixData.name,
@@ -80,7 +68,6 @@ const App = () => {
 
                 setUrls(urls);
 
-                // console.log(bitrixData)
                 if (!bitrixData) {
                     setTechProblem(true);
                     setLoading(false);

@@ -9,6 +9,10 @@
       "prettier"
     ],
     "plugins": ["prettier"],
+    "env": {
+      "browser": true,
+      "es6": true
+    },
     "settings": {
       "react": {
         "version": "detect"
