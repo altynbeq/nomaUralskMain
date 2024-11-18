@@ -34,8 +34,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]
     >([]);
 
-    if (!isOpen) return null;
-
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (modalContentRef.current && !modalContentRef.current.contains(e.target as Node)) {
             onClose();
@@ -83,7 +81,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         });
 
         if (error) {
-            console.error('Ошибка при сохранении:', error);
+            
             return;
         }
 

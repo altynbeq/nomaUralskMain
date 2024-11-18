@@ -15,6 +15,7 @@ export const useFetch = (endpoint?: string) => {
                 const fullUrl = `${BASE_URL}${relativeUrl || endpoint}`;
                 const response = await fetch(fullUrl, options);
                 if (!response.ok) {
+                    setError(`Error: ${response.status} ${response.statusText}`);
                     throw new Error('Failed to fetch data from the server');
                 }
                 const result = await response.json();
