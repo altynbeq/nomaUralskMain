@@ -3,7 +3,7 @@ import { ProfileModalHeader } from './ProfileModalHeader';
 import { AnalyticsAccess } from './AnalyticsAccess';
 import { DataEditing } from './DataEditing';
 import { EditDepartment } from './EditDepartment';
-import { Button, Alert } from '@mantine/core';
+import { Button } from '@mantine/core';
 import {
     Department,
     DEPARTMENT_EDITING_PRIVILEGES,
@@ -35,6 +35,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const [dataEditingAccess, setDataEditingAccess] = useState<
         (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]
     >([]);
+
+    if (!isOpen) {
+        return null;
+    }
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (modalContentRef.current && !modalContentRef.current.contains(e.target as Node)) {
@@ -75,19 +79,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
     const handleSave = async () => {
         const privileges = mapPrivilegesToBackend();
-
-        await fetchData('create-access', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...privileges, departmentId: department.id }),
-        });
-
-        if (error) {
+        try {
+            await fetchData('create-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...privileges, departmentId: department.id }),
+            });
+            toast.success('Данные сохранены');
+            onClose();
+        } catch (err) {
             toast.error('Не удалось сохранить, попробуйте еще.');
-            return;
         }
-        toast.success('Данные сохранены');
-        onClose();
     };
 
     return (
