@@ -1,10 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ProfileModalHeader } from './ProfileModalHeader';
 import { AnalyticsAccess } from './AnalyticsAccess';
 import { DataEditing } from './DataEditing';
 import { EditDepartment } from './EditDepartment';
 import { Button } from '@mantine/core';
-import { Department } from '../../../models/index';
+import {
+    Department,
+    DEPARTMENT_EDITING_PRIVILEGES,
+    DEPARTMENT_ANALYTICS_PRIVILEGES,
+} from '../../../models/index';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -21,12 +25,55 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 }) => {
     const modalContentRef = useRef<HTMLDivElement>(null);
 
+    const [analyticsAccess, setAnalyticsAccess] = useState<
+        (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]
+    >([]);
+    const [dataEditingAccess, setDataEditingAccess] = useState<
+        (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]
+    >([]);
+
     if (!isOpen) return null;
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (modalContentRef.current && !modalContentRef.current.contains(e.target as Node)) {
             onClose();
         }
+    };
+
+    const mapPrivilegesToBackend = () => {
+        const analyticsPrivileges = Object.keys(DEPARTMENT_ANALYTICS_PRIVILEGES)
+            .filter((key) => isNaN(Number(key))) // Оставляем только строковые ключи
+            .reduce(
+                (acc, key) => {
+                    acc[key.toLowerCase()] = analyticsAccess.includes(
+                        key as keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES,
+                    );
+                    return acc;
+                },
+                {} as Record<string, boolean>,
+            );
+
+        const editingPrivileges = Object.keys(DEPARTMENT_EDITING_PRIVILEGES)
+            .filter((key) => isNaN(Number(key))) // Оставляем только строковые ключи
+            .reduce(
+                (acc, key) => {
+                    acc[key.toLowerCase()] = dataEditingAccess.includes(
+                        key as keyof typeof DEPARTMENT_EDITING_PRIVILEGES,
+                    );
+                    return acc;
+                },
+                {} as Record<string, boolean>,
+            );
+
+        return {
+            analytics: analyticsPrivileges,
+            editing: editingPrivileges,
+        };
+    };
+
+    const handleSave = () => {
+        const privileges = mapPrivilegesToBackend();
+        console.log(privileges);
     };
 
     return (
@@ -40,11 +87,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             >
                 <ProfileModalHeader onClose={onClose} />
                 <EditDepartment tooltipIconsClickHandler={tooltipIconsClickHandler} item={user} />
-                <AnalyticsAccess />
-                <DataEditing />
+                <AnalyticsAccess
+                    selectedValues={analyticsAccess}
+                    setSelectedValues={setAnalyticsAccess}
+                />
+                <DataEditing
+                    selectedValues={dataEditingAccess}
+                    setSelectedValues={setDataEditingAccess}
+                />
                 <div className="flex justify-center items-center">
                     <Button
-                        onClick={() => console.log('save')}
+                        onClick={handleSave}
                         className="flex w-[50%] justify-center items-center rounded-full border-2 border-blue-500 hover:border-blue-700 py-2"
                     >
                         Сохранить

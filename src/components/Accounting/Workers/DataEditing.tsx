@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import React from 'react';
 import { MultiSelect } from '../../../components/CustomMultiselect';
 import { DEPARTMENT_EDITING_PRIVILEGES } from '../../../models/index';
 
-export const DataEditing = () => {
+interface DataEditingProps {
+    selectedValues: (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[];
+    setSelectedValues: (values: (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]) => void;
+}
+
+export const DataEditing: React.FC<DataEditingProps> = ({ selectedValues, setSelectedValues }) => {
     const options = [
         { label: 'Смены', value: DEPARTMENT_EDITING_PRIVILEGES.SHIFTS },
         { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.WAREHOUSE },
@@ -10,10 +15,8 @@ export const DataEditing = () => {
         { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.EMPLOYEES },
     ];
 
-    const [selectedValues, setSelectedValues] = useState<(string | number)[]>([]);
-
     const handleChange = (values: (string | number)[]) => {
-        setSelectedValues(values);
+        setSelectedValues(values as (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]);
     };
 
     return (

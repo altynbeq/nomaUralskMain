@@ -1,8 +1,16 @@
-import { useState } from 'react';
+import React from 'react';
 import { MultiSelect } from '../../../components/CustomMultiselect';
 import { DEPARTMENT_ANALYTICS_PRIVILEGES } from '../../../models/index';
 
-export const AnalyticsAccess = () => {
+interface AnalyticsAccessProps {
+    selectedValues: (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[];
+    setSelectedValues: (values: (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]) => void;
+}
+
+export const AnalyticsAccess: React.FC<AnalyticsAccessProps> = ({
+    selectedValues,
+    setSelectedValues,
+}) => {
     const options = [
         { label: 'Финансы', value: DEPARTMENT_ANALYTICS_PRIVILEGES.FINANCES },
         { label: 'Продажи', value: DEPARTMENT_ANALYTICS_PRIVILEGES.SALES },
@@ -10,10 +18,8 @@ export const AnalyticsAccess = () => {
         { label: 'Склад', value: DEPARTMENT_ANALYTICS_PRIVILEGES.WAREHOUSE },
     ];
 
-    const [selectedValues, setSelectedValues] = useState<(string | number)[]>([]);
-
     const handleChange = (values: (string | number)[]) => {
-        setSelectedValues(values);
+        setSelectedValues(values as (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]);
     };
 
     return (

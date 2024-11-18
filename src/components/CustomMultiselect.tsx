@@ -20,16 +20,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
     selectedValues = [],
     tooltipText = 'Additional information about Analytics Access.',
 }) => {
-    const [selected, setSelected] = useState<(string | number)[]>(selectedValues);
-    const [isTooltipVisible, setIsTooltipVisible] = useState(false); // Локальное состояние для тултипа
+    const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
     const handleSelectOption = (value: string | number) => {
-        const isSelected = selected.includes(value);
+        const isSelected = selectedValues.includes(value);
         const updatedSelection = isSelected
-            ? selected.filter((item) => item !== value)
-            : [...selected, value];
+            ? selectedValues.filter((item) => item !== value)
+            : [...selectedValues, value];
 
-        setSelected(updatedSelection);
         onChange(updatedSelection);
     };
 
@@ -62,7 +60,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
                     <div
                         className={`w-8 h-8 border-4 rounded-full transition-colors ${
-                            selected.includes(option.value) ? 'bg-blue-500' : 'bg-white'
+                            selectedValues.includes(option.value) ? 'bg-blue-500' : 'bg-white'
                         }`}
                     ></div>
                 </div>
