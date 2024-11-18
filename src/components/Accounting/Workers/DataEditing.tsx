@@ -3,10 +3,10 @@ import { MultiSelect } from '../../../components/CustomMultiselect';
 
 export const DataEditing = () => {
     const options = [
-        { label: 'Finance', value: 'react' },
-        { label: 'Sales', value: 'angular' },
-        { label: 'Workers', value: 'vue' },
-        { label: 'Svelte', value: 'svelte' },
+        { label: 'Shifts', value: 'react' },
+        { label: 'Warehouse', value: 'angular' },
+        { label: 'Expenses', value: 'vue' },
+        { label: 'Workers', value: 'svelte' },
     ];
 
     const [selectedValues, setSelectedValues] = useState<(string | number)[]>([]);
@@ -18,6 +18,7 @@ export const DataEditing = () => {
     return (
         <div className="flex flex-col gap-5">
             <MultiSelect
+                title="Data editing"
                 options={options}
                 onChange={handleChange}
                 selectedValues={selectedValues}

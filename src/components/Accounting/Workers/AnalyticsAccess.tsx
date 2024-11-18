@@ -18,6 +18,7 @@ export const AnalyticsAccess = () => {
     return (
         <div className="flex flex-col gap-5">
             <MultiSelect
+                title="Analytics Access"
                 options={options}
                 onChange={handleChange}
                 selectedValues={selectedValues}
