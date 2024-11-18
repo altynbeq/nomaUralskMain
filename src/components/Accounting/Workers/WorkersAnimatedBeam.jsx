@@ -1,8 +1,5 @@
-'use client';
-import { FaLink, FaEdit, FaTrashAlt, FaSave, FaPlus } from 'react-icons/fa';
-
+import { FaSave, FaPlus } from 'react-icons/fa';
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
-
 import { AnimatedBeam } from '../../MagicUi/AnimateBeam';
 import { ProfileModal } from './ProfileModal';
 
@@ -25,7 +22,6 @@ function renderBeams(items, refs, containerRef) {
     return items.map((item, index) => {
         const toItem = items.find((target) => target.id === item.linkedTo);
         const toRef = toItem ? refs.current[items.indexOf(toItem)] : null;
-        // console.log(refs.current[index]);
         return (
             toRef &&
             refs.current[index] && (
@@ -43,20 +39,13 @@ function renderBeams(items, refs, containerRef) {
 
 export default function AnimatedBeamMultipleOutputDemo({
     update,
-    setUpdate,
     items,
     setItems,
-    Icons,
-    id,
-    setStructure,
-    fetchStructure,
     className,
     defaultImage,
 }) {
     const containerRef = useRef(null);
     const [renderBeamsOn, setRenderBeamsOn] = useState(false);
-    const [workerName, setWorkerName] = useState('');
-    const [workerRank, setWorkerRank] = useState('');
     const [departmentName, setDepartmentName] = useState('');
     const [addDepartmentModal, setAddDepartmentModal] = useState(false);
     const [selectedLevel1, setSelectedLevel1] = useState('');
@@ -66,8 +55,6 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [copySuccess, setCopySuccess] = useState('');
     const [editedDepartmentName, setEditedDepartmentName] = useState('');
     const [hoveredIndex, setHoveredIndex] = useState(null);
-
-    // console.log(items, refs)
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -356,8 +343,6 @@ export default function AnimatedBeamMultipleOutputDemo({
         setTimeout(() => {
             setRenderBeamsOn(true);
         }, 300);
-        setWorkerName('');
-        setWorkerRank('');
         setSelectedLevel1('');
     };
 
@@ -455,7 +440,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                                 item.level === 2 && (
                                     <div
                                         key={item.id}
-                                        className="flex flex-col max-w-[120px] items-center gap-4 relative group"
+                                        className="flex flex-col items-center gap-4 relative group"
                                         onMouseEnter={() => handleMouseEnter(index)}
                                         onMouseLeave={handleMouseLeave}
                                     >
