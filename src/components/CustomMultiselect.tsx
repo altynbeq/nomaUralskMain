@@ -35,7 +35,6 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
     return (
         <div className="relative flex flex-col items-start gap-4 p-4 border rounded shadow-md max-w-sm">
-            {/* Header */}
             <div className="flex items-center gap-2">
                 <span className="text-lg font-semibold">{title}</span>
                 <div
@@ -47,24 +46,20 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
                 </div>
             </div>
 
-            {/* Tooltip */}
             {isTooltipVisible && (
                 <div className="absolute top-12 left-0 bg-gray-100 border border-gray-300 text-sm text-gray-700 p-2 rounded shadow-lg w-full">
                     {tooltipText}
                 </div>
             )}
 
-            {/* Options */}
             {options.map((option) => (
                 <div
                     key={option.value}
                     className="flex items-center justify-between w-full cursor-pointer group"
                     onClick={() => handleSelectOption(option.value)}
                 >
-                    {/* Label */}
                     <span className="text-base">{option.label}</span>
 
-                    {/* Value (circle) */}
                     <div
                         className={`w-5 h-5 border-2 rounded-full transition-colors ${
                             selected.includes(option.value) ? 'bg-blue-500' : 'bg-white'
