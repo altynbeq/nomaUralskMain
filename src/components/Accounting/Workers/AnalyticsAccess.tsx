@@ -3,10 +3,10 @@ import { MultiSelect } from '../../../components/CustomMultiselect';
 
 export const AnalyticsAccess = () => {
     const options = [
-        { label: 'Finance', value: 'react' },
-        { label: 'Sales', value: 'angular' },
-        { label: 'Workers', value: 'vue' },
-        { label: 'Svelte', value: 'svelte' },
+        { label: 'Финансы', value: 'react' },
+        { label: 'Продажи', value: 'angular' },
+        { label: 'Сотрудники', value: 'vue' },
+        { label: 'Склад', value: 'svelte' },
     ];
 
     const [selectedValues, setSelectedValues] = useState<(string | number)[]>([]);
@@ -18,11 +18,11 @@ export const AnalyticsAccess = () => {
     return (
         <div className="flex flex-col gap-5">
             <MultiSelect
-                title="Analytics Access"
+                title="Доступ к аналитике"
                 options={options}
                 onChange={handleChange}
                 selectedValues={selectedValues}
-                tooltipText="Department user will access to selected analytics modules"
+                tooltipText="Пользователь департамента получит доступ к выбранным модулям аналитики"
             />
         </div>
     );

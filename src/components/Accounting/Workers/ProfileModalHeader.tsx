@@ -8,7 +8,7 @@ interface ProfileModalHeaderProps {
 
 export const ProfileModalHeader: FC<ProfileModalHeaderProps> = ({ onClose }) => (
     <div>
-        <h1>Department Access</h1>
+        <h1 className="text-2xl font-bold">Доступ к департаменту</h1>
         <Button
             onClick={onClose}
             className="absolute top-3 right-3 w-12 h-12 flex items-center justify-center bg-white  rounded-full"
