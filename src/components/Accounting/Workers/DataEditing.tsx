@@ -9,10 +9,10 @@ interface DataEditingProps {
 
 export const DataEditing: React.FC<DataEditingProps> = ({ selectedValues, setSelectedValues }) => {
     const options = [
-        { label: 'Смены', value: DEPARTMENT_EDITING_PRIVILEGES.SHIFTS },
-        { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.WAREHOUSE },
-        { label: 'Расходы', value: DEPARTMENT_EDITING_PRIVILEGES.EXPENSES },
-        { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.EMPLOYEES },
+        { label: 'Смены', value: DEPARTMENT_EDITING_PRIVILEGES.Shifts },
+        { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.Warehouse },
+        { label: 'Расходы', value: DEPARTMENT_EDITING_PRIVILEGES.Expenses },
+        { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.Workers },
     ];
 
     const handleChange = (values: (string | number)[]) => {
@@ -26,7 +26,7 @@ export const DataEditing: React.FC<DataEditingProps> = ({ selectedValues, setSel
                 options={options}
                 onChange={handleChange}
                 selectedValues={selectedValues}
-                tooltipText="Department user will be able to edit and add new data records"
+                tooltipText="Пользователь отдела сможет редактировать и добавлять новые записи данных"
             />
         </div>
     );

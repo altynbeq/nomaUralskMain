@@ -7,15 +7,15 @@ export interface Department {
 }
 
 export enum DEPARTMENT_ANALYTICS_PRIVILEGES {
-    FINANCES = 'FINANCES',
-    SALES = 'SALES',
-    EMPLOYEES = 'EMPLOYEES',
-    WAREHOUSE = 'WAREHOUSE',
+    Finance = 'Finance',
+    Sales = 'Sales',
+    Workers = 'Workers',
+    Warehouse = 'Warehouse',
 }
 
 export enum DEPARTMENT_EDITING_PRIVILEGES {
-    SHIFTS = 'SHIFTS',
-    WAREHOUSE = 'WAREHOUSE',
-    EXPENSES = 'EXPENSES',
-    EMPLOYEES = 'EMPLOYEES',
+    Shifts = 'Shifts',
+    Warehouse = 'Warehouse',
+    Expenses = 'Expenses',
+    Workers = 'Workers',
 }

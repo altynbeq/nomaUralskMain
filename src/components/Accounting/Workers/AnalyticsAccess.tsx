@@ -12,10 +12,10 @@ export const AnalyticsAccess: React.FC<AnalyticsAccessProps> = ({
     setSelectedValues,
 }) => {
     const options = [
-        { label: 'Финансы', value: DEPARTMENT_ANALYTICS_PRIVILEGES.FINANCES },
-        { label: 'Продажи', value: DEPARTMENT_ANALYTICS_PRIVILEGES.SALES },
-        { label: 'Сотрудники', value: DEPARTMENT_ANALYTICS_PRIVILEGES.EMPLOYEES },
-        { label: 'Склад', value: DEPARTMENT_ANALYTICS_PRIVILEGES.WAREHOUSE },
+        { label: 'Финансы', value: DEPARTMENT_ANALYTICS_PRIVILEGES.Finance },
+        { label: 'Продажи', value: DEPARTMENT_ANALYTICS_PRIVILEGES.Sales },
+        { label: 'Сотрудники', value: DEPARTMENT_ANALYTICS_PRIVILEGES.Workers },
+        { label: 'Склад', value: DEPARTMENT_ANALYTICS_PRIVILEGES.Warehouse },
     ];
 
     const handleChange = (values: (string | number)[]) => {

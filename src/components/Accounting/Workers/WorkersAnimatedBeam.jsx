@@ -462,7 +462,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                                             {/* First row: Link and Edit icons */}
 
                                             <ProfileModal
-                                                user={item}
+                                                department={item}
                                                 isOpen={hoveredIndex == index}
                                                 tooltipIconsClickHandler={tooltipIconsClickHandler}
                                                 onClose={() => setHoveredIndex(null)}
