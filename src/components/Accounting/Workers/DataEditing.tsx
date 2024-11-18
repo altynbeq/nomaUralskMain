@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { MultiSelect } from '../../../components/CustomMultiselect';
+import { DEPARTMENT_EDITING_PRIVILEGES } from '../../../models/index';
 
 export const DataEditing = () => {
     const options = [
-        { label: 'Смены', value: 'react' },
-        { label: 'Склад', value: 'angular' },
-        { label: 'Расходы', value: 'vue' },
-        { label: 'Сотрудники', value: 'svelte' },
+        { label: 'Смены', value: DEPARTMENT_EDITING_PRIVILEGES.SHIFTS },
+        { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.WAREHOUSE },
+        { label: 'Расходы', value: DEPARTMENT_EDITING_PRIVILEGES.EXPENSES },
+        { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.EMPLOYEES },
     ];
 
     const [selectedValues, setSelectedValues] = useState<(string | number)[]>([]);

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { MultiSelect } from '../../../components/CustomMultiselect';
+import { DEPARTMENT_ANALYTICS_PRIVILEGES } from '../../../models/index';
 
 export const AnalyticsAccess = () => {
     const options = [
-        { label: 'Финансы', value: 'react' },
-        { label: 'Продажи', value: 'angular' },
-        { label: 'Сотрудники', value: 'vue' },
-        { label: 'Склад', value: 'svelte' },
+        { label: 'Финансы', value: DEPARTMENT_ANALYTICS_PRIVILEGES.FINANCES },
+        { label: 'Продажи', value: DEPARTMENT_ANALYTICS_PRIVILEGES.SALES },
+        { label: 'Сотрудники', value: DEPARTMENT_ANALYTICS_PRIVILEGES.EMPLOYEES },
+        { label: 'Склад', value: DEPARTMENT_ANALYTICS_PRIVILEGES.WAREHOUSE },
     ];
 
     const [selectedValues, setSelectedValues] = useState<(string | number)[]>([]);

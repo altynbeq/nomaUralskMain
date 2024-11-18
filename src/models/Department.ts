@@ -5,3 +5,17 @@ export interface Department {
     level?: number;
     linkedTo?: string;
 }
+
+export enum DEPARTMENT_ANALYTICS_PRIVILEGES {
+    FINANCES,
+    SALES,
+    EMPLOYEES,
+    WAREHOUSE,
+}
+
+export enum DEPARTMENT_EDITING_PRIVILEGES {
+    SHIFTS,
+    WAREHOUSE,
+    EMPLOYEES,
+    EXPENSES,
+}
