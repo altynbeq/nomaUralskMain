@@ -4,6 +4,7 @@ import { FaLink, FaEdit, FaTrashAlt, FaSave, FaPlus } from 'react-icons/fa';
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
 
 import { AnimatedBeam } from '../../MagicUi/AnimateBeam';
+import { ProfileModal } from './ProfileModal';
 
 const Circle = forwardRef(({ className, children }, ref) => {
     return (
@@ -64,6 +65,7 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [tooltipModalItem, setTooltipModalItem] = useState(null);
     const [copySuccess, setCopySuccess] = useState('');
     const [editedDepartmentName, setEditedDepartmentName] = useState('');
+    const [hoveredIndex, setHoveredIndex] = useState(null);
 
     // console.log(items, refs)
 
@@ -367,6 +369,14 @@ export default function AnimatedBeamMultipleOutputDemo({
         }
     }, [items, renderBeamsOn, tooltipModalItem, update]);
 
+    const handleMouseEnter = (index) => {
+        setHoveredIndex(index);
+    };
+
+    const handleMouseLeave = () => {
+        setHoveredIndex(null);
+    };
+
     return (
         <>
             {renderTooltipModal(tooltipModalItem, tooltipModalMode)}
@@ -446,6 +456,8 @@ export default function AnimatedBeamMultipleOutputDemo({
                                     <div
                                         key={item.id}
                                         className="flex flex-col max-w-[120px] items-center gap-4 relative group"
+                                        onMouseEnter={() => handleMouseEnter(index)}
+                                        onMouseLeave={handleMouseLeave}
                                     >
                                         <Circle
                                             key={item.id}
@@ -461,10 +473,15 @@ export default function AnimatedBeamMultipleOutputDemo({
                                         {/* Tooltip with icons and triangle */}
                                         <div className="absolute left-full -ml-8 p-2 bg-white text-black text-sm rounded-lg border-2 border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2 z-[9999] ">
                                             {/* Triangle */}
-                                            <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div>
-
+                                            {/* <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div> */}
                                             {/* First row: Link and Edit icons */}
-                                            <div className="flex gap-2">
+
+                                            <ProfileModal
+                                                user={item}
+                                                isOpen={hoveredIndex == index}
+                                                onClose={() => setHoveredIndex(null)}
+                                            />
+                                            {/* <div className="flex gap-2">
                                                 <div
                                                     onClick={(e) => {
                                                         tooltipIconsClickHandler(item, 'link');
@@ -481,16 +498,16 @@ export default function AnimatedBeamMultipleOutputDemo({
                                                 >
                                                     <FaEdit />
                                                 </div>
-                                            </div>
-                                            {/* Second row: Trash bin icon */}
-                                            <div
+                                            </div> */}
+
+                                            {/* <div
                                                 onClick={(e) => {
                                                     tooltipIconsClickHandler(item, 'delete');
                                                 }}
                                                 className="mx-auto w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer"
                                             >
                                                 <FaTrashAlt />
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </div>
                                 ),
@@ -508,6 +525,12 @@ export default function AnimatedBeamMultipleOutputDemo({
                             </p>
                         </div>
                     </div>
+
+                    {/* <ProfileModal
+                                                user={item}
+                                                isOpen={hoveredIndex == index}
+                                                onClose={() => setHoveredIndex(null)}
+                                            /> */}
 
                     {/* Bottom row of circles (Level 3) */}
                     <div className="flex justify-between gap-8">
