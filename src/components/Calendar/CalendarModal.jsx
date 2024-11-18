@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaEdit, FaTimes, FaTrash } from 'react-icons/fa';
 
 const ScheduleWithEdit = (props) => {
@@ -6,9 +6,9 @@ const ScheduleWithEdit = (props) => {
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [employees, setEmployees] = useState([
-        { id: 1, name: "John Smith", startTime: "09:00", endTime: "17:00" },
-        { id: 2, name: "Sarah Johnson", startTime: "14:00", endTime: "22:00" },
-        { id: 3, name: "Mike Brown", startTime: "23:00", endTime: "07:00" },
+        { id: 1, name: 'John Smith', startTime: '09:00', endTime: '17:00' },
+        { id: 2, name: 'Sarah Johnson', startTime: '14:00', endTime: '22:00' },
+        { id: 3, name: 'Mike Brown', startTime: '23:00', endTime: '07:00' },
     ]);
 
     useEffect(() => {
@@ -26,11 +26,13 @@ const ScheduleWithEdit = (props) => {
     };
 
     const handleSave = (employeeId, newStartTime, newEndTime) => {
-        setEmployees(employees.map(emp =>
-            emp.id === employeeId
-                ? { ...emp, startTime: newStartTime, endTime: newEndTime }
-                : emp
-        ));
+        setEmployees(
+            employees.map((emp) =>
+                emp.id === employeeId
+                    ? { ...emp, startTime: newStartTime, endTime: newEndTime }
+                    : emp,
+            ),
+        );
         setEditingId(null);
     };
 
@@ -39,7 +41,7 @@ const ScheduleWithEdit = (props) => {
     };
 
     const confirmDelete = () => {
-        setEmployees(employees.filter(emp => emp.id !== deletingId));
+        setEmployees(employees.filter((emp) => emp.id !== deletingId));
         setDeletingId(null);
     };
 
@@ -92,17 +94,11 @@ const ScheduleWithEdit = (props) => {
                     <div className="flex items-center gap-4 mt-2">
                         <div className="flex items-center gap-2">
                             <label className="text-sm">Start:</label>
-                            <TimeInput
-                                value={startTime}
-                                onChange={setStartTime}
-                            />
+                            <TimeInput value={startTime} onChange={setStartTime} />
                         </div>
                         <div className="flex items-center gap-2">
                             <label className="text-sm">End:</label>
-                            <TimeInput
-                                value={endTime}
-                                onChange={setEndTime}
-                            />
+                            <TimeInput value={endTime} onChange={setEndTime} />
                         </div>
                     </div>
                 </div>
@@ -125,7 +121,7 @@ const ScheduleWithEdit = (props) => {
     };
 
     const getEmployeeName = (id) => {
-        const employee = employees.find(emp => emp.id === id);
+        const employee = employees.find((emp) => emp.id === id);
         return employee ? employee.name : '';
     };
 
@@ -140,12 +136,12 @@ const ScheduleWithEdit = (props) => {
                                 onClick={() => props.setOpen(false)}
                                 className="text-gray-500 hover:text-gray-800"
                             >
-                                <FaTimes/>
+                                <FaTimes />
                             </button>
                         </div>
 
                         <div className="mt-4 space-y-4">
-                            {employees.map((employee) => (
+                            {employees.map((employee) =>
                                 editingId === employee.id ? (
                                     <EmployeeEditForm
                                         key={employee.id}
@@ -162,11 +158,13 @@ const ScheduleWithEdit = (props) => {
                                     >
                                         <div className="flex-1">
                                             <div className="flex justify-between">
-                                                <h3 className="font-medium mr-4">{employee.name}</h3>
+                                                <h3 className="font-medium mr-4">
+                                                    {employee.name}
+                                                </h3>
                                                 <div className="flex items-center text-gray-600 mt-1">
-                                            <span className="text-sm mr-2">
-                                              {employee.startTime} - {employee.endTime}
-                                            </span>
+                                                    <span className="text-sm mr-2">
+                                                        {employee.startTime} - {employee.endTime}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -176,18 +174,18 @@ const ScheduleWithEdit = (props) => {
                                                 onClick={() => handleEdit(employee.id)}
                                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                                             >
-                                                <FaEdit/>
+                                                <FaEdit />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(employee.id)}
                                                 className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                                             >
-                                                <FaTrash/>
+                                                <FaTrash />
                                             </button>
                                         </div>
                                     </div>
-                                )
-                            ))}
+                                ),
+                            )}
                         </div>
                     </div>
                 </div>
@@ -197,10 +195,23 @@ const ScheduleWithEdit = (props) => {
                 <div className="fixed z-30 inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6">
                         <h2 className="text-xl font-bold">Confirm Deletion</h2>
-                        <p>Are you sure you want to remove {getEmployeeName(deletingId)} from this day&apos;s schedule? This action cannot be undone.</p>
+                        <p>
+                            Are you sure you want to remove {getEmployeeName(deletingId)} from this
+                            day&apos;s schedule? This action cannot be undone.
+                        </p>
                         <div className="flex justify-end mt-4">
-                            <button onClick={() => setDeletingId(null)} className="mr-2 p-2 bg-gray-300 rounded">Cancel</button>
-                            <button onClick={confirmDelete} className="p-2 bg-red-500 text-white rounded">Delete</button>
+                            <button
+                                onClick={() => setDeletingId(null)}
+                                className="mr-2 p-2 bg-gray-300 rounded"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="p-2 bg-red-500 text-white rounded"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>

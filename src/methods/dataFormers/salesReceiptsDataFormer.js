@@ -3,12 +3,12 @@ export const sales1CDataFormer = (data) => {
     const processedDocuments = new Set();
     const stats = {};
 
-    data.forEach(item => {
-        const documentNumber = item["Номер"];
-        const cashRegister = item["КассаККМНаименование"];
-        const terminal = item["ЭквайринговыйТерминалНаименование"] || "Неопределено";
-        const totalDocumentAmount = parseFloat(item["СуммаДокумента"].toString());
-        const saleDate = new Date(item["Дата"]);
+    data.forEach((item) => {
+        const documentNumber = item['Номер'];
+        const cashRegister = item['КассаККМНаименование'];
+        const terminal = item['ЭквайринговыйТерминалНаименование'] || 'Неопределено';
+        const totalDocumentAmount = parseFloat(item['СуммаДокумента'].toString());
+        const saleDate = new Date(item['Дата']);
         const saleHour = saleDate.getHours();
 
         // Adjust date for sales between midnight and 1 AM
@@ -25,12 +25,28 @@ export const sales1CDataFormer = (data) => {
                 totalSum: 0,
                 KassaKKMName: {},
                 salesSeries: Array.from({ length: 7 }, (_, i) => ({
-                    x: ['Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'][i],
-                    y: 0
+                    x: [
+                        'Thursday',
+                        'Friday',
+                        'Saturday',
+                        'Sunday',
+                        'Monday',
+                        'Tuesday',
+                        'Wednesday',
+                    ][i],
+                    y: 0,
                 })),
                 salesSumSeries: Array.from({ length: 7 }, (_, i) => ({
-                    x: ['Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'][i],
-                    y: 0
+                    x: [
+                        'Thursday',
+                        'Friday',
+                        'Saturday',
+                        'Sunday',
+                        'Monday',
+                        'Tuesday',
+                        'Wednesday',
+                    ][i],
+                    y: 0,
                 })),
                 totalNumberSales: 0,
             };

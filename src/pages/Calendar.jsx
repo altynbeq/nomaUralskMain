@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '../components';
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import CalendarModal from "../components/Calendar/CalendarModal";
-import CalendarModalAddShift from "../components/Calendar/CalendarModalAddShift";
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import CalendarModal from '../components/Calendar/CalendarModal';
+import CalendarModalAddShift from '../components/Calendar/CalendarModalAddShift';
 import ruLocale from '@fullcalendar/core/locales/ru';
 
 const events = [
@@ -55,7 +55,7 @@ const events = [
 
     { title: 'Ершов', start: new Date(2024, 9, 28, 10, 0), end: new Date(2024, 9, 28, 18, 0) },
     { title: 'Копылов', start: new Date(2024, 9, 28, 7, 30), end: new Date(2024, 9, 28, 15, 30) },
-    { title: 'Суханов', start: new Date(2024, 9, 28, 13, 0), end: new Date(2024, 9, 28, 21, 0) }
+    { title: 'Суханов', start: new Date(2024, 9, 28, 13, 0), end: new Date(2024, 9, 28, 21, 0) },
 ];
 
 const Scheduler = () => {
@@ -63,40 +63,53 @@ const Scheduler = () => {
     const [currentShifts, setCurrentShifts] = useState(events);
     const [modalAddShift, setModalAddShift] = useState(false);
 
-    function  openModal() {
+    function openModal() {
         setModal(true);
     }
-    function  openModalAddShift() {
+    function openModalAddShift() {
         setModalAddShift(true);
     }
 
-// a custom render function
+    // a custom render function
     function renderEventContent(eventInfo) {
         const startTime = eventInfo.event.start;
         const endTime = eventInfo.event.end;
 
         // Format the times as desired (e.g., "HH:mm")
-        const startTimeFormatted = startTime ? startTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' }) : '';
-        const endTimeFormatted = endTime ? endTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' }) : '';
+        const startTimeFormatted = startTime
+            ? startTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
+            : '';
+        const endTimeFormatted = endTime
+            ? endTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
+            : '';
 
         return (
-            <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal} >
-                <span className="md:scale-10 lg:scale-100 text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">{startTimeFormatted} - {endTimeFormatted} </span>   <strong className="text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">{eventInfo.event.title}</strong><br />
+            <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal}>
+                <span className="md:scale-10 lg:scale-100 text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">
+                    {startTimeFormatted} - {endTimeFormatted}{' '}
+                </span>{' '}
+                <strong className="text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">
+                    {eventInfo.event.title}
+                </strong>
+                <br />
             </div>
         );
     }
 
-    useEffect(() => {
-
-    }, [currentShifts]);
+    useEffect(() => {}, [currentShifts]);
     return (
         <div className="m-2 mb-0 p-2 pb-0  bg-white rounded-3xl">
             <Header category="Учёт" title="Смены" />
             <CalendarModal open={modal} setOpen={setModal} />
-            <CalendarModalAddShift open={modalAddShift} setOpen={setModalAddShift} currentShifts={currentShifts} setCurrentShifts={setCurrentShifts} />
+            <CalendarModalAddShift
+                open={modalAddShift}
+                setOpen={setModalAddShift}
+                currentShifts={currentShifts}
+                setCurrentShifts={setCurrentShifts}
+            />
             <FullCalendar
                 plugins={[dayGridPlugin]}
-                initialView='dayGridMonth'
+                initialView="dayGridMonth"
                 weekends={true}
                 events={currentShifts}
                 eventContent={renderEventContent}
@@ -118,6 +131,5 @@ const Scheduler = () => {
         </div>
     );
 };
-
 
 export default Scheduler;

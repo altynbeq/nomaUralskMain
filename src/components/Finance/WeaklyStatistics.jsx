@@ -1,10 +1,17 @@
-import React from 'react'
+import React from 'react';
 import { IoIosMore } from 'react-icons/io';
 import { useStateContext } from '../../contexts/ContextProvider';
-import { FaDollarSign, FaMoneyBillAlt, FaMoneyBill, FaBox, FaFilter, FaChartBar } from "react-icons/fa";
-import { ExportToExcel } from '../'
+import {
+    FaDollarSign,
+    FaMoneyBillAlt,
+    FaMoneyBill,
+    FaBox,
+    FaFilter,
+    FaChartBar,
+} from 'react-icons/fa';
+import { ExportToExcel } from '../';
 
-const WeaklyStatistics = ({ idcomp, title}) => {
+const WeaklyStatistics = ({ idcomp, title }) => {
     const { currentColor, currentMode } = useStateContext();
 
     const weeklyStats = [
@@ -72,43 +79,48 @@ const WeaklyStatistics = ({ idcomp, title}) => {
                     <div className="flex justify-between">
                         <p className="text-xl font-semibold">{title}</p>
                         <button type="button" className="text-xl font-semibold text-gray-500">
-                        <IoIosMore />
+                            <IoIosMore />
                         </button>
                     </div>
 
                     <div className="mt-2">
                         {weeklyStats.map((item) => (
-                        <div key={idcomp + item.id} className="flex justify-between mt-4 w-full">
-                            <div className="flex gap-4">
-                            <button
-                                type="button"
-                                style={{ background: item.iconBg }}
-                                className="text-2xl hover:drop-shadow-xl text-white rounded-full p-3"
+                            <div
+                                key={idcomp + item.id}
+                                className="flex justify-between mt-4 w-full"
                             >
-                                {item.icon}
-                            </button>
-                            <div>
-                                <p className="text-md font-semibold">{item.title}</p>
-                                <p className="text-sm text-gray-400">{item.desc}</p>
-                            </div>
-                            </div>
+                                <div className="flex gap-4">
+                                    <button
+                                        type="button"
+                                        style={{ background: item.iconBg }}
+                                        className="text-2xl hover:drop-shadow-xl text-white rounded-full p-3"
+                                    >
+                                        {item.icon}
+                                    </button>
+                                    <div>
+                                        <p className="text-md font-semibold">{item.title}</p>
+                                        <p className="text-sm text-gray-400">{item.desc}</p>
+                                    </div>
+                                </div>
 
-                            <p className={`text-${item.pcColor}`}>{item.amount}</p>
-                        </div>
+                                <p className={`text-${item.pcColor}`}>{item.amount}</p>
+                            </div>
                         ))}
                     </div>
-                    
-                    <div className='mt-4'>
+
+                    <div className="mt-4">
                         <ExportToExcel />
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default WeaklyStatistics
+export default WeaklyStatistics;
 
-{/* <div className="mt-4">
+{
+    /* <div className="mt-4">
                     <SparkLine currentColor={currentColor} id="area-sparkLine" height="160px" type="Area" data={SparklineAreaData}  color="rgb(242, 252, 253)" />
-                    </div> */}
+                    </div> */
+}

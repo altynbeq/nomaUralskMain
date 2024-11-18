@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import ManageWarehouse from "../components/Accounting/Warehouse/ManageWarehouse";
-import ListOfExpenses from "../components/Accounting/Warehouse/ListOfExpenses";
-import CollapsibleTable from "../components/Accounting/Warehouse/CollapsibleTable";
+import ManageWarehouse from '../components/Accounting/Warehouse/ManageWarehouse';
+import ListOfExpenses from '../components/Accounting/Warehouse/ListOfExpenses';
+import CollapsibleTable from '../components/Accounting/Warehouse/CollapsibleTable';
 
 const AccountingWarehouse = () => {
-    return(
+    return (
         <>
-            <ManageWarehouse/>
-            <ListOfExpenses/>
-            <CollapsibleTable/>
+            <ManageWarehouse />
+            <ListOfExpenses />
+            <CollapsibleTable />
         </>
-    )
-
+    );
 };
 
 export default AccountingWarehouse;

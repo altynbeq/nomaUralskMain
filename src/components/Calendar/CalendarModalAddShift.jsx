@@ -34,12 +34,17 @@ const CalendarModalAddShift = (props) => {
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-4 rounded-lg shadow-lg min-w-[300]">
                         <div className="flex justify-between">
-                            <h2 style={{alignItems:'center'}} className="text-lg font-bold flex mr-5 pr-10 mb-4">Добавить новую смену</h2>
+                            <h2
+                                style={{ alignItems: 'center' }}
+                                className="text-lg font-bold flex mr-5 pr-10 mb-4"
+                            >
+                                Добавить новую смену
+                            </h2>
                             <button
                                 onClick={() => props.setOpen(false)}
                                 className="text-gray-500 hover:text-gray-800"
                             >
-                                <FaTimes className="mb-4"/>
+                                <FaTimes className="mb-4" />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit}>
@@ -73,7 +78,10 @@ const CalendarModalAddShift = (props) => {
                                     required
                                 />
                             </div>
-                            <button type="submit" className="flex bg-blue-500 text-white py-2 px-4 rounded ml-auto">
+                            <button
+                                type="submit"
+                                className="flex bg-blue-500 text-white py-2 px-4 rounded ml-auto"
+                            >
                                 Добавить
                             </button>
                         </form>
