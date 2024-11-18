@@ -464,6 +464,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                                             <ProfileModal
                                                 user={item}
                                                 isOpen={hoveredIndex == index}
+                                                tooltipIconsClickHandler={tooltipIconsClickHandler}
                                                 onClose={() => setHoveredIndex(null)}
                                             />
                                             {/* <div className="flex gap-2">
