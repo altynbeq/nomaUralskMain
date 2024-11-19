@@ -76,8 +76,13 @@ const App = () => {
                 setSkeletonUp(false);
             }
         };
-
-        if (userLoggedIn && !currentUserDepartmentId) {
+        if (
+            userLoggedIn &&
+            (currentUserDepartmentId === null ||
+                currentUserDepartmentId === undefined ||
+                currentUserDepartmentId === 'null' ||
+                currentUserDepartmentId === 'undefined')
+        ) {
             fetchData(currentUserId);
         } else {
             setLoading(false);
