@@ -9,7 +9,7 @@ interface DataEditingProps {
 
 export const DataEditing: React.FC<DataEditingProps> = ({ selectedValues, setSelectedValues }) => {
     const options = [
-        { label: 'Разрешить', value: DEPARTMENT_EDITING_PRIVILEGES.Allow },
+        { label: 'Разрешить редактирование', value: DEPARTMENT_EDITING_PRIVILEGES.Allow },
         // { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.Warehouse },
         // { label: 'Расходы', value: DEPARTMENT_EDITING_PRIVILEGES.Expenses },
         // { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.Workers },
