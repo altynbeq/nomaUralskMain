@@ -18,6 +18,7 @@ import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import { getLeadsBack } from './methods/dataFetches/getLeadsBack';
 import { getUserUrls } from './methods/getUserUrls';
+import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import AccountingWarehouse from './pages/AccountingWarehouse';
 import AccountingWorkers from './pages/AccountingWorkers';
 
@@ -76,14 +77,24 @@ const App = () => {
                 setSkeletonUp(false);
             }
         };
-        if (
-            userLoggedIn &&
-            (currentUserDepartmentId === null ||
-                currentUserDepartmentId === undefined ||
-                currentUserDepartmentId === 'null' ||
-                currentUserDepartmentId === 'undefined')
-        ) {
-            fetchData(currentUserId);
+
+        const executeFunction = () => {
+            // Ваша функция, которая выполняется, если currentUserDepartmentId существует
+            // Например:
+            console.log('currentUserDepartmentId существует:', currentUserDepartmentId);
+            // Ваш код здесь
+        };
+
+        if (userLoggedIn) {
+            if (isValidDepartmentId(currentUserDepartmentId)) {
+                // Если currentUserDepartmentId существует, выполняем одну функцию
+                executeFunction();
+                setLoading(false);
+                setSkeletonUp(false);
+            } else {
+                // Если currentUserDepartmentId не существует, вызываем fetchData
+                fetchData(currentUserId);
+            }
         } else {
             setLoading(false);
             setSkeletonUp(false);
