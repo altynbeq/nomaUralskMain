@@ -42,6 +42,7 @@ const App = () => {
     useEffect(() => {
         const currentUserId = localStorage.getItem('_id');
         const currentToken = localStorage.getItem('token');
+        const currentUserDepartmentId = localStorage.getItem('departmentId');
         const userLoggedIn = currentUserId !== null && currentToken !== null;
         setIsLoggedIn(userLoggedIn);
 
@@ -76,7 +77,7 @@ const App = () => {
             }
         };
 
-        if (userLoggedIn) {
+        if (userLoggedIn && !currentUserDepartmentId) {
             fetchData(currentUserId);
         } else {
             setLoading(false);

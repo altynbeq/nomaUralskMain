@@ -21,21 +21,17 @@ const LogInForm = () => {
     };
 
     useEffect(() => {
-        // console.log("=>(LogInForm.jsx:15) currentUrl", currentUrl, typeof currentUrl);
-        if (userId) {
-            // console.log('context userId', userId);
-        }
         if (!localStorageData.length) {
             return;
         }
         localStorage.setItem('_id', localStorageData[0]);
         localStorage.setItem('token', localStorageData[1]);
+        localStorage.setItem('departmentId', localStorageData[2]);
         window.location.href = '/general';
     }, [localStorageData]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        //fetch
         const handleLogIn = (email, password) => {
             const requestOptions = {
                 method: 'POST',
@@ -43,12 +39,19 @@ const LogInForm = () => {
                 body: JSON.stringify({ email, password }),
             };
             const url = `https://nomalytica-back.onrender.com/api/users/login`;
-            // console.log(email,password)
             fetch(url, requestOptions)
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.message === 'Login successful') {
-                        setLocalStorageData([data.user._id, data.token]);
+                        if (data.user?.role === 'subUser') {
+                            setLocalStorageData([
+                                data.user._id,
+                                data.token,
+                                data.user?.departmentId,
+                            ]);
+                        } else {
+                            setLocalStorageData([data.user._id, data.token]);
+                        }
                         handleLogin(data.user._id);
                     } else {
                         alert(data.message);
@@ -62,8 +65,6 @@ const LogInForm = () => {
     const handleSubmitRegistration = (e) => {
         e.preventDefault();
         const handleRegistration = () => {
-            // console.log("=>(LogInForm.jsx:85) email", email);
-            // console.log("=>(LogInForm.jsx:85) password", password);
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -73,9 +74,6 @@ const LogInForm = () => {
                 }),
             };
             const url = `https://nomalytica-back.onrender.com/api/subUsers/create-subuser/`;
-            // const url = `http://localhost:8888/api/subUsers/create-subuser/`
-            // console.log(email, password)
-
             fetch(url, requestOptions).then((res) => {
                 if (!res.ok) {
                     res.text().then((error) => alert(error));
