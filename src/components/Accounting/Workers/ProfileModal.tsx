@@ -117,7 +117,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <ToastContainer position="top-center" autoClose={5000} />
                 <div className="flex justify-center items-center">
                     {isLoading ? (
-                        <p>Загрузка</p>
+                        <p>Загрузка...</p>
                     ) : (
                         <Button
                             onClick={handleSave}

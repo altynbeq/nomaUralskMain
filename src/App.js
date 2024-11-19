@@ -33,28 +33,30 @@ const App = () => {
         setSpisanie,
         setUserData,
     } = useStateContext();
+
     const [loading, setLoading] = useState(true);
     const [techProblem, setTechProblem] = useState(false);
-    const [localStorageState, setLocalStorageState] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [urls, setUrls] = useState('');
+
     useEffect(() => {
         const currentUserId = localStorage.getItem('_id');
+        const currentToken = localStorage.getItem('token');
+        const userLoggedIn = currentUserId !== null && currentToken !== null;
+        setIsLoggedIn(userLoggedIn);
 
-        const checkStorage = () => {
-            let result =
-                localStorage.getItem('_id') === null && localStorage.getItem('token') === null;
-            if (result) {
-                setLocalStorageState(result);
-            }
-            return result;
-        };
-        checkStorage();
-        async function collector(userId) {
+        const fetchData = async (userId) => {
             try {
-                const [bitrixData, urls] = await Promise.all([
+                const [bitrixData, urlsData] = await Promise.all([
                     getLeadsBack(userId),
                     getUserUrls(userId),
                 ]);
+
+                if (!bitrixData) {
+                    setTechProblem(true);
+                    return;
+                }
+
                 setUserData({
                     email: bitrixData.email,
                     name: bitrixData.name,
@@ -65,109 +67,87 @@ const App = () => {
                 setKKM(JSON.parse(bitrixData.kkmData));
                 setReceipts(JSON.parse(bitrixData.salesReceipt));
                 setSpisanie(JSON.parse(bitrixData.productsSpisanie));
-
-                setUrls(urls);
-
-                if (!bitrixData) {
-                    setTechProblem(true);
-                    setLoading(false);
-                    return;
-                }
+                setUrls(urlsData);
+            } catch (error) {
+                setTechProblem(true);
             } finally {
                 setLoading(false);
                 setSkeletonUp(false);
             }
-        }
-        if (currentUserId) {
-            collector(currentUserId);
-        }
-        if (!currentUserId) {
+        };
+
+        if (userLoggedIn) {
+            fetchData(currentUserId);
+        } else {
             setLoading(false);
             setSkeletonUp(false);
         }
-    }, []);
+    }, [setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setSpisanie, setUserData]);
 
     if (techProblem) {
         return <TechProb />;
     }
 
+    if (loading) {
+        return <Loader />;
+    }
+
+    if (!isLoggedIn) {
+        return <LogInForm />;
+    }
+
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
-            {loading ? (
-                <Loader />
-            ) : localStorageState ? (
-                <LogInForm />
-            ) : (
-                <BrowserRouter>
-                    <>
-                        <div className="flex relative dark:bg-main-dark-bg">
-                            <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
-                                <TooltipComponent
-                                    content="Settings"
-                                    position="Top"
-                                ></TooltipComponent>
-                            </div>
-                            {activeMenu ? (
-                                <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
-                                    <Sidebar />
-                                </div>
-                            ) : (
-                                <div className="w-0 dark:bg-secondary-dark-bg">
-                                    <Sidebar />
-                                </div>
-                            )}
-                            <div
-                                className={
-                                    activeMenu
-                                        ? 'dark:bg-main-dark-bg  bg-main-bg min-h-screen md:ml-72 w-full  '
-                                        : 'bg-main-bg dark:bg-main-dark-bg  w-full min-h-screen flex-2 '
-                                }
-                            >
-                                <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full ">
-                                    <Navbar />
-                                </div>
-
-                                <div>
-                                    <Routes>
-                                        <>
-                                            <Route path="/" element={<General urls={urls} />} />
-                                            <Route
-                                                path="/general"
-                                                element={<General urls={urls} />}
-                                            />
-                                            <Route
-                                                path="/finance"
-                                                element={<Finance urls={urls} />}
-                                            />
-                                            <Route path="/sales" element={<Sales urls={urls} />} />
-                                            <Route
-                                                path="/workers"
-                                                element={<Workers urls={urls} />}
-                                            />
-                                            <Route path="/sklad" element={<Sklad urls={urls} />} />
-                                            <Route path="/docs" element={<ComingSoon />} />
-                                            <Route path="/resources" element={<ComingSoon />} />
-                                            <Route path="/support" element={<ComingSoon />} />
-                                            <Route path="/Q&A" element={<ComingSoon />} />
-                                            <Route path="/login" element={<LogInForm />} />
-                                            <Route path="/calendar" element={<Calendar />} />
-                                            <Route
-                                                path="/accounting-warehouse"
-                                                element={<AccountingWarehouse />}
-                                            />
-                                            <Route
-                                                path="/accounting-workers"
-                                                element={<AccountingWorkers />}
-                                            />
-                                        </>
-                                    </Routes>
-                                </div>
-                                <Footer />
-                            </div>
+            <BrowserRouter>
+                <div className="flex relative dark:bg-main-dark-bg">
+                    <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
+                        <TooltipComponent content="Settings" position="Top" />
+                    </div>
+                    {activeMenu ? (
+                        <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
+                            <Sidebar />
                         </div>
-                    </>
-                </BrowserRouter>
-            )}
+                    ) : (
+                        <div className="w-0 dark:bg-secondary-dark-bg">
+                            <Sidebar />
+                        </div>
+                    )}
+                    <div
+                        className={
+                            activeMenu
+                                ? 'dark:bg-main-dark-bg bg-main-bg min-h-screen md:ml-72 w-full'
+                                : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
+                        }
+                    >
+                        <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+                            <Navbar />
+                        </div>
+
+                        <div>
+                            <Routes>
+                                <Route path="/" element={<General urls={urls} />} />
+                                <Route path="/general" element={<General urls={urls} />} />
+                                <Route path="/finance" element={<Finance urls={urls} />} />
+                                <Route path="/sales" element={<Sales urls={urls} />} />
+                                <Route path="/workers" element={<Workers urls={urls} />} />
+                                <Route path="/sklad" element={<Sklad urls={urls} />} />
+                                <Route path="/docs" element={<ComingSoon />} />
+                                <Route path="/resources" element={<ComingSoon />} />
+                                <Route path="/support" element={<ComingSoon />} />
+                                <Route path="/Q&A" element={<ComingSoon />} />
+                                <Route path="/login" element={<LogInForm />} />
+                                <Route path="/calendar" element={<Calendar />} />
+                                <Route
+                                    path="/accounting-warehouse"
+                                    element={<AccountingWarehouse />}
+                                />
+                                <Route path="/accounting-workers" element={<AccountingWorkers />} />
+                            </Routes>
+                        </div>
+                        <Footer />
+                    </div>
+                </div>
+            </BrowserRouter>
         </div>
     );
 };
