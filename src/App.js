@@ -79,12 +79,30 @@ const App = () => {
         };
 
         const fetchSubUserData = async (departmentId) => {
-            console.log(departmentId);
+            try {
+                const response = await fetch(
+                    `https://nomalytica-back.onrender.com/api/access/access-and-subusers/${departmentId}`,
+                    {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Fetched sub-user data:', result);
+                // Add any additional handling logic for result here
+            } catch (error) {
+                console.error('Error fetching sub-user data:', error);
+            }
         };
 
         if (userLoggedIn) {
             if (isValidDepartmentId(currentUserDepartmentId)) {
-                fetchData('67115eee932afd00804adc24');
+                fetchSubUserData(currentUserDepartmentId);
                 setLoading(false);
                 setSkeletonUp(false);
             } else {

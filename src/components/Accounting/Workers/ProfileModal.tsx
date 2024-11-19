@@ -43,7 +43,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     tooltipIconsClickHandler,
 }) => {
     const modalContentRef = useRef<HTMLDivElement>(null);
-    const { isLoading, fetchData, data } = useFetch<DepartAccesses>();
+    const { isLoading, fetchData } = useFetch<DepartAccesses>();
 
     const [analyticsAccess, setAnalyticsAccess] = useState<
         (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]
@@ -79,7 +79,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     setAnalyticsAccess(analyticsAccessFromBackend);
                     setDataEditingAccess(editingAccessFromBackend);
                 } else {
-                    // No existing access data
                     setInitialAccess(null);
                 }
             } catch (error) {
