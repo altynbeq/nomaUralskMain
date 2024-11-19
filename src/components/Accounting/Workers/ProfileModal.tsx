@@ -51,6 +51,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const [dataEditingAccess, setDataEditingAccess] = useState<
         (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]
     >([]);
+    const [hasAccesses, setHasAccesses] = useState(false);
 
     if (!isOpen) {
         return null;
@@ -68,8 +69,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                 });
-            } catch (e) {
-                console.log(e);
+            } catch {
+                setHasAccesses(false);
             }
         }
     }, [department, fetchData]);
@@ -88,6 +89,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
             setAnalyticsAccess(analyticsAccessFromBackend);
             setDataEditingAccess(editingAccessFromBackend);
+            setHasAccesses(true);
         }
     }, [data]);
 
@@ -138,7 +140,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             });
             toast.success('Данные сохранены');
             onClose();
-        } catch (err) {
+        } catch {
             toast.error('Не удалось сохранить, попробуйте еще.');
         }
     };
