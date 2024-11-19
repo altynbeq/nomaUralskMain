@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 
 const BASE_URL = 'https://nomalytica-back.onrender.com/api/';
 
-export const useFetch = (endpoint?: string) => {
-    const [data, setData] = useState(null);
+export const useFetch = <T = unknown>(endpoint?: string) => {
+    const [data, setData] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -19,17 +19,18 @@ export const useFetch = (endpoint?: string) => {
                     setError(errorMessage);
                     throw new Error(errorMessage);
                 }
-                const result = await response.json();
+                const result: T = await response.json();
                 setData(result);
-                return result; // Return data if needed
+                return result;
             } catch (err) {
                 setError((err as Error).message);
-                throw err; // Re-throw the error to be caught in handleSave
+                throw err;
             } finally {
                 setIsLoading(false);
             }
         },
         [endpoint],
     );
+
     return { data, isLoading, error, fetchData };
 };

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ProfileModalHeader } from './ProfileModalHeader';
 import { AnalyticsAccess } from './AnalyticsAccess';
 import { DataEditing } from './DataEditing';
@@ -20,6 +20,22 @@ interface ProfileModalProps {
     tooltipIconsClickHandler: () => void;
 }
 
+interface GetDepartsAccessesResponse {
+    departmentId: string;
+    access: {
+        Analytics: Record<string, boolean>;
+        DataManagement: boolean;
+        _id: string;
+    };
+    subUsers: Array<{
+        role: string;
+        image: string | null;
+        _id: string;
+        email: string;
+        name: string;
+    }>;
+}
+
 export const ProfileModal: React.FC<ProfileModalProps> = ({
     isOpen,
     onClose,
@@ -27,7 +43,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     tooltipIconsClickHandler,
 }) => {
     const modalContentRef = useRef<HTMLDivElement>(null);
-    const { isLoading, fetchData } = useFetch();
+    const { isLoading, fetchData, data } = useFetch<GetDepartsAccessesResponse>();
 
     const [analyticsAccess, setAnalyticsAccess] = useState<
         (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]
@@ -43,6 +59,33 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     if (!department) {
         return null;
     }
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+        if (department) {
+            fetchData(`access/access-and-subusers/${department.id}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+    }, [department, fetchData]);
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+        if (data) {
+            const { Analytics, DataManagement } = data.access;
+
+            const analyticsAccessFromBackend = Object.keys(Analytics).filter(
+                (key) => Analytics[key] === true,
+            ) as (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[];
+
+            const editingAccessFromBackend: (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[] =
+                DataManagement ? ['Allow'] : [];
+
+            setAnalyticsAccess(analyticsAccessFromBackend);
+            setDataEditingAccess(editingAccessFromBackend);
+        }
+    }, [data]);
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (modalContentRef.current && !modalContentRef.current.contains(e.target as Node)) {
@@ -84,7 +127,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const handleSave = async () => {
         const privileges = mapPrivilegesToBackend();
         try {
-            await fetchData('create-access', {
+            await fetchData('access/create-access', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...privileges, departmentId: department.id }),

@@ -78,21 +78,16 @@ const App = () => {
             }
         };
 
-        const executeFunction = () => {
-            // Ваша функция, которая выполняется, если currentUserDepartmentId существует
-            // Например:
-            console.log('currentUserDepartmentId существует:', currentUserDepartmentId);
-            // Ваш код здесь
+        const fetchSubUserData = async (departmentId) => {
+            console.log(departmentId);
         };
 
         if (userLoggedIn) {
             if (isValidDepartmentId(currentUserDepartmentId)) {
-                // Если currentUserDepartmentId существует, выполняем одну функцию
-                executeFunction();
+                fetchData('67115eee932afd00804adc24');
                 setLoading(false);
                 setSkeletonUp(false);
             } else {
-                // Если currentUserDepartmentId не существует, вызываем fetchData
                 fetchData(currentUserId);
             }
         } else {
