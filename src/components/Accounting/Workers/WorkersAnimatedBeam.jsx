@@ -54,7 +54,7 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [tooltipModalItem, setTooltipModalItem] = useState(null);
     const [copySuccess, setCopySuccess] = useState('');
     const [editedDepartmentName, setEditedDepartmentName] = useState('');
-    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [selectedDepartment, setSelectedDepartment] = useState(null);
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -354,14 +354,6 @@ export default function AnimatedBeamMultipleOutputDemo({
         }
     }, [items, renderBeamsOn, tooltipModalItem, update]);
 
-    const handleMouseEnter = (index) => {
-        setHoveredIndex(index);
-    };
-
-    const handleMouseLeave = () => {
-        setHoveredIndex(null);
-    };
-
     return (
         <>
             {renderTooltipModal(tooltipModalItem, tooltipModalMode)}
@@ -432,6 +424,14 @@ export default function AnimatedBeamMultipleOutputDemo({
                                 ),
                         )}
                     </div>
+                    {selectedDepartment && (
+                        <ProfileModal
+                            department={selectedDepartment}
+                            isOpen={selectedDepartment !== null}
+                            tooltipIconsClickHandler={tooltipIconsClickHandler}
+                            onClose={() => setSelectedDepartment(null)}
+                        />
+                    )}
 
                     {/* Middle center circle (Level 2) */}
                     <div className="flex justify-center mr-auto ml-auto gap-10">
@@ -440,9 +440,8 @@ export default function AnimatedBeamMultipleOutputDemo({
                                 item.level === 2 && (
                                     <div
                                         key={item.id}
-                                        className="flex flex-col items-center gap-4 relative group"
-                                        onMouseEnter={() => handleMouseEnter(index)}
-                                        onMouseLeave={handleMouseLeave}
+                                        className="flex flex-col items-center gap-4 relative group cursor-pointer"
+                                        onClick={() => setSelectedDepartment(item)}
                                     >
                                         <Circle
                                             key={item.id}
@@ -456,45 +455,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                                         </Circle>
                                         <p className="text-center">{item.name}</p>
                                         {/* Tooltip with icons and triangle */}
-                                        <div className="absolute left-full -ml-8 p-2 bg-white text-black text-sm rounded-lg border-2 border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2 z-[9999] ">
-                                            {/* Triangle */}
-                                            {/* <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-gray-300"></div> */}
-                                            {/* First row: Link and Edit icons */}
-
-                                            <ProfileModal
-                                                department={item}
-                                                isOpen={hoveredIndex == index}
-                                                tooltipIconsClickHandler={tooltipIconsClickHandler}
-                                                onClose={() => setHoveredIndex(null)}
-                                            />
-                                            {/* <div className="flex gap-2">
-                                                <div
-                                                    onClick={(e) => {
-                                                        tooltipIconsClickHandler(item, 'link');
-                                                    }}
-                                                    className="w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer"
-                                                >
-                                                    <FaLink />
-                                                </div>
-                                                <div
-                                                    onClick={(e) => {
-                                                        tooltipIconsClickHandler(item, 'edit');
-                                                    }}
-                                                    className="w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer"
-                                                >
-                                                    <FaEdit />
-                                                </div>
-                                            </div> */}
-
-                                            {/* <div
-                                                onClick={(e) => {
-                                                    tooltipIconsClickHandler(item, 'delete');
-                                                }}
-                                                className="mx-auto w-8 h-8 bg-white flex items-center justify-center rounded-full border-2 border-gray-300 shadow cursor-pointer"
-                                            >
-                                                <FaTrashAlt />
-                                            </div> */}
-                                        </div>
+                                        <div className="absolute left-full -ml-8 p-2 bg-white text-black text-sm rounded-lg border-2 border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2 z-[9999] "></div>
                                     </div>
                                 ),
                         )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MultiSelect } from '../../../components/CustomMultiselect';
+import { MultiSelect } from '../../Multiselect';
 import { DEPARTMENT_EDITING_PRIVILEGES } from '../../../models/index';
 
 interface DataEditingProps {
@@ -9,10 +9,10 @@ interface DataEditingProps {
 
 export const DataEditing: React.FC<DataEditingProps> = ({ selectedValues, setSelectedValues }) => {
     const options = [
-        { label: 'Смены', value: DEPARTMENT_EDITING_PRIVILEGES.Shifts },
-        { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.Warehouse },
-        { label: 'Расходы', value: DEPARTMENT_EDITING_PRIVILEGES.Expenses },
-        { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.Workers },
+        { label: 'Разрешить', value: DEPARTMENT_EDITING_PRIVILEGES.Allow },
+        // { label: 'Склад', value: DEPARTMENT_EDITING_PRIVILEGES.Warehouse },
+        // { label: 'Расходы', value: DEPARTMENT_EDITING_PRIVILEGES.Expenses },
+        // { label: 'Сотрудники', value: DEPARTMENT_EDITING_PRIVILEGES.Workers },
     ];
 
     const handleChange = (values: (string | number)[]) => {

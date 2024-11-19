@@ -27,7 +27,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     tooltipIconsClickHandler,
 }) => {
     const modalContentRef = useRef<HTMLDivElement>(null);
-    const { isLoading, error, fetchData } = useFetch();
+    const { isLoading, fetchData } = useFetch();
 
     const [analyticsAccess, setAnalyticsAccess] = useState<
         (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]
@@ -37,6 +37,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     >([]);
 
     if (!isOpen) {
+        return null;
+    }
+
+    if (!department) {
         return null;
     }
 
@@ -73,7 +77,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
         return {
             Analytics: analyticsPrivileges,
-            DataManagement: true,
+            DataManagement: editingPrivileges['Allow'],
         };
     };
 

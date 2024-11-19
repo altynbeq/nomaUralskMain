@@ -1,5 +1,5 @@
 import React from 'react';
-import { MultiSelect } from '../../../components/CustomMultiselect';
+import { MultiSelect } from '../../Multiselect';
 import { DEPARTMENT_ANALYTICS_PRIVILEGES } from '../../../models/index';
 
 interface AnalyticsAccessProps {

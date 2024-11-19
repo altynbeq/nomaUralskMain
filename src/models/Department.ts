@@ -18,4 +18,5 @@ export enum DEPARTMENT_EDITING_PRIVILEGES {
     Warehouse = 'Warehouse',
     Expenses = 'Expenses',
     Workers = 'Workers',
+    Allow = 'Allow',
 }
