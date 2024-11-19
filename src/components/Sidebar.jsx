@@ -3,13 +3,12 @@ import { Link, NavLink } from 'react-router-dom';
 import { FaChartPie } from 'react-icons/fa';
 import { MdOutlineCancel } from 'react-icons/md';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
-
 import { links } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
 
 const Sidebar = () => {
     const { currentColor, activeMenu, setActiveMenu, screenSize, access } = useStateContext();
-    const [filteredLinks, setFilteredLinks] = useState(links);
+    const [filteredLinks, setFilteredLinks] = useState([]);
 
     const handleCloseSideBar = () => {
         if (activeMenu !== undefined && screenSize <= 900) {
@@ -19,30 +18,37 @@ const Sidebar = () => {
 
     useEffect(() => {
         if (access) {
-            const newFilteredLinks = links.map((category) => ({
-                ...category,
-                links: category.links.filter((link) => {
-                    // Filter based on Analytics permissions
-                    if (access.Analytics) {
-                        if (link.name === 'finance' && !access.Analytics.Finance) return false;
-                        if (link.name === 'sales' && !access.Analytics.Sales) return false;
-                        if (link.name === 'workers' && !access.Analytics.Workers) return false;
-                        if (link.name === 'sklad' && !access.Analytics.Warehouse) return false;
+            const newFilteredLinks = links
+                .map((category) => {
+                    if (category.title === 'Учёт' && !access.DataManagement) {
+                        return null;
                     }
 
-                    // Filter based on DataManagement permissions
-                    if (link.name === 'accounting-expenses' && !access.DataManagement) {
-                        return false;
+                    const filteredCategoryLinks = category.links.filter((link) => {
+                        if (access.Analytics) {
+                            if (link.name === 'finance' && !access.Analytics.Finance) return false;
+                            if (link.name === 'sales' && !access.Analytics.Sales) return false;
+                            if (link.name === 'workers' && !access.Analytics.Workers) return false;
+                            if (link.name === 'sklad' && !access.Analytics.Warehouse) return false;
+                        }
+
+                        return true;
+                    });
+
+                    if (filteredCategoryLinks.length === 0) {
+                        return null;
                     }
 
-                    // Add further filtering logic for other types of permissions here if needed
+                    return {
+                        ...category,
+                        links: filteredCategoryLinks,
+                    };
+                })
+                .filter((category) => category !== null);
 
-                    return true; // Keep all other links
-                }),
-            }));
             setFilteredLinks(newFilteredLinks);
         } else {
-            setFilteredLinks(links); // Default to showing all links if no access data is available
+            setFilteredLinks(links);
         }
     }, [access]);
 
