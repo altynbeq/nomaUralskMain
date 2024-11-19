@@ -51,47 +51,45 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const [dataEditingAccess, setDataEditingAccess] = useState<
         (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[]
     >([]);
-    const [hasAccesses, setHasAccesses] = useState(false);
+    const [initialAccess, setInitialAccess] = useState<DepartAccesses['access'] | null>(null);
 
-    if (!isOpen) {
-        return null;
-    }
-
-    if (!department) {
+    if (!isOpen || !department) {
         return null;
     }
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-        if (department) {
+        const fetchAccesses = async () => {
             try {
-                fetchData(`access/access-and-subusers/${department.id}`, {
+                const result = await fetchData(`access/access-and-subusers/${department.id}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                 });
-            } catch {
-                setHasAccesses(false);
+
+                if (result && result.access) {
+                    setInitialAccess(result.access);
+
+                    const analyticsAccessFromBackend = Object.keys(result.access.Analytics).filter(
+                        (key) => result.access.Analytics[key] === true,
+                    ) as (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[];
+
+                    const editingAccessFromBackend: (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[] =
+                        result.access.DataManagement ? ['Allow'] : [];
+
+                    setAnalyticsAccess(analyticsAccessFromBackend);
+                    setDataEditingAccess(editingAccessFromBackend);
+                } else {
+                    // No existing access data
+                    setInitialAccess(null);
+                }
+            } catch (error) {
+                console.error('Error fetching accesses:', error);
+                setInitialAccess(null);
             }
-        }
+        };
+
+        fetchAccesses();
     }, [department, fetchData]);
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-        if (data) {
-            const { Analytics, DataManagement } = data.access;
-
-            const analyticsAccessFromBackend = Object.keys(Analytics).filter(
-                (key) => Analytics[key] === true,
-            ) as (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[];
-
-            const editingAccessFromBackend: (keyof typeof DEPARTMENT_EDITING_PRIVILEGES)[] =
-                DataManagement ? ['Allow'] : [];
-
-            setAnalyticsAccess(analyticsAccessFromBackend);
-            setDataEditingAccess(editingAccessFromBackend);
-            setHasAccesses(true);
-        }
-    }, [data]);
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (modalContentRef.current && !modalContentRef.current.contains(e.target as Node)) {
@@ -130,6 +128,20 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         };
     };
 
+    const arePrivilegesDifferent = () => {
+        if (!initialAccess) return true;
+
+        const currentPrivileges = mapPrivilegesToBackend();
+
+        const analyticsEqual =
+            JSON.stringify(currentPrivileges.Analytics) === JSON.stringify(initialAccess.Analytics);
+
+        const dataManagementEqual =
+            currentPrivileges.DataManagement === initialAccess.DataManagement;
+
+        return !(analyticsEqual && dataManagementEqual);
+    };
+
     const handleSave = async () => {
         const privileges = mapPrivilegesToBackend();
         try {
@@ -138,10 +150,43 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...privileges, departmentId: department.id }),
             });
-            toast.success('Данные сохранены');
+            toast.success('Доступы успешно созданы');
             onClose();
         } catch {
             toast.error('Не удалось сохранить, попробуйте еще.');
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (!initialAccess || !initialAccess._id) {
+            toast.error('Нет доступа для обновления');
+            return;
+        }
+
+        const privileges = mapPrivilegesToBackend();
+        try {
+            await fetchData(`access/update-access/${initialAccess._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(privileges),
+            });
+            toast.success('Доступы успешно обновлены');
+            onClose();
+        } catch {
+            toast.error('Не удалось обновить доступы, попробуйте еще.');
+        }
+    };
+
+    const handleAction = () => {
+        if (arePrivilegesDifferent()) {
+            if (initialAccess && initialAccess._id) {
+                handleUpdate();
+            } else {
+                handleSave();
+            }
+        } else {
+            toast.info('Изменений не обнаружено');
+            onClose();
         }
     };
 
@@ -173,7 +218,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         <p>Загрузка...</p>
                     ) : (
                         <Button
-                            onClick={handleSave}
+                            onClick={handleAction}
                             className="flex w-[50%] justify-center items-center rounded-full border-2 border-blue-500 hover:border-blue-700 py-2"
                         >
                             Сохранить
