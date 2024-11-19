@@ -8,9 +8,9 @@ import { links } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
 
 const Sidebar = () => {
-    const { currentColor, activeMenu, setActiveMenu, screenSize } = useStateContext();
-    const [navLinks, setNavLinks] = useState(links);
-    const data = JSON.parse(localStorage.getItem('nomalyticsTokenAuth'));
+    const { currentColor, activeMenu, setActiveMenu, screenSize, access } = useStateContext();
+    const [filteredLinks, setFilteredLinks] = useState(links);
+
     const handleCloseSideBar = () => {
         if (activeMenu !== undefined && screenSize <= 900) {
             setActiveMenu(false);
@@ -18,29 +18,41 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        const data = JSON.parse(localStorage.getItem('nomalyticsTokenAuth'));
+        if (access) {
+            const newFilteredLinks = links.map((category) => ({
+                ...category,
+                links: category.links.filter((link) => {
+                    // Filter based on Analytics permissions
+                    if (access.Analytics) {
+                        if (link.name === 'finance' && !access.Analytics.Finance) return false;
+                        if (link.name === 'sales' && !access.Analytics.Sales) return false;
+                        if (link.name === 'workers' && !access.Analytics.Workers) return false;
+                        if (link.name === 'sklad' && !access.Analytics.Warehouse) return false;
+                    }
 
-        // if(data.userRole == 'sklad'){
-        //   let filteredLinks = links[0].links.filter(link => link.name == "sklad");
+                    // Filter based on DataManagement permissions
+                    if (link.name === 'accounting-expenses' && !access.DataManagement) {
+                        return false;
+                    }
 
-        //   links[0].links = filteredLinks;
-        //   setNavLinks(links);
-        // } else if(data.userRole == 'rop'){
-        //   let filteredLinks = links[0].links.filter(link => link.name == "sales");
-        //   links[0].links = filteredLinks;
-        //   setNavLinks(links);
-        // }
-        setActiveMenu(true);
-    }, []);
+                    // Add further filtering logic for other types of permissions here if needed
 
-    const activeLink =
-        'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg  text-white  text-md m-2';
+                    return true; // Keep all other links
+                }),
+            }));
+            setFilteredLinks(newFilteredLinks);
+        } else {
+            setFilteredLinks(links); // Default to showing all links if no access data is available
+        }
+    }, [access]);
+
+    const activeLink = 'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2';
     const normalLink =
         'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-md text-gray-700 dark:text-gray-200 dark:hover:text-black hover:bg-light-gray m-2';
 
     return (
         <div className="ml-3 h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10">
-            {activeMenu == true && (
+            {activeMenu === true && (
                 <>
                     <div className="flex justify-between items-center">
                         <Link
@@ -49,7 +61,7 @@ const Sidebar = () => {
                             className="items-center gap-3 ml-3 mt-4 flex flex-row text-xl font-extrabold tracking-tight dark:text-white text-slate-900"
                         >
                             <span className="flex flex-row p-1 gap-1">
-                                N<FaChartPie className="mt-1 " />
+                                N<FaChartPie className="mt-1" />
                                 malytica
                             </span>
                         </Link>
@@ -64,8 +76,8 @@ const Sidebar = () => {
                             </button>
                         </TooltipComponent>
                     </div>
-                    <div className="mt-10 ">
-                        {links.map((item) => (
+                    <div className="mt-10">
+                        {filteredLinks.map((item) => (
                             <div key={item.title}>
                                 <p className="text-gray-400 dark:text-gray-400 m-3 mt-4 uppercase">
                                     {item.title}
@@ -83,7 +95,7 @@ const Sidebar = () => {
                                         }
                                     >
                                         {link.icon}
-                                        <span className=" ">{link.text}</span>
+                                        <span>{link.text}</span>
                                     </NavLink>
                                 ))}
                             </div>
