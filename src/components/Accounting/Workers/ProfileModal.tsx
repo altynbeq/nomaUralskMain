@@ -20,7 +20,7 @@ interface ProfileModalProps {
     tooltipIconsClickHandler: () => void;
 }
 
-interface GetDepartsAccessesResponse {
+interface DepartAccesses {
     departmentId: string;
     access: {
         Analytics: Record<string, boolean>;
@@ -43,7 +43,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     tooltipIconsClickHandler,
 }) => {
     const modalContentRef = useRef<HTMLDivElement>(null);
-    const { isLoading, fetchData, data } = useFetch<GetDepartsAccessesResponse>();
+    const { isLoading, fetchData, data } = useFetch<DepartAccesses>();
 
     const [analyticsAccess, setAnalyticsAccess] = useState<
         (keyof typeof DEPARTMENT_ANALYTICS_PRIVILEGES)[]
@@ -63,10 +63,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         if (department) {
-            fetchData(`access/access-and-subusers/${department.id}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            });
+            try {
+                fetchData(`access/access-and-subusers/${department.id}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            } catch (e) {
+                console.log(e);
+            }
         }
     }, [department, fetchData]);
 

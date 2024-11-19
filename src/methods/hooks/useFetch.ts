@@ -15,6 +15,11 @@ export const useFetch = <T = unknown>(endpoint?: string) => {
                 const fullUrl = `${BASE_URL}${relativeUrl || endpoint}`;
                 const response = await fetch(fullUrl, options);
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        setError('Data not found');
+                        setData(null);
+                        return null;
+                    }
                     const errorMessage = `Error: ${response.status} ${response.statusText}`;
                     setError(errorMessage);
                     throw new Error(errorMessage);
