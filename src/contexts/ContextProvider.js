@@ -26,6 +26,11 @@ export const ContextProvider = ({ children }) => {
     const [deals, setDeals] = useState({});
     const [userId, setUserId] = useState('');
     const [userData, setUserData] = useState({});
+    const [access, setAccess] = useState({
+        Analytics: {},
+        DataManagement: false,
+    });
+    const [subUsers, setSubUsers] = useState([]);
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
@@ -51,6 +56,15 @@ export const ContextProvider = ({ children }) => {
         setUserId('');
         localStorage.clear();
         window.location.reload();
+    };
+    const updateAccessData = (accessData) => {
+        setAccess({
+            Analytics: accessData.Analytics,
+            DataManagement: accessData.DataManagement,
+        });
+    };
+    const updateSubUsers = (subUsersData) => {
+        setSubUsers(subUsersData);
     };
     return (
         // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -92,6 +106,10 @@ export const ContextProvider = ({ children }) => {
                 handleLogOut,
                 userData,
                 setUserData,
+                access,
+                setAccess: updateAccessData,
+                subUsers,
+                setSubUsers: updateSubUsers,
             }}
         >
             {children}

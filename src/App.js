@@ -33,6 +33,8 @@ const App = () => {
         setReceipts,
         setSpisanie,
         setUserData,
+        setAccess,
+        setSubUsers,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -93,8 +95,8 @@ const App = () => {
                 }
 
                 const result = await response.json();
-                console.log('Fetched sub-user data:', result);
-                // Add any additional handling logic for result here
+                setAccess(result.access);
+                setSubUsers(result.subUsers);
             } catch (error) {
                 console.error('Error fetching sub-user data:', error);
             }
