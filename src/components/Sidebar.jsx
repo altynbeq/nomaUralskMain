@@ -7,7 +7,8 @@ import { links } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
 
 const Sidebar = () => {
-    const { currentColor, activeMenu, setActiveMenu, screenSize, access } = useStateContext();
+    const { currentColor, activeMenu, setActiveMenu, screenSize, access, subUsers } =
+        useStateContext();
     const [filteredLinks, setFilteredLinks] = useState([]);
 
     const handleCloseSideBar = () => {
@@ -17,7 +18,7 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        if (access) {
+        if (access && Array.isArray(subUsers) && subUsers.length > 0) {
             const newFilteredLinks = links
                 .map((category) => {
                     if (category.title === 'Учёт' && !access.DataManagement) {
@@ -31,7 +32,6 @@ const Sidebar = () => {
                             if (link.name === 'workers' && !access.Analytics.Workers) return false;
                             if (link.name === 'sklad' && !access.Analytics.Warehouse) return false;
                         }
-
                         return true;
                     });
 
@@ -50,7 +50,7 @@ const Sidebar = () => {
         } else {
             setFilteredLinks(links);
         }
-    }, [access]);
+    }, [access, subUsers]);
 
     const activeLink = 'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2';
     const normalLink =
