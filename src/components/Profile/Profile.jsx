@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
+import { useStateContext } from '../../contexts/ContextProvider';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
+
+    const { subUser } = useStateContext();
 
     const dailyData = [
         {
@@ -62,8 +65,8 @@ export const Profile = () => {
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                    <h2 className="font-semibold text-lg text-black">Name Surname</h2>
-                    <p className="text-gray-500 text-sm">Position : Frontend</p>
+                    <h2 className="font-semibold text-lg text-black">{subUser?.name}</h2>
+                    <p className="text-gray-500 text-sm">Сотрудник</p>
                 </div>
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />

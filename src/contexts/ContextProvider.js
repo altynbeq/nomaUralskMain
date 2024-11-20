@@ -30,7 +30,7 @@ export const ContextProvider = ({ children }) => {
         Analytics: {},
         DataManagement: false,
     });
-    const [subUsers, setSubUsers] = useState([]);
+    const [subUser, setSubUser] = useState({});
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
@@ -63,8 +63,8 @@ export const ContextProvider = ({ children }) => {
             DataManagement: accessData.DataManagement,
         });
     };
-    const updateSubUsers = (subUsersData) => {
-        setSubUsers(subUsersData);
+    const updateSubUser = (subUserData) => {
+        setSubUser(subUserData);
     };
     return (
         // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -108,8 +108,8 @@ export const ContextProvider = ({ children }) => {
                 setUserData,
                 access,
                 setAccess: updateAccessData,
-                subUsers,
-                setSubUsers: updateSubUsers,
+                subUser,
+                setSubUser: updateSubUser,
             }}
         >
             {children}

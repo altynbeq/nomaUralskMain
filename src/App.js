@@ -34,7 +34,7 @@ const App = () => {
         setSpisanie,
         setUserData,
         setAccess,
-        setSubUsers,
+        setSubUser,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -95,8 +95,14 @@ const App = () => {
                 }
 
                 const result = await response.json();
+                const currentUserSubUser = result.subUsers.find(
+                    (user) => user._id === currentUserId,
+                );
+
                 setAccess(result.access);
-                setSubUsers(result.subUsers);
+                if (currentUserSubUser) {
+                    setSubUser(currentUserSubUser);
+                }
             } catch (error) {
                 console.error('Error fetching sub-user data:', error);
             }
