@@ -24,17 +24,28 @@ const DailyRevenue = ({userKkmUrl}) => {
         }
   }, []);
 
-  const getter = async() => {
-      
-      const kkmData = await getKKMReceiptsFront(userKkmUrl, dateRanges[0]);
-      setPieData(FinanceHolePie(kkm.dayFormedKKM));
-      setFinanceStats(FinanceStats(kkm.dayFormedKKM));
-      setKKM({
-        ...kkm,
-        dayFormedKKM: kkmData
-      });
-    }
-  getter();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const kkmData = await getKKMReceiptsFront(userKkmUrl, dateRanges[0]);
+        setKKM((prevKkm) => ({
+          ...prevKkm,
+          dayFormedKKM: kkmData,
+        }));
+        setPieData(FinanceHolePie(kkmData));
+        setFinanceStats(FinanceStats(kkmData));
+      } catch (error) {
+        console.error('Error fetching KKM data:', error);
+      }
+    };
+
+    fetchData();
+  }, [
+    userKkmUrl,
+    dateRanges[0].bitrixStartDate,
+    dateRanges[0].bitrixEndDate,
+    setKKM,
+  ]);
   
   return (
       <>
