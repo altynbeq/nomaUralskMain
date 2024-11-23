@@ -171,7 +171,7 @@ const Calendar = () => {
                 options={subuserStores}
                 optionLabel="storeName"
                 placeholder="Выберите магазин"
-                className="mb-5"
+                className="mb-5 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
                 showClear
             />
 
