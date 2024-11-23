@@ -35,7 +35,6 @@ const CalendarModalAddShift = (props) => {
             }
             toast.success('Смена успешно добавлена');
             await props.fetchShifts();
-
         } catch (error) {
             console.error('Error adding shift:', error);
         }
