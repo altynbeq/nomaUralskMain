@@ -76,7 +76,7 @@ const CalendarModalAddShift = (props) => {
                             </button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="mb-8 flex gap-4">
+                            <div className="mb-8 gap-4 flex flex-col items-center">
                                 <label className="block text-gray-700">Сотрудник:</label>
                                 <AutoComplete
                                     value={selectedSubuser}
@@ -84,7 +84,8 @@ const CalendarModalAddShift = (props) => {
                                     completeMethod={searchUsers}
                                     onChange={(e) => setSelectedSubuser(e.value)}
                                     field="name"
-                                    className="w-full"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500"
+                                    inputClassName="focus:outline-none focus:ring-0"
                                     placeholder="Выберите сотрудника"
                                 />
                             </div>
