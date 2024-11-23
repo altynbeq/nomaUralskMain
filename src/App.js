@@ -99,6 +99,11 @@ const App = () => {
                     (user) => user._id === currentUserId,
                 );
 
+                setUserData({
+                    email: currentUserSubUser.email,
+                    name: currentUserSubUser.name,
+                });
+
                 setAccess(result.access);
                 if (currentUserSubUser) {
                     setSubUser(currentUserSubUser);

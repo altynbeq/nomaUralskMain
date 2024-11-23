@@ -42,11 +42,11 @@ const UserProfile = () => {
                         {lastName}
                     </p>
                     <p className="text-gray-500 text-sm font-semibold dark:text-gray-400 break-words">
-                        {userEmail.split('@')[0]}
+                        {userEmail}
                     </p>
                 </div>
             </div>
-            <div>
+            {/* <div>
                 {userProfileData.map((item, index) => (
                     <div
                         key={index}
@@ -65,7 +65,7 @@ const UserProfile = () => {
                         </div>
                     </div>
                 ))}
-            </div>
+            </div> */}
             <div className="mt-5">
                 <button
                     type="button"
