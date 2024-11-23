@@ -297,7 +297,6 @@ export default function AnimatedBeamMultipleOutputDemo({
     // };
 
     const handleAddDepartment = (e) => {
-        console.log(localStorage);
         setRenderBeamsOn(false);
         e.preventDefault();
 
@@ -337,8 +336,6 @@ export default function AnimatedBeamMultipleOutputDemo({
 
         fetchAddDepartment();
 
-        // console.log(selectedLevel2);
-        // console.log(newWorker);
         refs.current.push(React.createRef()); // Add a new ref for the new item
         setTimeout(() => {
             setRenderBeamsOn(true);
