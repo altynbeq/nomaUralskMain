@@ -154,6 +154,7 @@ const Scheduler = () => {
             <Header category="Учёт" title="Смены" />
             <CalendarModal open={modal} setOpen={setModal} />
             <CalendarModalAddShift
+                subusers={subusers}
                 open={modalAddShift}
                 setOpen={setModalAddShift}
                 currentShifts={currentShifts}

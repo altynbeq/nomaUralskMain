@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { AutoComplete } from 'primereact/autocomplete';
 
 const CalendarModalAddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
     const [title, setTitle] = useState('');
     const [start, setStart] = useState('');
     const [end, setEnd] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -27,6 +29,17 @@ const CalendarModalAddShift = (props) => {
     useEffect(() => {
         setIsModalOpen(props.open);
     }, [props.open]);
+
+    const searchUsers = (event) => {
+        if (!event.query.trim().length) {
+            setFilteredUsers([]);
+        } else {
+            const filtered = props.subusers.filter((user) =>
+                user.name.toLowerCase().includes(event.query.toLowerCase()),
+            );
+            setFilteredUsers(filtered);
+        }
+    };
 
     return (
         <>
@@ -50,12 +63,13 @@ const CalendarModalAddShift = (props) => {
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Сотрудник:</label>
-                                <input
-                                    type="text"
+                                <AutoComplete
                                     value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    className="border rounded w-full py-2 px-3"
-                                    required
+                                    suggestions={filteredUsers.map((user) => user.name)}
+                                    completeMethod={searchUsers}
+                                    onChange={(e) => setTitle(e.value)}
+                                    className="w-full"
+                                    placeholder="Выберите сотрудника"
                                 />
                             </div>
                             <div className="mb-4">
