@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale'; // Import Russian locale
 
 export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
     const [shift, setShift] = useState(null);
@@ -51,7 +53,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
             if (!response.ok) {
                 throw new Error('Failed to update shift');
             }
-            await fetchShifts(); // Refresh shifts
+            await fetchShifts();
             setEditing(false);
             setOpen(false);
         } catch (error) {
@@ -70,15 +72,19 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
             if (!response.ok) {
                 throw new Error('Failed to delete shift');
             }
-            await fetchShifts(); // Refresh shifts
+            await fetchShifts();
             setOpen(false);
         } catch (error) {
             console.error(error);
         }
     };
 
+    const formatDate = (date) => {
+        return format(new Date(date), 'dd MMMM yyyy, HH:mm', { locale: ru });
+    };
+
     if (!shift) {
-        return null; // Or a loading indicator
+        return null;
     }
 
     return (
@@ -131,12 +137,10 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
                                         <strong>Сотрудник:</strong> {shift.subUserId.name}
                                     </p>
                                     <p>
-                                        <strong>Начало смены:</strong>{' '}
-                                        {new Date(shift.startTime).toLocaleString()}
+                                        <strong>Начало смены:</strong> {formatDate(shift.startTime)}
                                     </p>
                                     <p>
-                                        <strong>Конец смены:</strong>{' '}
-                                        {new Date(shift.endTime).toLocaleString()}
+                                        <strong>Конец смены:</strong> {formatDate(shift.endTime)}
                                     </p>
                                 </div>
                                 <div className="flex gap-2 mt-4">
