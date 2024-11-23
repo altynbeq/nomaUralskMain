@@ -8,10 +8,10 @@ import ruLocale from '@fullcalendar/core/locales/ru';
 import { useStateContext } from '../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
 
-const Scheduler = () => {
+const Calendar = () => {
     const { access } = useStateContext();
     const [modal, setModal] = useState(false);
-    const [currentShifts, setCurrentShifts] = useState();
+    const [currentShifts, setCurrentShifts] = useState([]);
     const [modalAddShift, setModalAddShift] = useState(false);
     const [subuserStores, setSubuserStores] = useState([]);
     const [selectedStore, setSelectedStore] = useState(null);
@@ -27,18 +27,20 @@ const Scheduler = () => {
     useEffect(() => {
         const id = localStorage.getItem('_id');
         if (id && access.DataManagement) {
-            fetchSubuserStores(id);
+            fetchStructure(id);
         }
     }, [access.DataManagement]);
 
     useEffect(() => {
         if (selectedStore) {
             fetchSubusers(selectedStore._id);
-            fetchShifts(selectedStore._id);
+            fetchShiftsByStore(selectedStore._id);
+        } else {
+            fetchAllShifts();
         }
     }, [selectedStore]);
 
-    const fetchSubuserStores = async (id) => {
+    const fetchStructure = async (id) => {
         const url = `https://nomalytica-back.onrender.com/api/subUsers/subuser-stores/${id}`;
         try {
             const response = await fetch(url);
@@ -47,14 +49,13 @@ const Scheduler = () => {
             }
             const data = await response.json();
             setSubuserStores(data);
-            return data;
         } catch (error) {
-            console.error('Failed to fetch data:', error);
+            console.error('Failed to fetch stores:', error);
         }
     };
 
-    const fetchSubusers = async (id) => {
-        const url = `https://nomalytica-back.onrender.com/api/subUsers/subusers/${id}`;
+    const fetchSubusers = async (storeId) => {
+        const url = `https://nomalytica-back.onrender.com/api/subUsers/subusers/${storeId}`;
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -62,13 +63,32 @@ const Scheduler = () => {
             }
             const data = await response.json();
             setSubusers(data);
-            return data;
         } catch (error) {
-            console.error('Failed to fetch data:', error);
+            console.error('Failed to fetch subusers:', error);
         }
     };
 
-    const fetchShifts = async (storeId) => {
+    const fetchAllShifts = async () => {
+        const url = `https://nomalytica-back.onrender.com/api/shifts/all`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const data = await response.json();
+
+            const shifts = data.map((shift) => ({
+                title: shift.subUserId.name,
+                start: new Date(shift.startTime),
+                end: new Date(shift.endTime),
+            }));
+            setCurrentShifts(shifts);
+        } catch (error) {
+            console.error('Failed to fetch all shifts:', error);
+        }
+    };
+
+    const fetchShiftsByStore = async (storeId) => {
         const url = `https://nomalytica-back.onrender.com/api/shifts/store/${storeId}`;
         try {
             const response = await fetch(url);
@@ -84,16 +104,14 @@ const Scheduler = () => {
             }));
             setCurrentShifts(shifts);
         } catch (error) {
-            console.error('Failed to fetch shifts:', error);
+            console.error('Failed to fetch shifts by store:', error);
         }
     };
 
-    // a custom render function
     function renderEventContent(eventInfo) {
         const startTime = eventInfo.event.start;
         const endTime = eventInfo.event.end;
 
-        // Format the times as desired (e.g., "HH:mm")
         const startTimeFormatted = startTime
             ? startTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
             : '';
@@ -103,19 +121,16 @@ const Scheduler = () => {
 
         return (
             <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal}>
-                <span className="md:scale-10 lg:scale-100 text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">
-                    {startTimeFormatted} - {endTimeFormatted}{' '}
-                </span>{' '}
-                <strong className="text-white text-xs sm:text-xs-sm md:text-xs lg:text-xs">
-                    {eventInfo.event.title}
-                </strong>
-                <br />
+                <span className="text-white text-xs">
+                    {startTimeFormatted} - {endTimeFormatted}
+                </span>
+                <strong className="text-white text-xs">{eventInfo.event.title}</strong>
             </div>
         );
     }
 
     return (
-        <div className="m-2 mb-0 p-2 pb-0  bg-white rounded-3xl">
+        <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
             <Header category="Учёт" title="Смены" />
             <CalendarModal open={modal} setOpen={setModal} />
             <CalendarModalAddShift
@@ -124,6 +139,9 @@ const Scheduler = () => {
                 setOpen={setModalAddShift}
                 currentShifts={currentShifts}
                 setCurrentShifts={setCurrentShifts}
+                fetchShifts={
+                    selectedStore ? () => fetchShiftsByStore(selectedStore._id) : fetchAllShifts
+                }
             />
             <Dropdown
                 value={selectedStore}
@@ -132,6 +150,7 @@ const Scheduler = () => {
                 optionLabel="storeName"
                 placeholder="Выберите магазин"
                 className="mb-5"
+                showClear // Позволяет очистить выбор
             />
 
             <FullCalendar
@@ -146,7 +165,7 @@ const Scheduler = () => {
                 headerToolbar={{
                     left: 'dayGridMonth,dayGridWeek,dayGridDay',
                     center: 'title',
-                    right: 'customButton prev,next,today', // Add the custom button here
+                    right: 'customButton prev,next,today',
                 }}
                 customButtons={{
                     customButton: {
@@ -159,4 +178,4 @@ const Scheduler = () => {
     );
 };
 
-export default Scheduler;
+export default Calendar;

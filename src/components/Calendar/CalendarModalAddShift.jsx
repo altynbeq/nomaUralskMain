@@ -21,22 +21,19 @@ const CalendarModalAddShift = (props) => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        subUserId: selectedSubuser._id, // Используем ID выбранного сотрудника
-                        startTime: new Date(start).toISOString(), // Преобразуем в ISO формат
+                        subUserId: selectedSubuser._id,
+                        startTime: new Date(start).toISOString(),
                         endTime: new Date(end).toISOString(),
                     }),
                 },
             );
 
-            const newShift = await response.json();
-            props.setCurrentShifts([
-                ...props.currentShifts,
-                {
-                    title: setSelectedSubuser.name,
-                    start: new Date(start),
-                    end: new Date(end),
-                },
-            ]);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            // После успешного добавления смены обновляем список смен
+            await props.fetchShifts();
 
             props.setOpen(false);
         } catch (error) {
