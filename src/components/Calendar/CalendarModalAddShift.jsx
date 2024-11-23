@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CalendarModalAddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
@@ -31,11 +33,9 @@ const CalendarModalAddShift = (props) => {
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }
-
-            // После успешного добавления смены обновляем список смен
+            toast.success('Смена успешно добавлена');
             await props.fetchShifts();
 
-            props.setOpen(false);
         } catch (error) {
             console.error('Error adding shift:', error);
         }
@@ -60,6 +60,8 @@ const CalendarModalAddShift = (props) => {
         <>
             {isModalOpen && (
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <ToastContainer position="top-center" autoClose={5000} />
+
                     <div className="bg-white p-4 rounded-lg shadow-lg min-w-[300]">
                         <div className="flex justify-between">
                             <h2

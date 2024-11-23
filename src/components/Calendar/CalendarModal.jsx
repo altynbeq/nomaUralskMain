@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale'; // Import Russian locale
+import { formatDate } from '../../methods/dataFormatter';
 
 export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
     const [shift, setShift] = useState(null);
@@ -77,10 +76,6 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const formatDate = (date) => {
-        return format(new Date(date), 'dd MMMM yyyy, HH:mm', { locale: ru });
     };
 
     if (!shift) {
