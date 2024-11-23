@@ -125,7 +125,7 @@ const LogInForm = () => {
                         <div className="rounded-xl flex flex-col gap-4 shadow-sm -space-y-px">
                             <div>
                                 <label htmlFor="email-address" className="">
-                                    Логин
+                                    Почта
                                 </label>
                                 <input
                                     id="email-address"

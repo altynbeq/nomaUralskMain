@@ -12,7 +12,6 @@ import {
     TechProb,
     LogInForm,
     Calendar,
-    Loader,
 } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
@@ -21,6 +20,7 @@ import { getUserUrls } from './methods/getUserUrls';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import AccountingWarehouse from './pages/AccountingWarehouse';
 import AccountingWorkers from './pages/AccountingWorkers';
+import { Loader } from './components/Loader';
 
 const App = () => {
     const {
