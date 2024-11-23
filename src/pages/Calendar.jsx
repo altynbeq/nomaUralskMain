@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import CalendarModal from '../components/Calendar/CalendarModal';
+import { ScheduleWithEdit } from '../components/Calendar/CalendarModal';
 import CalendarModalAddShift from '../components/Calendar/CalendarModalAddShift';
 import ruLocale from '@fullcalendar/core/locales/ru';
 import { useStateContext } from '../contexts/ContextProvider';
@@ -16,6 +16,7 @@ const Calendar = () => {
     const [subuserStores, setSubuserStores] = useState([]);
     const [selectedStore, setSelectedStore] = useState(null);
     const [subusers, setSubusers] = useState([]);
+    const [selectedShiftId, setSelectedShiftId] = useState(null);
 
     function openModal() {
         setModal(true);
@@ -81,6 +82,10 @@ const Calendar = () => {
                 title: shift.subUserId.name,
                 start: new Date(shift.startTime),
                 end: new Date(shift.endTime),
+                extendedProps: {
+                    shiftId: shift._id,
+                    subUserId: shift.subUserId._id,
+                },
             }));
             setCurrentShifts(shifts);
         } catch (error) {
@@ -101,6 +106,10 @@ const Calendar = () => {
                 title: shift.subUserId.name,
                 start: new Date(shift.startTime),
                 end: new Date(shift.endTime),
+                extendedProps: {
+                    shiftId: shift._id,
+                    subUserId: shift.subUserId._id,
+                },
             }));
             setCurrentShifts(shifts);
         } catch (error) {
@@ -129,10 +138,23 @@ const Calendar = () => {
         );
     }
 
+    const handleEventClick = (info) => {
+        const shiftId = info.event.extendedProps.shiftId;
+        setSelectedShiftId(shiftId);
+        setModal(true);
+    };
+
     return (
         <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
             <Header category="Учёт" title="Смены" />
-            <CalendarModal open={modal} setOpen={setModal} />
+            <ScheduleWithEdit
+                open={modal}
+                setOpen={setModal}
+                shiftId={selectedShiftId}
+                fetchShifts={
+                    selectedStore ? () => fetchShiftsByStore(selectedStore._id) : fetchAllShifts
+                }
+            />
             <CalendarModalAddShift
                 subusers={subusers}
                 open={modalAddShift}
@@ -150,7 +172,7 @@ const Calendar = () => {
                 optionLabel="storeName"
                 placeholder="Выберите магазин"
                 className="mb-5"
-                showClear // Позволяет очистить выбор
+                showClear
             />
 
             <FullCalendar
@@ -159,6 +181,7 @@ const Calendar = () => {
                 weekends={true}
                 events={currentShifts}
                 eventContent={renderEventContent}
+                eventClick={handleEventClick}
                 locale={ruLocale}
                 firstDay={1}
                 fixedWeekCount={false}
