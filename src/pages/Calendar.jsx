@@ -7,6 +7,7 @@ import CalendarModalAddShift from '../components/Calendar/CalendarModalAddShift'
 import ruLocale from '@fullcalendar/core/locales/ru';
 import { useStateContext } from '../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
+import AlertModal from '../components/AlertModal';
 
 const Calendar = () => {
     const { access } = useStateContext();
@@ -17,12 +18,17 @@ const Calendar = () => {
     const [selectedStore, setSelectedStore] = useState(null);
     const [subusers, setSubusers] = useState([]);
     const [selectedShiftId, setSelectedShiftId] = useState(null);
+    const [alertOpen, setAlertOpen] = useState(false);
 
     function openModal() {
         setModal(true);
     }
     function openModalAddShift() {
-        setModalAddShift(true);
+        if (selectedStore) {
+            setModalAddShift(true);
+        } else {
+            setAlertOpen(true);
+        }
     }
 
     useEffect(() => {
@@ -147,6 +153,11 @@ const Calendar = () => {
     return (
         <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
             <Header category="Учёт" title="Смены" />
+            <AlertModal
+                open={alertOpen}
+                message="Пожалуйста, выберите магазин перед добавлением смены."
+                onClose={() => setAlertOpen(false)}
+            />
             <ScheduleWithEdit
                 open={modal}
                 setOpen={setModal}
