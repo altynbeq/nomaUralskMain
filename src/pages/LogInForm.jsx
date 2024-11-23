@@ -3,6 +3,8 @@ import { useStateContext } from './../contexts/ContextProvider';
 import { FaChartPie, FaEye, FaEyeSlash } from 'react-icons/fa';
 import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
+import AlertModal from '../components/AlertModal';
+import { se } from 'date-fns/locale';
 
 const LogInForm = () => {
     const { handleLogin, userId } = useStateContext();
@@ -15,6 +17,10 @@ const LogInForm = () => {
     const [token, setToken] = useState('');
     const [name, setName] = useState('');
     const [regBtnActive, setRegBtnActive] = useState(true);
+    const [alertOpen, setAlertOpen] = useState({
+        login: false,
+        signUp: false,
+    });
 
     const deactivateRegBtn = () => {
         setRegBtnActive(false);
@@ -54,7 +60,9 @@ const LogInForm = () => {
                         }
                         handleLogin(data.user._id);
                     } else {
-                        alert(data.message);
+                        setAlertOpen({
+                            login: true,
+                        });
                     }
                 })
                 .catch((error) => console.error('Error:', error));
@@ -79,9 +87,7 @@ const LogInForm = () => {
                     res.text().then((error) => alert(error));
                 }
                 if (res.ok) {
-                    res.json().then((data) =>
-                        alert(`Пользователь ${data.email} успешно зарегисрирован`),
-                    );
+                    res.json().then(() => setAlertOpen({ signUp: true }));
                     deactivateRegBtn();
                 }
             });
@@ -95,6 +101,17 @@ const LogInForm = () => {
             className="min-h-screen flex items-center justify-center bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8"
             style={{ backgroundImage: `url(${window.innerWidth >= 768 ? bgDesk : bgMob})` }}
         >
+            <AlertModal
+                open={alertOpen.login || alertOpen.signUp}
+                message={
+                    alertOpen.login
+                        ? 'Введены не верные данные'
+                        : alertOpen.signUp
+                          ? 'Вы успешно зарегистрировались'
+                          : ''
+                }
+                onClose={() => setAlertOpen(false)}
+            />
             <div className="max-w-md w-full bg-white p-8 border-8-grey rounded-2xl space-y-8">
                 <div className="flex text-blue-800 mb-10 flex-row text-4xl align-center justify-center gap-1">
                     <h2>N</h2>
@@ -119,7 +136,7 @@ const LogInForm = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                    placeholder="Логин"
+                                    placeholder="Почта"
                                 />
                             </div>
                             <div>
