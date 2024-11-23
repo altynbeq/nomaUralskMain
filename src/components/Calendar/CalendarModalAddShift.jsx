@@ -4,26 +4,44 @@ import { AutoComplete } from 'primereact/autocomplete';
 
 const CalendarModalAddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
-    const [title, setTitle] = useState('');
+    const [selectedSubuser, setSelectedSubuser] = useState(null);
     const [start, setStart] = useState('');
     const [end, setEnd] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!title || !start || !end) return;
+        if (!selectedSubuser || !start || !end) return;
+        try {
+            const response = await fetch(
+                'https://nomalytica-back.onrender.com/api/shifts/create-shift',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        subUserId: selectedSubuser._id, // Используем ID выбранного сотрудника
+                        startTime: new Date(start).toISOString(), // Преобразуем в ISO формат
+                        endTime: new Date(end).toISOString(),
+                    }),
+                },
+            );
 
-        const newShift = {
-            title,
-            start: new Date(start),
-            end: new Date(end),
-        };
-        const newShifts = [...props.currentShifts, newShift];
-        props.setCurrentShifts(newShifts);
-        setTitle('');
-        setStart('');
-        setEnd('');
-        props.setOpen(false);
+            const newShift = await response.json();
+            props.setCurrentShifts([
+                ...props.currentShifts,
+                {
+                    title: setSelectedSubuser.name,
+                    start: new Date(start),
+                    end: new Date(end),
+                },
+            ]);
+
+            props.setOpen(false);
+        } catch (error) {
+            console.error('Error adding shift:', error);
+        }
     };
 
     useEffect(() => {
@@ -61,13 +79,14 @@ const CalendarModalAddShift = (props) => {
                             </button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
+                            <div className="mb-8 flex gap-4">
                                 <label className="block text-gray-700">Сотрудник:</label>
                                 <AutoComplete
-                                    value={title}
-                                    suggestions={filteredUsers.map((user) => user.name)}
+                                    value={selectedSubuser}
+                                    suggestions={filteredUsers}
                                     completeMethod={searchUsers}
-                                    onChange={(e) => setTitle(e.value)}
+                                    onChange={(e) => setSelectedSubuser(e.value)}
+                                    field="name"
                                     className="w-full"
                                     placeholder="Выберите сотрудника"
                                 />
