@@ -1,14 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
+import { Calendar } from 'primereact/calendar';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { addLocale } from 'primereact/api';
+
+addLocale('ru', {
+    firstDayOfWeek: 1,
+    dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    dayNamesShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    monthNames: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+    ],
+    monthNamesShort: [
+        'Янв',
+        'Фев',
+        'Мар',
+        'Апр',
+        'Май',
+        'Июн',
+        'Июл',
+        'Авг',
+        'Сен',
+        'Окт',
+        'Ноя',
+        'Дек',
+    ],
+    today: 'Сегодня',
+    clear: 'Очистить',
+});
 
 const CalendarModalAddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
     const [selectedSubuser, setSelectedSubuser] = useState(null);
-    const [start, setStart] = useState('');
-    const [end, setEnd] = useState('');
+    const [start, setStart] = useState(null); // Инициализируем как null
+    const [end, setEnd] = useState(null); // Инициализируем как null
     const [filteredUsers, setFilteredUsers] = useState([]);
 
     const handleSubmit = async (e) => {
@@ -24,8 +63,8 @@ const CalendarModalAddShift = (props) => {
                     },
                     body: JSON.stringify({
                         subUserId: selectedSubuser._id,
-                        startTime: new Date(start).toISOString(),
-                        endTime: new Date(end).toISOString(),
+                        startTime: start.toISOString(), // Используем start напрямую
+                        endTime: end.toISOString(), // Используем end напрямую
                     }),
                 },
             );
@@ -92,22 +131,26 @@ const CalendarModalAddShift = (props) => {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Начало смены:</label>
-                                <input
-                                    type="datetime-local"
+                                <Calendar
                                     value={start}
-                                    onChange={(e) => setStart(e.target.value)}
-                                    className="border rounded w-full py-2 px-3"
-                                    required
+                                    onChange={(e) => setStart(e.value)}
+                                    showTime
+                                    locale="ru"
+                                    hourFormat="24"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    placeholder="Выберите дату и время начала"
                                 />
                             </div>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Конец смены:</label>
-                                <input
-                                    type="datetime-local"
+                                <Calendar
                                     value={end}
-                                    onChange={(e) => setEnd(e.target.value)}
-                                    className="border rounded w-full py-2 px-3"
-                                    required
+                                    onChange={(e) => setEnd(e.value)}
+                                    showTime
+                                    locale="ru"
+                                    hourFormat="24"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    placeholder="Выберите дату и время окончания"
                                 />
                             </div>
                             <button
