@@ -43,16 +43,18 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-const CalendarModalAddShift = (props) => {
+export const AddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
     const [selectedSubuser, setSelectedSubuser] = useState(null);
-    const [start, setStart] = useState(null); // Инициализируем как null
-    const [end, setEnd] = useState(null); // Инициализируем как null
+    const [start, setStart] = useState(null);
+    const [end, setEnd] = useState(null);
     const [filteredUsers, setFilteredUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedSubuser || !start || !end) return;
+        setIsLoading(true);
         try {
             const response = await fetch(
                 'https://nomalytica-back.onrender.com/api/shifts/create-shift',
@@ -63,8 +65,8 @@ const CalendarModalAddShift = (props) => {
                     },
                     body: JSON.stringify({
                         subUserId: selectedSubuser._id,
-                        startTime: start.toISOString(), // Используем start напрямую
-                        endTime: end.toISOString(), // Используем end напрямую
+                        startTime: start.toISOString(),
+                        endTime: end.toISOString(),
                     }),
                 },
             );
@@ -76,6 +78,8 @@ const CalendarModalAddShift = (props) => {
             await props.fetchShifts();
         } catch (error) {
             console.error('Error adding shift:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -155,9 +159,12 @@ const CalendarModalAddShift = (props) => {
                             </div>
                             <button
                                 type="submit"
-                                className="flex bg-blue-500 text-white py-2 px-4 rounded ml-auto"
+                                disabled={isLoading}
+                                className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
+                                    isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                             >
-                                Добавить
+                                {isLoading ? 'Добавление...' : 'Добавить'}
                             </button>
                         </form>
                     </div>
@@ -166,5 +173,3 @@ const CalendarModalAddShift = (props) => {
         </>
     );
 };
-
-export default CalendarModalAddShift;

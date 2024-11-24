@@ -3,7 +3,7 @@ import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import { ScheduleWithEdit } from '../components/Calendar/CalendarModal';
-import CalendarModalAddShift from '../components/Calendar/CalendarModalAddShift';
+import { AddShift } from '../components/Calendar/AddShift';
 import ruLocale from '@fullcalendar/core/locales/ru';
 import { useStateContext } from '../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
@@ -185,7 +185,7 @@ const Calendar = () => {
                 shiftId={selectedShiftId}
                 fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
             />
-            <CalendarModalAddShift
+            <AddShift
                 subusers={subusers}
                 open={modalAddShift}
                 setOpen={setModalAddShift}
