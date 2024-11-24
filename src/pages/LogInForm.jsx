@@ -4,7 +4,6 @@ import { FaChartPie, FaEye, FaEyeSlash } from 'react-icons/fa';
 import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
 import AlertModal from '../components/AlertModal';
-import { se } from 'date-fns/locale';
 
 const LogInForm = () => {
     const { handleLogin, userId } = useStateContext();

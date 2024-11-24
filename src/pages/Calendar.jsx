@@ -42,8 +42,6 @@ const Calendar = () => {
         if (selectedStore) {
             fetchSubusers(selectedStore._id);
             fetchShiftsByStore(selectedStore._id);
-        } else {
-            fetchAllShifts();
         }
     }, [selectedStore]);
 
@@ -162,9 +160,7 @@ const Calendar = () => {
                 open={modal}
                 setOpen={setModal}
                 shiftId={selectedShiftId}
-                fetchShifts={
-                    selectedStore ? () => fetchShiftsByStore(selectedStore._id) : fetchAllShifts
-                }
+                fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
             />
             <CalendarModalAddShift
                 subusers={subusers}
@@ -172,9 +168,7 @@ const Calendar = () => {
                 setOpen={setModalAddShift}
                 currentShifts={currentShifts}
                 setCurrentShifts={setCurrentShifts}
-                fetchShifts={
-                    selectedStore ? () => fetchShiftsByStore(selectedStore._id) : fetchAllShifts
-                }
+                fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
             />
             <Dropdown
                 value={selectedStore}
