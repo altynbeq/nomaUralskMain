@@ -1,21 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { formatDate } from '../../methods/dataFormatter';
+import { Calendar } from 'primereact/calendar';
+import { addLocale } from 'primereact/api';
+
+addLocale('ru', {
+    firstDayOfWeek: 1,
+    dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    dayNamesShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    monthNames: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+    ],
+    monthNamesShort: [
+        'Янв',
+        'Фев',
+        'Мар',
+        'Апр',
+        'Май',
+        'Июн',
+        'Июл',
+        'Авг',
+        'Сен',
+        'Окт',
+        'Ноя',
+        'Дек',
+    ],
+    today: 'Сегодня',
+    clear: 'Очистить',
+});
 
 export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
     const [shift, setShift] = useState(null);
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-
-    const formatDateForInput = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (open && shiftId) {
@@ -33,8 +64,8 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
             }
             const data = await response.json();
             setShift(data);
-            setStartTime(formatDateForInput(new Date(data.startTime)));
-            setEndTime(formatDateForInput(new Date(data.endTime)));
+            setStartTime(new Date(data.startTime));
+            setEndTime(new Date(data.endTime));
         } catch (error) {
             console.error(error);
         }
@@ -45,6 +76,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
     };
 
     const handleSave = async () => {
+        setIsSaving(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shiftId}`,
@@ -84,6 +116,8 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
             setOpen(false);
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -99,7 +133,10 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
                         <div className="flex justify-between">
                             <h2 className="text-lg font-bold flex mr-5 pr-10 mb-4">Детали смены</h2>
                             <button
-                                onClick={() => setOpen(false)}
+                                onClick={() => {
+                                    setOpen(false);
+                                    setEditing(false);
+                                }}
                                 className="text-gray-500 hover:text-gray-800"
                             >
                                 <FaTimes className="mb-4" />
@@ -108,30 +145,35 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
                         {editing ? (
                             <>
                                 <div className="mb-4">
-                                    <label className="block text-gray-700">Начало смены:</label>
-                                    <input
-                                        type="datetime-local"
+                                    <Calendar
                                         value={startTime}
-                                        onChange={(e) => setStartTime(e.target.value)}
-                                        className="border rounded w-full py-2 px-3"
-                                        required
+                                        onChange={(e) => setStartTime(e.value)}
+                                        showTime
+                                        locale="ru"
+                                        hourFormat="24"
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        placeholder="Начало смены:"
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-gray-700">Конец смены:</label>
-                                    <input
-                                        type="datetime-local"
+                                    <Calendar
                                         value={endTime}
-                                        onChange={(e) => setEndTime(e.target.value)}
-                                        className="border rounded w-full py-2 px-3"
-                                        required
+                                        onChange={(e) => setEndTime(e.value)}
+                                        showTime
+                                        locale="ru"
+                                        hourFormat="24"
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        placeholder="Конец смены:"
                                     />
                                 </div>
                                 <button
+                                    disabled={isSaving}
                                     onClick={handleSave}
-                                    className="flex bg-green-500 text-white py-2 px-4 rounded ml-auto"
+                                    className={`flex bg-green-500 text-white py-2 px-4 rounded ml-auto ${
+                                        isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                 >
-                                    Сохранить
+                                    {isSaving ? 'Сохранение...' : 'Сохранить'}
                                 </button>
                             </>
                         ) : (

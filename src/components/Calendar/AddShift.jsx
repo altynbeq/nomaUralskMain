@@ -1,19 +1,60 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
+import { Calendar } from 'primereact/calendar';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { addLocale } from 'primereact/api';
 
-const CalendarModalAddShift = (props) => {
+addLocale('ru', {
+    firstDayOfWeek: 1,
+    dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    dayNamesShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    monthNames: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+    ],
+    monthNamesShort: [
+        'Янв',
+        'Фев',
+        'Мар',
+        'Апр',
+        'Май',
+        'Июн',
+        'Июл',
+        'Авг',
+        'Сен',
+        'Окт',
+        'Ноя',
+        'Дек',
+    ],
+    today: 'Сегодня',
+    clear: 'Очистить',
+});
+
+export const AddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
     const [selectedSubuser, setSelectedSubuser] = useState(null);
-    const [start, setStart] = useState('');
-    const [end, setEnd] = useState('');
+    const [start, setStart] = useState(null);
+    const [end, setEnd] = useState(null);
     const [filteredUsers, setFilteredUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedSubuser || !start || !end) return;
+        setIsLoading(true);
         try {
             const response = await fetch(
                 'https://nomalytica-back.onrender.com/api/shifts/create-shift',
@@ -24,8 +65,8 @@ const CalendarModalAddShift = (props) => {
                     },
                     body: JSON.stringify({
                         subUserId: selectedSubuser._id,
-                        startTime: new Date(start).toISOString(),
-                        endTime: new Date(end).toISOString(),
+                        startTime: start.toISOString(),
+                        endTime: end.toISOString(),
                     }),
                 },
             );
@@ -37,6 +78,8 @@ const CalendarModalAddShift = (props) => {
             await props.fetchShifts();
         } catch (error) {
             console.error('Error adding shift:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -92,29 +135,36 @@ const CalendarModalAddShift = (props) => {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Начало смены:</label>
-                                <input
-                                    type="datetime-local"
+                                <Calendar
                                     value={start}
-                                    onChange={(e) => setStart(e.target.value)}
-                                    className="border rounded w-full py-2 px-3"
-                                    required
+                                    onChange={(e) => setStart(e.value)}
+                                    showTime
+                                    locale="ru"
+                                    hourFormat="24"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    placeholder="Выберите дату и время начала"
                                 />
                             </div>
                             <div className="mb-4">
                                 <label className="block text-gray-700">Конец смены:</label>
-                                <input
-                                    type="datetime-local"
+                                <Calendar
                                     value={end}
-                                    onChange={(e) => setEnd(e.target.value)}
-                                    className="border rounded w-full py-2 px-3"
-                                    required
+                                    onChange={(e) => setEnd(e.value)}
+                                    showTime
+                                    locale="ru"
+                                    hourFormat="24"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    placeholder="Выберите дату и время окончания"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="flex bg-blue-500 text-white py-2 px-4 rounded ml-auto"
+                                disabled={isLoading}
+                                className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
+                                    isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                             >
-                                Добавить
+                                {isLoading ? 'Добавление...' : 'Добавить'}
                             </button>
                         </form>
                     </div>
@@ -123,5 +173,3 @@ const CalendarModalAddShift = (props) => {
         </>
     );
 };
-
-export default CalendarModalAddShift;
