@@ -6,7 +6,7 @@
 // import Pyramid from './Charts/Pyramid';
 
 // const Website = () => {
-//     const { currentColor, currentMode } = useStateContext();  
+//     const { currentColor, currentMode } = useStateContext();
 
 //   return (
 //     <div className='mt-12 flex flex-col justify-center align-center p-10'>
@@ -66,7 +66,7 @@
 //             </div>
 //           ))}
 //         </div>
-        
+
 //         <div className="flex flex-wrap lg:flex-nowrap justify-center mt-5 gap-2">
 //             <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 rounded-2xl w-120 md:w-760">
 //                 <Pyramid height="100px" width="320"/>
@@ -90,7 +90,7 @@
 //                         </div>
 //                     ))}
 //                 </div>
-                
+
 //             </div>
 //             <div className='bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-2xl  p-10 w-[410px]'>
 //                 <Stacked id="stackedChart" currentMode={currentMode} width="320px" height="360px" />
@@ -136,7 +136,7 @@
 //             </div>
 //         </div>
 //     </div>
-   
+
 //   )
 // }
 

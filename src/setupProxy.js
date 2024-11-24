@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-module.exports = function(app) {
-     // Proxy for 1C API
+module.exports = function (app) {
+    // Proxy for 1C API
     app.use(
         '/api',
         createProxyMiddleware({
@@ -10,7 +10,7 @@ module.exports = function(app) {
             pathRewrite: {
                 '^/api': '', // remove /api from the request path
             },
-        })
+        }),
     );
 
     // Proxy for Bitrix24 API

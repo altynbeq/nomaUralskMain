@@ -1,31 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { useStateContext  } from '../../contexts/ContextProvider';
+import { useStateContext } from '../../contexts/ContextProvider';
 import BarChartRe from '../ReCharts/BarCharts';
 import { fetchDeals } from '../../methods/dataFetches/getDealsBitrix';
 
 const WeaklyRevenueOverviewStacked = () => {
     const { currentColor, dateRanges, deals } = useStateContext();
-    const [ russianSalesSeries, setrussianSalesSeries ] = useState([]);
-    const [ dealsSeries, setDealsSeries ] = useState({});
+    const [russianSalesSeries, setrussianSalesSeries] = useState([]);
+    const [dealsSeries, setDealsSeries] = useState({});
 
     const russianDaysMap = {
-        'Monday': 'Пн',
-        'Tuesday': 'Вт',
-        'Wednesday': 'Ср',
-        'Thursday': 'Чт',
-        'Friday': 'Пт',
-        'Saturday': 'Сб',
-        'Sunday': 'Вс'
+        Monday: 'Пн',
+        Tuesday: 'Вт',
+        Wednesday: 'Ср',
+        Thursday: 'Чт',
+        Friday: 'Пт',
+        Saturday: 'Сб',
+        Sunday: 'Вс',
     };
     useEffect(() => {
-        if(deals.dealsWeek){
-            const russianSalesSeries = deals.dealsWeek.avgCheckSeries.map(item => ({
+        if (deals.dealsWeek) {
+            const russianSalesSeries = deals.dealsWeek.avgCheckSeries.map((item) => ({
                 ...item,
-                x: russianDaysMap[item.x] || item.x 
+                x: russianDaysMap[item.x] || item.x,
             }));
-            setrussianSalesSeries(russianSalesSeries)
-        } 
-    }, [deals])
+            setrussianSalesSeries(russianSalesSeries);
+        }
+    }, [deals]);
 
     return (
         <div className="rounded-2xl p-2 mx-3" style={{ backgroundColor: currentColor }}>

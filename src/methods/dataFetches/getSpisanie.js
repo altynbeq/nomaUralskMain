@@ -21,8 +21,8 @@ async function fetchDataForRange(api, startDate, endDate) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${encodedCredentials}`
-        }
+            Authorization: `Basic ${encodedCredentials}`,
+        },
     });
 
     if (!response.ok) {
@@ -35,13 +35,12 @@ async function fetchDataForRange(api, startDate, endDate) {
 }
 
 export async function getSpisanie(api, dateRanges) {
-
     const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
     const formedSpisanieData = await calculateSpisanieStats(data);
     return formedSpisanieData;
     // if (Array.isArray(dateRanges) && dateRanges[0]) {
     //     const [dayRange, weekRange, monthRange] = dateRanges;
- 
+
     //     // Fetch data for each time period
     //     const [dayData, weekData, monthData] = await Promise.all([
     //         fetchDataForRange(dayRange.startDate, dayRange.endDate),

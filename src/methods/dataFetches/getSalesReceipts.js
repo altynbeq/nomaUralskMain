@@ -1,5 +1,5 @@
-import { sales1CDataFormer } from "../dataFormers/salesReceiptsDataFormer";
-import { sales1CMonthFormer } from '../dataFormers/salesReceiptsMonthFormer'
+import { sales1CDataFormer } from '../dataFormers/salesReceiptsDataFormer';
+import { sales1CMonthFormer } from '../dataFormers/salesReceiptsMonthFormer';
 
 const username = 'Алтынбек';
 const password = '5521';
@@ -12,8 +12,7 @@ function encodeBase64(string) {
 const credentials = `${username}:${password}`;
 const encodedCredentials = encodeBase64(credentials);
 
- 
-async function fetchDataForRange(api, startDate, endDate){
+async function fetchDataForRange(api, startDate, endDate) {
     // Decode URL-encoded dates
     const decodedStartDate = decodeURIComponent(startDate).split(' ')[0].replace(/-/g, '');
     const decodedEndDate = decodeURIComponent(endDate).split(' ')[0].replace(/-/g, '');
@@ -23,8 +22,8 @@ async function fetchDataForRange(api, startDate, endDate){
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${encodedCredentials}`
-        }
+            Authorization: `Basic ${encodedCredentials}`,
+        },
     });
 
     if (!response.ok) {
@@ -36,13 +35,13 @@ async function fetchDataForRange(api, startDate, endDate){
 }
 
 export async function getSalesReceiptsFront(api, dateRanges) {
-        const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
+    const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
     const shiftDate = (data) => {
         return data.map((item) => {
             // Extract date and time parts from ISO string (YYYY-MM-DDTHH:MM:SS)
-            let [datePart, timePart] = item.Дата.split("T");
-            let [year, month, day] = datePart.split("-").map(Number);
-            let [hours, minutes, seconds] = timePart.slice(0, -1).split(":").map(Number);
+            let [datePart, timePart] = item.Дата.split('T');
+            let [year, month, day] = datePart.split('-').map(Number);
+            let [hours, minutes, seconds] = timePart.slice(0, -1).split(':').map(Number);
 
             // Check if the time is between 00:00 and 02:00 UTC
             if (hours >= 0 && hours < 2) {
@@ -52,15 +51,15 @@ export async function getSalesReceiptsFront(api, dateRanges) {
                 // If hours go negative, adjust the date
                 if (hours < 0) {
                     hours += 24; // Wrap around the hours
-                    day -= 1;    // Move to the previous day
+                    day -= 1; // Move to the previous day
 
                     // Handle day and month boundaries
                     if (day < 1) {
                         month -= 1; // Move to the previous month
 
                         if (month < 1) {
-                            month = 12;     // Wrap to December
-                            year -= 1;      // Move to the previous year
+                            month = 12; // Wrap to December
+                            year -= 1; // Move to the previous year
                         }
 
                         // Get the correct number of days in the new month
@@ -84,6 +83,6 @@ export async function getSalesReceiptsFront(api, dateRanges) {
         });
     };
 
-        const formedData = sales1CMonthFormer(shiftDate(data));
-        return formedData;
+    const formedData = sales1CMonthFormer(shiftDate(data));
+    return formedData;
 }

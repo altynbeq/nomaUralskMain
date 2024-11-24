@@ -1,22 +1,23 @@
-
 export const kkmReceiptsDataFormer = (receipts) => {
     const storeStats = {};
     const processedSales = new Set(); // To track unique combinations of Дата and СуммаДокумента
 
-    receipts.forEach(receipt => {
+    receipts.forEach((receipt) => {
         let storeName = receipt.КассирНаименование.replace(/(\s|\d|Касса)/g, '');
         // console.log("=>(kkmDataFormer.js:8) storeName", storeName);
-        const kkmName = receipt.КассаККМНаименование.replace(/ОФД Фискальный регистратор |\(Склад.*\)/g, '').trim(); // Simplify KKM name
+        const kkmName = receipt.КассаККМНаименование
+            .replace(/ОФД Фискальный регистратор |\(Склад.*\)/g, '')
+            .trim(); // Simplify KKM name
         // console.log("=>(kkmDataFormer.js:10) kkmName", kkmName);
 
-        if(storeName === 'БухарЖырау'){
-            storeName = 'Бухар'
+        if (storeName === 'БухарЖырау') {
+            storeName = 'Бухар';
         }
 
         if (!storeStats[storeName]) {
             storeStats[storeName] = {
                 totalSum: 0,
-                totalNumberSales: 0,  // Keep track of the total number of unique sales
+                totalNumberSales: 0, // Keep track of the total number of unique sales
                 bestSoldItemAmount: { name: '', amount: 0, totalSum: 0 },
                 bestSoldItemSum: { name: '', amount: 0, totalSum: 0 },
                 leastSoldItemAmount: { name: '', amount: Infinity, totalSum: 0 },
@@ -24,8 +25,14 @@ export const kkmReceiptsDataFormer = (receipts) => {
                 kassaName: receipt.КассаККМНаименование,
                 itemsSold: {},
                 kkmStats: {}, // Initialize KKM stats
-                salesSeries: Array.from({ length: 31 }, (_, i) => ({ x: (i + 1).toString(), y: 0 })), // For counting sales number
-                salesSumSeries: Array.from({ length: 31 }, (_, i) => ({ x: (i + 1).toString(), y: 0 })) // For sales amount
+                salesSeries: Array.from({ length: 31 }, (_, i) => ({
+                    x: (i + 1).toString(),
+                    y: 0,
+                })), // For counting sales number
+                salesSumSeries: Array.from({ length: 31 }, (_, i) => ({
+                    x: (i + 1).toString(),
+                    y: 0,
+                })), // For sales amount
             };
         }
 
@@ -55,37 +62,37 @@ export const kkmReceiptsDataFormer = (receipts) => {
 
         // Update best sold item by amount
         if (store.itemsSold[itemName].amount > store.bestSoldItemAmount.amount) {
-            store.bestSoldItemAmount = { 
-                name: itemName, 
-                amount: store.itemsSold[itemName].amount, 
-                totalSum: store.itemsSold[itemName].totalSum 
+            store.bestSoldItemAmount = {
+                name: itemName,
+                amount: store.itemsSold[itemName].amount,
+                totalSum: store.itemsSold[itemName].totalSum,
             };
         }
 
         // Update best sold item by total sum
         if (store.itemsSold[itemName].totalSum > store.bestSoldItemSum.totalSum) {
-            store.bestSoldItemSum = { 
-                name: itemName, 
-                amount: store.itemsSold[itemName].amount, 
-                totalSum: store.itemsSold[itemName].totalSum 
+            store.bestSoldItemSum = {
+                name: itemName,
+                amount: store.itemsSold[itemName].amount,
+                totalSum: store.itemsSold[itemName].totalSum,
             };
         }
 
         // Update least sold item by amount
         if (store.itemsSold[itemName].amount < store.leastSoldItemAmount.amount) {
-            store.leastSoldItemAmount = { 
-                name: itemName, 
-                amount: store.itemsSold[itemName].amount, 
-                totalSum: store.itemsSold[itemName].totalSum 
+            store.leastSoldItemAmount = {
+                name: itemName,
+                amount: store.itemsSold[itemName].amount,
+                totalSum: store.itemsSold[itemName].totalSum,
             };
         }
 
         // Update least sold item by total sum
         if (store.itemsSold[itemName].totalSum < store.leastSoldItemSum.totalSum) {
-            store.leastSoldItemSum = { 
-                name: itemName, 
-                amount: store.itemsSold[itemName].amount, 
-                totalSum: store.itemsSold[itemName].totalSum 
+            store.leastSoldItemSum = {
+                name: itemName,
+                amount: store.itemsSold[itemName].amount,
+                totalSum: store.itemsSold[itemName].totalSum,
             };
         }
 
@@ -106,25 +113,24 @@ export const kkmReceiptsDataFormer = (receipts) => {
         store.kkmStats[kkmName].totalSum += itemSum; // Sum of the "Сумма" for this transaction
     });
 
-    Object.keys(storeStats).forEach(key => {
+    Object.keys(storeStats).forEach((key) => {
         const item = storeStats[key];
-    
-        const filteredStoreData = receipts.filter(receipt => 
-            receipt['КассаККМНаименование'] === item.kassaName
+
+        const filteredStoreData = receipts.filter(
+            (receipt) => receipt['КассаККМНаименование'] === item.kassaName,
         );
-    
-        const uniqueData = filteredStoreData.filter((receipt, index, self) =>
-            self.findIndex(otherReceipt => 
-                otherReceipt.Дата === receipt.Дата && 
-                otherReceipt.СуммаДокумента === receipt.СуммаДокумента
-            ) === index
+
+        const uniqueData = filteredStoreData.filter(
+            (receipt, index, self) =>
+                self.findIndex(
+                    (otherReceipt) =>
+                        otherReceipt.Дата === receipt.Дата &&
+                        otherReceipt.СуммаДокумента === receipt.СуммаДокумента,
+                ) === index,
         );
-    
+
         item.totalNumberSales = uniqueData.length;
     });
 
-    
     return storeStats;
 };
-
-

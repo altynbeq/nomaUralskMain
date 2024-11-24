@@ -39,30 +39,30 @@ export const dealsDataFormer = (list) => {
             { x: 'Monday', y: 0 },
             { x: 'Tuesday', y: 0 },
             { x: 'Wednesday', y: 0 },
-        ]
+        ],
     };
     const workersStats = {};
     const dailySalesCount = {
-        'Thursday': 0,
-        'Friday': 0,
-        'Saturday': 0,
-        'Sunday': 0,
-        'Monday': 0,
-        'Tuesday': 0,
-        'Wednesday': 0,
+        Thursday: 0,
+        Friday: 0,
+        Saturday: 0,
+        Sunday: 0,
+        Monday: 0,
+        Tuesday: 0,
+        Wednesday: 0,
     };
 
-    list.forEach(lead => {
+    list.forEach((lead) => {
         // Calculate totalSum
         const opportunity = parseFloat(lead.OPPORTUNITY);
         dealsStats.totalSum += opportunity;
-        
+
         // Date when lead was closed
         const closeDate = new Date(lead.CLOSEDATE);
         // Get day of the week as string
         const dayOfWeek = closeDate.toLocaleDateString('en-US', { weekday: 'long' });
 
-        const dayIndex = dealsStats.series.findIndex(item => item.x === dayOfWeek);
+        const dayIndex = dealsStats.series.findIndex((item) => item.x === dayOfWeek);
         if (dayIndex !== -1) {
             dealsStats.series[dayIndex].y += opportunity;
             dailySalesCount[dayOfWeek] += 1;
@@ -102,18 +102,19 @@ export const dealsDataFormer = (list) => {
     let minAmountInSeries = 0;
     let maxAmountInSeries = 0;
 
-    dealsStats.series.forEach(day => {
+    dealsStats.series.forEach((day) => {
         if (day.y > maxAmountInSeries) {
             maxAmountInSeries = day.y;
         }
-        if (day.y < minAmountInSeries && day.y > 0) { // Consider only positive amounts
+        if (day.y < minAmountInSeries && day.y > 0) {
+            // Consider only positive amounts
             minAmountInSeries = day.y;
         }
     });
 
     let bestDay = {};
     let maxDaySales = 0;
-    dealsStats.series.forEach(day => {
+    dealsStats.series.forEach((day) => {
         if (day.y > maxDaySales) {
             maxDaySales = day.y;
             bestDay = day;
@@ -123,7 +124,7 @@ export const dealsDataFormer = (list) => {
     // Calculate min and max sales from dailySalesCount
     let minSalesInSeries = 0;
     let maxSalesInSeries = 0;
-    
+
     for (let day in dailySalesCount) {
         if (dailySalesCount[day] > maxSalesInSeries) {
             maxSalesInSeries = dailySalesCount[day];
@@ -133,14 +134,19 @@ export const dealsDataFormer = (list) => {
         }
     }
 
-    dealsStats.bestWorker = { id: bestWorkerId, salesCount: bestWorkerSalesCount, totalSales: maxWorkerSales };
+    dealsStats.bestWorker = {
+        id: bestWorkerId,
+        salesCount: bestWorkerSalesCount,
+        totalSales: maxWorkerSales,
+    };
     dealsStats.workersStats = workersStats;
     dealsStats.bestDay = bestDay;
     dealsStats.maxAmountSeries = maxAmountInSeries;
     dealsStats.minAmountSeries = minAmountInSeries;
     dealsStats.maxSalesSeries = maxSalesInSeries;
     dealsStats.minSalesSeries = minSalesInSeries;
-    dealsStats.avgCheck = dealsStats.leadsCount > 0 ? Math.round(dealsStats.totalSum / dealsStats.leadsCount) : 0;
+    dealsStats.avgCheck =
+        dealsStats.leadsCount > 0 ? Math.round(dealsStats.totalSum / dealsStats.leadsCount) : 0;
 
     // dealsStats.series.forEach(day => {
     //     const dayIndex = dealsStats.avgCheckSeries.findIndex(item => item.x === day.x);
@@ -148,14 +154,14 @@ export const dealsDataFormer = (list) => {
     //         dealsStats.avgCheckSeries[dayIndex].yval = Math.round(day.y / dailySalesCount[day.x]);
     //     }
     // });
-    
+
     // Update salesSeries
-    dealsStats.salesSeries = dealsStats.salesSeries.map(day => ({
+    dealsStats.salesSeries = dealsStats.salesSeries.map((day) => ({
         x: day.x,
-        y: dailySalesCount[day.x]
+        y: dailySalesCount[day.x],
     }));
 
-    dealsStats.avgCheckSeries.forEach(day => {
+    dealsStats.avgCheckSeries.forEach((day) => {
         const dayOfWeekIndex = day.x - 1; // Convert x to array index (0 for Monday, 1 for Tuesday, etc.)
         const totalSumForDay = dealsStats.series[dayOfWeekIndex].y; // Get total sum of money for the day
         const totalSalesForDay = dealsStats.salesSeries[dayOfWeekIndex].y; // Get total number of sales for the day
@@ -167,4 +173,4 @@ export const dealsDataFormer = (list) => {
         }
     });
     return dealsStats;
-}
+};

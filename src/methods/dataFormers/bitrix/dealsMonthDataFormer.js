@@ -17,20 +17,20 @@ export const monthDealsDataFormer = (list) => {
         workersMainStats: {},
         dealsSource: {},
         salesSeries: Array.from({ length: 31 }, (_, index) => ({ x: `${index + 1}`, y: 0 })),
-        series: Array.from({ length: 31 }, (_, index) => ({ x: `${index + 1}`, y: 0 }))
+        series: Array.from({ length: 31 }, (_, index) => ({ x: `${index + 1}`, y: 0 })),
     };
     const workersStats = {};
     const workersSales = {};
     const workersMainStats = {};
     const today = new Date();
 
-    list.forEach(lead => {
+    list.forEach((lead) => {
         // Calculate totalSum
         const opportunity = parseFloat(lead.OPPORTUNITY);
-        if(opportunity > 0){
+        if (opportunity > 0) {
             dealsStats.totalSum += opportunity;
         }
-        
+
         // Date when lead was closed
         const closeDate = new Date(lead.CLOSEDATE);
         // Get day of the month
@@ -44,14 +44,14 @@ export const monthDealsDataFormer = (list) => {
                 dealsStats.salesSeries[dayIndex].y++;
             }
         }
-      
+
         if (lead.CLOSED === 'Y' && opportunity !== 0) {
             const workerId = lead.LAST_ACTIVITY_BY;
             if (!workersMainStats[workerId]) {
                 workersMainStats[workerId] = {
                     salesCount: 0,
                     totalSales: 0,
-                    conversion: '' // Placeholder for conversion
+                    conversion: '', // Placeholder for conversion
                 };
             }
             if (opportunity > dealsStats.maxAmount) {
@@ -79,7 +79,7 @@ export const monthDealsDataFormer = (list) => {
             workersMainStats[workerId].totalSales += opportunity;
         }
     });
-    // count dealsSource 
+    // count dealsSource
     const dealsBySource = (list) => {
         return list.reduce((acc, deal) => {
             const source = deal.SOURCE_ID;
@@ -90,16 +90,16 @@ export const monthDealsDataFormer = (list) => {
         }, {});
     };
 
-
     // Calculate min and max amount from series
     let minAmountInSeries = 0;
     let maxAmountInSeries = 0;
 
-    dealsStats.series.forEach(day => {
+    dealsStats.series.forEach((day) => {
         if (day.y > maxAmountInSeries) {
             maxAmountInSeries = day.y;
         }
-        if (day.y < minAmountInSeries && day.y > 0) { // Consider only positive amounts
+        if (day.y < minAmountInSeries && day.y > 0) {
+            // Consider only positive amounts
             minAmountInSeries = day.y;
         }
     });
@@ -114,15 +114,15 @@ export const monthDealsDataFormer = (list) => {
         }
     }
 
-    dealsStats.bestWorker = { 
-        id: bestId, 
+    dealsStats.bestWorker = {
+        id: bestId,
         sales: maxSales,
-        totalSales: workersSales[bestId] || 0 // Get the total sales for the best worker
+        totalSales: workersSales[bestId] || 0, // Get the total sales for the best worker
     };
 
     let bestDay = {};
     let maxDaySales = 0;
-    dealsStats.series.forEach(day => {
+    dealsStats.series.forEach((day) => {
         if (day.y > maxDaySales) {
             maxDaySales = day.y;
             bestDay = day;
@@ -143,7 +143,7 @@ export const monthDealsDataFormer = (list) => {
                     id: workerId,
                     avgCheck: Math.round(avgCheck),
                     salesCount: worker.salesCount,
-                    totalSales: worker.totalSales
+                    totalSales: worker.totalSales,
                 };
             }
         }
@@ -152,8 +152,8 @@ export const monthDealsDataFormer = (list) => {
     // Calculate min and max sales from salesSeries
     let minSalesInSeries = Number.MAX_SAFE_INTEGER;
     let maxSalesInSeries = 0;
-    
-    dealsStats.salesSeries.forEach(day => {
+
+    dealsStats.salesSeries.forEach((day) => {
         if (day.y > maxSalesInSeries) {
             maxSalesInSeries = day.y;
         }
@@ -168,7 +168,8 @@ export const monthDealsDataFormer = (list) => {
     dealsStats.bestAvgCheck = highestAvgCheckWorker;
     dealsStats.workersMainStats = workersMainStats;
     dealsStats.minAmountSeries = minAmountInSeries > 0 ? Math.round(minAmountInSeries / 2) : 0;
-    dealsStats.avgCheck = dealsStats.leadsCount > 0 ? Math.round(dealsStats.totalSum / dealsStats.leadsCount) : 0;
+    dealsStats.avgCheck =
+        dealsStats.leadsCount > 0 ? Math.round(dealsStats.totalSum / dealsStats.leadsCount) : 0;
     dealsStats.maxSalesSeries = maxSalesInSeries;
     dealsStats.minSalesSeries = minSalesInSeries;
     dealsStats.dealsSource = dealsBySource(list);

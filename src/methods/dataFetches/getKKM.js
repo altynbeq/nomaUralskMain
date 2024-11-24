@@ -1,16 +1,16 @@
-import { kkmReceiptsDataFormer } from "../dataFormers/kkmDataFormer";
+import { kkmReceiptsDataFormer } from '../dataFormers/kkmDataFormer';
 
 // Auth info
 const username = 'Алтынбек';
-const password  = '5521';
+const password = '5521';
 
 // Encode credentials to Base64 using TextEncoder
 const encoder = new TextEncoder();
-const credentials  = `${username}:${password}`;
+const credentials = `${username}:${password}`;
 const utf8Credentials = encoder.encode(credentials);
 
 // Function to convert ArrayBuffer to Base64
-function base64ArrayBuffer(arrayBuffer){
+function base64ArrayBuffer(arrayBuffer) {
     let binary = '';
     const bytes = new Uint8Array(arrayBuffer);
     const len = bytes.byteLength;
@@ -22,18 +22,18 @@ function base64ArrayBuffer(arrayBuffer){
 
 const encodedCredentials = base64ArrayBuffer(utf8Credentials);
 
-async function fetchDataForRange(api,startDate, endDate){
+async function fetchDataForRange(api, startDate, endDate) {
     const decodedStartDate = decodeURIComponent(startDate).split(' ')[0].replace(/-/g, '');
     const decodedEndDate = decodeURIComponent(endDate).split(' ')[0].replace(/-/g, '');
 
     const url = `${api}${decodedStartDate}/${decodedEndDate}`;
-    console.log("=>(getKKM.js:30) api", api);
+    console.log('=>(getKKM.js:30) api', api);
     const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${encodedCredentials}`
-        }
+            Authorization: `Basic ${encodedCredentials}`,
+        },
     });
 
     if (!response.ok) {
@@ -53,9 +53,9 @@ export async function getKKMReceiptsFront(api, dateRanges) {
     const shiftDate = (data) => {
         return data.map((item) => {
             // Extract date and time parts from ISO string (YYYY-MM-DDTHH:MM:SS)
-            let [datePart, timePart] = item.Дата.split("T");
-            let [year, month, day] = datePart.split("-").map(Number);
-            let [hours, minutes, seconds] = timePart.slice(0, -1).split(":").map(Number);
+            let [datePart, timePart] = item.Дата.split('T');
+            let [year, month, day] = datePart.split('-').map(Number);
+            let [hours, minutes, seconds] = timePart.slice(0, -1).split(':').map(Number);
 
             // Check if the time is between 00:00 and 02:00 UTC
 
@@ -67,15 +67,15 @@ export async function getKKMReceiptsFront(api, dateRanges) {
                 // If hours go negative, adjust the date
                 if (hours < 0) {
                     hours += 24; // Wrap around the hours
-                    day -= 1;    // Move to the previous day
+                    day -= 1; // Move to the previous day
 
                     // Handle day and month boundaries
                     if (day < 1) {
                         month -= 1; // Move to the previous month
 
                         if (month < 1) {
-                            month = 12;     // Wrap to December
-                            year -= 1;      // Move to the previous year
+                            month = 12; // Wrap to December
+                            year -= 1; // Move to the previous year
                         }
 
                         // Get the correct number of days in the new month
@@ -114,7 +114,7 @@ export async function getKKMReceiptsFront(api, dateRanges) {
     //         weekFormedKKM: kkmReceiptsDataFormer(weekData),
     //         dayFormedKKM: kkmReceiptsDataFormer(dayData)
     //     };
-    //     return final; 
+    //     return final;
     // } else {
     //     // if request for one time period
     //     const data = await fetchDataForRange(dateRanges.startDate, dateRanges.endDate);

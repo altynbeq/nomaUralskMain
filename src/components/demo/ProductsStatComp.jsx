@@ -1,44 +1,47 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { Calendar } from 'primereact/calendar';
-import { FaDollarSign, FaMoneyBillAlt, FaBox, FaFilter } from "react-icons/fa";
+import { FaDollarSign, FaMoneyBillAlt, FaBox, FaFilter } from 'react-icons/fa';
 import { FormatAmount, ConvertCalendarDate } from '../../data/MainDataSource';
-import { useStateContext } from "../../contexts/ContextProvider";
-import { getKKMReceiptsFront } from "../../methods/dataFetches/getKKM";
-import LoadingSkeleton from "../LoadingSkeleton";
+import { useStateContext } from '../../contexts/ContextProvider';
+import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
+import LoadingSkeleton from '../LoadingSkeleton';
 
 const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
     const stepperRef = useRef(null);
     const { dateRanges, kkm } = useStateContext();
-    const [dates, setDates] = useState([new Date(dateRanges[1].startDate.replace('%20', ' ')), new Date(dateRanges[1].endDate.replace('%20', ' '))]);
-    const [ productStats, setProductsStats ] = useState(kkm.monthFormedKKM);
+    const [dates, setDates] = useState([
+        new Date(dateRanges[1].startDate.replace('%20', ' ')),
+        new Date(dateRanges[1].endDate.replace('%20', ' ')),
+    ]);
+    const [productStats, setProductsStats] = useState(kkm.monthFormedKKM);
     const [loading, setLoading] = useState(false);
-    const componentRef = useRef(null)
+    const componentRef = useRef(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-    const handleDateChange = async(e) => {
-        if(e[1]){
+    const handleDateChange = async (e) => {
+        if (e[1]) {
             setLoading(true);
             const properDate = ConvertCalendarDate(e);
             const kkmData = await getKKMReceiptsFront(userKkmUrl, properDate);
             setProductsStats(kkmData);
             setLoading(false);
         }
-    }
+    };
 
-    useEffect(()=> {
+    useEffect(() => {
         let updateDimensions = () => {
             if (componentRef.current) {
-                const {offsetWidth, offsetHeight} = componentRef.current;
+                const { offsetWidth, offsetHeight } = componentRef.current;
                 setDimensions({
                     width: offsetWidth,
                     height: offsetHeight,
-                })
+                });
             }
         };
         updateDimensions();
-    }, [])
+    }, []);
 
     const productStatsTemplate = (storeStats) => [
         {
@@ -49,7 +52,7 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
             icon: <FaBox />,
             iconBg: '#1d4db7',
             pcColor: 'black-600',
-            format: false
+            format: false,
         },
         {
             id: '2',
@@ -59,7 +62,7 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
             icon: <FaDollarSign />,
             iconBg: '#1d4db7',
             pcColor: 'black-600',
-            format: true
+            format: true,
         },
         {
             id: '3',
@@ -69,7 +72,7 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
             icon: <FaFilter />,
             iconBg: '#1d4db7',
             pcColor: 'black-600',
-            format: false
+            format: false,
         },
         {
             id: '4',
@@ -79,61 +82,83 @@ const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
             icon: <FaMoneyBillAlt />,
             iconBg: '#1d4db7',
             pcColor: 'black-600',
-            format: true
-        }
+            format: true,
+        },
     ];
 
     return (
-        <div className={`bg-white dark:text-gray-200 overflow-hidden dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] px-6 py-6 flex flex-col subtle-border`}>
+        <div
+            className={`bg-white dark:text-gray-200 overflow-hidden dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] px-6 py-6 flex flex-col subtle-border`}
+        >
             <div className="flex flex-row justify-between mb-4">
                 <p className="text-[1rem] font-semibold">{title}</p>
                 <div className="flex flex-wrap border-solid border-1 rounded-xl border-black px-2 gap-1">
                     <Calendar
                         value={dates}
-                        onChange={(e) => { 
-                            setDates(e.value)
-                            handleDateChange(e.value)
-                        } }
+                        onChange={(e) => {
+                            setDates(e.value);
+                            handleDateChange(e.value);
+                        }}
                         selectionMode="range"
                         readOnlyInput
                         hideOnRangeSelection
                     />
                 </div>
             </div>
-            {loading ? <div className="pr-4 pt-2">
-                <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8}/>
-            </div> : '' }
+            {loading ? (
+                <div className="pr-4 pt-2">
+                    <LoadingSkeleton width={dimensions.width} height={dimensions.height - 8} />
+                </div>
+            ) : (
+                ''
+            )}
 
-            {!loading ? <div ref={componentRef}>
-            <Stepper ref={stepperRef}>
-                {Object.entries(productStats).map(([storeName, storeStats]) => (
-                    <StepperPanel key={storeName} header={storeName}>
-                        <div className="mt-2">
-                            {productStatsTemplate(storeStats).map((stat) => (
-                                <div key={stat.id} className="flex justify-between mt-4 w-full">
-                                    <div className="flex gap-4">
-                                        <button
-                                            type="button"
-                                            style={{ background: stat.iconBg }}
-                                            className="text-2xl hover:drop-shadow-xl text-white rounded-full p-3"
+            {!loading ? (
+                <div ref={componentRef}>
+                    <Stepper ref={stepperRef}>
+                        {Object.entries(productStats).map(([storeName, storeStats]) => (
+                            <StepperPanel key={storeName} header={storeName}>
+                                <div className="mt-2">
+                                    {productStatsTemplate(storeStats).map((stat) => (
+                                        <div
+                                            key={stat.id}
+                                            className="flex justify-between mt-4 w-full"
                                         >
-                                            {stat.icon}
-                                        </button>
-                                        <div>
-                                            <p className="text-md font-semibold">{stat.title}</p>
-                                            <p className="text-sm text-gray-400">{stat.desc ? stat.desc : `No data for ${storeName}`}</p>
+                                            <div className="flex gap-4">
+                                                <button
+                                                    type="button"
+                                                    style={{ background: stat.iconBg }}
+                                                    className="text-2xl hover:drop-shadow-xl text-white rounded-full p-3"
+                                                >
+                                                    {stat.icon}
+                                                </button>
+                                                <div>
+                                                    <p className="text-md font-semibold">
+                                                        {stat.title}
+                                                    </p>
+                                                    <p className="text-sm text-gray-400">
+                                                        {stat.desc
+                                                            ? stat.desc
+                                                            : `No data for ${storeName}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <p className={stat.pcColor}>
+                                                {stat.format
+                                                    ? FormatAmount(stat.valueKey)
+                                                    : stat.valueKey}{' '}
+                                                {stat.format ? '₸' : ''}
+                                            </p>
                                         </div>
-                                    </div>
-                                    <p className={stat.pcColor}>
-                                        {stat.format ? FormatAmount(stat.valueKey) : stat.valueKey} {stat.format ? '₸' : ''}
-                                    </p>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </StepperPanel>
-                ))}
-            </Stepper>
-            </div>:''}
+                            </StepperPanel>
+                        ))}
+                    </Stepper>
+                </div>
+            ) : (
+                ''
+            )}
         </div>
     );
 };
