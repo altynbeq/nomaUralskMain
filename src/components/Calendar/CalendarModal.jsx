@@ -99,7 +99,10 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
                         <div className="flex justify-between">
                             <h2 className="text-lg font-bold flex mr-5 pr-10 mb-4">Детали смены</h2>
                             <button
-                                onClick={() => setOpen(false)}
+                                onClick={() => {
+                                    setOpen(false);
+                                    setEditing(false);
+                                }}
                                 className="text-gray-500 hover:text-gray-800"
                             >
                                 <FaTimes className="mb-4" />

@@ -48,6 +48,8 @@ const Calendar = () => {
         if (selectedStore) {
             fetchSubusers(selectedStore._id);
             fetchShiftsByStore(selectedStore._id);
+        } else {
+            setCurrentShifts([]);
         }
     }, [selectedStore]);
 
@@ -74,7 +76,6 @@ const Calendar = () => {
             }
             const data = await response.json();
             setStores(data.stores);
-            console.log(data);
             return data;
         } catch (error) {
             console.error('Failed to fetch data:', error);
