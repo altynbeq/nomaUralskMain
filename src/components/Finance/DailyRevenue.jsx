@@ -24,28 +24,40 @@ const DailyRevenue = ({ userKkmUrl }) => {
         }
     }, []);
 
-    const getter = async () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
         const kkmData = await getKKMReceiptsFront(userKkmUrl, dateRanges[0]);
-        setPieData(FinanceHolePie(kkm.dayFormedKKM));
-        setFinanceStats(FinanceStats(kkm.dayFormedKKM));
-        setKKM({
-            ...kkm,
-            dayFormedKKM: kkmData,
-        });
+        setKKM((prevKkm) => ({
+          ...prevKkm,
+          dayFormedKKM: kkmData,
+        }));
+        setPieData(FinanceHolePie(kkmData));
+        setFinanceStats(FinanceStats(kkmData));
+      } catch (error) {
+        console.error('Error fetching KKM data:', error);
+      }
     };
-    getter();
 
-    return (
-        <>
-            <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">
-                <div className="flex justify-between">
-                    <p className="font-semibold text-1xl">Доходы за день</p>
-                    <div className="flex items-center gap-4">
-                        <p className="flex items-center gap-2 text-green-400 hover:drop-shadow-xl">
-                            <span>{date}</span>
-                        </p>
-                    </div>
-                </div>
+    fetchData();
+  }, [
+    userKkmUrl,
+    dateRanges[0].bitrixStartDate,
+    dateRanges[0].bitrixEndDate,
+    setKKM,
+  ]);
+  
+  return (
+      <>
+    <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">
+          <div className="flex justify-between">
+            <p className="font-semibold text-1xl">Доходы за день</p>
+            <div className="flex items-center gap-4">
+              <p className="flex items-center gap-2 text-green-400 hover:drop-shadow-xl">
+                <span>{date}</span>
+              </p>
+            </div>
+          </div>
 
                 <div className="mt-5 flex gap-2 flex-col md:flex-col w-[100%] items-center text-center justify-center">
                     <div className="w-[100%] h-[300px]  flex text-center flex-col align-center justify-center">

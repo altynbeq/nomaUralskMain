@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import { getDateRange } from '../methods/getDateRange';
 
 const StateContext = createContext();
@@ -32,16 +32,19 @@ export const ContextProvider = ({ children }) => {
     });
     const [subUser, setSubUser] = useState({});
 
-    const setMode = (e) => {
-        setCurrentMode(e.target.value);
-        localStorage.setItem('themeMode', e.target.value);
-    };
-
+  const setMode = (e) => {
+    setCurrentMode(e.target.value);
+    localStorage.setItem('themeMode', e.target.value);
+  };
+  
+  const dateRanges = useMemo(() => {
     const dateDay = getDateRange('today');
     const dateWeek = getDateRange('week');
     const dateMonth = getDateRange('month');
 
-    const dateRanges = [dateDay, dateWeek, dateMonth];
+    return [dateDay, dateWeek, dateMonth];
+  }, []);
+
 
     const setColor = (color) => {
         setCurrentColor(color);
