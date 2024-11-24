@@ -46,6 +46,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (open && shiftId) {
@@ -75,6 +76,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
     };
 
     const handleSave = async () => {
+        setIsSaving(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shiftId}`,
@@ -114,6 +116,8 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
             setOpen(false);
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -163,10 +167,13 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
                                     />
                                 </div>
                                 <button
+                                    disabled={isSaving}
                                     onClick={handleSave}
-                                    className="flex bg-green-500 text-white py-2 px-4 rounded ml-auto"
+                                    className={`flex bg-green-500 text-white py-2 px-4 rounded ml-auto ${
+                                        isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                 >
-                                    Сохранить
+                                    {isSaving ? 'Сохранение...' : 'Сохранить'}
                                 </button>
                             </>
                         ) : (
