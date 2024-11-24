@@ -8,13 +8,14 @@ import ruLocale from '@fullcalendar/core/locales/ru';
 import { useStateContext } from '../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
 import AlertModal from '../components/AlertModal';
+import { isValidDepartmentId } from '../methods/isValidDepartmentId';
 
 const Calendar = () => {
     const { access } = useStateContext();
     const [modal, setModal] = useState(false);
     const [currentShifts, setCurrentShifts] = useState([]);
     const [modalAddShift, setModalAddShift] = useState(false);
-    const [subuserStores, setSubuserStores] = useState([]);
+    const [stores, setStores] = useState([]);
     const [selectedStore, setSelectedStore] = useState(null);
     const [subusers, setSubusers] = useState([]);
     const [selectedShiftId, setSelectedShiftId] = useState(null);
@@ -33,8 +34,13 @@ const Calendar = () => {
 
     useEffect(() => {
         const id = localStorage.getItem('_id');
-        if (id && access.DataManagement) {
-            fetchStructure(id);
+        const departmentId = localStorage.getItem('departmentId');
+        if (isValidDepartmentId(departmentId)) {
+            if (id && access.DataManagement) {
+                fetchStructure(id);
+            }
+        } else {
+            fetchUserStructure(id);
         }
     }, [access.DataManagement]);
 
@@ -53,9 +59,25 @@ const Calendar = () => {
                 throw new Error(`Error: ${response.status}`);
             }
             const data = await response.json();
-            setSubuserStores(data);
+            setStores(data);
         } catch (error) {
             console.error('Failed to fetch stores:', error);
+        }
+    };
+
+    const fetchUserStructure = async (id) => {
+        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const data = await response.json();
+            setStores(data.stores);
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
         }
     };
 
@@ -173,7 +195,7 @@ const Calendar = () => {
             <Dropdown
                 value={selectedStore}
                 onChange={(e) => setSelectedStore(e.value)}
-                options={subuserStores}
+                options={stores}
                 optionLabel="storeName"
                 placeholder="Выберите магазин"
                 className="mb-5 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
