@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { columns, rows } from './ListOfExpensesData';
 import { Dropdown } from 'primereact/dropdown';
@@ -15,7 +15,61 @@ export default function ListOfExpenses() {
         { warehouseName: 'Склад 2', id: '1' },
         { warehouseName: 'Склад 3', id: '3' },
     ]);
+    const [products, setProducts] = useState([]);
     const [product, setProduct] = useState('');
+
+    useEffect(() => {
+        const companyId = localStorage.getItem('_id');
+        if (companyId) {
+            const fetchCompanyData = async () => {
+                try {
+                    const response = await fetch(
+                        `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    setProducts(data.products);
+                    if (data.warehouses) {
+                        setWarehouses(
+                            data.warehouses.map((warehouseName, index) => ({
+                                warehouseName,
+                                id: index.toString(),
+                            })),
+                        );
+                    }
+
+                    // setCompanyData(data);
+
+                    // Update warehouses state
+                    // if (data.warehouses) {
+                    //     setWarehouses(
+                    //         data.warehouses.map((warehouseName, index) => ({
+                    //             warehouseName,
+                    //             id: index.toString(),
+                    //         })),
+                    //     );
+                    // }
+
+                    // If you have a products state, you can set it here
+                    // setProducts(data.products);
+                } catch (error) {
+                    console.error('Error fetching company data:', error);
+                }
+            };
+
+            fetchCompanyData();
+        }
+    }, []);
 
     return (
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
