@@ -75,10 +75,10 @@ export function renderAvatar(params) {
 }
 
 export const columns = [
-    { field: 'pageTitle', headerName: 'Page Title', flex: 1.5, minWidth: 200 },
+    { field: 'pageTitle', headerName: 'Название', flex: 1.5, minWidth: 200 },
     {
         field: 'status',
-        headerName: 'Status',
+        headerName: 'Статус',
         flex: 0.5,
         minWidth: 80,
         renderCell: (params) => renderStatus(params.value),
@@ -93,7 +93,7 @@ export const columns = [
     },
     {
         field: 'eventCount',
-        headerName: 'Event Count',
+        headerName: 'Остаток',
         headerAlign: 'right',
         align: 'right',
         flex: 1,
@@ -101,7 +101,7 @@ export const columns = [
     },
     {
         field: 'viewsPerUser',
-        headerName: 'Views per User',
+        headerName: 'Мин. Остаток',
         headerAlign: 'right',
         align: 'right',
         flex: 1,
@@ -109,7 +109,7 @@ export const columns = [
     },
     {
         field: 'averageTime',
-        headerName: 'Average Time',
+        headerName: 'Приход/Спис',
         headerAlign: 'right',
         align: 'right',
         flex: 1,

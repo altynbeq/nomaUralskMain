@@ -32,19 +32,18 @@ export const ContextProvider = ({ children }) => {
     });
     const [subUser, setSubUser] = useState({});
 
-  const setMode = (e) => {
-    setCurrentMode(e.target.value);
-    localStorage.setItem('themeMode', e.target.value);
-  };
-  
-  const dateRanges = useMemo(() => {
-    const dateDay = getDateRange('today');
-    const dateWeek = getDateRange('week');
-    const dateMonth = getDateRange('month');
+    const setMode = (e) => {
+        setCurrentMode(e.target.value);
+        localStorage.setItem('themeMode', e.target.value);
+    };
 
-    return [dateDay, dateWeek, dateMonth];
-  }, []);
+    const dateRanges = useMemo(() => {
+        const dateDay = getDateRange('today');
+        const dateWeek = getDateRange('week');
+        const dateMonth = getDateRange('month');
 
+        return [dateDay, dateWeek, dateMonth];
+    }, []);
 
     const setColor = (color) => {
         setCurrentColor(color);

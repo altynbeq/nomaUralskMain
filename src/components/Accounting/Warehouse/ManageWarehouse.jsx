@@ -128,7 +128,7 @@ const ManageWarehouse = () => {
                     </h3>
                     <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
                         <div className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                            <p className="text-gray-600">Drag and drop your files here</p>
+                            <p className="text-gray-600">Перенесите файл сюда</p>
                             <div className="flex gap-4 justify-center my-4">
                                 <MdInsertDriveFile size={32} className="text-blue-500" />
                                 <MdPieChart size={32} className="text-blue-500" />
@@ -139,7 +139,7 @@ const ManageWarehouse = () => {
                                     onClick={() => setIsModalOpen2(true)}
                                     className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-950 transition-colors font-medium"
                                 >
-                                    Add
+                                    Добавить
                                 </button>
                                 <input
                                     type="file"
@@ -151,7 +151,7 @@ const ManageWarehouse = () => {
                                     onClick={() => handleFileUpload(fileInput2)}
                                     className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-950 transition-colors font-medium"
                                 >
-                                    Upload file
+                                    Загрузить файл
                                 </button>
                             </div>
                         </div>
@@ -165,7 +165,7 @@ const ManageWarehouse = () => {
                     </h3>
                     <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
                         <div className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                            <p className="text-gray-600">Drag and drop your files here</p>
+                            <p className="text-gray-600">Перенесите файл сюда</p>
                             <div className="flex gap-4 justify-center my-4">
                                 <MdInsertDriveFile size={32} className="text-blue-500" />
                                 <MdPieChart size={32} className="text-blue-500" />
@@ -176,7 +176,7 @@ const ManageWarehouse = () => {
                                     onClick={() => setIsModalOpen2(true)}
                                     className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-950 transition-colors font-medium"
                                 >
-                                    Add
+                                    Добавить
                                 </button>
                                 <input
                                     type="file"
@@ -188,7 +188,7 @@ const ManageWarehouse = () => {
                                     onClick={() => handleFileUpload(fileInput2)}
                                     className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-950 transition-colors font-medium"
                                 >
-                                    Upload file
+                                    Добавить файл
                                 </button>
                             </div>
                         </div>
