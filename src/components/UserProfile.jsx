@@ -1,54 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FaRegTimesCircle } from 'react-icons/fa';
 import { Button } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
 import avatar from '../data/avatar.jpg';
-import { MdDescription } from 'react-icons/md'; // Replace with appropriate icons
 
 const UserProfile = () => {
     const { currentColor, handleLogOut, userData, userImage } = useStateContext();
-    const [isUploading, setIsUploading] = useState(false);
 
-    // Safely access properties of userData
     const userName = userData?.name || 'Unknown User';
     const userEmail = userData?.email || 'Unknown Email';
-    const userId = userData?._id || '';
-    const fileInput = React.useRef(null);
-
-    const handleFileUpload = async (event) => {
-        const userId = localStorage.getItem('_id');
-        const file = event.target.files[0];
-        if (file) {
-            const formData = new FormData();
-            formData.append('avatar', file);
-
-            try {
-                setIsUploading(true);
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/subusers/subusers/${userId}/avatar`,
-                    {
-                        method: 'POST',
-                        body: formData,
-                    },
-                );
-                if (!response.ok) {
-                    throw new Error('Failed to upload avatar');
-                }
-                const result = await response.json();
-                console.log('Avatar uploaded successfully:', result);
-                alert('Avatar updated successfully!');
-            } catch (error) {
-                console.error('Error uploading avatar:', error);
-                alert('Failed to upload avatar');
-            } finally {
-                setIsUploading(false);
-            }
-        }
-    };
-
-    const handleUploadButtonClick = () => {
-        fileInput.current.click();
-    };
 
     return (
         <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-8 rounded-lg w-[90%] md:w-[30%]">
@@ -77,25 +37,6 @@ const UserProfile = () => {
                         {userEmail}
                     </p>
                 </div>
-            </div>
-            <div className="flex mt-5 p-8 gap-4 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                <MdDescription size={32} className="text-blue-500" />
-                <div className="flex gap-3">
-                    <button
-                        className="py-2 px-3 bg-gray-200 text-black rounded-full hover:bg-blue-600 transition-colors font-medium"
-                        onClick={handleUploadButtonClick}
-                    >
-                        Загрузить аватар
-                    </button>
-                    <input
-                        type="file"
-                        ref={fileInput}
-                        className="hidden"
-                        onChange={handleFileUpload}
-                        accept="image/*"
-                    />
-                </div>
-                {isUploading && <p className="text-gray-500 text-sm mt-2">Загрузка...</p>}
             </div>
             <div className="mt-5">
                 <button
