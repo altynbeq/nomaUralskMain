@@ -75,13 +75,18 @@ export function renderAvatar(params) {
 }
 
 export const columns = [
-    { field: 'pageTitle', headerName: 'Название', flex: 1.5, minWidth: 200 },
+    {
+        field: 'НоменклатураНаименование',
+        headerName: 'Название',
+        flex: 1.5,
+        minWidth: 200,
+    },
     {
         field: 'status',
         headerName: 'Статус',
         flex: 0.5,
         minWidth: 80,
-        renderCell: (params) => renderStatus(params.value),
+        renderCell: () => 'Online', // Можете заменить на динамическое значение
     },
     {
         field: 'users',
@@ -120,7 +125,7 @@ export const columns = [
         headerName: 'Daily Conversions',
         flex: 1,
         minWidth: 150,
-        renderCell: renderSparklineCell,
+        renderCell: () => 'N/A', // Заглушка, можно заменить на реальные данные
     },
 ];
 
