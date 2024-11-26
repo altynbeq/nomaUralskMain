@@ -83,7 +83,14 @@ const Calendar = () => {
     };
 
     const fetchSubusers = async (storeId) => {
-        const url = `https://nomalytica-back.onrender.com/api/subUsers/subusers/${storeId}`;
+        let companyId;
+        const departmentId = localStorage.getItem('departmentId');
+        if (isValidDepartmentId(departmentId)) {
+            companyId = localStorage.getItem('companyId');
+        } else {
+            companyId = localStorage.getItem('_id');
+        }
+        const url = `https://nomalytica-back.onrender.com/api/subusers/subusers-by-company/${companyId}`;
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -173,7 +180,19 @@ const Calendar = () => {
 
     return (
         <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
-            <Header category="Учёт" title="Смены" />
+            <div className="flex justify-between max-h-[40px] mb-16 mt-5">
+                {' '}
+                <Header category="Учёт" title="Смены" />
+                <Dropdown
+                    value={selectedStore}
+                    onChange={(e) => setSelectedStore(e.value)}
+                    options={stores}
+                    optionLabel="storeName"
+                    placeholder="Выберите магазин"
+                    className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                    showClear
+                />
+            </div>
             <AlertModal
                 open={alertOpen}
                 message="Пожалуйста, выберите магазин перед добавлением смены."
@@ -192,15 +211,6 @@ const Calendar = () => {
                 currentShifts={currentShifts}
                 setCurrentShifts={setCurrentShifts}
                 fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
-            />
-            <Dropdown
-                value={selectedStore}
-                onChange={(e) => setSelectedStore(e.value)}
-                options={stores}
-                optionLabel="storeName"
-                placeholder="Выберите магазин"
-                className="mb-5 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
-                showClear
             />
 
             <FullCalendar

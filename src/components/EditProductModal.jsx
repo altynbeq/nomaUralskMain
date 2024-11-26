@@ -84,7 +84,6 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                 <Dialog
                     header="Перенос товара"
                     visible={isTransferModalOpen}
-                    // style={{ width: '400px' }}
                     onHide={handleTransferModalClose}
                     modal
                     closable

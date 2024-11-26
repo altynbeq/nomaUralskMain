@@ -65,8 +65,9 @@ export default function AnimatedBeamMultipleOutputDemo({
 
     const renderTooltipModal = (item, mode) => {
         const handleCopyClick = (text) => {
+            const companyId = localStorage.getItem('_id');
             navigator.clipboard
-                .writeText(text)
+                .writeText(`${text}&companyId=${companyId}`)
                 .then(() => {
                     setCopySuccess('Text copied!');
                 })
