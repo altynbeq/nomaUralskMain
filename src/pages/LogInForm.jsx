@@ -32,6 +32,7 @@ const LogInForm = () => {
         localStorage.setItem('_id', localStorageData[0]);
         localStorage.setItem('token', localStorageData[1]);
         localStorage.setItem('departmentId', localStorageData[2]);
+        localStorage.setItem('companyId', localStorageData[3]);
         window.location.href = '/general';
     }, [localStorageData]);
 
@@ -53,6 +54,7 @@ const LogInForm = () => {
                                 data.user._id,
                                 data.token,
                                 data.user?.departmentId,
+                                data?.user?.companyId,
                             ]);
                         } else {
                             setLocalStorageData([data.user._id, data.token]);
@@ -71,6 +73,14 @@ const LogInForm = () => {
 
     const handleSubmitRegistration = (e) => {
         e.preventDefault();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const companyId = urlParams.get('companyId');
+
+        if (!companyId) {
+            alert('Company ID is missing in the URL');
+            return;
+        }
         const handleRegistration = () => {
             const requestOptions = {
                 method: 'POST',
@@ -78,9 +88,11 @@ const LogInForm = () => {
                 body: JSON.stringify({
                     input: { email, password, name },
                     departmentLink: currentUrl,
+                    companyId,
                 }),
             };
-            const url = `https://nomalytica-back.onrender.com/api/subUsers/create-subuser/`;
+            const url = `https://nomalytica-back.onrender.com/api/subUsers/create-subuser`;
+
             fetch(url, requestOptions).then((res) => {
                 if (!res.ok) {
                     res.text().then((error) => alert(error));
