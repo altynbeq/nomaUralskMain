@@ -84,20 +84,15 @@ export default function ListOfExpenses() {
                 <div className="flex items-center justify-between mb-5">
                     <p className="flex text-[1rem] font-semibold align-left">Список списаний</p>
                     <div className="flex gap-6 items-center">
-                        <InputText
-                            className=" rounded-lg p-2 border-2"
-                            value={productSearch}
-                            onChange={(e) => setProductSearch(e.target.value)}
-                            placeholder="Поиск товара"
+                        <Button
+                            className=" bg-blue-500 text-white rounded-lg p-2"
+                            label="Редактировать"
+                            icon="pi pi-file-edit"
+                            onClick={() => setEditModalIsVisible(true)}
                         />
-                        <div>
-                            <Button
-                                className=" bg-blue-500 text-white rounded-lg p-2"
-                                label="Редактировать"
-                                icon="pi pi-file-edit"
-                                onClick={() => setEditModalIsVisible(true)}
-                            />
+                        <div className="flex gap-6">
                             <EditProductModal
+                                warehouses={warehouses}
                                 items={selectedItems}
                                 isOpen={editModalIsVisible}
                                 onClose={() => {
@@ -105,16 +100,22 @@ export default function ListOfExpenses() {
                                     setEditModalIsVisible(false);
                                 }}
                             />
+                            <Dropdown
+                                value={selectedWarehouse}
+                                onChange={(e) => setSelectedWarehouse(e.value)}
+                                options={warehouses}
+                                optionLabel="warehouseName"
+                                placeholder="Выберите склад"
+                                className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
+                                showClear
+                            />
+                            <InputText
+                                className=" rounded-lg p-2 border-2"
+                                value={productSearch}
+                                onChange={(e) => setProductSearch(e.target.value)}
+                                placeholder="Поиск товара"
+                            />
                         </div>
-                        <Dropdown
-                            value={selectedWarehouse}
-                            onChange={(e) => setSelectedWarehouse(e.value)}
-                            options={warehouses}
-                            optionLabel="warehouseName"
-                            placeholder="Выберите склад"
-                            className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
-                            showClear
-                        />
                     </div>
                 </div>
                 <div className="flex flex-wrap border-solid border-1 rounded-xl  px-2 gap-1 w-full">
