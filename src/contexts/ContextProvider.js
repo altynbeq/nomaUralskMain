@@ -31,6 +31,7 @@ export const ContextProvider = ({ children }) => {
         DataManagement: false,
     });
     const [subUser, setSubUser] = useState({});
+    const [userImage, setUserImage] = useState('');
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
@@ -112,6 +113,8 @@ export const ContextProvider = ({ children }) => {
                 setAccess: updateAccessData,
                 subUser,
                 setSubUser: updateSubUser,
+                setUserImage,
+                userImage,
             }}
         >
             {children}
