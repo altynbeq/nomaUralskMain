@@ -1,12 +1,123 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { columns, rows } from './ListOfExpensesData';
+import { columns } from './ListOfExpensesData';
+import { Dropdown } from 'primereact/dropdown';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { EditProductModal } from '../../../components/EditProductModal';
 
 export default function ListOfExpenses() {
+    const [editModalIsVisible, setEditModalIsVisible] = useState(false);
+    const [selectedWarehouse, setSelectedWarehouse] = useState({});
+    const [warehouses, setWarehouses] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [productSearch, setProductSearch] = useState('');
+    const [selectedItems, setSelectedItems] = useState([]);
+
+    useEffect(() => {
+        const companyId = localStorage.getItem('_id');
+        if (companyId) {
+            const fetchCompanyData = async () => {
+                try {
+                    const response = await fetch(
+                        `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    setProducts(data.products);
+                    if (data.warehouses) {
+                        setWarehouses(
+                            data.warehouses.map((warehouseName, index) => ({
+                                warehouseName,
+                                id: index.toString(),
+                            })),
+                        );
+                    }
+                } catch (error) {
+                    console.error('Error fetching company data:', error);
+                }
+            };
+
+            fetchCompanyData();
+        }
+    }, []);
+
+    const rows = filteredProducts.map((product, index) => ({
+        id: product._id || index,
+        НоменклатураНаименование: product.НоменклатураНаименование,
+        status: 'Online',
+        users: Math.floor(Math.random() * 1000),
+        eventCount: Math.floor(Math.random() * 500),
+        viewsPerUser: Math.floor(Math.random() * 50),
+        averageTime: Math.floor(Math.random() * 50),
+        conversions: null,
+    }));
+
+    const handleSelectionChange = (ids) => {
+        const selected = ids.map((id) =>
+            products.find((product) => product._id === id || product.id === id),
+        );
+        setSelectedItems(selected.filter(Boolean));
+    };
+
+    useEffect(() => {
+        const filtered = products.filter((product) =>
+            product.НоменклатураНаименование.toLowerCase().includes(productSearch.toLowerCase()),
+        );
+        setFilteredProducts(filtered);
+    }, [productSearch, products]);
+
     return (
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4 ">
-                <p className="flex text-[1rem] font-semibold align-left mb-4 ">Список списаний</p>
+                <div className="flex items-center justify-between mb-5">
+                    <p className="flex text-[1rem] font-semibold align-left">Список списаний</p>
+                    <div className="flex gap-6 items-center">
+                        <Button
+                            className=" bg-blue-500 text-white rounded-lg p-2"
+                            label="Редактировать"
+                            icon="pi pi-file-edit"
+                            onClick={() => setEditModalIsVisible(true)}
+                        />
+                        <div className="flex gap-6">
+                            <EditProductModal
+                                warehouses={warehouses}
+                                items={selectedItems}
+                                isOpen={editModalIsVisible}
+                                onClose={() => {
+                                    if (!editModalIsVisible) return;
+                                    setEditModalIsVisible(false);
+                                }}
+                            />
+                            <Dropdown
+                                value={selectedWarehouse}
+                                onChange={(e) => setSelectedWarehouse(e.value)}
+                                options={warehouses}
+                                optionLabel="warehouseName"
+                                placeholder="Выберите склад"
+                                className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
+                                showClear
+                            />
+                            <InputText
+                                className=" rounded-lg p-2 border-2"
+                                value={productSearch}
+                                onChange={(e) => setProductSearch(e.target.value)}
+                                placeholder="Поиск товара"
+                            />
+                        </div>
+                    </div>
+                </div>
                 <div className="flex flex-wrap border-solid border-1 rounded-xl  px-2 gap-1 w-full">
                     <DataGrid
                         autoHeight
@@ -21,6 +132,7 @@ export default function ListOfExpenses() {
                         }}
                         pageSizeOptions={[10, 20, 50]}
                         disableColumnResize
+                        onRowSelectionModelChange={handleSelectionChange}
                         density="compact"
                         slotProps={{
                             filterPanel: {

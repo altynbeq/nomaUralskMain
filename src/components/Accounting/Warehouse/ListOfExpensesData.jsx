@@ -75,13 +75,18 @@ export function renderAvatar(params) {
 }
 
 export const columns = [
-    { field: 'pageTitle', headerName: 'Page Title', flex: 1.5, minWidth: 200 },
+    {
+        field: 'НоменклатураНаименование',
+        headerName: 'Название',
+        flex: 1.5,
+        minWidth: 200,
+    },
     {
         field: 'status',
-        headerName: 'Status',
+        headerName: 'Статус',
         flex: 0.5,
         minWidth: 80,
-        renderCell: (params) => renderStatus(params.value),
+        renderCell: () => 'Online', // Можете заменить на динамическое значение
     },
     {
         field: 'users',
@@ -93,7 +98,7 @@ export const columns = [
     },
     {
         field: 'eventCount',
-        headerName: 'Event Count',
+        headerName: 'Остаток',
         headerAlign: 'right',
         align: 'right',
         flex: 1,
@@ -101,7 +106,7 @@ export const columns = [
     },
     {
         field: 'viewsPerUser',
-        headerName: 'Views per User',
+        headerName: 'Мин. Остаток',
         headerAlign: 'right',
         align: 'right',
         flex: 1,
@@ -109,7 +114,7 @@ export const columns = [
     },
     {
         field: 'averageTime',
-        headerName: 'Average Time',
+        headerName: 'Приход/Спис',
         headerAlign: 'right',
         align: 'right',
         flex: 1,
@@ -120,7 +125,7 @@ export const columns = [
         headerName: 'Daily Conversions',
         flex: 1,
         minWidth: 150,
-        renderCell: renderSparklineCell,
+        renderCell: () => 'N/A', // Заглушка, можно заменить на реальные данные
     },
 ];
 

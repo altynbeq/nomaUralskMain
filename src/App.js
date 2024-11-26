@@ -21,6 +21,7 @@ import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import AccountingWarehouse from './pages/AccountingWarehouse';
 import AccountingWorkers from './pages/AccountingWorkers';
 import { Loader } from './components/Loader';
+import 'primeicons/primeicons.css';
 
 const App = () => {
     const {

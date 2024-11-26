@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// import { SpisanieMonthChart } from '../components/Sklad'
 import SpisanieMonthChart from '../components/Sklad/SpisanieMonthChart';
-// import { ProductsStats } from '../components/Sales'
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useStateContext } from '../contexts/ContextProvider';
 import TableSort from '../components/demo/TablesList';
@@ -14,38 +12,6 @@ import {
     GridProductListCols,
     SpisanieBarSeriesByStore,
 } from '../data/MainDataSource';
-import ProductStatsComp from '../components/demo/ProductsStatComp';
-
-const data = [
-    {
-        name: 'Page A',
-        uv: 4000,
-    },
-    {
-        name: 'Page B',
-        uv: 3000,
-    },
-    {
-        name: 'Page C',
-        uv: 2000,
-    },
-    {
-        name: 'Page D',
-        uv: 2780,
-    },
-    {
-        name: 'Page E',
-        uv: 1890,
-    },
-    {
-        name: 'Page F',
-        uv: 2390,
-    },
-    {
-        name: 'Page G',
-        uv: 3490,
-    },
-];
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
