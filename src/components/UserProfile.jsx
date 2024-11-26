@@ -66,7 +66,7 @@ const UserProfile = () => {
             <div className="flex gap-5 items-center mt-6 border-color border-b-1 pb-6">
                 <img
                     className="rounded-full h-24 w-24"
-                    src={`https://nomalytica-back.onrender.com${userImage}`}
+                    src={userImage ? `https://nomalytica-back.onrender.com${userImage}` : avatar}
                     alt="user-profile"
                 />
                 <div className="overflow-hidden">
@@ -85,7 +85,7 @@ const UserProfile = () => {
                         className="py-2 px-3 bg-gray-200 text-black rounded-full hover:bg-blue-600 transition-colors font-medium"
                         onClick={handleUploadButtonClick}
                     >
-                        Загрузить файл
+                        Загрузить аватар
                     </button>
                     <input
                         type="file"
