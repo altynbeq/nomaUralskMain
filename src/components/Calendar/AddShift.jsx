@@ -5,6 +5,7 @@ import { Calendar } from 'primereact/calendar';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { addLocale } from 'primereact/api';
+import avatar from '../../data/avatar.jpg';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -99,6 +100,23 @@ export const AddShift = (props) => {
         }
     };
 
+    // Define the itemTemplate function
+    const itemTemplate = (item) => {
+        return (
+            <div className="flex items-center">
+                <img
+                    src={item.image ? `https://nomalytica-back.onrender.com${item.image}` : avatar}
+                    alt={item.name}
+                    className="w-12 h-12 rounded-full mr-2"
+                />
+                <div>
+                    <div>{item.name}</div>
+                    <div className="text-gray-500 text-sm">{item.departmentId?.name}</div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <>
             {isModalOpen && (
@@ -129,9 +147,11 @@ export const AddShift = (props) => {
                                     completeMethod={searchUsers}
                                     onChange={(e) => setSelectedSubuser(e.value)}
                                     field="name"
+                                    itemTemplate={itemTemplate} // Use the itemTemplate here
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500"
                                     inputClassName="focus:outline-none focus:ring-0"
                                     placeholder="Выберите сотрудника"
+                                    panelStyle={{ width: '295px' }}
                                 />
                             </div>
                             <div className="mb-4">
