@@ -100,7 +100,6 @@ export const AddShift = (props) => {
         }
     };
 
-    // Define the itemTemplate function
     const itemTemplate = (item) => {
         return (
             <div className="flex items-center">
