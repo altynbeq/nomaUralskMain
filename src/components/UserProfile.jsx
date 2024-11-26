@@ -46,7 +46,7 @@ const UserProfile = () => {
                     </p>
                 </div>
             </div>
-            {/* <div>
+            <div>
                 {userProfileData.map((item, index) => (
                     <div
                         key={index}
@@ -65,7 +65,7 @@ const UserProfile = () => {
                         </div>
                     </div>
                 ))}
-            </div> */}
+            </div>
             <div className="mt-5">
                 <button
                     type="button"

@@ -121,7 +121,10 @@ const LogInForm = () => {
                           ? 'Вы успешно зарегистрировались'
                           : ''
                 }
-                onClose={() => setAlertOpen(false)}
+                onClose={() => {
+                    setAlertOpen(false);
+                    window.location.href = '/general';
+                }}
             />
             <div className="max-w-md w-full bg-white p-8 border-8-grey rounded-2xl space-y-8">
                 <div className="flex text-blue-800 mb-10 flex-row text-4xl align-center justify-center gap-1">
