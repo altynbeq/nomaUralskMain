@@ -35,94 +35,105 @@ const ManageWarehouse = () => {
         <form className="space-y-4 p-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Name</label>
+                    <label className="text-sm font-medium">Название товара</label>
                     <input
                         type="text"
+                        required
                         className="w-full rounded-md border border-gray-300 p-2"
-                        placeholder="Enter name"
+                        placeholder="Введите товар"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Date</label>
-                    <input type="date" className="w-full rounded-md border border-gray-300 p-2" />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Organisation</label>
+                    <label className="text-sm font-medium">Дата</label>
                     <input
-                        type="text"
+                        type="date"
+                        required
                         className="w-full rounded-md border border-gray-300 p-2"
-                        placeholder="Enter organisation"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Responsible</label>
+                    <label className="text-sm font-medium">Организация</label>
                     <input
                         type="text"
+                        required
                         className="w-full rounded-md border border-gray-300 p-2"
-                        placeholder="Enter responsible person"
+                        placeholder="Название организации"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Warehouse</label>
+                    <label className="text-sm font-medium">Ответсвенный</label>
                     <input
                         type="text"
+                        required
                         className="w-full rounded-md border border-gray-300 p-2"
-                        placeholder="Enter warehouse"
+                        placeholder="Имя ответсвенного"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Reason</label>
+                    <label className="text-sm font-medium">Склад</label>
                     <input
                         type="text"
+                        required
                         className="w-full rounded-md border border-gray-300 p-2"
-                        placeholder="Enter reason"
+                        placeholder="Склад товара"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Amount</label>
+                    <label className="text-sm font-medium">Причина</label>
+                    <input
+                        type="text"
+                        required
+                        className="w-full rounded-md border border-gray-300 p-2"
+                        placeholder="Причина списания"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Количество</label>
                     <input
                         type="number"
+                        required
                         className="w-full rounded-md border border-gray-300 p-2"
-                        placeholder="Enter amount"
+                        placeholder="Количество товара"
                     />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                     <label className="text-sm font-medium">Price</label>
                     <input
                         type="number"
                         className="w-full rounded-md border border-gray-300 p-2"
                         placeholder="Enter price"
                     />
-                </div>
+                </div> */}
 
                 {/* Photo Upload / Capture */}
-                <div className="space-y-2 col-span-2">
-                    <label className="text-sm font-medium">Photo</label>
+                <div className="space-y-2 col-span-1">
+                    <label className="text-sm font-medium">Фото</label>
                     <input
                         type="file"
+                        required
                         accept="image/*"
                         capture="environment"
                         className="w-full rounded-md border border-gray-300 p-2"
                     />
-                    <p className="text-xs text-gray-500">Upload a photo or take one directly.</p>
+                    <p className="text-xs text-gray-500">Сделайте фото товара</p>
                 </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-gray-700 text-white rounded-full hover:bg-gray-800 transition-colors"
+                    className="px-4 py-2 bg-blue-700 text-white rounded-full hover:bg-gray-800 transition-colors"
                 >
-                    Submit
+                    Добавить
                 </button>
             </div>
         </form>
     );
 
     return (
-        <div className="w-[90%] mx-auto mt-5 md:mt-0 pt-10 md:pt-0 flex items-center justify-center">
-            <div className=" w-full flex flex-col md:flex-row  gap-8">
+        <div className="w-[90%] mb-5 md:w-[40%] subtle-border mx-auto mt-5 md:mt-0  md:pt-0 flex items-center justify-center">
+            <div className=" w-full flex  flex-col md:flex-row  gap-8">
                 {/* First Component */}
-                <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
+                {/* <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                     <h3 className="text-lg font-medium text-gray-800 mb-4 absolute top-4 left-6">
                         Добавить поступление
                     </h3>
@@ -156,16 +167,16 @@ const ManageWarehouse = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Second Component */}
-                <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
+                <div className="w-full h-72  bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                     <h3 className="text-lg font-medium text-gray-800 mb-4 absolute top-4 left-6">
-                        Добавить списания
+                        Добавить списание
                     </h3>
                     <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
                         <div className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                            <p className="text-gray-600">Перенесите файл сюда</p>
+                            <p className="text-gray-600">Заполните данные списания</p>
                             <div className="flex gap-4 justify-center my-4">
                                 <MdInsertDriveFile size={32} className="text-blue-500" />
                                 <MdPieChart size={32} className="text-blue-500" />
@@ -174,7 +185,7 @@ const ManageWarehouse = () => {
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setIsModalOpen2(true)}
-                                    className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-950 transition-colors font-medium"
+                                    className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-400 transition-colors font-medium"
                                 >
                                     Добавить
                                 </button>
@@ -184,12 +195,12 @@ const ManageWarehouse = () => {
                                     className="hidden"
                                     onChange={(e) => console.log(e.target.files[0])}
                                 />
-                                <button
+                                {/* <button
                                     onClick={() => handleFileUpload(fileInput2)}
                                     className="px-6 py-2 bg-gray-200 text-black rounded-full hover:bg-blue-950 transition-colors font-medium"
                                 >
                                     Добавить файл
-                                </button>
+                                </button> */}
                             </div>
                         </div>
                     </div>
@@ -209,7 +220,7 @@ const ManageWarehouse = () => {
             <Modal
                 isOpen={isModalOpen2}
                 onClose={() => setIsModalOpen2(false)}
-                title="Добавить списания"
+                title="Добавить списание"
             >
                 <FormContent />
             </Modal>

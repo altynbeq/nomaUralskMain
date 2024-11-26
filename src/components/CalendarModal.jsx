@@ -34,7 +34,7 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, dailyData }) => {
         '2xl:border-2 2xl:pl-6 2xl:pr-6';
 
     return (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div className="fixed z-10 inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white rounded-lg p-6 w-full sm:w-2/5 md:w-1/2 lg:w-2/5 xl:w-1/3 shadow-lg relative">
                 <button
                     onClick={onClose}
