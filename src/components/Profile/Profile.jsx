@@ -26,16 +26,6 @@ export const Profile = () => {
         setIsModalOpen(true);
     };
     const getDayColor = (day) => {
-        // const dayData = dailyData.find((item) => item.date === day);
-        // if (!dayData) return 'bg-gray-300';
-
-        // if (dayData.tasksCompleted && !dayData.wasLate) {
-        //     return 'bg-green-500';
-        // } else if (!dayData.wasLate) {
-        //     return 'bg-yellow-400';
-        // } else {
-        //     return 'bg-red-500';
-        // }
         const formattedDay = new Date(new Date().setDate(day)).toISOString().slice(0, 10);
 
         const shift = subuserShifts.find((shift) => {
@@ -43,23 +33,10 @@ export const Profile = () => {
             const endDate = shift.endTime.slice(0, 10); // Оставляем только дату
             return startDate === formattedDay || endDate === formattedDay;
         });
-        // Если найден подходящий сдвиг, выделяем оранжевым
         if (shift) {
-            return 'bg-blue-500';
-        } else {
-            const dayData = dailyData.find((item) => item.date === day);
-            if (!dayData) return 'bg-gray-300';
-
-            if (dayData.tasksCompleted && !dayData.wasLate) {
-                return 'bg-green-500';
-            } else if (!dayData.wasLate) {
-                return 'bg-yellow-400';
-            } else {
-                return 'bg-red-500';
-            }
+            return 'bg-blue-500 text-white';
         }
-
-        // return 'bg-gray-300';
+        return 'bg-gray-300';
     };
     const dailyData = [
         {
