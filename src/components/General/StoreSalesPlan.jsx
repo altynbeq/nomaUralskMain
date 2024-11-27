@@ -1,24 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
-import { FaRegEdit } from 'react-icons/fa';
 import { dailyData } from '../../data/dailyData';
+import { useStateContext } from '../../contexts/ContextProvider';
+import { Dropdown } from 'primereact/dropdown';
 
 export const StoreSalesPlan = () => {
+    const { companyStructure } = useStateContext();
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
-    const [selectedStore, setSelectedStore] = useState('Абая');
+    const [selectedStore, setSelectedStore] = useState(null);
+    const [totalPlan, setTotalPlan] = useState();
 
     const toggleView = () => {
         setIsMonthView(!isMonthView);
     };
 
-    const handleStoreChange = (event) => {
-        setSelectedStore(event.target.value);
-    };
-
     const weekDays = ['Чт', 'Пт', 'Сб', 'Вс', 'Пн', 'Вт', 'Ср'];
-    const stores = ['Абая', 'Фурманова', 'Центр'];
     const openModal = (day) => {
         setSelectedDay(day);
         setIsModalOpen(true);
@@ -36,9 +35,25 @@ export const StoreSalesPlan = () => {
         }
     };
 
-    const getProgressWidth = () => {
-        return `60%`;
-    };
+    useEffect(() => {
+        if (selectedStore) {
+            // Общий план для выбранного магазина
+            const store = companyStructure?.stores?.find(
+                (store) => store.storeName === selectedStore.storeName,
+            );
+            setTotalPlan(store?.plans?.reduce((total, plan) => total + plan.goal, 0) || 0);
+        } else {
+            // Общий план для всех магазинов
+            setTotalPlan(
+                companyStructure?.stores?.reduce(
+                    (total, store) =>
+                        total +
+                        (store.plans?.reduce((storeTotal, plan) => storeTotal + plan.goal, 0) || 0),
+                    0,
+                ),
+            );
+        }
+    }, [companyStructure?.stores, selectedStore]);
 
     return (
         <div className="w-[43%]  bg-white rounded-lg shadow-md p-4 ">
@@ -51,17 +66,15 @@ export const StoreSalesPlan = () => {
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
             <div className="flex justify-between mb-4">
-                <select
+                <Dropdown
                     value={selectedStore}
-                    onChange={handleStoreChange}
-                    className="p-2 bg-gray-200 text-black rounded-lg"
-                >
-                    {stores.map((store, index) => (
-                        <option key={index} value={store}>
-                            {store}
-                        </option>
-                    ))}
-                </select>
+                    onChange={(e) => setSelectedStore(e.value)}
+                    options={companyStructure?.stores || []}
+                    optionLabel="storeName"
+                    showClear
+                    placeholder="Выберите магазин"
+                    className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                />
                 <div className="flex items-center justify-center ">
                     <div className="relative gap-1  bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                         <button
@@ -85,7 +98,7 @@ export const StoreSalesPlan = () => {
                 <div className="flex flex-row justify-evenly subtle-border p-1">
                     <div className="flex flex-col text-center justify-center">
                         <h3>Общий план:</h3>
-                        <h3> 123 321 231 тг</h3>
+                        <h3>{totalPlan} тг</h3>
                     </div>
                     <div>
                         <h3>Выполнено:</h3>
