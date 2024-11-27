@@ -11,6 +11,8 @@ import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import { Loader } from './components/Loader';
 import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
     const {
@@ -25,6 +27,7 @@ const App = () => {
         setUserData,
         setAccess,
         setSubUser,
+        setCompanyStructure,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -110,12 +113,28 @@ const App = () => {
                 setSkeletonUp(false);
             } else {
                 fetchData(currentUserId);
+                fetchUserStructure(currentUserId);
             }
         } else {
             setLoading(false);
             setSkeletonUp(false);
         }
     }, [setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setSpisanie, setUserData]);
+
+    const fetchUserStructure = async (id) => {
+        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const data = await response.json();
+            setCompanyStructure(data);
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
 
     if (techProblem) {
         return <TechProb />;
@@ -145,6 +164,7 @@ const App = () => {
                             <Sidebar />
                         </div>
                     )}
+                    <ToastContainer position="top-center" autoClose={5000} />
                     <MainContent urls={urls} activeMenu={activeMenu} />
                 </div>
             </BrowserRouter>

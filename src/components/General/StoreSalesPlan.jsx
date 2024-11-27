@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { FaRegEdit } from 'react-icons/fa';
-import { FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
+import { dailyData } from '../../data/dailyData';
 
 export const StoreSalesPlan = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,44 +29,8 @@ export const StoreSalesPlan = () => {
             return 'bg-red-500';
         }
     };
-    const dailyData = [
-        {
-            date: 1,
-            tasksCompleted: true,
-            wasLate: false,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:00',
-            leftAt: '20:00',
-            plan: '600 000 тг',
-            actual: '600 000 тг',
-        },
-        {
-            date: 2,
-            tasksCompleted: false,
-            wasLate: true,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:30',
-            leftAt: '19:00',
-            plan: '600 000 тг',
-            actual: '480 000 тг',
-        },
 
-        {
-            date: 3,
-            tasksCompleted: false,
-            wasLate: false,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:30',
-            leftAt: '19:00',
-            plan: '600 000 тг',
-            actual: '480 000 тг',
-        },
-    ];
     const getProgressWidth = () => {
-        // if (!dayData) return '0%';
-
-        const planAmount = '600 000';
-        const actualAmount = '100 000';
         return `60%`;
     };
 

@@ -14,7 +14,7 @@ function convertUrl(apiUrl) {
 }
 
 export const GeneralCompany = ({ urls }) => {
-    const { kkm, skeletonUp, spisanie } = useStateContext();
+    const { kkm, skeletonUp, spisanie, structureCompany } = useStateContext();
     const [ready, setReady] = useState(false);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
@@ -54,8 +54,8 @@ export const GeneralCompany = ({ urls }) => {
                 <EmpltSiftStats />
             </div>
             <div className="flex mt-5 gap-10 w-[100%] flex-col md:flex-col justify-center align-top items-center">
-                <EmplSalesPlans />
                 <SetStoresSalesPlan />
+                <EmplSalesPlans />
             </div>
             <div className="flex mt-5 gap-4  w-[100%] flex-col md:flex-row  justify-center align-top      items-center">
                 <CardWithStats userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
