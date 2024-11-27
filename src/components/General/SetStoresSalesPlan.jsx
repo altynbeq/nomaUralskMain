@@ -6,7 +6,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import avatar from '../../data/avatar.jpg';
 import { dailyData } from '../../data/dailyData';
 import { StorePlanModal } from '../Plan/StorePlanModal';
-import { toast } from 'react-toastify';
+import AlertModal from '../AlertModal';
 
 export const SetStoresSalesPlan = () => {
     const { companyStructure } = useStateContext();
@@ -18,6 +18,7 @@ export const SetStoresSalesPlan = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [storePlanModalOpen, setStorePlanModalOpen] = useState(false);
     const [selectedStorePlan, setSelectedStorePlan] = useState({});
+    const [showAlertModal, setShowAlertModal] = useState(false);
 
     const toggleView = () => {
         setIsMonthView(!isMonthView);
@@ -53,7 +54,7 @@ export const SetStoresSalesPlan = () => {
     };
 
     const successSetPlan = () => {
-        toast.success('План был поставлен');
+        setShowAlertModal(true);
     };
 
     return (
@@ -173,6 +174,11 @@ export const SetStoresSalesPlan = () => {
                 isVisible={storePlanModalOpen}
                 onHide={closeStorePlanModal}
                 store={selectedStorePlan}
+            />
+            <AlertModal
+                message="План добавлен"
+                open={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
             />
         </div>
     );
