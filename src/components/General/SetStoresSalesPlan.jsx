@@ -2,27 +2,12 @@ import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { FaRegEdit } from 'react-icons/fa';
 import { FaCalendarWeek, FaSearch } from 'react-icons/fa';
-import { Dropdown } from 'primereact/dropdown';
 
-export const EmplSalesPlans = () => {
+export const SetStoresSalesPlan = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
-    const [selectedMonth, setSelectedMonth] = useState('Сентябрь');
-    const months = [
-        'Январь',
-        'Февраль',
-        'Март',
-        'Апрель',
-        'Май',
-        'Июнь',
-        'Июль',
-        'Август',
-        'Сентябрь',
-        'Октябрь',
-        'Ноябрь',
-        'Декабрь',
-    ];
+
     const toggleView = () => {
         setIsMonthView(!isMonthView);
     };
@@ -142,26 +127,20 @@ export const EmplSalesPlans = () => {
         worker.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
     return (
-        <div className="w-[90%]  bg-white rounded-lg shadow-md p-4 ">
+        <div className="max-w-1xl  bg-white rounded-lg shadow-md p-4 ">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                    <h2 className="font-semibold text-lg text-black">План сотрудников</h2>
+                    <h2 className="font-semibold text-lg text-black">План магазинов</h2>
                     <p className="text-gray-500 text-sm">Романтик Уральск</p>
                 </div>
             </div>
-            <hr className="bg-red w-full mx-auto my-4" />
+            <hr className="bg-red max-w-xs mx-auto my-4" />
             <div className="flex justify-between mb-4">
-                <div className="flex flex-wrap z-10 pb-6 gap-1 border-solid border-gray-500">
-                    <Dropdown
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.value)}
-                        options={months}
-                        optionLabel="name"
-                        placeholder="Выберите месяц"
-                        className="w-full md:w-14rem border border-gray-400 text-black bg-white"
-                    />
-                </div>
+                <button className=" p-2 flex text-sm flex-row justify-center align-center gap-2 text-center bg-gray-200 text-black  rounded-2xl mr-2">
+                    Редактировать
+                    <FaRegEdit />
+                </button>
                 <div className="flex items-center justify-center ">
                     <div className="relative gap-1  bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                         <button
