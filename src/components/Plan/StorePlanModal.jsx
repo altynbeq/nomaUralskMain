@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -213,7 +213,12 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                     <div className="field mb-4">
                         <Dropdown
                             value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.value)}
+                            onChange={(e) => {
+                                setSelectedCategory(e.value);
+                                if (isEditMode) {
+                                    setPlanName('');
+                                }
+                            }}
                             options={categories}
                             showClear
                             placeholder="Выберите категорию"
@@ -224,6 +229,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                         <Button
                             className="bg-green-500 text-white border-2 p-2 rounded-lg"
                             onClick={handleSave}
+                            disabled={!planName || !planGoal || !selectedCategory}
                             label={isEditMode ? 'Сохранить изменения' : 'Сохранить'}
                         />
                     </div>
