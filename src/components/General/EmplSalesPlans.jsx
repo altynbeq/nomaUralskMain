@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { Dropdown } from 'primereact/dropdown';
+import { Button } from 'primereact/button';
 import { useStateContext } from '../../contexts/ContextProvider';
 import avatar from '../../data/avatar.jpg';
 import { dailyData } from '../../data/dailyData';
+import { SubuserPlanModal } from '../../components/Plan/SubuserPlanModal';
 
 export const EmplSalesPlans = () => {
     const { companyStructure } = useStateContext();
@@ -13,6 +15,8 @@ export const EmplSalesPlans = () => {
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [subuserPlanModalOpen, setSubuserPlanModalOpen] = useState(false);
+    const [selectedSubuserPlan, setSelectedSubuserPlan] = useState({});
 
     const toggleView = () => {
         setIsMonthView(!isMonthView);
@@ -44,6 +48,15 @@ export const EmplSalesPlans = () => {
 
         return matchesSearchTerm && matchesSelectedDepartment && matchesSelectedStore;
     });
+
+    const handleButtonClick = (subUser) => {
+        setSubuserPlanModalOpen(true);
+        setSelectedSubuserPlan(subUser);
+    };
+
+    const closeSubuserPlanModal = () => {
+        setSubuserPlanModalOpen(false);
+    };
 
     return (
         <div className="w-[90%] bg-white rounded-lg shadow-md p-4">
@@ -115,7 +128,8 @@ export const EmplSalesPlans = () => {
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
                     {filteredSubUsers?.length > 0 ? (
                         filteredSubUsers.map((subUser) => (
-                            <div
+                            <Button
+                                onClick={() => handleButtonClick(subUser)}
                                 key={subUser._id}
                                 className="flex flex-col items-center text-center p-1 border rounded-lg"
                             >
@@ -129,7 +143,7 @@ export const EmplSalesPlans = () => {
                                     className="w-12 h-12 rounded-full object-cover mb-2"
                                 />
                                 <div className="text-sm font-semibold">{subUser.name}</div>
-                            </div>
+                            </Button>
                         ))
                     ) : (
                         <p className="text-gray-500 text-center col-span-full">
@@ -155,6 +169,11 @@ export const EmplSalesPlans = () => {
                 onClose={() => setIsModalOpen(false)}
                 selectedDay={selectedDay}
                 dailyData={dailyData}
+            />
+            <SubuserPlanModal
+                isVisible={subuserPlanModalOpen}
+                onHide={closeSubuserPlanModal}
+                subuser={selectedSubuserPlan}
             />
         </div>
     );

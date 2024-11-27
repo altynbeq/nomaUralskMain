@@ -6,13 +6,13 @@ import { Dropdown } from 'primereact/dropdown';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import avatar from '../../data/avatar.jpg';
 
-export const StorePlanModal = ({ isVisible, onHide, store }) => {
+export const SubuserPlanModal = ({ isVisible, onHide, subuser }) => {
     const categories = ['Розы', 'Шоколадки', 'Боксы'];
     const [openNewPlanModal, setOpenNewPlanModal] = useState(false);
     const [planName, setPlanName] = useState('');
     const [planGoal, setPlanGoal] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
-    const [plans, setPlans] = useState(store.plans || []);
+    const [plans, setPlans] = useState(subuser.plans || []);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingPlanIndex, setEditingPlanIndex] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
         setEditingPlanIndex(null);
     };
 
-    const updateStore = async (updatedPlans) => {
+    const updateSubuser = async (updatedPlans) => {
         setIsLoading(true);
         try {
             const sanitizedPlans = updatedPlans.map((plan) => ({
@@ -39,20 +39,18 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                 category: plan.category,
             }));
             const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/stores/update-store/${store._id}`,
+                `https://nomalytica-back.onrender.com/api/subUsers/update-subuser/${subuser._id}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ plans: sanitizedPlans }),
                 },
             );
-
             if (!response.ok) {
                 throw new Error('Failed to update store');
             }
-
-            const updatedStore = await response.json();
-            console.log('Store updated successfully:', updatedStore);
+            const updatedSubuser = await response.json();
+            console.log('Store updated successfully:', updatedSubuser);
         } catch (error) {
             console.error('Error updating store:', error.message);
         } finally {
@@ -68,14 +66,14 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                     : plan,
             );
             setPlans(updatedPlans);
-            updateStore(updatedPlans);
+            updateSubuser(updatedPlans);
         } else if (planName && planGoal && selectedCategory) {
             const newPlans = [
                 ...plans,
                 { name: planName, goal: planGoal, category: selectedCategory },
             ];
             setPlans(newPlans);
-            updateStore(newPlans);
+            updateSubuser(newPlans);
         }
         closeSecondModal();
     };
@@ -83,7 +81,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
     const handleDelete = (index) => {
         const updatedPlans = plans.filter((_, i) => i !== index);
         setPlans(updatedPlans);
-        updateStore(updatedPlans);
+        updateSubuser(updatedPlans);
     };
 
     return (
@@ -95,16 +93,16 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                     <div className="flex gap-2">
                         <img
                             src={
-                                store?.image
-                                    ? `https://nomalytica-back.onrender.com${store.image}`
+                                subuser?.image
+                                    ? `https://nomalytica-back.onrender.com${subuser.image}`
                                     : avatar
                             }
-                            alt={store.storeName}
+                            alt={subuser.name}
                             className="w-12 h-12 rounded-full object-cover mb-2"
                         />
                         <div className="flex flex-col">
                             <h3 className="font-bold text-lg">
-                                {store?.storeName || 'Название магазина'}
+                                {subuser?.name || 'Имя сотрудника'}
                             </h3>
                             <p className="text-sm font-semibold">План на {getCurrentMonthYear()}</p>
                         </div>
@@ -176,7 +174,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                         className={`w-full border-2 p-2 rounded-lg bg-green-500 text-white ${
                             isLoading ? 'p-button-loading bg-blue-500' : ''
                         }`}
-                        onClick={updateStore}
+                        onClick={updateSubuser}
                         disabled={isLoading || !plans.length}
                     />
                 </div>
