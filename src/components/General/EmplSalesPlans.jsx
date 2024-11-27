@@ -151,7 +151,27 @@ export const EmplSalesPlans = () => {
                 </div>
             </div>
             <hr className="bg-red w-full mx-auto my-4" />
-            <div className="flex justify-between mb-4">
+            <div className="flex gap-4 justify-between align-center items-center  mb-4">
+                <div className="w-full mb-4 relative">
+                    <input
+                        type="text"
+                        placeholder="Search for an employee"
+                        className="w-full pl-10 p-2 border border-gray-300 rounded-md"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                </div>
+                <div className="flex flex-wrap z-10 pb-6 gap-1 border-solid border-gray-500">
+                    <Dropdown
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.value)}
+                        options={months}
+                        optionLabel="name"
+                        placeholder="Выберите месяц"
+                        className="w-full md:w-14rem border border-gray-400 text-black bg-white"
+                    />
+                </div>
                 <div className="flex flex-wrap z-10 pb-6 gap-1 border-solid border-gray-500">
                     <Dropdown
                         value={selectedMonth}
@@ -169,14 +189,14 @@ export const EmplSalesPlans = () => {
                             className={` p-1 rounded-full transition-colors duration-300 relative z-2  text-sm
                                     ${!isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
                         >
-                            Неделя
+                            Выставлен
                         </button>
                         <button
                             onClick={toggleView}
                             className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
                                     ${isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
                         >
-                            Месяц
+                            Нету
                         </button>
                     </div>
                 </div>
@@ -185,16 +205,6 @@ export const EmplSalesPlans = () => {
                 <div className="">
                     <h3>Общий план: 123 321 231 тг</h3>
                     {/* <h3>Остаток: 12 321 231 тг</h3> */}
-                </div>
-                <div className="mb-4 relative">
-                    <input
-                        type="text"
-                        placeholder="Search for an employee"
-                        className="w-full pl-10 p-2 border border-gray-300 rounded-md"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 </div>
             </div>
             {isMonthView ? (
