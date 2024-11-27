@@ -12,9 +12,10 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
     const [planName, setPlanName] = useState('');
     const [planGoal, setPlanGoal] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
-    const [plans, setPlans] = useState([]);
+    const [plans, setPlans] = useState(store.plans || []);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingPlanIndex, setEditingPlanIndex] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const openSecondModal = () => {
         setOpenNewPlanModal(true);
@@ -29,38 +30,55 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
         setEditingPlanIndex(null);
     };
 
+    const updateStore = async (updatedPlans) => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/stores/update-store/${store._id}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plans: updatedPlans }),
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to update store');
+            }
+
+            const updatedStore = await response.json();
+            console.log('Store updated successfully:', updatedStore);
+        } catch (error) {
+            console.error('Error updating store:', error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSave = () => {
         if (isEditMode) {
-            // Update the existing plan
-            setPlans((prevPlans) =>
-                prevPlans.map((plan, index) =>
-                    index === editingPlanIndex
-                        ? { name: planName, goal: planGoal, category: selectedCategory }
-                        : plan,
-                ),
+            const updatedPlans = plans.map((plan, index) =>
+                index === editingPlanIndex
+                    ? { name: planName, goal: planGoal, category: selectedCategory }
+                    : plan,
             );
+            setPlans(updatedPlans);
+            updateStore(updatedPlans);
         } else if (planName && planGoal && selectedCategory) {
-            // Add a new plan
-            setPlans((prevPlans) => [
-                ...prevPlans,
+            const newPlans = [
+                ...plans,
                 { name: planName, goal: planGoal, category: selectedCategory },
-            ]);
+            ];
+            setPlans(newPlans);
+            updateStore(newPlans);
         }
         closeSecondModal();
     };
 
-    const handleEdit = (index) => {
-        const plan = plans[index];
-        setPlanName(plan.name);
-        setPlanGoal(plan.goal);
-        setSelectedCategory(plan.category);
-        setEditingPlanIndex(index);
-        setIsEditMode(true);
-        setOpenNewPlanModal(true);
-    };
-
     const handleDelete = (index) => {
-        setPlans((prevPlans) => prevPlans.filter((_, i) => i !== index));
+        const updatedPlans = plans.filter((_, i) => i !== index);
+        setPlans(updatedPlans);
+        updateStore(updatedPlans);
     };
 
     return (
@@ -93,12 +111,14 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
             >
                 <div className="flex justify-end mt-3">
                     <Button
+                        className="bg-blue-500 text-white border-2 p-2 rounded-lg"
                         onClick={openSecondModal}
                         label="Добавить"
-                        className="bg-blue-500 text-white border-2 p-2 rounded-lg"
+                        icon="pi pi-plus"
                     />
                 </div>
                 <div>
+                    {/* Display all added plans */}
                     {plans.length > 0 ? (
                         <div className="mt-4">
                             {plans.map((plan, index) => (
@@ -121,7 +141,14 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                                         <Button
                                             icon="pi pi-pencil"
                                             className="p-button-rounded p-button-text p-button-info"
-                                            onClick={() => handleEdit(index)}
+                                            onClick={() => {
+                                                setPlanName(plan.name);
+                                                setPlanGoal(plan.goal);
+                                                setSelectedCategory(plan.category);
+                                                setEditingPlanIndex(index);
+                                                setIsEditMode(true);
+                                                setOpenNewPlanModal(true);
+                                            }}
                                             tooltip="Изменить"
                                         />
                                         <Button
@@ -135,14 +162,24 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-gray-500 mt-4">Планы пока не добавлены</p>
+                        <p className="text-gray-500 mt-4">Планы пока не добавлены.</p>
                     )}
+                </div>
+                <div className="flex justify-center mt-4">
+                    <Button
+                        label={isLoading ? 'Обновление...' : 'Поставить план'}
+                        className={`w-full border-2 p-2 rounded-lg bg-green-500 text-white ${
+                            isLoading ? 'p-button-loading bg-blue-500' : ''
+                        }`}
+                        onClick={updateStore}
+                        disabled={isLoading}
+                    />
                 </div>
             </Dialog>
             <Dialog
                 visible={openNewPlanModal}
                 onHide={closeSecondModal}
-                header="Новый План"
+                header={isEditMode ? 'Изменить План' : 'Новый План'}
                 style={{ width: '450px' }}
                 modal
                 closable
@@ -187,7 +224,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                         <Button
                             className="bg-green-500 text-white border-2 p-2 rounded-lg"
                             onClick={handleSave}
-                            label="Cохранить"
+                            label={isEditMode ? 'Сохранить изменения' : 'Сохранить'}
                         />
                     </div>
                 </div>
