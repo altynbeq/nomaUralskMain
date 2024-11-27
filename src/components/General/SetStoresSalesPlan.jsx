@@ -84,8 +84,9 @@ export const SetStoresSalesPlan = () => {
                         onChange={(e) => setSelectedStore(e.value)}
                         options={companyStructure?.stores || []}
                         optionLabel="storeName"
+                        showClear
                         placeholder="Выберите магазин"
-                        className="w-full md:w-14rem border border-gray-400 text-black bg-white"
+                        className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                     />
                 </div>
                 <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
@@ -94,8 +95,9 @@ export const SetStoresSalesPlan = () => {
                         onChange={(e) => setSelectedDepartment(e.value)}
                         options={companyStructure?.departments || []}
                         optionLabel="name"
-                        placeholder="Выберите месяц"
-                        className="w-full md:w-14rem border border-gray-400 text-black bg-white"
+                        showClear
+                        placeholder="Выберите отдел"
+                        className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                     />
                 </div>
                 <div className="relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
