@@ -43,13 +43,7 @@ export const SetStoresSalesPlan = () => {
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-<<<<<<< Updated upstream
                     <h2 className="font-semibold text-lg text-black">План магазинов</h2>
-=======
-                    <h2 className="font-semibold text-lg text-black">
-                        Поставить план для магазинов
-                    </h2>
->>>>>>> Stashed changes
                     <p className="text-gray-500 text-sm">Романтик Уральск</p>
                 </div>
             </div>
