@@ -11,6 +11,8 @@ import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import { Loader } from './components/Loader';
 import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
     const {
@@ -145,6 +147,7 @@ const App = () => {
                             <Sidebar />
                         </div>
                     )}
+                    <ToastContainer position="top-center" autoClose={5000} />
                     <MainContent urls={urls} activeMenu={activeMenu} />
                 </div>
             </BrowserRouter>

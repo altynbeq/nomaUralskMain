@@ -8,71 +8,53 @@ export const Profile = () => {
     const [subuserShifts, setSubuserShifts] = useState([]);
     const [selectedShift, setSelectedShift] = useState(null);
 
+    const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
     const toggleView = () => {
         setIsMonthView(!isMonthView);
     };
-    const weekDays = ['Чт', 'Пт', 'Сб', 'Вс', 'Пн', 'Вт', 'Ср'];
 
-    const openModal = (day) => {
-        setSelectedDay(day);
-        const formattedDay = new Date(new Date().setDate(day)).toISOString().slice(0, 10);
+    const getCurrentWeekDates = () => {
+        const currentDate = new Date();
+        const dayOfWeek = currentDate.getDay() || 7;
+        const monday = new Date(currentDate);
+        monday.setDate(currentDate.getDate() - dayOfWeek + 1);
+
+        const weekDates = [];
+
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            weekDates.push(date);
+        }
+
+        return weekDates;
+    };
+
+    const getDayColor = (date) => {
+        const formattedDate = date.toISOString().slice(0, 10);
+
+        const hasShift = subuserShifts.some((shift) => {
+            const startDate = shift.startTime.slice(0, 10);
+            const endDate = shift.endTime.slice(0, 10);
+            return startDate === formattedDate || endDate === formattedDate;
+        });
+
+        return hasShift ? 'bg-blue-500 text-white' : 'bg-gray-300';
+    };
+
+    const openModal = (date) => {
+        setSelectedDay(date);
+        const formattedDate = date.toISOString().slice(0, 10);
+
         const shift = subuserShifts.find((shift) => {
             const startDate = shift.startTime.slice(0, 10);
             const endDate = shift.endTime.slice(0, 10);
-            return startDate === formattedDay || endDate === formattedDay;
+            return startDate === formattedDate || endDate === formattedDate;
         });
 
         setSelectedShift(shift || null);
         setIsModalOpen(true);
-    };
-    const getDayColor = (day) => {
-        const formattedDay = new Date(new Date().setDate(day)).toISOString().slice(0, 10);
-
-        const shift = subuserShifts.find((shift) => {
-            const startDate = shift.startTime.slice(0, 10); // Оставляем только дату
-            const endDate = shift.endTime.slice(0, 10); // Оставляем только дату
-            return startDate === formattedDay || endDate === formattedDay;
-        });
-        if (shift) {
-            return 'bg-blue-500 text-white';
-        }
-        return 'bg-gray-300';
-    };
-    const dailyData = [
-        {
-            date: 1,
-            tasksCompleted: true,
-            wasLate: false,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:00',
-            leftAt: '20:00',
-            plan: '600 000 тг',
-            actual: '600 000 тг',
-        },
-        {
-            date: 2,
-            tasksCompleted: false,
-            wasLate: true,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:30',
-            leftAt: '19:00',
-            plan: '600 000 тг',
-            actual: '480 000 тг',
-        },
-
-        {
-            date: 3,
-            tasksCompleted: false,
-            wasLate: false,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:30',
-            leftAt: '19:00',
-            plan: '600 000 тг',
-            actual: '480 000 тг',
-        },
-    ];
-    const getProgressWidth = () => {
-        return `60%`;
     };
 
     useEffect(() => {
@@ -101,7 +83,7 @@ export const Profile = () => {
     }, []);
 
     return (
-        <div className="w-[90%] md:w-[50%] ml-5  bg-white subtle-border rounded-lg shadow-md p-4 ">
+        <div className="w-[90%] md:w-[50%] ml-5 bg-white subtle-border rounded-lg shadow-md p-4">
             <div className="flex flex-row justify-between">
                 <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
@@ -110,19 +92,21 @@ export const Profile = () => {
                         <p className="text-gray-500 text-sm">Романтик Уральск</p>
                     </div>
                 </div>
-                <div className="flex items-center justify-center ">
-                    <div className="relative gap-1  bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
+                <div className="flex items-center justify-center">
+                    <div className="relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                         <button
                             onClick={toggleView}
-                            className={` p-1 rounded-full transition-colors duration-300 relative z-2  text-sm
-                                    ${!isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
+                            className={`p-1 rounded-full transition-colors duration-300 relative z-2 text-sm ${
+                                !isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'
+                            }`}
                         >
                             Неделя
                         </button>
                         <button
                             onClick={toggleView}
-                            className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
-                                    ${isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
+                            className={`p-1 rounded-full transition-colors duration-300 relative z-2 text-sm ${
+                                isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'
+                            }`}
                         >
                             Месяц
                         </button>
@@ -130,68 +114,37 @@ export const Profile = () => {
                 </div>
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
-            {/* <div className="flex justify-between mb-4">
-                <button className=" p-2 flex text-sm flex-row justify-center align-center gap-2 text-center bg-gray-200 text-black  rounded-2xl mr-2">
-                    Редактировать
-                    <FaRegEdit />
-                </button>
-                <div className="flex items-center justify-center ">
-                    <div className="relative gap-1  bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
-                        <button
-                            onClick={toggleView}
-                            className={` p-1 rounded-full transition-colors duration-300 relative z-2  text-sm
-                                    ${!isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
-                        >
-                            Неделя
-                        </button>
-                        <button
-                            onClick={toggleView}
-                            className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
-                                    ${isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
-                        >
-                            Месяц
-                        </button>
-                    </div>
-                </div>
-            </div> */}
-            <div className="flex flex-col gap-4 justify-between mb-4">
-                <div className="flex flex-col md:flex-row  justify-between p-2">
-                    <h3>Общий план: 123 321 231 тг</h3>
-                    <h3>Остаток: 12 321 231 тг</h3>
-                </div>
-                <div>
-                    <h3 className="flex text-center justify-center">12 321 231 тг (60%)</h3>
-                    <div className="w-full bg-gray-200 h-2 rounded-full my-2">
-                        <div
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{ width: getProgressWidth() }}
-                        />
-                    </div>
-                </div>
-            </div>
             {isMonthView ? (
                 <div className="grid grid-cols-7 gap-2">
-                    {[...Array(31).keys()].map((day) => (
-                        <button
-                            key={day + 1}
-                            onClick={() => openModal(day + 1)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full ${getDayColor(
-                                day + 1,
-                            )} border text-sm`}
-                        >
-                            {day + 1}
-                        </button>
-                    ))}
+                    {/* Месячный вид */}
+                    {[...Array(31).keys()].map((day) => {
+                        const date = new Date();
+                        date.setDate(day + 1);
+                        return (
+                            <button
+                                key={day + 1}
+                                onClick={() => openModal(date)}
+                                className={`w-8 h-8 flex items-center justify-center rounded-full ${getDayColor(
+                                    date,
+                                )} border text-sm`}
+                            >
+                                {day + 1}
+                            </button>
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="grid grid-cols-7 gap-2">
-                    {weekDays.map((day, index) => (
+                    {/* Недельный вид */}
+                    {getCurrentWeekDates().map((date, index) => (
                         <button
                             key={index}
-                            onClick={() => openModal(day)}
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 border text-sm"
+                            onClick={() => openModal(date)}
+                            className={`w-8 h-8 flex flex-col items-center justify-center rounded-full ${getDayColor(
+                                date,
+                            )} border text-sm`}
                         >
-                            {day}
+                            <span>{weekDays[index]}</span>
                         </button>
                     ))}
                 </div>
@@ -200,7 +153,6 @@ export const Profile = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 selectedDay={selectedDay}
-                dailyData={dailyData}
                 selectedShift={selectedShift}
             />
         </div>

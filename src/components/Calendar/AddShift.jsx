@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Calendar } from 'primereact/calendar';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { addLocale } from 'primereact/api';
 import avatar from '../../data/avatar.jpg';
@@ -121,8 +121,6 @@ export const AddShift = (props) => {
         <>
             {isModalOpen && (
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <ToastContainer position="top-center" autoClose={5000} />
-
                     <div className="bg-white p-4 rounded-lg shadow-lg min-w-[300]">
                         <div className="flex justify-between">
                             <h2
