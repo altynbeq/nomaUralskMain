@@ -53,6 +53,9 @@ export const GeneralCompany = ({ urls }) => {
                 <EmplSalesPlans />
                 <EmpltSiftStats />
             </div>
+            {/* <div className="flex mt-5 gap-4 w-[100%] flex-col md:flex-row justify-center align-top items-center">
+                <EmplSalesPlans />
+            </div> */}
             <div className="flex mt-5 gap-4  w-[100%] flex-col md:flex-row  justify-center align-top      items-center">
                 <CardWithStats userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
             </div>

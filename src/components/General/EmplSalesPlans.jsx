@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { FaRegEdit } from 'react-icons/fa';
-import { FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
+import { FaCalendarWeek, FaSearch } from 'react-icons/fa';
 
 export const EmplSalesPlans = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,13 +69,69 @@ export const EmplSalesPlans = () => {
         const actualAmount = '100 000';
         return `60%`;
     };
+    const workers = [
+        {
+            id: 1,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 2,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 3,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 5,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 6,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 7,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 8,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+        {
+            id: 9,
+            name: 'John Doe',
+            position: 'Manager',
+            imageUrl: 'https://via.placeholder.com/100',
+        },
+    ];
 
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Filter workers based on the search term
+    const filteredWorkers = workers.filter((worker) =>
+        worker.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
     return (
         <div className="max-w-1xl  bg-white rounded-lg shadow-md p-4 mt-[10%]">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                    <h2 className="font-semibold text-lg text-black">План на 11-2024</h2>
+                    <h2 className="font-semibold text-lg text-black">План сотрудников</h2>
                     <p className="text-gray-500 text-sm">Романтик Уральск</p>
                 </div>
             </div>
@@ -107,30 +163,34 @@ export const EmplSalesPlans = () => {
             <div className="flex flex-col gap-4 justify-between mb-4">
                 <div className="">
                     <h3>Общий план: 123 321 231 тг</h3>
-                    <h3>Остаток: 12 321 231 тг</h3>
+                    {/* <h3>Остаток: 12 321 231 тг</h3> */}
                 </div>
-                <div>
-                    <h3 className="flex text-center justify-center">12 321 231 тг (60%)</h3>
-                    <div className="w-full bg-gray-200 h-2 rounded-full my-2">
-                        <div
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{ width: getProgressWidth() }}
-                        />
-                    </div>
+                <div className="mb-4 relative">
+                    <input
+                        type="text"
+                        placeholder="Search for an employee"
+                        className="w-full pl-10 p-2 border border-gray-300 rounded-md"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 </div>
             </div>
             {isMonthView ? (
-                <div className="grid grid-cols-7 gap-2">
-                    {[...Array(31).keys()].map((day) => (
-                        <button
-                            key={day + 1}
-                            onClick={() => openModal(day + 1)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full ${getDayColor(
-                                day + 1,
-                            )} border text-sm`}
+                <div className="grid grid-cols-3 gap-2">
+                    {workers.map((worker) => (
+                        <div
+                            key={worker.id}
+                            className="flex flex-col items-center text-center p-1 border rounded-lg"
                         >
-                            {day + 1}
-                        </button>
+                            <img
+                                src={worker.imageUrl}
+                                alt={worker.name}
+                                className="w-12 h-12 rounded-full object-cover mb-2"
+                            />
+                            <div className="text-sm font-semibold">{worker.name}</div>
+                            <div className="text-xs text-gray-500">{worker.position}</div>
+                        </div>
                     ))}
                 </div>
             ) : (
