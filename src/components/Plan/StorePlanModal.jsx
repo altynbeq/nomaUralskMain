@@ -172,7 +172,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                             isLoading ? 'p-button-loading bg-blue-500' : ''
                         }`}
                         onClick={updateStore}
-                        disabled={isLoading}
+                        disabled={isLoading || !plans.length}
                     />
                 </div>
             </Dialog>
