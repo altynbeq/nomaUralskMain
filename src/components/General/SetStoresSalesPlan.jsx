@@ -6,6 +6,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import avatar from '../../data/avatar.jpg';
 import { dailyData } from '../../data/dailyData';
 import { StorePlanModal } from '../Plan/StorePlanModal';
+import { toast } from 'react-toastify';
 
 export const SetStoresSalesPlan = () => {
     const { companyStructure } = useStateContext();
@@ -49,6 +50,10 @@ export const SetStoresSalesPlan = () => {
 
     const closeStorePlanModal = () => {
         setStorePlanModalOpen(false);
+    };
+
+    const successSetPlan = () => {
+        toast.success('План был поставлен');
     };
 
     return (
@@ -164,6 +169,7 @@ export const SetStoresSalesPlan = () => {
                 dailyData={dailyData}
             />
             <StorePlanModal
+                successSetPlan={successSetPlan}
                 isVisible={storePlanModalOpen}
                 onHide={closeStorePlanModal}
                 store={selectedStorePlan}
