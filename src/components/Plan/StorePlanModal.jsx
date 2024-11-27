@@ -13,6 +13,8 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
     const [planGoal, setPlanGoal] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [plans, setPlans] = useState([]);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editingPlanIndex, setEditingPlanIndex] = useState(null);
 
     const openSecondModal = () => {
         setOpenNewPlanModal(true);
@@ -23,16 +25,42 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
         setPlanName('');
         setPlanGoal('');
         setSelectedCategory('');
+        setIsEditMode(false);
+        setEditingPlanIndex(null);
     };
 
     const handleSave = () => {
-        if (planName && planGoal && selectedCategory) {
+        if (isEditMode) {
+            // Update the existing plan
+            setPlans((prevPlans) =>
+                prevPlans.map((plan, index) =>
+                    index === editingPlanIndex
+                        ? { name: planName, goal: planGoal, category: selectedCategory }
+                        : plan,
+                ),
+            );
+        } else if (planName && planGoal && selectedCategory) {
+            // Add a new plan
             setPlans((prevPlans) => [
                 ...prevPlans,
                 { name: planName, goal: planGoal, category: selectedCategory },
             ]);
         }
         closeSecondModal();
+    };
+
+    const handleEdit = (index) => {
+        const plan = plans[index];
+        setPlanName(plan.name);
+        setPlanGoal(plan.goal);
+        setSelectedCategory(plan.category);
+        setEditingPlanIndex(index);
+        setIsEditMode(true);
+        setOpenNewPlanModal(true);
+    };
+
+    const handleDelete = (index) => {
+        setPlans((prevPlans) => prevPlans.filter((_, i) => i !== index));
     };
 
     return (
@@ -64,7 +92,11 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                 closable
             >
                 <div className="flex justify-end mt-3">
-                    <Button onClick={openSecondModal} label="Добавить" icon="pi pi-plus" />
+                    <Button
+                        onClick={openSecondModal}
+                        label="Добавить"
+                        className="bg-blue-500 text-white border-2 p-2 rounded-lg"
+                    />
                 </div>
                 <div>
                     {plans.length > 0 ? (
@@ -72,11 +104,33 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                             {plans.map((plan, index) => (
                                 <div
                                     key={index}
-                                    className="p-2 mb-3 border-2 rounded-lg border-gray-300 shadow-sm"
+                                    className="p-2 mb-3 border-2 rounded-lg border-gray-300 shadow-sm flex justify-between items-center"
                                 >
-                                    <p className="font-bold text-md">Категория: {plan.category}</p>
-                                    <p className="text-sm text-gray-600">Название: {plan.name}</p>
-                                    <p className="text-sm text-gray-600">Цель: {plan.goal} тг</p>
+                                    <div>
+                                        <p className="font-bold text-md">
+                                            Категория: {plan.category}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            Название: {plan.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            Цель: {plan.goal} тг
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            icon="pi pi-pencil"
+                                            className="p-button-rounded p-button-text p-button-info"
+                                            onClick={() => handleEdit(index)}
+                                            tooltip="Изменить"
+                                        />
+                                        <Button
+                                            icon="pi pi-trash"
+                                            className="p-button-rounded p-button-text p-button-danger"
+                                            onClick={() => handleDelete(index)}
+                                            tooltip="Удалить"
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>
