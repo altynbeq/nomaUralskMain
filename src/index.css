@@ -60,15 +60,24 @@ body {
 }
 
 .p-dropdown-label  {
-    color: white
+    color: white;
+    font-family: 'Comfortaa', sans-serif;
 }
 
 .p-dropdown-trigger {
-    color: white
+    color: white;
+    font-family: 'Comfortaa', sans-serif;
 }
 
 .p-dropdown-clear-icon {
-    color: white
+    color: white;
+}
+
+.p-dialog {
+    font-family: 'Comfortaa', sans-serif;
+}  
+.p-component {
+    font-family: 'Comfortaa', sans-serif;
 }
 
 @tailwind base;

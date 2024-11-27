@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
-import { FaRegEdit } from 'react-icons/fa';
-import { FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
+import { FaRegEdit, FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
 
 export const EmpltSiftStats = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
