@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -16,6 +16,12 @@ export const SubuserPlanModal = ({ isVisible, onHide, subuser }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingPlanIndex, setEditingPlanIndex] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (subuser?.plans) {
+            setPlans(subuser.plans);
+        }
+    }, [subuser]);
 
     const openSecondModal = () => {
         setOpenNewPlanModal(true);
