@@ -64,6 +64,11 @@ body {
     font-family: 'Comfortaa', sans-serif;
 }
 
+.p-dropdown-label-gray {
+    color: gray;
+    font-family: 'Comfortaa', sans-serif;
+}
+
 .p-dropdown-trigger {
     color: white;
     font-family: 'Comfortaa', sans-serif;
