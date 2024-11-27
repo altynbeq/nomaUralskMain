@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -16,6 +16,12 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingPlanIndex, setEditingPlanIndex] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (store?.plans) {
+            setPlans(store.plans);
+        }
+    }, [store]);
 
     const openSecondModal = () => {
         setOpenNewPlanModal(true);
