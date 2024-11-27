@@ -41,7 +41,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
+export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selectedStore }) => {
     const [shift, setShift] = useState(null);
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
@@ -87,6 +87,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts }) => {
                         subUserId: shift.subUserId._id,
                         startTime: new Date(startTime).toISOString(),
                         endTime: new Date(endTime).toISOString(),
+                        selectedStore,
                     }),
                 },
             );

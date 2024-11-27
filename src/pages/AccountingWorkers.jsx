@@ -96,7 +96,7 @@ const AccountingWorkers = () => {
             setUpdate(false);
         }
 
-        setCurrentUserId(localStorage.getItem('_id'));
+        const currentUserId = localStorage.getItem('_id');
         if (!structure) {
             fetchStructure(currentUserId).then((result) => {
                 setStructure(result);
@@ -116,8 +116,6 @@ const AccountingWorkers = () => {
         if (structure && itemsFromStructure.length === 0) {
             setItemsFromStructure(buildItems());
         }
-
-        // console.log("=>(AccountingWorkers.jsx:111) update", structure);
     }, [structure]);
 
     const Icons = {

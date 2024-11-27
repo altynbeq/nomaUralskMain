@@ -199,12 +199,14 @@ const Calendar = () => {
                 onClose={() => setAlertOpen(false)}
             />
             <ScheduleWithEdit
+                selectedStore={selectedStore}
                 open={modal}
                 setOpen={setModal}
                 shiftId={selectedShiftId}
                 fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
             />
             <AddShift
+                selectedStore={selectedStore}
                 subusers={subusers}
                 open={modalAddShift}
                 setOpen={setModalAddShift}
