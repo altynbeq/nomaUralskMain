@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaRegTimesCircle } from 'react-icons/fa';
 import { Button } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
@@ -9,6 +9,10 @@ const UserProfile = () => {
 
     const userName = userData?.name || 'Unknown User';
     const userEmail = userData?.email || 'Unknown Email';
+
+    useEffect(() => {
+        console.log(userImage);
+    }, [userImage]);
 
     return (
         <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-8 rounded-lg w-[90%] md:w-[30%]">
