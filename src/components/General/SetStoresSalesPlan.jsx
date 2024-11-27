@@ -3,6 +3,7 @@ import { CalendarModal } from '../CalendarModal';
 import { Dropdown } from 'primereact/dropdown';
 import { useStateContext } from '../../contexts/ContextProvider';
 import avatar from '../../data/avatar.jpg';
+import { dailyData } from '../../data/dailyData';
 
 export const SetStoresSalesPlan = () => {
     const { companyStructure } = useStateContext();
@@ -22,41 +23,11 @@ export const SetStoresSalesPlan = () => {
         setIsModalOpen(true);
     };
 
-    const dailyData = [
-        {
-            date: 1,
-            tasksCompleted: true,
-            wasLate: false,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:00',
-            leftAt: '20:00',
-            plan: '600 000 тг',
-            actual: '600 000 тг',
-        },
-        {
-            date: 2,
-            tasksCompleted: false,
-            wasLate: true,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:30',
-            leftAt: '19:00',
-            plan: '600 000 тг',
-            actual: '480 000 тг',
-        },
-
-        {
-            date: 3,
-            tasksCompleted: false,
-            wasLate: false,
-            workHours: '12:00 - 20:00',
-            cameAt: '12:30',
-            leftAt: '19:00',
-            plan: '600 000 тг',
-            actual: '480 000 тг',
-        },
-    ];
-
     const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredStores = companyStructure.stores?.filter((store) =>
+        store.storeName.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
 
     return (
         <div className="w-[90%]  bg-white rounded-lg shadow-md p-4 ">
@@ -124,7 +95,7 @@ export const SetStoresSalesPlan = () => {
             </div>
             {isMonthView ? (
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
-                    {companyStructure.stores?.map((store) => (
+                    {filteredStores?.map((store) => (
                         <div
                             key={store.id}
                             className="flex flex-col items-center text-center p-1 border rounded-lg"
