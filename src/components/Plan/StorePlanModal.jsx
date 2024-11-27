@@ -6,7 +6,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import avatar from '../../data/avatar.jpg';
 
-export const StorePlanModal = ({ isVisible, onHide, store }) => {
+export const StorePlanModal = ({ isVisible, onHide, store, successSetPlan }) => {
     const categories = ['Розы', 'Шоколадки', 'Боксы'];
     const [openNewPlanModal, setOpenNewPlanModal] = useState(false);
     const [planName, setPlanName] = useState('');
@@ -56,9 +56,9 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
             if (!response.ok) {
                 throw new Error('Failed to update store');
             }
-
-            const updatedStore = await response.json();
-            console.log('Store updated successfully:', updatedStore);
+            closeSecondModal();
+            onHide();
+            successSetPlan();
         } catch (error) {
             console.error('Error updating store:', error.message);
         } finally {
@@ -83,7 +83,6 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
             setPlans(newPlans);
             updateStore(newPlans);
         }
-        closeSecondModal();
     };
 
     const handleDelete = (index) => {

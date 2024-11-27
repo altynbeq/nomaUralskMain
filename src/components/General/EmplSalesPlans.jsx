@@ -6,6 +6,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import avatar from '../../data/avatar.jpg';
 import { dailyData } from '../../data/dailyData';
 import { SubuserPlanModal } from '../../components/Plan/SubuserPlanModal';
+import { toast } from 'react-toastify';
 
 export const EmplSalesPlans = () => {
     const { companyStructure } = useStateContext();
@@ -56,6 +57,10 @@ export const EmplSalesPlans = () => {
 
     const closeSubuserPlanModal = () => {
         setSubuserPlanModalOpen(false);
+    };
+
+    const successSetPlan = () => {
+        toast.success('План был поставлен');
     };
 
     return (
@@ -171,6 +176,7 @@ export const EmplSalesPlans = () => {
                 dailyData={dailyData}
             />
             <SubuserPlanModal
+                successSetPlan={successSetPlan}
                 isVisible={subuserPlanModalOpen}
                 onHide={closeSubuserPlanModal}
                 subuser={selectedSubuserPlan}

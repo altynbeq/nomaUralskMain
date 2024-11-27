@@ -14,7 +14,7 @@ function convertUrl(apiUrl) {
 }
 
 export const GeneralCompany = ({ urls }) => {
-    const { kkm, skeletonUp, spisanie, structureCompany } = useStateContext();
+    const { kkm, skeletonUp, spisanie } = useStateContext();
     const [ready, setReady] = useState(false);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
