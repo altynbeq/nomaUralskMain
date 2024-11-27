@@ -25,9 +25,25 @@ export const EmplSalesPlans = () => {
         setIsModalOpen(true);
     };
 
-    const filteredSubUsers = companyStructure.subUsers?.filter((subUser) =>
-        subUser.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    // Enhanced filtering logic
+    const filteredSubUsers = companyStructure.subUsers?.filter((subUser) => {
+        const matchesSearchTerm = subUser.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesSelectedDepartment = selectedDepartment
+            ? subUser.departmentId === selectedDepartment._id
+            : true;
+
+        const matchesSelectedStore = selectedStore
+            ? (() => {
+                  const department = companyStructure.departments?.find(
+                      (dept) => dept._id === subUser.departmentId,
+                  );
+                  return department && department.storeId === selectedStore._id;
+              })()
+            : true;
+
+        return matchesSearchTerm && matchesSelectedDepartment && matchesSelectedStore;
+    });
 
     return (
         <div className="w-[90%] bg-white rounded-lg shadow-md p-4">
@@ -100,7 +116,7 @@ export const EmplSalesPlans = () => {
                     {filteredSubUsers?.length > 0 ? (
                         filteredSubUsers.map((subUser) => (
                             <div
-                                key={subUser.id}
+                                key={subUser._id}
                                 className="flex flex-col items-center text-center p-1 border rounded-lg"
                             >
                                 <img

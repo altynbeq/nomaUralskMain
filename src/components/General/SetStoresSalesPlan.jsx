@@ -12,10 +12,12 @@ export const SetStoresSalesPlan = () => {
     const [isMonthView, setIsMonthView] = useState(true);
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const toggleView = () => {
         setIsMonthView(!isMonthView);
     };
+
     const weekDays = ['Чт', 'Пт', 'Сб', 'Вс', 'Пн', 'Вт', 'Ср'];
 
     const openModal = (day) => {
@@ -23,14 +25,21 @@ export const SetStoresSalesPlan = () => {
         setIsModalOpen(true);
     };
 
-    const [searchTerm, setSearchTerm] = useState('');
+    // Enhanced filtering logic
+    const filteredStores = companyStructure.stores?.filter((store) => {
+        const matchesSearchTerm = store.storeName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSelectedStore = selectedStore ? store._id === selectedStore._id : true;
+        const matchesSelectedDepartment = selectedDepartment
+            ? companyStructure.departments?.some(
+                  (dept) => dept.storeId === store._id && dept._id === selectedDepartment._id,
+              )
+            : true;
 
-    const filteredStores = companyStructure.stores?.filter((store) =>
-        store.storeName.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+        return matchesSearchTerm && matchesSelectedStore && matchesSelectedDepartment;
+    });
 
     return (
-        <div className="w-[90%]  bg-white rounded-lg shadow-md p-4 ">
+        <div className="w-[90%] bg-white rounded-lg shadow-md p-4 ">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
@@ -74,44 +83,52 @@ export const SetStoresSalesPlan = () => {
                 <div className="relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                     <button
                         onClick={toggleView}
-                        className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
-                                    ${!isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
+                        className={`p-1 rounded-full transition-colors duration-300 relative z-2 text-sm ${
+                            !isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'
+                        }`}
                     >
                         Выставлен
                     </button>
                     <button
                         onClick={toggleView}
-                        className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
-                                    ${isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
+                        className={`p-1 rounded-full transition-colors duration-300 relative z-2 text-sm ${
+                            isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'
+                        }`}
                     >
                         Нету
                     </button>
                 </div>
             </div>
             <div className="flex flex-col gap-4 justify-between mb-4">
-                <div className="">
+                <div>
                     <h3>Общий план: 123 321 231 тг</h3>
                 </div>
             </div>
             {isMonthView ? (
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
-                    {filteredStores?.map((store) => (
-                        <div
-                            key={store.id}
-                            className="flex flex-col items-center text-center p-1 border rounded-lg"
-                        >
-                            <img
-                                src={
-                                    store?.image
-                                        ? `https://nomalytica-back.onrender.com${store.image}`
-                                        : avatar
-                                }
-                                alt={store.storeName}
-                                className="w-12 h-12 rounded-full object-cover mb-2"
-                            />
-                            <div className="text-sm font-semibold">{store.storeName}</div>
-                        </div>
-                    ))}
+                    {filteredStores?.length > 0 ? (
+                        filteredStores.map((store) => (
+                            <div
+                                key={store._id}
+                                className="flex flex-col items-center text-center p-1 border rounded-lg"
+                            >
+                                <img
+                                    src={
+                                        store?.image
+                                            ? `https://nomalytica-back.onrender.com${store.image}`
+                                            : avatar
+                                    }
+                                    alt={store.storeName}
+                                    className="w-12 h-12 rounded-full object-cover mb-2"
+                                />
+                                <div className="text-sm font-semibold">{store.storeName}</div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500 text-center col-span-full">
+                            Магазины не найдены.
+                        </p>
+                    )}
                 </div>
             ) : (
                 <div className="grid grid-cols-7 gap-2">
