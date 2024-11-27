@@ -12,6 +12,7 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
     const [planName, setPlanName] = useState('');
     const [planGoal, setPlanGoal] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [plans, setPlans] = useState([]);
 
     const openSecondModal = () => {
         setOpenNewPlanModal(true);
@@ -19,9 +20,18 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
 
     const closeSecondModal = () => {
         setOpenNewPlanModal(false);
+        setPlanName('');
+        setPlanGoal('');
+        setSelectedCategory('');
     };
 
     const handleSave = () => {
+        if (planName && planGoal && selectedCategory) {
+            setPlans((prevPlans) => [
+                ...prevPlans,
+                { name: planName, goal: planGoal, category: selectedCategory },
+            ]);
+        }
         closeSecondModal();
     };
 
@@ -57,7 +67,22 @@ export const StorePlanModal = ({ isVisible, onHide, store }) => {
                     <Button onClick={openSecondModal} label="Добавить" icon="pi pi-plus" />
                 </div>
                 <div>
-                    // здесь
+                    {plans.length > 0 ? (
+                        <div className="mt-4">
+                            {plans.map((plan, index) => (
+                                <div
+                                    key={index}
+                                    className="p-2 mb-3 border-2 rounded-lg border-gray-300 shadow-sm"
+                                >
+                                    <p className="font-bold text-md">Категория: {plan.category}</p>
+                                    <p className="text-sm text-gray-600">Название: {plan.name}</p>
+                                    <p className="text-sm text-gray-600">Цель: {plan.goal} тг</p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-gray-500 mt-4">Планы пока не добавлены</p>
+                    )}
                 </div>
             </Dialog>
             <Dialog
