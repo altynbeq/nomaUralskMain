@@ -27,6 +27,7 @@ const App = () => {
         setUserData,
         setAccess,
         setSubUser,
+        setCompanyStructure,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -112,12 +113,28 @@ const App = () => {
                 setSkeletonUp(false);
             } else {
                 fetchData(currentUserId);
+                fetchUserStructure(currentUserId);
             }
         } else {
             setLoading(false);
             setSkeletonUp(false);
         }
     }, [setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setSpisanie, setUserData]);
+
+    const fetchUserStructure = async (id) => {
+        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const data = await response.json();
+            setCompanyStructure(data);
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
 
     if (techProblem) {
         return <TechProb />;

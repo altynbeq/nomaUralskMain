@@ -1,28 +1,17 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
-import { FaRegEdit } from 'react-icons/fa';
-import { FaCalendarWeek, FaSearch } from 'react-icons/fa';
 import { Dropdown } from 'primereact/dropdown';
+import { useStateContext } from '../../contexts/ContextProvider';
+import avatar from '../../data/avatar.jpg';
 
 export const SetStoresSalesPlan = () => {
+    const { companyStructure } = useStateContext();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
-    const [selectedMonth, setSelectedMonth] = useState('Сентябрь');
-    const months = [
-        'Январь',
-        'Февраль',
-        'Март',
-        'Апрель',
-        'Май',
-        'Июнь',
-        'Июль',
-        'Август',
-        'Сентябрь',
-        'Октябрь',
-        'Ноябрь',
-        'Декабрь',
-    ];
+    const [selectedStore, setSelectedStore] = useState(null);
+    const [selectedDepartment, setSelectedDepartment] = useState(null);
+
     const toggleView = () => {
         setIsMonthView(!isMonthView);
     };
@@ -32,18 +21,7 @@ export const SetStoresSalesPlan = () => {
         setSelectedDay(day);
         setIsModalOpen(true);
     };
-    const getDayColor = (day) => {
-        const dayData = dailyData.find((item) => item.date === day);
-        if (!dayData) return 'bg-gray-300';
 
-        if (dayData.tasksCompleted && !dayData.wasLate) {
-            return 'bg-green-500';
-        } else if (!dayData.wasLate) {
-            return 'bg-yellow-400';
-        } else {
-            return 'bg-red-500';
-        }
-    };
     const dailyData = [
         {
             date: 1,
@@ -77,150 +55,88 @@ export const SetStoresSalesPlan = () => {
             actual: '480 000 тг',
         },
     ];
-    const getProgressWidth = () => {
-        // if (!dayData) return '0%';
-
-        const planAmount = '600 000';
-        const actualAmount = '100 000';
-        return `60%`;
-    };
-    const workers = [
-        {
-            id: 1,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 2,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 3,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 5,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 6,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 7,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 8,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-        {
-            id: 9,
-            name: 'John Doe',
-            position: 'Manager',
-            imageUrl: 'https://via.placeholder.com/100',
-        },
-    ];
 
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Filter workers based on the search term
-    const filteredWorkers = workers.filter((worker) =>
-        worker.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
     return (
         <div className="w-[90%]  bg-white rounded-lg shadow-md p-4 ">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                    <h2 className="font-semibold text-lg text-black">План сотрудников</h2>
+                    <h2 className="font-semibold text-lg text-black">План магазинов</h2>
                     <p className="text-gray-500 text-sm">Романтик Уральск</p>
                 </div>
             </div>
             <hr className="bg-red w-full mx-auto my-4" />
-            <div className="flex gap-4 justify-between align-center items-center  mb-4">
-                <div className="w-full mb-4 relative">
+            <div className="flex gap-4 mb-4">
+                <div className="w-full relative">
                     <input
                         type="text"
-                        placeholder="Search for an employee"
+                        placeholder="Поиск магазина"
                         className="w-full pl-10 p-2 border border-gray-300 rounded-md"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 </div>
-                <div className="flex flex-wrap z-10 pb-6 gap-1 border-solid border-gray-500">
+                <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
                     <Dropdown
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.value)}
-                        options={months}
+                        value={selectedStore}
+                        onChange={(e) => setSelectedStore(e.value)}
+                        options={companyStructure?.stores || []}
+                        optionLabel="storeName"
+                        placeholder="Выберите магазин"
+                        className="w-full md:w-14rem border border-gray-400 text-black bg-white"
+                    />
+                </div>
+                <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
+                    <Dropdown
+                        value={selectedDepartment}
+                        onChange={(e) => setSelectedDepartment(e.value)}
+                        options={companyStructure?.departments || []}
                         optionLabel="name"
                         placeholder="Выберите месяц"
                         className="w-full md:w-14rem border border-gray-400 text-black bg-white"
                     />
                 </div>
-                <div className="flex flex-wrap z-10 pb-6 gap-1 border-solid border-gray-500">
-                    <Dropdown
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.value)}
-                        options={months}
-                        optionLabel="name"
-                        placeholder="Выберите месяц"
-                        className="w-full md:w-14rem border border-gray-400 text-black bg-white"
-                    />
-                </div>
-                <div className="flex items-center justify-center ">
-                    <div className="relative gap-1  bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
-                        <button
-                            onClick={toggleView}
-                            className={` p-1 rounded-full transition-colors duration-300 relative z-2  text-sm
+                <div className="relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
+                    <button
+                        onClick={toggleView}
+                        className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
                                     ${!isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
-                        >
-                            Выставлен
-                        </button>
-                        <button
-                            onClick={toggleView}
-                            className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
+                    >
+                        Выставлен
+                    </button>
+                    <button
+                        onClick={toggleView}
+                        className={` p-1 rounded-full transition-colors duration-300 relative z-2 text-sm
                                     ${isMonthView ? 'bg-white shadow-md' : 'bg-transparent text-gray-500'}`}
-                        >
-                            Нету
-                        </button>
-                    </div>
+                    >
+                        Нету
+                    </button>
                 </div>
             </div>
             <div className="flex flex-col gap-4 justify-between mb-4">
                 <div className="">
                     <h3>Общий план: 123 321 231 тг</h3>
-                    {/* <h3>Остаток: 12 321 231 тг</h3> */}
                 </div>
             </div>
             {isMonthView ? (
-                <div className="grid grid-cols-3 gap-2">
-                    {workers.map((worker) => (
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
+                    {companyStructure.stores?.map((store) => (
                         <div
-                            key={worker.id}
+                            key={store.id}
                             className="flex flex-col items-center text-center p-1 border rounded-lg"
                         >
                             <img
-                                src={worker.imageUrl}
-                                alt={worker.name}
+                                src={
+                                    store?.image
+                                        ? `https://nomalytica-back.onrender.com${store.image}`
+                                        : avatar
+                                }
+                                alt={store.storeName}
                                 className="w-12 h-12 rounded-full object-cover mb-2"
                             />
-                            <div className="text-sm font-semibold">{worker.name}</div>
-                            <div className="text-xs text-gray-500">{worker.position}</div>
+                            <div className="text-sm font-semibold">{store.storeName}</div>
                         </div>
                     ))}
                 </div>

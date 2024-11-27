@@ -32,6 +32,7 @@ export const ContextProvider = ({ children }) => {
     });
     const [subUser, setSubUser] = useState({});
     const [userImage, setUserImage] = useState('');
+    const [companyStructure, setCompanyStructure] = useState({});
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
@@ -115,6 +116,8 @@ export const ContextProvider = ({ children }) => {
                 setSubUser: updateSubUser,
                 setUserImage,
                 userImage,
+                companyStructure,
+                setCompanyStructure,
             }}
         >
             {children}
