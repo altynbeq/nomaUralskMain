@@ -157,7 +157,7 @@ export const Profile = () => {
                         <button
                             key={index}
                             onClick={() => openModal(date)}
-                            className={`w-8 h-8 flex flex-col items-center justify-center rounded-full ${getDayColor(
+                            className={`w-8 h-8 p-6 flex flex-col items-center justify-center rounded-full ${getDayColor(
                                 date,
                             )} border text-sm`}
                         >
