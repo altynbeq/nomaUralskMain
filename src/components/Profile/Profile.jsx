@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CalendarModal } from '../CalendarModal';
+import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -88,8 +89,9 @@ export const Profile = () => {
                 <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                     <div>
-                        <h2 className="font-semibold text-lg text-black">План на 11-2024</h2>
-                        <p className="text-gray-500 text-sm">Романтик Уральск</p>
+                        <h2 className="font-semibold text-lg text-black">
+                            План на {getCurrentMonthYear()}
+                        </h2>
                     </div>
                 </div>
                 <div className="flex items-center justify-center">
