@@ -21,9 +21,15 @@ export const EmployeeCalendar = () => {
         return companyStructure.subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesDepartment = selectedDepartment
-                ? subuser.departmentId === selectedDepartment.id
+                ? subuser.departmentId === selectedDepartment._id
                 : true;
-            const matchesStore = selectedStore ? subuser.storeId === selectedStore.id : true;
+
+            const subuserDepartment = companyStructure.departments.find(
+                (dept) => dept._id === subuser.departmentId,
+            );
+            const subuserStoreId = subuserDepartment ? subuserDepartment.storeId : null;
+
+            const matchesStore = selectedStore ? subuserStoreId === selectedStore._id : true;
 
             return matchesSearch && matchesDepartment && matchesStore;
         });
