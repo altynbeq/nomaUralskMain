@@ -17,7 +17,7 @@ export const Profile = () => {
 
     const getCurrentWeekDates = () => {
         const currentDate = new Date();
-        const dayOfWeek = currentDate.getDay() || 7;
+        const dayOfWeek = currentDate.getDay() || 7; // Понедельник как первый день
         const monday = new Date(currentDate);
         monday.setDate(currentDate.getDate() - dayOfWeek + 1);
 
@@ -32,8 +32,15 @@ export const Profile = () => {
         return weekDates;
     };
 
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = `0${date.getMonth() + 1}`.slice(-2);
+        const day = `0${date.getDate()}`.slice(-2);
+        return `${year}-${month}-${day}`;
+    };
+
     const getDayColor = (date) => {
-        const formattedDate = date.toISOString().slice(0, 10);
+        const formattedDate = formatDate(date);
 
         const hasShift = subuserShifts.some((shift) => {
             const startDate = shift.startTime.slice(0, 10);
@@ -46,7 +53,7 @@ export const Profile = () => {
 
     const openModal = (date) => {
         setSelectedDay(date);
-        const formattedDate = date.toISOString().slice(0, 10);
+        const formattedDate = formatDate(date);
 
         const shift = subuserShifts.find((shift) => {
             const startDate = shift.startTime.slice(0, 10);
@@ -82,6 +89,15 @@ export const Profile = () => {
         };
         fetchSubUserShifts();
     }, []);
+
+    const getDaysInMonth = (year, month) => {
+        return new Date(year, month + 1, 0).getDate();
+    };
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
 
     return (
         <div className="w-[90%] md:w-[50%] ml-5 bg-white subtle-border rounded-lg shadow-md p-4">
@@ -119,9 +135,8 @@ export const Profile = () => {
             {isMonthView ? (
                 <div className="grid grid-cols-7 gap-2">
                     {/* Месячный вид */}
-                    {[...Array(31).keys()].map((day) => {
-                        const date = new Date();
-                        date.setDate(day + 1);
+                    {[...Array(daysInMonth).keys()].map((day) => {
+                        const date = new Date(currentYear, currentMonth, day + 1);
                         return (
                             <button
                                 key={day + 1}
@@ -147,6 +162,7 @@ export const Profile = () => {
                             )} border text-sm`}
                         >
                             <span>{weekDays[index]}</span>
+                            <span>{date.getDate()}</span>
                         </button>
                     ))}
                 </div>
