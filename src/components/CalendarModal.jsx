@@ -1,4 +1,6 @@
-export const CalendarModal = ({ isOpen, onClose, selectedDay, dailyData }) => {
+import { dailyData } from '../data/dailyData';
+
+export const CalendarModal = ({ isOpen, onClose, selectedDay }) => {
     if (!isOpen) return null;
 
     const dayData = dailyData.find((item) => item.date === selectedDay);
