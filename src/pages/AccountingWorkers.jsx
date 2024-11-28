@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import WorkersAnimatedBeam from '../components/Accounting/Workers/WorkersAnimatedBeam';
 import { SubusersList } from '../components/Accounting/Workers/SubusersList';
+import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
 
 const AccountingWorkers = () => {
     const [structure, setStructure] = useState('');
@@ -622,7 +623,8 @@ const AccountingWorkers = () => {
                     defaultImage={defaultImage}
                 />
             )}
-            <SubusersList subusers={items.filter((item) => item.level === 3) || []} />
+            <SubusersList />
+            <EmployeeCalendar />
         </>
     );
 };
