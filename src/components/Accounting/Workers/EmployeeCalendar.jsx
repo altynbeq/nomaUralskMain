@@ -100,10 +100,17 @@ export const EmployeeCalendar = () => {
     };
 
     const getShiftsForDay = (shifts, day) => {
-        const dayStart = new Date(year, month, day, 0, 0, 0).toISOString();
-        const dayEnd = new Date(year, month, day, 23, 59, 59).toISOString();
+        const dayStart = new Date(year, month, day, 0, 0, 0);
+        const dayEnd = new Date(year, month, day, 23, 59, 59);
+
         return (
-            shifts?.filter((shift) => shift.startTime >= dayStart && shift.endTime <= dayEnd) || []
+            shifts?.filter((shift) => {
+                const shiftStart = new Date(shift.startTime);
+                const shiftEnd = new Date(shift.endTime);
+
+                // Проверяем, пересекается ли смена с текущим днем
+                return shiftStart <= dayEnd && shiftEnd >= dayStart;
+            }) || []
         );
     };
 
@@ -201,11 +208,24 @@ export const EmployeeCalendar = () => {
                                             onMouseEnter={() => handleMouseEnter(index, dayIndex)}
                                             onMouseLeave={handleMouseLeave}
                                         >
-                                            <div className="w-6 h-6 bg-gray-200 rounded-full mx-auto hover:bg-blue-500"></div>
+                                            <div
+                                                className={`w-6 h-6 rounded-full mx-auto ${
+                                                    shifts.length > 0
+                                                        ? 'bg-green-500'
+                                                        : 'bg-gray-200'
+                                                } hover:bg-blue-500`}
+                                            ></div>
                                             {hoveredCircle &&
                                                 hoveredCircle.employeeIndex === index &&
                                                 hoveredCircle.dayIndex === dayIndex && (
-                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px]">
+                                                    <div
+                                                        style={{
+                                                            top: '-100%',
+                                                            left: '50%',
+                                                            transform: 'translate(-50%, -100%)',
+                                                        }}
+                                                        className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px]"
+                                                    >
                                                         <p>
                                                             Дата:{' '}
                                                             {`${dayIndex + 1}.${month + 1}.${year}`}
