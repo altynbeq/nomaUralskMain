@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { Calendar } from 'primereact/calendar';
 import { useStateContext } from '../../../contexts/ContextProvider';
 
 export const EmployeeCalendar = () => {
     const { companyStructure } = useStateContext();
-
-    const [selectedDate, setSelectedDate] = useState(new Date()); // Выбранная дата (месяц и год)
+    const currentDate = new Date();
+    const [month, setMonth] = useState(currentDate.getMonth()); // Ноябрь (0-11)
+    const [year, setYear] = useState(currentDate.getFullYear());
     const [hoveredCircle, setHoveredCircle] = useState(null); // Для тултипа
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState(''); // Состояние для поиска
@@ -29,21 +29,30 @@ export const EmployeeCalendar = () => {
         });
     }, [companyStructure, searchTerm, selectedDepartment, selectedStore]);
 
-    // Получаем количество дней в выбранном месяце
-    const daysInMonth = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth() + 1,
-        0,
-    ).getDate();
+    const daysInMonth = new Date(year, month + 1, 0).getDate(); // Кол-во дней в месяце
 
-    // Генерируем массив номеров дней
-    const dayNumbers = [...Array(daysInMonth)].map((_, index) => index + 1);
+    // Получаем название месяца динамически
+    const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(
+        new Date(year, month),
+    );
 
-    // Генерируем названия дней недели динамически
-    const weekDays = dayNumbers.map((day) => {
-        const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
-        return date.toLocaleDateString('ru-RU', { weekday: 'short' });
-    });
+    const handlePrevMonth = () => {
+        if (month === 0) {
+            setMonth(11);
+            setYear(year - 1);
+        } else {
+            setMonth(month - 1);
+        }
+    };
+
+    const handleNextMonth = () => {
+        if (month === 11) {
+            setMonth(0);
+            setYear(year + 1);
+        } else {
+            setMonth(month + 1);
+        }
+    };
 
     const handleMouseEnter = (employeeIndex, dayIndex) => {
         setHoveredCircle({ employeeIndex, dayIndex });
@@ -88,25 +97,19 @@ export const EmployeeCalendar = () => {
             {/* Верхняя панель */}
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
-                    {/* Используем компонент Calendar для выбора месяца и года */}
-                    <Calendar
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.value)}
-                        view="month"
-                        dateFormat="mm/yy"
-                        yearNavigator
-                        yearRange="2020:2030"
-                        showIcon
-                        className="p-inputtext-sm"
-                        locale="ru"
-                        monthNavigator
-                    />
-                    <h2 className="text-lg font-semibold text-black">
-                        {selectedDate.toLocaleDateString('ru-RU', {
-                            month: 'long',
-                            year: 'numeric',
-                        })}
-                    </h2>
+                    <button
+                        onClick={handlePrevMonth}
+                        className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
+                    >
+                        ←
+                    </button>
+                    <h2 className="text-lg font-semibold text-black">{`${monthName} ${year} г.`}</h2>
+                    <button
+                        onClick={handleNextMonth}
+                        className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
+                    >
+                        →
+                    </button>
                 </div>
                 <div className="flex gap-4">
                     <Dropdown
@@ -142,22 +145,28 @@ export const EmployeeCalendar = () => {
                     <thead>
                         <tr>
                             <th className="px-4 py-2 text-left">Сотрудник</th>
-                            {dayNumbers.map((day, index) => (
+                            {[...Array(daysInMonth)].map((_, index) => (
                                 <th key={index} className="px-2 py-1 text-center text-sm">
-                                    {day}
+                                    {index + 1}
                                 </th>
                             ))}
                         </tr>
                         <tr>
                             <th className="px-4 py-2 text-left"></th>
-                            {weekDays.map((weekDay, index) => (
-                                <th
-                                    key={index}
-                                    className="px-2 py-1 text-center text-xs text-gray-500"
-                                >
-                                    {weekDay}
-                                </th>
-                            ))}
+                            {[...Array(daysInMonth)].map((_, index) => {
+                                const date = new Date(year, month, index + 1);
+                                const weekDay = new Intl.DateTimeFormat('ru-RU', {
+                                    weekday: 'short',
+                                }).format(date);
+                                return (
+                                    <th
+                                        key={index}
+                                        className="px-2 py-1 text-center text-xs text-gray-500"
+                                    >
+                                        {weekDay}
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
                     <tbody>
@@ -168,7 +177,7 @@ export const EmployeeCalendar = () => {
                                     {/* Серый кружок */}
                                     <span>{`${employee.name} (${getDepartmentName(employee.departmentId)})`}</span>
                                 </td>
-                                {dayNumbers.map((day, dayIndex) => (
+                                {[...Array(daysInMonth)].map((_, dayIndex) => (
                                     <td
                                         key={dayIndex}
                                         className="px-2 py-2 text-center relative"
@@ -196,9 +205,9 @@ export const EmployeeCalendar = () => {
                                                 >
                                                     <p>
                                                         Дата:{' '}
-                                                        {`${day}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`}
+                                                        {`${dayIndex + 1}.${month + 1}.${year}`}
                                                     </p>
-                                                    <p>Место: {employee.storeId}</p>
+                                                    <p>Место: Локация {index + 1}</p>
                                                     <p>Начало: 09:00</p>
                                                     <p>Конец: 18:00</p>
                                                     <p>Отметился: 09:04</p>
