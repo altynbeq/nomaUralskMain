@@ -219,7 +219,7 @@ export const EmployeeCalendar = () => {
                                             {hoveredCircle &&
                                                 hoveredCircle.employeeIndex === index &&
                                                 hoveredCircle.dayIndex === dayIndex && (
-                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px] left-[-100%] transform -translate-x-2/3 top-1/2 -translate-y-1/2">
+                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px] left-[-100%] transform -translate-x-2/3 top-[-50%] -translate-y-1/2">
                                                         <p>
                                                             Дата:{' '}
                                                             {`${dayIndex + 1}.${month + 1}.${year}`}
