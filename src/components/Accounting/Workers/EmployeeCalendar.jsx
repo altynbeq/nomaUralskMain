@@ -114,7 +114,7 @@ export const EmployeeCalendar = () => {
     };
 
     return (
-        <div className="w-full bg-white shadow-md rounded-lg p-6 m-16">
+        <div className="w-full bg-white p-6">
             {/* Верхняя панель */}
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
@@ -161,8 +161,8 @@ export const EmployeeCalendar = () => {
             </div>
 
             {/* Таблица */}
-            <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse">
+            <div className="overflow-x-auto w-full max-w-full">
+                <table className="table-auto w-full max-w-full border-collapse">
                     <thead>
                         <tr>
                             <th className="px-4 py-2 text-left">Сотрудник</th>
