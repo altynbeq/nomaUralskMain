@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { useStateContext } from '../../../contexts/ContextProvider';
+import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 
 export const EmployeeCalendar = () => {
     const { companyStructure } = useStateContext();
@@ -98,6 +99,14 @@ export const EmployeeCalendar = () => {
         return department ? department.name : 'Неизвестный департамент';
     };
 
+    const getShiftsForDay = (shifts, day) => {
+        const dayStart = new Date(year, month, day, 0, 0, 0).toISOString();
+        const dayEnd = new Date(year, month, day, 23, 59, 59).toISOString();
+        return (
+            shifts?.filter((shift) => shift.startTime >= dayStart && shift.endTime <= dayEnd) || []
+        );
+    };
+
     return (
         <div className="w-full bg-white shadow-md rounded-lg p-6 m-16">
             {/* Верхняя панель */}
@@ -183,45 +192,49 @@ export const EmployeeCalendar = () => {
                                     {/* Серый кружок */}
                                     <span>{`${employee.name} (${getDepartmentName(employee.departmentId)})`}</span>
                                 </td>
-                                {[...Array(daysInMonth)].map((_, dayIndex) => (
-                                    <td
-                                        key={dayIndex}
-                                        className="px-2 py-2 text-center relative"
-                                        onMouseEnter={() => handleMouseEnter(index, dayIndex)}
-                                        onMouseLeave={handleMouseLeave}
-                                    >
-                                        <div className="w-6 h-6 bg-gray-200 rounded-full mx-auto hover:bg-blue-500"></div>
-                                        {hoveredCircle &&
-                                            hoveredCircle.employeeIndex === index &&
-                                            hoveredCircle.dayIndex === dayIndex && (
-                                                <div
-                                                    className={`absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black whitespace-nowrap ${
-                                                        dayIndex < 5
-                                                            ? 'left-full ml-2'
-                                                            : dayIndex > daysInMonth - 5
-                                                              ? 'right-full mr-2'
-                                                              : 'left-1/2 transform -translate-x-1/2'
-                                                    } ${
-                                                        index >= employeesPerPage - 2
-                                                            ? 'bottom-full mb-2'
-                                                            : index === employeesPerPage - 3
-                                                              ? 'bottom-full mb-1'
-                                                              : 'top-full mt-2'
-                                                    }`}
-                                                >
-                                                    <p>
-                                                        Дата:{' '}
-                                                        {`${dayIndex + 1}.${month + 1}.${year}`}
-                                                    </p>
-                                                    <p>Место: Локация {index + 1}</p>
-                                                    <p>Начало: 09:00</p>
-                                                    <p>Конец: 18:00</p>
-                                                    <p>Отметился: 09:04</p>
-                                                    <p>Закончил: 17:59</p>
-                                                </div>
-                                            )}
-                                    </td>
-                                ))}
+                                {[...Array(daysInMonth)].map((_, dayIndex) => {
+                                    const shifts = getShiftsForDay(employee.shifts, dayIndex + 1);
+                                    return (
+                                        <td
+                                            key={dayIndex}
+                                            className="px-2 py-2 text-center relative"
+                                            onMouseEnter={() => handleMouseEnter(index, dayIndex)}
+                                            onMouseLeave={handleMouseLeave}
+                                        >
+                                            <div className="w-6 h-6 bg-gray-200 rounded-full mx-auto hover:bg-blue-500"></div>
+                                            {hoveredCircle &&
+                                                hoveredCircle.employeeIndex === index &&
+                                                hoveredCircle.dayIndex === dayIndex && (
+                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px]">
+                                                        <p>
+                                                            Дата:{' '}
+                                                            {`${dayIndex + 1}.${month + 1}.${year}`}
+                                                        </p>
+                                                        {shifts.length > 0 ? (
+                                                            shifts.map((shift) => (
+                                                                <div key={shift._id}>
+                                                                    <p>
+                                                                        Начало:{' '}
+                                                                        {formatOnlyTimeDate(
+                                                                            shift.startTime,
+                                                                        )}
+                                                                    </p>
+                                                                    <p>
+                                                                        Конец:{' '}
+                                                                        {formatOnlyTimeDate(
+                                                                            shift.endTime,
+                                                                        )}
+                                                                    </p>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <p>Нет смен</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                        </td>
+                                    );
+                                })}
                             </tr>
                         ))}
                     </tbody>
