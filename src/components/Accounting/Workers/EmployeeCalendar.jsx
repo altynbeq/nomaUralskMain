@@ -99,19 +99,21 @@ export const EmployeeCalendar = () => {
         return department ? department.name : 'Неизвестный департамент';
     };
 
-    const getShiftsForDay = (shifts, day) => {
-        const dayStart = new Date(year, month, day, 0, 0, 0);
-        const dayEnd = new Date(year, month, day, 23, 59, 59);
+    const getShiftsForDay = useMemo(() => {
+        return (shifts, day) => {
+            const dayStart = new Date(year, month, day, 0, 0, 0);
+            const dayEnd = new Date(year, month, day, 23, 59, 59);
 
-        return (
-            shifts?.filter((shift) => {
-                const shiftStart = new Date(shift.startTime);
+            return (
+                shifts?.filter((shift) => {
+                    const shiftStart = new Date(shift.startTime);
 
-                // Проверяем, начинается ли смена в текущий день
-                return shiftStart >= dayStart && shiftStart <= dayEnd;
-            }) || []
-        );
-    };
+                    // Проверяем, начинается ли смена в текущий день
+                    return shiftStart >= dayStart && shiftStart <= dayEnd;
+                }) || []
+            );
+        };
+    }, [month, year]);
 
     return (
         <div className="w-full bg-white p-6">
