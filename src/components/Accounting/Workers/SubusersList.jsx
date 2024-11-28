@@ -6,6 +6,7 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { useStateContext } from '../../../contexts/ContextProvider';
 import { SubuserEditModal } from './SubuserEditModal';
+import { SubuserDeleteModal } from './SubuserDeleteModal';
 import AlertModal from '../../AlertModal';
 
 export const SubusersList = () => {
@@ -15,6 +16,7 @@ export const SubusersList = () => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showSubuserEditModal, setShowSubuserEditModal] = useState(false);
+    const [showSubuserDeleteModal, setShowSubuserDeleteModal] = useState(false);
     const [editingSubuser, setEditingSubuser] = useState(false);
     const [showAlertModal, setShowAlertModal] = useState(false);
 
@@ -54,6 +56,11 @@ export const SubusersList = () => {
         setShowAlertModal(true);
     };
 
+    const onSuccessDeleting = () => {
+        setShowSubuserDeleteModal(false);
+        setShowAlertModal(true);
+    };
+
     const actionTemplate = (rowData) => (
         <div className="flex gap-2">
             <Button
@@ -67,7 +74,10 @@ export const SubusersList = () => {
             <Button
                 icon="pi pi-trash"
                 className="p-button-rounded p-button-danger"
-                onClick={() => console.log(`Delete ${rowData.name}`)}
+                onClick={() => {
+                    setShowSubuserDeleteModal(true);
+                    setEditingSubuser(rowData);
+                }}
             />
         </div>
     );
@@ -116,6 +126,13 @@ export const SubusersList = () => {
                 onSuccess={onSuccessEditing}
                 subuser={editingSubuser}
                 isVisible={showSubuserEditModal}
+                onClose={() => setShowSubuserEditModal(false)}
+            />
+            <SubuserDeleteModal
+                onSuccess={onSuccessDeleting}
+                onClose={() => setShowSubuserDeleteModal(false)}
+                isVisible={showSubuserDeleteModal}
+                subuserId={editingSubuser?._id || ''}
             />
             <AlertModal
                 message="Вы успешно обновили данные сотрудника"

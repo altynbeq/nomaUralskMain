@@ -3,41 +3,20 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useEffect, useState } from 'react';
 
-export const SubuserEditModal = ({ isVisible, onClose, subuser, onSuccess }) => {
+export const SubuserEditModal = ({ isVisible, subuser, onClose, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [subuserName, setSubuserName] = useState('');
 
     useEffect(() => {
         setSubuserName(subuser.name);
     }, [subuser.name]);
-    // const onDelete = async () => {
-    //     setIsLoading(true);
-    //     try {
-    //         const response = await fetch(
-    //             `https://nomalytica-back.onrender.com/api/subUsers//delete-subuser/${subuser._id}`,
-    //             {
-    //                 method: 'DELETE',
-    //                 headers: { 'Content-Type': 'application/json' },
-    //             },
-    //         );
-
-    //         if (!response.ok) {
-    //             throw new Error('Failed to update store');
-    //         }
-    //         onSuccess();
-    //     } catch (error) {
-    //         console.error('Error updating store:', error.message);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
 
     const onSave = async () => {
         setIsLoading(true);
         console.log(subuserName);
         try {
             const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/subUsers/update-subuser-name/${subuser._id}`,
+                `https://nomalytica-back.onrender.com/api/subUsers/delete-subuser/${subuser._id}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
