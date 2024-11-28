@@ -5,24 +5,33 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { useStateContext } from '../../../contexts/ContextProvider';
+import { SubuserEditModal } from './SubuserEditModal';
+import AlertModal from '../../AlertModal';
 
-export const SubusersList = ({ subusers }) => {
+export const SubusersList = () => {
     const { companyStructure } = useStateContext();
 
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showSubuserEditModal, setShowSubuserEditModal] = useState(false);
+    const [editingSubuser, setEditingSubuser] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
 
     // Логика фильтрации
-    const filteredSubusers = subusers.filter((subuser) => {
+    const filteredSubusers = companyStructure.subUsers?.filter((subuser) => {
         const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
-        // Фильтр по отделу и магазину, если требуется
-        return matchesSearch;
+        const matchesDepartment = selectedDepartment
+            ? subuser.departmentId === selectedDepartment.id
+            : true;
+        const matchesStore = selectedStore ? subuser.storeId === selectedStore.id : true;
+
+        return matchesSearch && matchesDepartment && matchesStore;
     });
 
     const nameTemplate = (rowData) => (
         <div className="flex items-center">
-            <span className="mr-2">{rowData.icon}</span>
+            {rowData.icon && <span className="mr-2">{rowData.icon}</span>}
             <div>
                 <p className="font-bold">{rowData.name}</p>
                 <p className="text-sm text-gray-500">{rowData.rank}</p>
@@ -30,16 +39,36 @@ export const SubusersList = ({ subusers }) => {
         </div>
     );
 
-    const emailTemplate = () => <p className="text-sm text-gray-500">alt.quat@gmail.com</p>;
-
-    const dateTemplate = () => (
-        <p className="text-sm text-gray-500">{new Date().toISOString().split('T')[0]}</p>
+    const emailTemplate = (rowData) => (
+        <p className="text-sm text-gray-500">{rowData.email || 'Не указан'}</p>
     );
 
-    const actionTemplate = () => (
+    const dateTemplate = (rowData) => (
+        <p className="text-sm text-gray-500">
+            {rowData.createdAt ? new Date(rowData.createdAt).toLocaleDateString() : 'Неизвестно'}
+        </p>
+    );
+
+    const onSuccessEditing = () => {
+        setShowSubuserEditModal(false);
+        setShowAlertModal(true);
+    };
+
+    const actionTemplate = (rowData) => (
         <div className="flex gap-2">
-            <Button icon="pi pi-pencil" className="p-button-rounded p-button-secondary" />
-            <Button icon="pi pi-trash" className="p-button-rounded p-button-danger" />
+            <Button
+                icon="pi pi-pencil"
+                className="p-button-rounded p-button-secondary"
+                onClick={() => {
+                    setShowSubuserEditModal(true);
+                    setEditingSubuser(rowData);
+                }}
+            />
+            <Button
+                icon="pi pi-trash"
+                className="p-button-rounded p-button-danger"
+                onClick={() => console.log(`Delete ${rowData.name}`)}
+            />
         </div>
     );
 
@@ -83,6 +112,16 @@ export const SubusersList = ({ subusers }) => {
                 <Column header="Дата" body={dateTemplate} />
                 <Column header="Действия" body={actionTemplate} />
             </DataTable>
+            <SubuserEditModal
+                onSuccess={onSuccessEditing}
+                subuser={editingSubuser}
+                isVisible={showSubuserEditModal}
+            />
+            <AlertModal
+                message="Вы успешно обновили данные сотрудника"
+                open={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
+            />
         </div>
     );
 };
