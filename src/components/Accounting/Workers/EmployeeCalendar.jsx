@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { useStateContext } from '../../../contexts/ContextProvider';
-import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
+import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
 
 export const EmployeeCalendar = () => {
     const { companyStructure } = useStateContext();
@@ -106,10 +106,9 @@ export const EmployeeCalendar = () => {
         return (
             shifts?.filter((shift) => {
                 const shiftStart = new Date(shift.startTime);
-                const shiftEnd = new Date(shift.endTime);
 
-                // Проверяем, пересекается ли смена с текущим днем
-                return shiftStart <= dayEnd && shiftEnd >= dayStart;
+                // Проверяем, начинается ли смена в текущий день
+                return shiftStart >= dayStart && shiftStart <= dayEnd;
             }) || []
         );
     };
@@ -197,7 +196,9 @@ export const EmployeeCalendar = () => {
                                 <td className="px-4 py-2 flex items-center gap-2">
                                     <div className="w-8 h-8 bg-gray-200 rounded-full"></div>{' '}
                                     {/* Серый кружок */}
-                                    <span>{`${employee.name} (${getDepartmentName(employee.departmentId)})`}</span>
+                                    <span>{`${employee.name} (${getDepartmentName(
+                                        employee.departmentId,
+                                    )})`}</span>
                                 </td>
                                 {[...Array(daysInMonth)].map((_, dayIndex) => {
                                     const shifts = getShiftsForDay(employee.shifts, dayIndex + 1);
@@ -218,14 +219,7 @@ export const EmployeeCalendar = () => {
                                             {hoveredCircle &&
                                                 hoveredCircle.employeeIndex === index &&
                                                 hoveredCircle.dayIndex === dayIndex && (
-                                                    <div
-                                                        style={{
-                                                            top: '-100%',
-                                                            left: '50%',
-                                                            transform: 'translate(-50%, -100%)',
-                                                        }}
-                                                        className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px]"
-                                                    >
+                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px]">
                                                         <p>
                                                             Дата:{' '}
                                                             {`${dayIndex + 1}.${month + 1}.${year}`}
