@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import WorkersAnimatedBeam from '../components/Accounting/Workers/WorkersAnimatedBeam';
+import { SubusersList } from '../components/Accounting/Workers/SubusersList';
+import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
 
 const AccountingWorkers = () => {
     const [structure, setStructure] = useState('');
@@ -9,6 +13,7 @@ const AccountingWorkers = () => {
     const [subUsers, setSubUsers] = useState([]);
     const [update, setUpdate] = useState(false);
     const [currentUserId, setCurrentUserId] = useState('');
+    const [showFullShifts, setShowFullShifts] = useState(false);
 
     const fetchStructure = async (id) => {
         const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
@@ -611,6 +616,13 @@ const AccountingWorkers = () => {
 
     return (
         <>
+            <div className="flex justify-center ml-16 my-16">
+                <Button
+                    className="bg-blue-500 text-white rounded p-2"
+                    onClick={() => setShowFullShifts(true)}
+                    label="Посмотреть весь график"
+                />
+            </div>
             {items.length && (
                 <WorkersAnimatedBeam
                     id={currentUserId}
@@ -621,6 +633,14 @@ const AccountingWorkers = () => {
                     defaultImage={defaultImage}
                 />
             )}
+            <SubusersList />
+            <Dialog
+                className="shadow-md rounded-lg"
+                visible={showFullShifts}
+                onHide={() => setShowFullShifts(false)}
+            >
+                <EmployeeCalendar />
+            </Dialog>
         </>
     );
 };
