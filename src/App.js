@@ -28,6 +28,10 @@ const App = () => {
         setAccess,
         setSubUser,
         setCompanyStructure,
+        setProducts,
+        setWarehouses,
+        currentUserSubUser,
+        subUser,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -133,6 +137,49 @@ const App = () => {
             return data;
         } catch (error) {
             console.error('Failed to fetch data:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (subUser?.companyId) {
+            fetchCompanyData(subUser.companyId);
+        } else {
+            const currentUserId = localStorage.getItem('_id');
+            if (currentUserId && !subUser?.companyId) {
+                fetchCompanyData(currentUserId);
+            }
+        }
+    }, [subUser]);
+
+    const fetchCompanyData = async (companyId) => {
+        console.log(companyId);
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setProducts(data.products);
+            if (data.warehouses) {
+                setWarehouses(
+                    data.warehouses.map((warehouseName, index) => ({
+                        warehouseName,
+                        id: index.toString(),
+                    })),
+                );
+            }
+        } catch (error) {
+            console.error('Error fetching company data:', error);
         }
     };
 
