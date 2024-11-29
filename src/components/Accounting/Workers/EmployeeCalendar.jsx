@@ -167,7 +167,7 @@ export const EmployeeCalendar = () => {
                 <table className="table-auto w-full max-w-full border-collapse">
                     <thead>
                         <tr>
-                            <th className="px-4 py-2 text-left">Сотрудник</th>
+                            <th className="px-2 py-2 text-left">Сотрудник</th>
                             {[...Array(daysInMonth)].map((_, index) => (
                                 <th key={index} className="px-2 py-1 text-center text-sm">
                                     {index + 1}
@@ -175,7 +175,7 @@ export const EmployeeCalendar = () => {
                             ))}
                         </tr>
                         <tr>
-                            <th className="px-4 py-2 text-left"></th>
+                            <th className="px-2 py-1 text-left"></th>
                             {[...Array(daysInMonth)].map((_, index) => {
                                 const date = new Date(year, month, index + 1);
                                 const weekDay = new Intl.DateTimeFormat('ru-RU', {
@@ -184,7 +184,7 @@ export const EmployeeCalendar = () => {
                                 return (
                                     <th
                                         key={index}
-                                        className="px-2 py-1 text-center text-xs text-gray-500"
+                                        className="py-1 text-center text-xs text-gray-500"
                                     >
                                         {weekDay}
                                     </th>
@@ -207,12 +207,12 @@ export const EmployeeCalendar = () => {
                                     return (
                                         <td
                                             key={dayIndex}
-                                            className="px-2 py-2 text-center relative"
+                                            className="py-1 text-center relative"
                                             onMouseEnter={() => handleMouseEnter(index, dayIndex)}
                                             onMouseLeave={handleMouseLeave}
                                         >
                                             <div
-                                                className={`w-4 h-4 rounded-full mx-auto ${
+                                                className={`w-4 h-4 rounded-full ${
                                                     shifts.length > 0
                                                         ? 'bg-green-500'
                                                         : 'bg-gray-200'
