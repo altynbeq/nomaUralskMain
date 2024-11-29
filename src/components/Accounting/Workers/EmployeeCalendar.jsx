@@ -119,7 +119,7 @@ export const EmployeeCalendar = () => {
         <div className="w-full bg-white p-6">
             {/* Верхняя панель */}
             <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 ml-4 mt-4">
                     <button
                         onClick={handlePrevMonth}
                         className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
@@ -196,7 +196,7 @@ export const EmployeeCalendar = () => {
                         {currentSubusers?.map((employee, index) => (
                             <tr key={index}>
                                 <td className="px-4 py-2 flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>{' '}
+                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>{' '}
                                     {/* Серый кружок */}
                                     <span>{`${employee.name} (${getDepartmentName(
                                         employee.departmentId,
@@ -212,7 +212,7 @@ export const EmployeeCalendar = () => {
                                             onMouseLeave={handleMouseLeave}
                                         >
                                             <div
-                                                className={`w-6 h-6 rounded-full mx-auto ${
+                                                className={`w-4 h-4 rounded-full mx-auto ${
                                                     shifts.length > 0
                                                         ? 'bg-green-500'
                                                         : 'bg-gray-200'
@@ -262,7 +262,7 @@ export const EmployeeCalendar = () => {
                 <button
                     onClick={handlePrevPage}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-lg ${
+                    className={`px-4 py-2 ml-4 rounded-lg ${
                         currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'
                     }`}
                 >
@@ -272,7 +272,7 @@ export const EmployeeCalendar = () => {
                 <button
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-lg ${
+                    className={`px-4 py-2 mr-4 rounded-lg ${
                         currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'
                     }`}
                 >
