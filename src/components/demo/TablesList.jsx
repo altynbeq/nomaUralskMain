@@ -185,18 +185,21 @@ const TableSort = ({
     };
 
     useEffect(() => {
-        if (listRows.length == 0) {
+        if (listRows.length === 0) {
             setListRows([...rows]);
             setSpisanieStats(spisanieStats);
         }
+        // Проверяем, изменились ли размеры перед обновлением
         if (componentRef.current) {
             const { offsetWidth, offsetHeight } = componentRef.current;
-            setDimensions({
-                width: offsetWidth,
-                height: offsetHeight,
-            });
+            if (offsetWidth !== dimensions.width || offsetHeight !== dimensions.height) {
+                setDimensions({
+                    width: offsetWidth,
+                    height: offsetHeight,
+                });
+            }
         }
-    }, [listRows]);
+    }, [listRows, rows, spisanieStats, dimensions.width, dimensions.height]);
 
     const [dates, setDates] = useState([
         new Date(dateRanges[1].startDate.replace('%20', ' ')),
