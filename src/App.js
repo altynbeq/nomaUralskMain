@@ -31,6 +31,7 @@ const App = () => {
         setProducts,
         setWarehouses,
         currentUserSubUser,
+        subUser,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -140,15 +141,18 @@ const App = () => {
     };
 
     useEffect(() => {
-        const currentUserId = localStorage.getItem('_id');
-        if (currentUserSubUser) {
-            return fetchCompanyData(currentUserSubUser.companyId);
+        if (subUser?.companyId) {
+            fetchCompanyData(subUser.companyId);
         } else {
-            fetchCompanyData(currentUserId);
+            const currentUserId = localStorage.getItem('_id');
+            if (currentUserId && !subUser?.companyId) {
+                fetchCompanyData(currentUserId);
+            }
         }
-    }, [currentUserSubUser]);
+    }, [subUser]);
 
     const fetchCompanyData = async (companyId) => {
+        console.log(companyId);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
