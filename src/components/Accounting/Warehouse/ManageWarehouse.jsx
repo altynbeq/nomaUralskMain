@@ -208,13 +208,13 @@ const ManageWarehouse = () => {
             </div>
 
             {/* Modal for first component */}
-            {/* <Modal
+            <Modal
                 isOpen={isModalOpen1}
                 onClose={() => setIsModalOpen1(false)}
                 title="Добавить поступление"
             >
                 <FormContent />
-            </Modal> */}
+            </Modal>
 
             {/* Modal for second component */}
             <Modal
