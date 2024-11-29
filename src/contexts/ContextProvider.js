@@ -1,3 +1,4 @@
+// ContextProvider.js
 import React, { createContext, useContext, useState, useMemo } from 'react';
 import { getDateRange } from '../methods/getDateRange';
 
@@ -70,59 +71,80 @@ export const ContextProvider = ({ children }) => {
     const updateSubUser = (subUserData) => {
         setSubUser(subUserData);
     };
-    return (
-        // eslint-disable-next-line react/jsx-no-constructed-context-values
-        <StateContext.Provider
-            value={{
-                leads,
-                setLeads,
-                deals,
-                setDeals,
-                receipts,
-                setReceipts,
-                spisanie,
-                setSpisanie,
-                isLoading,
-                setLoading,
-                kkm,
-                setKKM,
-                skeletonUp,
-                setSkeletonUp,
-                dateRanges,
-                currentColor,
-                currentMode,
-                activeMenu,
-                screenSize,
-                setScreenSize,
-                handleClick,
-                isClicked,
-                initialState,
-                setIsClicked,
-                setActiveMenu,
-                setCurrentColor,
-                setCurrentMode,
-                setMode,
-                setColor,
-                themeSettings,
-                setThemeSettings,
-                handleLogin,
-                userId,
-                handleLogOut,
-                userData,
-                setUserData,
-                access,
-                setAccess: updateAccessData,
-                subUser,
-                setSubUser: updateSubUser,
-                setUserImage,
-                userImage,
-                companyStructure,
-                setCompanyStructure,
-            }}
-        >
-            {children}
-        </StateContext.Provider>
+
+    // Мемоизация объекта value
+    const value = useMemo(
+        () => ({
+            leads,
+            setLeads,
+            deals,
+            setDeals,
+            receipts,
+            setReceipts,
+            spisanie,
+            setSpisanie,
+            isLoading,
+            setLoading,
+            kkm,
+            setKKM,
+            skeletonUp,
+            setSkeletonUp,
+            dateRanges,
+            currentColor,
+            currentMode,
+            activeMenu,
+            screenSize,
+            setScreenSize,
+            handleClick,
+            isClicked,
+            initialState,
+            setIsClicked,
+            setActiveMenu,
+            setCurrentColor,
+            setCurrentMode,
+            setMode,
+            setColor,
+            themeSettings,
+            setThemeSettings,
+            handleLogin,
+            userId,
+            handleLogOut,
+            userData,
+            setUserData,
+            access,
+            setAccess: updateAccessData,
+            subUser,
+            setSubUser: updateSubUser,
+            setUserImage,
+            userImage,
+            companyStructure,
+            setCompanyStructure,
+        }),
+        [
+            leads,
+            deals,
+            receipts,
+            spisanie,
+            isLoading,
+            kkm,
+            skeletonUp,
+            dateRanges,
+            currentColor,
+            currentMode,
+            activeMenu,
+            screenSize,
+            isClicked,
+            themeSettings,
+            userId,
+            userData,
+            access,
+            subUser,
+            userImage,
+            companyStructure,
+        ],
     );
+
+    return <StateContext.Provider value={value}>{children}</StateContext.Provider>;
 };
 
 export const useStateContext = () => useContext(StateContext);

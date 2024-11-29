@@ -1,10 +1,10 @@
 import { Profile } from '../Profile/Profile';
-import ManageWarehouse from '../../components/Accounting/Warehouse/ManageWarehouse';
+import { AddWarehouse } from '../../components/Accounting/Warehouse/AddWarehouse';
 
 export const GeneralSubuser = () => {
     return (
         <div className="flex mt-10 flex-col md:flex-row align-center justify-center md:mr-20">
-            <ManageWarehouse />
+            <AddWarehouse />
             <Profile />
         </div>
     );

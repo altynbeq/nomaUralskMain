@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { MoreEditProductModal } from '../components/MoreEditProductModal';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
-import { Divider } from 'primereact/divider';
 
 export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -11,7 +10,6 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const [toWarehouse, setToWarehouse] = useState(null);
     const [transferDate, setTransferDate] = useState(null);
     const [isMoreEditModalOpen, setIsMoreEditModalOpen] = useState(false);
-    const [count, setCount] = useState(0);
 
     const moreEditModalClick = () => {
         setIsMoreEditModalOpen((prev) => !prev);
@@ -24,10 +22,6 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const handleTransferModalClose = () => {
         setIsTransferModalOpen(false);
     };
-
-    useEffect(() => {
-        console.log(warehouses);
-    }, [warehouses]);
 
     if (!isOpen) return null;
 
