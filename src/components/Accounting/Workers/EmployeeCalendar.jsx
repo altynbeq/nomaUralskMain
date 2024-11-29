@@ -195,12 +195,15 @@ export const EmployeeCalendar = () => {
                     <tbody>
                         {currentSubusers?.map((employee, index) => (
                             <tr key={index}>
-                                <td className="px-4 py-2 flex items-center gap-2">
+                                <td className="px-4 py-2 inline-flex items-center gap-2">
                                     <div className="w-6 h-6 bg-gray-200 rounded-full"></div>{' '}
                                     {/* Серый кружок */}
-                                    <span>{`${employee.name} (${getDepartmentName(
-                                        employee.departmentId,
-                                    )})`}</span>
+                                    <div className="flex flex-col">
+                                        <p className="text-sm">{`${employee.name}`}</p>
+                                        <p className="text-sm">
+                                            ({getDepartmentName(employee.departmentId)})
+                                        </p>
+                                    </div>
                                 </td>
                                 {[...Array(daysInMonth)].map((_, dayIndex) => {
                                     const shifts = getShiftsForDay(employee.shifts, dayIndex + 1);
