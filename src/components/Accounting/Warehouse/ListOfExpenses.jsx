@@ -8,52 +8,12 @@ import { EditProductModal } from '../../../components/EditProductModal';
 import { useStateContext } from '../../../contexts/ContextProvider';
 
 export default function ListOfExpenses() {
-    const { setWarehouses, warehouses } = useStateContext();
+    const { products, warehouses } = useStateContext();
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState({});
-    // const [warehouses, setWarehouses] = useState([]);
-    const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [productSearch, setProductSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
-
-    useEffect(() => {
-        const companyId = localStorage.getItem('_id');
-        if (companyId) {
-            const fetchCompanyData = async () => {
-                try {
-                    const response = await fetch(
-                        `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
-                        {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                        },
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    setProducts(data.products);
-                    if (data.warehouses) {
-                        setWarehouses(
-                            data.warehouses.map((warehouseName, index) => ({
-                                warehouseName,
-                                id: index.toString(),
-                            })),
-                        );
-                    }
-                } catch (error) {
-                    console.error('Error fetching company data:', error);
-                }
-            };
-
-            fetchCompanyData();
-        }
-    }, [setWarehouses]);
 
     const rows = filteredProducts.map((product, index) => ({
         id: product._id || index,

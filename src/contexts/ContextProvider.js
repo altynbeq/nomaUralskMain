@@ -35,6 +35,7 @@ export const ContextProvider = ({ children }) => {
     const [userImage, setUserImage] = useState('');
     const [companyStructure, setCompanyStructure] = useState({});
     const [warehouses, setWarehouses] = useState([]);
+    const [products, setProducts] = useState([]);
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
@@ -122,6 +123,8 @@ export const ContextProvider = ({ children }) => {
             setCompanyStructure,
             warehouses,
             setWarehouses,
+            products,
+            setProducts,
         }),
         [
             leads,
@@ -146,6 +149,8 @@ export const ContextProvider = ({ children }) => {
             companyStructure,
             warehouses,
             setWarehouses,
+            products,
+            setProducts,
         ],
     );
 
