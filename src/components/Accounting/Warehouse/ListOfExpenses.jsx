@@ -5,11 +5,13 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { EditProductModal } from '../../../components/EditProductModal';
+import { useStateContext } from '../../../contexts/ContextProvider';
 
 export default function ListOfExpenses() {
+    const { setWarehouses, warehouses } = useStateContext();
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState({});
-    const [warehouses, setWarehouses] = useState([]);
+    // const [warehouses, setWarehouses] = useState([]);
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [productSearch, setProductSearch] = useState('');
@@ -51,7 +53,7 @@ export default function ListOfExpenses() {
 
             fetchCompanyData();
         }
-    }, []);
+    }, [setWarehouses]);
 
     const rows = filteredProducts.map((product, index) => ({
         id: product._id || index,
