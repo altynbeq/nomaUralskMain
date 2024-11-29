@@ -55,7 +55,7 @@ const Sklad = ({ urls }) => {
             }
         }
         window.scrollTo(0, 0);
-    }, []);
+    }, [kkm.monthFormedKKM, spisanie.monthSpisanie, urls.externalApis]);
 
     if (skeletonUp) {
         return (

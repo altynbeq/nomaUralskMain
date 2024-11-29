@@ -185,11 +185,17 @@ const TableSort = ({
     };
 
     useEffect(() => {
-        if (listRows.length === 0) {
+        // Only update listRows if rows have actually changed
+        if (listRows.length === 0 && rows.length > 0) {
             setListRows([...rows]);
+        }
+
+        // Only update spisanieStats if it has changed
+        if (JSON.stringify(spisanieStatsState) !== JSON.stringify(spisanieStats)) {
             setSpisanieStats(spisanieStats);
         }
-        // Проверяем, изменились ли размеры перед обновлением
+
+        // Handle dimensions update
         if (componentRef.current) {
             const { offsetWidth, offsetHeight } = componentRef.current;
             if (offsetWidth !== dimensions.width || offsetHeight !== dimensions.height) {
@@ -199,7 +205,14 @@ const TableSort = ({
                 });
             }
         }
-    }, [listRows, rows, spisanieStats, dimensions.width, dimensions.height]);
+    }, [
+        rows,
+        spisanieStats,
+        listRows.length,
+        dimensions.width,
+        dimensions.height,
+        spisanieStatsState,
+    ]);
 
     const [dates, setDates] = useState([
         new Date(dateRanges[1].startDate.replace('%20', ' ')),
