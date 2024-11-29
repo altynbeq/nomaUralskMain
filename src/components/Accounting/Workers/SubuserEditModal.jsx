@@ -16,7 +16,7 @@ export const SubuserEditModal = ({ isVisible, subuser, onClose, onSuccess }) => 
         console.log(subuserName);
         try {
             const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/subUsers/delete-subuser/${subuser._id}`,
+                `https://nomalytica-back.onrender.com/api/subUsers/update-subuser-name/${subuser._id}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -38,14 +38,7 @@ export const SubuserEditModal = ({ isVisible, subuser, onClose, onSuccess }) => 
     };
 
     return (
-        <Dialog
-            visible={isVisible}
-            onHide={onClose}
-            header="Редактировать"
-            style={{ width: '15vw' }}
-            modal
-            closable={true}
-        >
+        <Dialog visible={isVisible} onHide={onClose} header="Редактировать" modal closable={true}>
             <div className="mb-4">
                 <label htmlFor="workerName" className="block text-gray-700 font-medium mb-2">
                     Имя работника
@@ -55,7 +48,7 @@ export const SubuserEditModal = ({ isVisible, subuser, onClose, onSuccess }) => 
                     value={subuserName || ''}
                     onChange={(e) => setSubuserName(e.target.value)}
                     placeholder="Введите имя работника"
-                    className="border-2 p-1 rounded-lg border-blue-500"
+                    className="border-2 p-1 rounded-lg border-blue-500 w-full"
                 />
             </div>
 
