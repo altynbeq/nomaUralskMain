@@ -212,7 +212,7 @@ export const EmployeeCalendar = () => {
                                             onMouseLeave={handleMouseLeave}
                                         >
                                             <div
-                                                className={`w-4 h-4 rounded-full ${
+                                                className={`w-4 h-4 flex items-center rounded-full ${
                                                     shifts.length > 0
                                                         ? 'bg-green-500'
                                                         : 'bg-gray-200'
