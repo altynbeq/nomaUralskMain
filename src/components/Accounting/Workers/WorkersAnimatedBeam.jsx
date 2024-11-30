@@ -5,6 +5,7 @@ import { ProfileModal } from './ProfileModal';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import QRCode from 'react-qr-code';
+import { MapPicker } from '../../../components/MapPicker';
 
 const Circle = forwardRef(({ className, children }, ref) => {
     return (
@@ -57,7 +58,7 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [showStoreModal, setShowStoreModal] = useState(false);
     const [selectedStore, setSelectedStore] = useState(null);
-    const [QRLocation, setQRLocation] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -353,26 +354,14 @@ export default function AnimatedBeamMultipleOutputDemo({
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const { latitude, longitude } = position.coords;
-                            setQRLocation({ latitude, longitude });
-                            console.log(
-                                `QR Location set: Latitude: ${latitude}, Longitude: ${longitude}`,
-                            );
-                        },
-                        (error) => {
-                            console.error('Error fetching location:', error);
-                        },
-                    );
-                } else {
-                    console.error('Geolocation is not supported by this browser.');
-                }
             } catch (error) {
                 console.error(error);
             }
         }
+    };
+
+    const handleSave = () => {
+        console.log(selectedLocation);
     };
 
     return (
@@ -381,23 +370,37 @@ export default function AnimatedBeamMultipleOutputDemo({
             {renderAddDepartmentModal()}
             <Dialog
                 visible={showStoreModal}
+                className="w-full"
                 header={selectedStore?.name || ''}
                 onHide={() => setShowStoreModal(false)}
             >
-                <div ref={qrRef}>
-                    <QRCode
-                        title="GeeksForGeeks"
-                        value={'http://192.168.0.105:3000?isQrRedirect=true'}
-                        bgColor={'#FFFFFF'}
-                        fgColor={'#000000'}
-                        size={600}
-                    />
+                <div className="flex gap-2">
+                    <div className="flex-1 flex flex-col justify-center items-center" ref={qrRef}>
+                        <QRCode
+                            title="GeeksForGeeks"
+                            value={'http://192.168.0.105:3000?isQrRedirect=true'}
+                            bgColor={'#FFFFFF'}
+                            fgColor={'#000000'}
+                            size={300}
+                        />
+                        <Button
+                            className="mt-5 bg-blue-500 text-white rounded p-2"
+                            onClick={() => handleQRDownload()}
+                            label="Cкачать QR-код"
+                        />
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                        <MapPicker
+                            selectedLocation={selectedLocation}
+                            setSelectedLocation={setSelectedLocation}
+                        />
+                        <Button
+                            className="mt-5 bg-blue-500 text-white rounded p-2"
+                            onClick={() => handleSave()}
+                            label="Выбрать локацию"
+                        />
+                    </div>
                 </div>
-                <Button
-                    className="mt-5 bg-blue-500 text-white rounded p-2 w-full"
-                    onClick={() => handleQRDownload()}
-                    label="Cкачать QR-код"
-                />
             </Dialog>
             <div
                 className={`mt-10 md:mt-0 ml-auto mr-auto relative flex h-[500px] max-w-[90%] items-center justify-center overflow-hidden rounded-lg border bg-white p-10 md:shadow-xl ${className}`}
