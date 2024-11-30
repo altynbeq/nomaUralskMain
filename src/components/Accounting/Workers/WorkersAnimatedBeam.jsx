@@ -57,7 +57,7 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [showStoreModal, setShowStoreModal] = useState(false);
     const [selectedStore, setSelectedStore] = useState(null);
-    const [message, setMessage] = useState('');
+    const [QRLocation, setQRLocation] = useState(null);
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -336,22 +336,42 @@ export default function AnimatedBeamMultipleOutputDemo({
 
     const handleQRDownload = () => {
         if (qrRef.current) {
-            const svg = qrRef.current.querySelector('svg');
-            if (!svg) {
-                console.error('QR code SVG not found');
-                return;
+            try {
+                const svg = qrRef.current.querySelector('svg');
+                if (!svg) {
+                    console.error('QR code SVG not found');
+                    return;
+                }
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'qrcode.svg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude } = position.coords;
+                            setQRLocation({ latitude, longitude });
+                            console.log(
+                                `QR Location set: Latitude: ${latitude}, Longitude: ${longitude}`,
+                            );
+                        },
+                        (error) => {
+                            console.error('Error fetching location:', error);
+                        },
+                    );
+                } else {
+                    console.error('Geolocation is not supported by this browser.');
+                }
+            } catch (error) {
+                console.error(error);
             }
-            const serializer = new XMLSerializer();
-            const svgString = serializer.serializeToString(svg);
-            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'qrcode.svg';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
         }
     };
 
@@ -367,7 +387,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                 <div ref={qrRef}>
                     <QRCode
                         title="GeeksForGeeks"
-                        value={'http://192.168.0.105:3000?isQr=true'}
+                        value={'http://192.168.0.105:3000?isQrRedirect=true'}
                         bgColor={'#FFFFFF'}
                         fgColor={'#000000'}
                         size={600}

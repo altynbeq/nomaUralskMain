@@ -37,6 +37,7 @@ const App = () => {
     const [techProblem, setTechProblem] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [urls, setUrls] = useState('');
+    const [isQrRedirect, setIsQrRedirect] = useState(false);
 
     useEffect(() => {
         const currentUserId = localStorage.getItem('_id');
@@ -44,6 +45,13 @@ const App = () => {
         const currentUserDepartmentId = localStorage.getItem('departmentId');
         const userLoggedIn = currentUserId !== null && currentToken !== null;
         setIsLoggedIn(userLoggedIn);
+
+        const searchParams = new URLSearchParams(window.location.search);
+        const isQr = searchParams.get('isQrRedirect') === 'true'; // Проверяем наличие параметра isQr=true
+
+        if (isQr) {
+            setIsQrRedirect(true);
+        }
 
         const fetchData = async (userId) => {
             try {
@@ -190,7 +198,7 @@ const App = () => {
     }
 
     if (!isLoggedIn) {
-        return <LogInForm />;
+        return <LogInForm isQrRedirect={isQrRedirect} />;
     }
 
     return (

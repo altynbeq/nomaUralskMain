@@ -18,10 +18,11 @@ export const MainContent = ({ urls, activeMenu }) => {
     const location = useLocation();
 
     useEffect(() => {
-        console.log(`Переход на маршрут: ${location.pathname}`);
-        // Добавьте вашу логику здесь
-        // Например, можно отправить данные в аналитику
-    }, [location.pathname]);
+        const searchParams = new URLSearchParams(location.search);
+        const isQr = searchParams.get('isQrRedirect') === 'true';
+        // if (isQr) {
+        // }
+    }, [location.pathname, location.search]);
 
     useEffect(() => {
         const departmentId = localStorage.getItem('departmentId');
