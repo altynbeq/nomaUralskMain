@@ -4,7 +4,7 @@ import { AnimatedBeam } from '../../MagicUi/AnimateBeam';
 import { ProfileModal } from './ProfileModal';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
-import { QRCodeCanvas } from 'qrcode.react';
+import QRCode from 'react-qr-code';
 
 const Circle = forwardRef(({ className, children }, ref) => {
     return (
@@ -332,18 +332,27 @@ export default function AnimatedBeamMultipleOutputDemo({
         }
     }, [items, renderBeamsOn, tooltipModalItem, update]);
 
+    const qrRef = useRef(null);
+
     const handleQRDownload = () => {
-        const qrCodeURL = document
-            .getElementById('qrCodeEl')
-            .toDataURL('image/png')
-            .replace('image/png', 'image/octet-stream');
-        console.log(qrCodeURL);
-        let aEl = document.createElement('a');
-        aEl.href = qrCodeURL;
-        aEl.download = 'QR_Code.png';
-        document.body.appendChild(aEl);
-        aEl.click();
-        document.body.removeChild(aEl);
+        if (qrRef.current) {
+            const svg = qrRef.current.querySelector('svg');
+            if (!svg) {
+                console.error('QR code SVG not found');
+                return;
+            }
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(svg);
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'qrcode.svg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
     };
 
     return (
@@ -355,7 +364,15 @@ export default function AnimatedBeamMultipleOutputDemo({
                 header={selectedStore?.name || ''}
                 onHide={() => setShowStoreModal(false)}
             >
-                <QRCodeCanvas id="qrCodeEl" size={600} value={selectedStore} />
+                <div ref={qrRef}>
+                    <QRCode
+                        title="GeeksForGeeks"
+                        value={'test'}
+                        bgColor={'#FFFFFF'}
+                        fgColor={'#000000'}
+                        size={256}
+                    />
+                </div>
                 <Button
                     className="mt-5 bg-blue-500 text-white rounded p-2 w-full"
                     onClick={() => handleQRDownload()}
