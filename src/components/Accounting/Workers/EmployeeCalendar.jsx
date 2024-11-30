@@ -271,7 +271,7 @@ export const EmployeeCalendar = () => {
                 >
                     Предыдущая
                 </button>
-                <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages}`}</span>
+                <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages || 1}`}</span>
                 <button
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
