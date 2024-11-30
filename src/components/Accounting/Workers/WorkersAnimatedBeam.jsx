@@ -355,7 +355,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                 header={selectedStore?.name || ''}
                 onHide={() => setShowStoreModal(false)}
             >
-                <QRCodeCanvas id="qrCodeEl" size={150} value={selectedStore} />
+                <QRCodeCanvas id="qrCodeEl" size={600} value={selectedStore} />
                 <Button
                     className="mt-5 bg-blue-500 text-white rounded p-2 w-full"
                     onClick={() => handleQRDownload()}
