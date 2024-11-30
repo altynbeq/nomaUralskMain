@@ -360,8 +360,31 @@ export default function AnimatedBeamMultipleOutputDemo({
         }
     };
 
-    const handleSave = () => {
-        console.log(selectedLocation);
+    const handleGeoSave = async () => {
+        if (!selectedLocation || !selectedStore) {
+            return;
+        }
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/stores/update-store/${selectedStore?.id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ location: selectedLocation }), // Передаем координаты в формате lat/lng
+                },
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+                setShowStoreModal(false);
+            } else {
+                alert('Ошибка обновления локации: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Ошибка сохранения локации:', error);
+        }
     };
 
     return (
@@ -376,14 +399,16 @@ export default function AnimatedBeamMultipleOutputDemo({
             >
                 <div className="flex gap-2">
                     <div className="flex-1 flex flex-col mb-5">
-                        <h1 className="text-lg font-semibold text-center">Выберите локацию</h1>
+                        <h1 className="text-lg font-semibold text-center">
+                            Укажите локацию магазина
+                        </h1>
                         <MapPicker
                             selectedLocation={selectedLocation}
                             setSelectedLocation={setSelectedLocation}
                         />
                         <Button
                             className="mx-auto mt-5 bg-blue-500 text-white rounded p-2 max-w-[180px]"
-                            onClick={() => handleSave()}
+                            onClick={() => handleGeoSave()}
                             label="Выбрать локацию"
                         />
                     </div>
