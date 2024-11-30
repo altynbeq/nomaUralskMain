@@ -367,10 +367,10 @@ export default function AnimatedBeamMultipleOutputDemo({
                 <div ref={qrRef}>
                     <QRCode
                         title="GeeksForGeeks"
-                        value={'test'}
+                        value={'http://192.168.0.105:3000?isQr=true'}
                         bgColor={'#FFFFFF'}
                         fgColor={'#000000'}
-                        size={256}
+                        size={600}
                     />
                 </div>
                 <Button

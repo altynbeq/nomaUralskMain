@@ -3,17 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
 import { MdDescription } from 'react-icons/md';
 import { Navbar, Footer } from './components';
-import {
-    General,
-    Sales,
-    ComingSoon,
-    Sklad,
-    Finance,
-    Workers,
-    LogInForm,
-    Calendar,
-    QRScanner,
-} from './pages';
+import { General, Sales, ComingSoon, Sklad, Finance, Workers, LogInForm, Calendar } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import AccountingWarehouse from './pages/AccountingWarehouse';
@@ -26,6 +16,12 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
+
+    useEffect(() => {
+        console.log(`Переход на маршрут: ${location.pathname}`);
+        // Добавьте вашу логику здесь
+        // Например, можно отправить данные в аналитику
+    }, [location.pathname]);
 
     useEffect(() => {
         const departmentId = localStorage.getItem('departmentId');
@@ -128,7 +124,6 @@ export const MainContent = ({ urls, activeMenu }) => {
                         <Route path="/calendar" element={<Calendar />} />
                         <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
                         <Route path="/accounting-workers" element={<AccountingWorkers />} />
-                        <Route path="/scan" element={<QRScanner />} />
                     </Routes>
                 </div>
                 <Footer />

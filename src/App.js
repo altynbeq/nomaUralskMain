@@ -30,7 +30,6 @@ const App = () => {
         setCompanyStructure,
         setProducts,
         setWarehouses,
-        currentUserSubUser,
         subUser,
     } = useStateContext();
 
@@ -152,7 +151,6 @@ const App = () => {
     }, [subUser]);
 
     const fetchCompanyData = async (companyId) => {
-        console.log(companyId);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
