@@ -73,11 +73,6 @@ export const links = [
                 text: 'Сотрудники',
                 icon: <FaUserTie />,
             },
-            {
-                name: 'scan',
-                text: 'Сканирование',
-                icon: <FaUserTie />,
-            },
         ],
     },
     {

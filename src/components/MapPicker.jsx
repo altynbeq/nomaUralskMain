@@ -32,7 +32,7 @@ export const MapPicker = ({ selectedLocation, setSelectedLocation }) => {
             <MapContainer
                 center={selectedLocation || [51.1694, 71.4491]} // Начальная точка
                 zoom={13}
-                style={{ height: '300px', width: '100%' }}
+                style={{ height: '300px' }}
             >
                 <TileLayer
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

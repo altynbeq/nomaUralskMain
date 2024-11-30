@@ -375,6 +375,18 @@ export default function AnimatedBeamMultipleOutputDemo({
                 onHide={() => setShowStoreModal(false)}
             >
                 <div className="flex gap-2">
+                    <div className="flex-1 flex flex-col mb-5">
+                        <h1 className="text-lg font-semibold text-center">Выберите локацию</h1>
+                        <MapPicker
+                            selectedLocation={selectedLocation}
+                            setSelectedLocation={setSelectedLocation}
+                        />
+                        <Button
+                            className="mx-auto mt-5 bg-blue-500 text-white rounded p-2 max-w-[180px]"
+                            onClick={() => handleSave()}
+                            label="Выбрать локацию"
+                        />
+                    </div>
                     <div className="flex-1 flex flex-col justify-center items-center" ref={qrRef}>
                         <QRCode
                             title="GeeksForGeeks"
@@ -387,17 +399,6 @@ export default function AnimatedBeamMultipleOutputDemo({
                             className="mt-5 bg-blue-500 text-white rounded p-2"
                             onClick={() => handleQRDownload()}
                             label="Cкачать QR-код"
-                        />
-                    </div>
-                    <div className="flex-1 flex flex-col">
-                        <MapPicker
-                            selectedLocation={selectedLocation}
-                            setSelectedLocation={setSelectedLocation}
-                        />
-                        <Button
-                            className="mt-5 bg-blue-500 text-white rounded p-2"
-                            onClick={() => handleSave()}
-                            label="Выбрать локацию"
                         />
                     </div>
                 </div>
