@@ -2,6 +2,9 @@ import { FaSave, FaPlus } from 'react-icons/fa';
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
 import { AnimatedBeam } from '../../MagicUi/AnimateBeam';
 import { ProfileModal } from './ProfileModal';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const Circle = forwardRef(({ className, children }, ref) => {
     return (
@@ -52,6 +55,9 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [copySuccess, setCopySuccess] = useState('');
     const [editedDepartmentName, setEditedDepartmentName] = useState('');
     const [selectedDepartment, setSelectedDepartment] = useState(null);
+    const [showStoreModal, setShowStoreModal] = useState(false);
+    const [selectedStore, setSelectedStore] = useState(null);
+    const [message, setMessage] = useState('');
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -326,10 +332,36 @@ export default function AnimatedBeamMultipleOutputDemo({
         }
     }, [items, renderBeamsOn, tooltipModalItem, update]);
 
+    const handleQRDownload = () => {
+        const qrCodeURL = document
+            .getElementById('qrCodeEl')
+            .toDataURL('image/png')
+            .replace('image/png', 'image/octet-stream');
+        console.log(qrCodeURL);
+        let aEl = document.createElement('a');
+        aEl.href = qrCodeURL;
+        aEl.download = 'QR_Code.png';
+        document.body.appendChild(aEl);
+        aEl.click();
+        document.body.removeChild(aEl);
+    };
+
     return (
         <>
             {renderTooltipModal(tooltipModalItem, tooltipModalMode)}
             {renderAddDepartmentModal()}
+            <Dialog
+                visible={showStoreModal}
+                header={selectedStore?.name || ''}
+                onHide={() => setShowStoreModal(false)}
+            >
+                <QRCodeCanvas id="qrCodeEl" size={150} value={selectedStore} />
+                <Button
+                    className="mt-5 bg-blue-500 text-white rounded p-2 w-full"
+                    onClick={() => handleQRDownload()}
+                    label="Cкачать QR-код"
+                />
+            </Dialog>
             <div
                 className={`mt-10 md:mt-0 ml-auto mr-auto relative flex h-[500px] max-w-[90%] items-center justify-center overflow-hidden rounded-lg border bg-white p-10 md:shadow-xl ${className}`}
                 ref={containerRef}
@@ -340,9 +372,13 @@ export default function AnimatedBeamMultipleOutputDemo({
                         {items.map(
                             (item, index) =>
                                 item.level === 1 && (
-                                    <div
+                                    <Button
+                                        onClick={() => {
+                                            setShowStoreModal(true);
+                                            setSelectedStore(item);
+                                        }}
                                         key={item.id}
-                                        className="flex flex-col max-w-[120px] items-center gap-4"
+                                        className="flex flex-col max-w-[120px] items-center gap-4 cursor-pointer"
                                     >
                                         <p className="text-center">{item.name}</p>
                                         <Circle
@@ -355,7 +391,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                                                 style={{ transform: 'scale(3)' }}
                                             />
                                         </Circle>
-                                    </div>
+                                    </Button>
                                 ),
                         )}
                     </div>
