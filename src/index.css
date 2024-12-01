@@ -83,7 +83,9 @@ body {
 }  
 .p-component {
     font-family: 'Comfortaa', sans-serif;
+    color: white;
 }
+
 
 @tailwind base;
 @tailwind components;

@@ -444,9 +444,9 @@ export default function AnimatedBeamMultipleOutputDemo({
                                             setSelectedStore(item);
                                         }}
                                         key={item.id}
-                                        className="flex flex-col max-w-[120px] items-center gap-4 cursor-pointer"
+                                        label={item.name}
+                                        className="flex flex-col max-w-[120px] text-black items-center gap-4 cursor-pointer"
                                     >
-                                        <p className="text-center">{item.name}</p>
                                         <Circle
                                             key={item.id}
                                             ref={refs.current[index]}

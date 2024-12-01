@@ -48,7 +48,7 @@ export const AddWarehouse = () => {
                             <Button
                                 label="Добавить"
                                 onClick={() => setIsModalOpen(true)}
-                                className="p-button-rounded p-button-info"
+                                className="bg-blue-500 text-white rounded p-2 max-w-[250px]"
                             />
                         </div>
                     </div>
