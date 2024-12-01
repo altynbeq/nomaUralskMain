@@ -3,6 +3,7 @@ import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { FileUpload } from 'primereact/fileupload';
+import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 
 export const AddWarehouseForm = ({
     formData,
@@ -11,6 +12,7 @@ export const AddWarehouseForm = ({
     handleFileUpload, // Обработчик файлов
     handleSubmit,
 }) => {
+    const isSmallScreen = useIsSmallScreen(768);
     const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
@@ -26,14 +28,14 @@ export const AddWarehouseForm = ({
     }, [formData.file]);
 
     return (
-        <form className="space-y-4 p-4" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-4">
+        <form className="px-4" onSubmit={handleSubmit}>
+            <div className={`grid gap-4 ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Название товара</label>
                     <InputText
                         value={formData.productName}
                         onChange={(e) => handleInputChange(e, 'productName')}
-                        placeholder="Введите товар"
+                        placeholder="Товар"
                         className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
@@ -46,7 +48,7 @@ export const AddWarehouseForm = ({
                         locale="ru"
                         hourFormat="24"
                         className="w-full"
-                        placeholder="Выберите дату"
+                        placeholder="Дата"
                     />
                 </div>
                 <div className="space-y-2 flex flex-col">
@@ -54,7 +56,7 @@ export const AddWarehouseForm = ({
                     <InputText
                         value={formData.organization}
                         onChange={(e) => handleInputChange(e, 'organization')}
-                        placeholder="Название организации"
+                        placeholder="Организация"
                         className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
@@ -63,7 +65,7 @@ export const AddWarehouseForm = ({
                     <InputText
                         value={formData.responsible}
                         onChange={(e) => handleInputChange(e, 'responsible')}
-                        placeholder="Имя ответственного"
+                        placeholder="Ответственный"
                         className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
@@ -81,7 +83,7 @@ export const AddWarehouseForm = ({
                     <InputText
                         value={formData.reason}
                         onChange={(e) => handleInputChange(e, 'reason')}
-                        placeholder="Причина списания"
+                        placeholder="Причина"
                         className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
@@ -91,7 +93,7 @@ export const AddWarehouseForm = ({
                         value={formData.quantity}
                         onChange={(e) => handleInputChange(e, 'quantity')}
                         type="text" // Изменено на "text" для тестирования
-                        placeholder="Количество товара"
+                        placeholder="Количество"
                         className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
@@ -108,7 +110,7 @@ export const AddWarehouseForm = ({
                         customUpload={true}
                         chooseLabel="Загрузить"
                         uploadHandler={(e) => handleFileUpload(e.files[0])} // Передаём файл в родительский обработчик
-                        className="w-full"
+                        className="w-full max-w-[250px]"
                     />
                     <p className="text-xs text-gray-500">Сделайте фото товара</p>
                 </div>
@@ -125,13 +127,11 @@ export const AddWarehouseForm = ({
                     </div>
                 )}
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-                <Button
-                    label="Добавить"
-                    type="submit"
-                    className="bg-blue-500 text-white rounded p-2 max-w-[250px]"
-                />
-            </div>
+            <Button
+                label="Добавить"
+                type="submit"
+                className="flex justify-center bg-blue-500 text-white rounded p-2 w-full"
+            />
         </form>
     );
 };

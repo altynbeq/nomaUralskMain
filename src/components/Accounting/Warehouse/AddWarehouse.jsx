@@ -3,8 +3,10 @@ import { MdInsertDriveFile, MdPieChart, MdDescription } from 'react-icons/md';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
+import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 
 export const AddWarehouse = () => {
+    const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
@@ -63,7 +65,7 @@ export const AddWarehouse = () => {
                 header="Добавить списание"
                 visible={isModalOpen}
                 onHide={() => setIsModalOpen(false)}
-                style={{ width: '50vw' }}
+                style={{ width: isSmallScreen ? '150vw' : '40vw' }}
             >
                 <AddWarehouseForm
                     formData={formData}
