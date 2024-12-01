@@ -3,8 +3,10 @@ import { MdInsertDriveFile, MdPieChart, MdDescription } from 'react-icons/md';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
+import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 
 export const AddWarehouse = () => {
+    const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
@@ -13,7 +15,8 @@ export const AddWarehouse = () => {
         responsible: '',
         warehouse: '',
         reason: '',
-        quantity: '', // Или 0, если используете type="number"
+        quantity: '',
+        file: null,
     });
 
     const handleInputChange = useCallback((e, field) => {
@@ -22,6 +25,10 @@ export const AddWarehouse = () => {
 
     const handleDateChange = useCallback((e, field) => {
         setFormData((prevData) => ({ ...prevData, [field]: e.value }));
+    }, []);
+
+    const handleFileUpload = useCallback((file) => {
+        setFormData((prevData) => ({ ...prevData, file })); // Обновляем файл в состоянии
     }, []);
 
     const handleSubmit = useCallback(
@@ -48,7 +55,7 @@ export const AddWarehouse = () => {
                             <Button
                                 label="Добавить"
                                 onClick={() => setIsModalOpen(true)}
-                                className="p-button-rounded p-button-info"
+                                className="bg-blue-500 text-white rounded p-2 max-w-[250px]"
                             />
                         </div>
                     </div>
@@ -58,12 +65,13 @@ export const AddWarehouse = () => {
                 header="Добавить списание"
                 visible={isModalOpen}
                 onHide={() => setIsModalOpen(false)}
-                style={{ width: '50vw' }}
+                style={{ width: isSmallScreen ? '150vw' : '40vw' }}
             >
                 <AddWarehouseForm
                     formData={formData}
                     handleInputChange={handleInputChange}
                     handleDateChange={handleDateChange}
+                    handleFileUpload={handleFileUpload}
                     handleSubmit={handleSubmit}
                 />
             </Dialog>
