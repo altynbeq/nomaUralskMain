@@ -14,7 +14,7 @@ import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 import AlertModal from './components/AlertModal';
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { setUserImage, userImage, subUserShifts } = useStateContext();
+    const { setUserImage, userImage, subUserShifts, subUser } = useStateContext();
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -56,16 +56,24 @@ export const MainContent = ({ urls, activeMenu }) => {
         const today = new Date();
         const todayDateString = today.toISOString().split('T')[0];
 
+        // Фильтруем смены на сегодня, соответствующие текущему subUser и без scanTime
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
             const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
-            return shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
+            const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
+            const isCurrentSubUser = shift.subUserId === subUser._id; // Предполагается, что subUser имеет поле _id
+            const hasNoScanTime =
+                !shift.scanTime ||
+                new Date(shift.scanTime).toISOString().split('T')[0] !== todayDateString;
+
+            return isToday && isCurrentSubUser && hasNoScanTime;
         });
 
-        if (todaysShifts.length > 0) {
+        if (todaysShifts.length > 0 && QRLocation) {
+            // Проверяем наличие QRLocation один раз
             todaysShifts.forEach((shift) => {
                 const storeLocation = shift.selectedStore.location;
-                if (storeLocation && QRLocation) {
+                if (storeLocation) {
                     const distance = getDistanceFromLatLonInMeters(
                         storeLocation.lat,
                         storeLocation.lng,
@@ -77,12 +85,12 @@ export const MainContent = ({ urls, activeMenu }) => {
                         updateShift(shift);
                     } else {
                         setShowMarkShiftResultModal(true);
-                        setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+                        setMarkShiftResultMessage('Вы находитесь слишком далеко от места смены.');
                     }
                 }
             });
         }
-    }, [QRLocation, subUserShifts]);
+    }, [QRLocation, subUserShifts, subUser]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
