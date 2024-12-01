@@ -23,7 +23,6 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState(false);
 
     const updateShift = async (shift) => {
-        console.log('update');
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
