@@ -2,6 +2,10 @@ import { FaSave, FaPlus } from 'react-icons/fa';
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
 import { AnimatedBeam } from '../../MagicUi/AnimateBeam';
 import { ProfileModal } from './ProfileModal';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import QRCode from 'react-qr-code';
+import { MapPicker } from '../../../components/MapPicker';
 
 const Circle = forwardRef(({ className, children }, ref) => {
     return (
@@ -52,6 +56,9 @@ export default function AnimatedBeamMultipleOutputDemo({
     const [copySuccess, setCopySuccess] = useState('');
     const [editedDepartmentName, setEditedDepartmentName] = useState('');
     const [selectedDepartment, setSelectedDepartment] = useState(null);
+    const [showStoreModal, setShowStoreModal] = useState(false);
+    const [selectedStore, setSelectedStore] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     // Use useCallback to memoize the function and prevent it from causing unnecessary re-renders
     const tooltipIconsClickHandler = (item, mode) => {
@@ -326,10 +333,101 @@ export default function AnimatedBeamMultipleOutputDemo({
         }
     }, [items, renderBeamsOn, tooltipModalItem, update]);
 
+    const qrRef = useRef(null);
+
+    const handleQRDownload = () => {
+        if (qrRef.current) {
+            try {
+                const svg = qrRef.current.querySelector('svg');
+                if (!svg) {
+                    console.error('QR code SVG not found');
+                    return;
+                }
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'qrcode.svg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+
+    const handleGeoSave = async () => {
+        if (!selectedLocation || !selectedStore) {
+            return;
+        }
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/stores/update-store/${selectedStore?.id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ location: selectedLocation }), // Передаем координаты в формате lat/lng
+                },
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+                setShowStoreModal(false);
+            } else {
+                alert('Ошибка обновления локации: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Ошибка сохранения локации:', error);
+        }
+    };
+
     return (
         <>
             {renderTooltipModal(tooltipModalItem, tooltipModalMode)}
             {renderAddDepartmentModal()}
+            <Dialog
+                visible={showStoreModal}
+                className="w-full"
+                header={selectedStore?.name || ''}
+                onHide={() => setShowStoreModal(false)}
+            >
+                <div className="flex gap-2">
+                    <div className="flex-1 flex flex-col mb-5">
+                        <h1 className="text-lg font-semibold text-center">
+                            Укажите локацию магазина
+                        </h1>
+                        <MapPicker
+                            selectedLocation={selectedLocation}
+                            setSelectedLocation={setSelectedLocation}
+                        />
+                        <Button
+                            className="mx-auto mt-5 bg-blue-500 text-white rounded p-2 max-w-[180px]"
+                            onClick={() => handleGeoSave()}
+                            label="Выбрать локацию"
+                        />
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center items-center" ref={qrRef}>
+                        <QRCode
+                            title="GeeksForGeeks"
+                            value={'nomalytics-romantic.netlify.app?isQrRedirect=true'}
+                            bgColor={'#FFFFFF'}
+                            fgColor={'#000000'}
+                            size={300}
+                        />
+                        <Button
+                            className="mt-5 bg-blue-500 text-white rounded p-2"
+                            onClick={() => handleQRDownload()}
+                            label="Cкачать QR-код"
+                        />
+                    </div>
+                </div>
+            </Dialog>
             <div
                 className={`mt-10 md:mt-0 ml-auto mr-auto relative flex h-[500px] max-w-[90%] items-center justify-center overflow-hidden rounded-lg border bg-white p-10 md:shadow-xl ${className}`}
                 ref={containerRef}
@@ -340,9 +438,13 @@ export default function AnimatedBeamMultipleOutputDemo({
                         {items.map(
                             (item, index) =>
                                 item.level === 1 && (
-                                    <div
+                                    <Button
+                                        onClick={() => {
+                                            setShowStoreModal(true);
+                                            setSelectedStore(item);
+                                        }}
                                         key={item.id}
-                                        className="flex flex-col max-w-[120px] items-center gap-4"
+                                        className="flex flex-col max-w-[120px] items-center gap-4 cursor-pointer"
                                     >
                                         <p className="text-center">{item.name}</p>
                                         <Circle
@@ -355,7 +457,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                                                 style={{ transform: 'scale(3)' }}
                                             />
                                         </Circle>
-                                    </div>
+                                    </Button>
                                 ),
                         )}
                     </div>

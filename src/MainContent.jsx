@@ -10,12 +10,107 @@ import AccountingWarehouse from './pages/AccountingWarehouse';
 import AccountingWorkers from './pages/AccountingWorkers';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import 'primeicons/primeicons.css';
+import { getDistanceFromLatLonInMeters } from './methods/getDistance';
+import AlertModal from './components/AlertModal';
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { setUserImage, userImage } = useStateContext();
+    const { setUserImage, userImage, subUserShifts, subUser } = useStateContext();
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
+    const [QRLocation, setQRLocation] = useState(null);
+    const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
+    const [markShiftResultMessage, setMarkShiftResultMessage] = useState(false);
+
+    const updateShift = async (shift) => {
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subUserId: shift.subUserId,
+                        startTime: shift.startTime,
+                        endTime: shift.endTime,
+                        selectedStore: shift.selectedStore._id,
+                        scanTime: new Date(),
+                    }),
+                },
+            );
+
+            if (response.ok) {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Вы успешно отметили смену.');
+            } else {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+            }
+        } catch {
+            setShowMarkShiftResultModal(true);
+            setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        }
+    };
+
+    useEffect(() => {
+        const today = new Date();
+        const todayDateString = today.toISOString().split('T')[0];
+
+        // Фильтруем смены на сегодня, соответствующие текущему subUser и без scanTime
+        const todaysShifts = subUserShifts.filter((shift) => {
+            const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
+            const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
+            const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
+            const isCurrentSubUser = shift.subUserId === subUser._id; // Предполагается, что subUser имеет поле _id
+            const hasNoScanTime =
+                !shift.scanTime ||
+                new Date(shift.scanTime).toISOString().split('T')[0] !== todayDateString;
+
+            return isToday && isCurrentSubUser && hasNoScanTime;
+        });
+
+        if (todaysShifts.length > 0 && QRLocation) {
+            // Проверяем наличие QRLocation один раз
+            todaysShifts.forEach((shift) => {
+                const storeLocation = shift.selectedStore.location;
+                if (storeLocation) {
+                    const distance = getDistanceFromLatLonInMeters(
+                        storeLocation.lat,
+                        storeLocation.lng,
+                        QRLocation.lat,
+                        QRLocation.lng,
+                    );
+
+                    if (distance <= 50) {
+                        updateShift(shift);
+                    } else {
+                        setShowMarkShiftResultModal(true);
+                        setMarkShiftResultMessage('Вы находитесь слишком далеко от места смены.');
+                    }
+                }
+            });
+        }
+    }, [QRLocation, subUserShifts, subUser]);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const isQr = searchParams.get('isQrRedirect') === 'true';
+        if (isQr) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        setQRLocation({ lat: latitude, lng: longitude });
+                    },
+                    (error) => {
+                        console.error('Ошибка при получении геолокации:', error);
+                    },
+                );
+            } else {
+                console.error('Geolocation не поддерживается этим браузером.');
+            }
+        }
+    }, [location.pathname, location.search]);
 
     useEffect(() => {
         const departmentId = localStorage.getItem('departmentId');
@@ -151,6 +246,13 @@ export const MainContent = ({ urls, activeMenu }) => {
                     {isUploading && <p className="text-gray-500 text-sm mt-2">Загрузка...</p>}
                 </div>
             </Dialog>
+            <AlertModal
+                message={markShiftResultMessage}
+                open={showMarkShiftResultModal}
+                onClose={() => {
+                    setShowMarkShiftResultModal(false);
+                }}
+            />
         </>
     );
 };

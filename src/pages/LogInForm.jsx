@@ -5,7 +5,7 @@ import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
 import AlertModal from '../components/AlertModal';
 
-const LogInForm = () => {
+const LogInForm = ({ isQrRedirect }) => {
     const { handleLogin, userId } = useStateContext();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -33,8 +33,12 @@ const LogInForm = () => {
         localStorage.setItem('token', localStorageData[1]);
         localStorage.setItem('departmentId', localStorageData[2]);
         localStorage.setItem('companyId', localStorageData[3]);
-        window.location.href = '/general';
-    }, [localStorageData]);
+        if (isQrRedirect) {
+            window.location.href = '/general?isQrRedirect=true';
+        } else {
+            window.location.href = '/general';
+        }
+    }, [isQrRedirect, localStorageData]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
