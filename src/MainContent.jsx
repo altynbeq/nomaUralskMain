@@ -19,7 +19,38 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
     const [QRLocation, setQRLocation] = useState(null);
-    const [showSuccessMarkShift, setShowSuccessMarkShift] = useState(false);
+    const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
+    const [markShiftResultMessage, setMarkShiftResultMessage] = useState(false);
+
+    const updateShift = async (shift) => {
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subUserId: shift.subUserId,
+                        startTime: shift.startTime,
+                        endTime: shift.endTime,
+                        selectedStore: shift.selectedStore._id,
+                        scanTime: new Date(),
+                    }),
+                },
+            );
+
+            if (response.ok) {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Вы успешно отметили смену.');
+            } else {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+            }
+        } catch {
+            setShowMarkShiftResultModal(true);
+            setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        }
+    };
 
     useEffect(() => {
         const today = new Date();
@@ -43,14 +74,13 @@ export const MainContent = ({ urls, activeMenu }) => {
                     );
 
                     if (distance <= 50) {
-                        setShowSuccessMarkShift(true);
+                        updateShift(shift);
                     } else {
-                        setShowSuccessMarkShift(false);
+                        setShowMarkShiftResultModal(true);
+                        setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
                     }
                 }
             });
-        } else {
-            console.log('Сегодня смен нет.');
         }
     }, [QRLocation, subUserShifts]);
 
@@ -63,19 +93,13 @@ export const MainContent = ({ urls, activeMenu }) => {
                     (position) => {
                         const { latitude, longitude } = position.coords;
                         setQRLocation({ lat: latitude, lng: longitude });
-                        console.log(
-                            `Текущая локация: Latitude: ${latitude}, Longitude: ${longitude}`,
-                        );
-                        // Здесь вы можете выполнить дополнительные действия, например, отправить координаты на сервер
                     },
                     (error) => {
                         console.error('Ошибка при получении геолокации:', error);
-                        // Обработка ошибок, например, показать уведомление пользователю
                     },
                 );
             } else {
                 console.error('Geolocation не поддерживается этим браузером.');
-                // Обработка случая, когда геолокация не поддерживается
             }
         }
     }, [location.pathname, location.search]);
@@ -215,9 +239,9 @@ export const MainContent = ({ urls, activeMenu }) => {
                 </div>
             </Dialog>
             <AlertModal
-                message="Вы успешно отметили смену"
-                open={showSuccessMarkShift}
-                onClose={() => setShowSuccessMarkShift(false)}
+                message={markShiftResultMessage}
+                open={showMarkShiftResultModal}
+                onClose={() => setShowMarkShiftResultModal(false)}
             />
         </>
     );
