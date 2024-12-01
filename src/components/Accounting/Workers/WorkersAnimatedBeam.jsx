@@ -415,7 +415,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                     <div className="flex-1 flex flex-col justify-center items-center" ref={qrRef}>
                         <QRCode
                             title="GeeksForGeeks"
-                            value={'http://192.168.0.105:3000?isQrRedirect=true'}
+                            value={'nomalytics-romantic.netlify.app?isQrRedirect=true'}
                             bgColor={'#FFFFFF'}
                             fgColor={'#000000'}
                             size={300}
