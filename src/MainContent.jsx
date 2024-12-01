@@ -62,11 +62,11 @@ export const MainContent = ({ urls, activeMenu }) => {
             const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
             const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
             const isCurrentSubUser = shift.subUserId === subUser._id; // Предполагается, что subUser имеет поле _id
-            const hasNoScanTime =
-                !shift.scanTime ||
-                new Date(shift.scanTime).toISOString().split('T')[0] !== todayDateString;
+            // const hasNoScanTime =
+            //     !shift.scanTime ||
+            //     new Date(shift.scanTime).toISOString().split('T')[0] !== todayDateString;
 
-            return isToday && isCurrentSubUser && hasNoScanTime;
+            return isToday && isCurrentSubUser;
         });
 
         if (todaysShifts.length > 0 && QRLocation) {
