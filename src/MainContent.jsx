@@ -10,13 +10,57 @@ import AccountingWarehouse from './pages/AccountingWarehouse';
 import AccountingWorkers from './pages/AccountingWorkers';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import 'primeicons/primeicons.css';
+import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { setUserImage, userImage } = useStateContext();
+    const { setUserImage, userImage, subUserShifts } = useStateContext();
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
     const [QRLocation, setQRLocation] = useState(null);
+
+    useEffect(() => {
+        const today = new Date();
+        const todayDateString = today.toISOString().split('T')[0];
+
+        const todaysShifts = subUserShifts.filter((shift) => {
+            const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
+            const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
+            return shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
+        });
+
+        if (todaysShifts.length > 0) {
+            todaysShifts.forEach((shift) => {
+                const storeLocation = shift.selectedStore.location;
+                if (storeLocation && QRLocation) {
+                    const distance = getDistanceFromLatLonInMeters(
+                        storeLocation.lat,
+                        storeLocation.lng,
+                        QRLocation.lat,
+                        QRLocation.lng,
+                    );
+
+                    if (distance <= 50) {
+                        console.log(
+                            `Смена ${shift._id}: Координаты совпадают (расстояние ${distance} метров).`,
+                        );
+                        // Здесь можно добавить дополнительную логику при совпадении координат
+                    } else {
+                        console.log(
+                            `Смена ${shift._id}: Координаты НЕ совпадают (расстояние ${distance} метров).`,
+                        );
+                        // Здесь можно добавить дополнительную логику при несовпадении координат
+                    }
+                } else {
+                    console.log(
+                        `Смена ${shift._id}: Отсутствуют данные о координатах магазина или QRLocation.`,
+                    );
+                }
+            });
+        } else {
+            console.log('Сегодня смен нет.');
+        }
+    }, [QRLocation, subUserShifts]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);

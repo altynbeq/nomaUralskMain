@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
+import { useStateContext } from '../../contexts/ContextProvider';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -8,6 +9,7 @@ export const Profile = () => {
     const [isMonthView, setIsMonthView] = useState(true);
     const [subuserShifts, setSubuserShifts] = useState([]);
     const [selectedShift, setSelectedShift] = useState(null);
+    const { setSubUserShifts } = useStateContext();
 
     const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -83,6 +85,7 @@ export const Profile = () => {
 
                 const result = await response.json();
                 setSubuserShifts(result);
+                setSubUserShifts(result);
             } catch (error) {
                 console.error('Error fetching sub-user data:', error);
             }
