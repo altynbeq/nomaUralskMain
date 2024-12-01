@@ -82,7 +82,7 @@ const Calendar = () => {
         }
     };
 
-    const fetchSubusers = async (storeId) => {
+    const fetchSubusers = async () => {
         let companyId;
         const departmentId = localStorage.getItem('departmentId');
         if (isValidDepartmentId(departmentId)) {

@@ -16,12 +16,32 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
+    const [QRLocation, setQRLocation] = useState(null);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
-        // if (isQr) {
-        // }
+        if (isQr) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        setQRLocation({ lat: latitude, lng: longitude });
+                        console.log(
+                            `Текущая локация: Latitude: ${latitude}, Longitude: ${longitude}`,
+                        );
+                        // Здесь вы можете выполнить дополнительные действия, например, отправить координаты на сервер
+                    },
+                    (error) => {
+                        console.error('Ошибка при получении геолокации:', error);
+                        // Обработка ошибок, например, показать уведомление пользователю
+                    },
+                );
+            } else {
+                console.error('Geolocation не поддерживается этим браузером.');
+                // Обработка случая, когда геолокация не поддерживается
+            }
+        }
     }, [location.pathname, location.search]);
 
     useEffect(() => {
