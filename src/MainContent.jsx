@@ -11,6 +11,7 @@ import AccountingWorkers from './pages/AccountingWorkers';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import 'primeicons/primeicons.css';
 import { getDistanceFromLatLonInMeters } from './methods/getDistance';
+import AlertModal from './components/AlertModal';
 
 export const MainContent = ({ urls, activeMenu }) => {
     const { setUserImage, userImage, subUserShifts } = useStateContext();
@@ -18,6 +19,7 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
     const [QRLocation, setQRLocation] = useState(null);
+    const [showSuccessMarkShift, setShowSuccessMarkShift] = useState(false);
 
     useEffect(() => {
         const today = new Date();
@@ -41,20 +43,10 @@ export const MainContent = ({ urls, activeMenu }) => {
                     );
 
                     if (distance <= 50) {
-                        console.log(
-                            `Смена ${shift._id}: Координаты совпадают (расстояние ${distance} метров).`,
-                        );
-                        // Здесь можно добавить дополнительную логику при совпадении координат
+                        setShowSuccessMarkShift(true);
                     } else {
-                        console.log(
-                            `Смена ${shift._id}: Координаты НЕ совпадают (расстояние ${distance} метров).`,
-                        );
-                        // Здесь можно добавить дополнительную логику при несовпадении координат
+                        setShowSuccessMarkShift(false);
                     }
-                } else {
-                    console.log(
-                        `Смена ${shift._id}: Отсутствуют данные о координатах магазина или QRLocation.`,
-                    );
                 }
             });
         } else {
@@ -222,6 +214,11 @@ export const MainContent = ({ urls, activeMenu }) => {
                     {isUploading && <p className="text-gray-500 text-sm mt-2">Загрузка...</p>}
                 </div>
             </Dialog>
+            <AlertModal
+                message="Вы успешно отметили смену"
+                open={showSuccessMarkShift}
+                onClose={() => setShowSuccessMarkShift(false)}
+            />
         </>
     );
 };
