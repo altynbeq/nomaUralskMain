@@ -13,7 +13,8 @@ export const AddWarehouse = () => {
         responsible: '',
         warehouse: '',
         reason: '',
-        quantity: '', // Или 0, если используете type="number"
+        quantity: '',
+        file: null,
     });
 
     const handleInputChange = useCallback((e, field) => {
@@ -22,6 +23,10 @@ export const AddWarehouse = () => {
 
     const handleDateChange = useCallback((e, field) => {
         setFormData((prevData) => ({ ...prevData, [field]: e.value }));
+    }, []);
+
+    const handleFileUpload = useCallback((file) => {
+        setFormData((prevData) => ({ ...prevData, file })); // Обновляем файл в состоянии
     }, []);
 
     const handleSubmit = useCallback(
@@ -64,6 +69,7 @@ export const AddWarehouse = () => {
                     formData={formData}
                     handleInputChange={handleInputChange}
                     handleDateChange={handleDateChange}
+                    handleFileUpload={handleFileUpload}
                     handleSubmit={handleSubmit}
                 />
             </Dialog>
