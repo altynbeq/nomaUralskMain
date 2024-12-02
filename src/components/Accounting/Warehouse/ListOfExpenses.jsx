@@ -43,16 +43,16 @@ export default function ListOfExpenses() {
     return (
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4 ">
-                <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center justify-between flex-col md:flex-row mb-5">
                     <p className="flex text-[1rem] font-semibold align-left">Список списаний</p>
-                    <div className="flex gap-6 items-center">
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <Button
                             className=" bg-blue-500 text-white rounded-lg p-2"
                             label="Редактировать"
                             icon="pi pi-file-edit"
                             onClick={() => setEditModalIsVisible(true)}
                         />
-                        <div className="flex gap-6">
+                        <div className="flex w-fit flex-row md:flex-row gap-2 md:gap-6">
                             <EditProductModal
                                 warehouses={warehouses}
                                 items={selectedItems}
@@ -67,15 +67,15 @@ export default function ListOfExpenses() {
                                 onChange={(e) => setSelectedWarehouse(e.value)}
                                 options={warehouses}
                                 optionLabel="warehouseName"
-                                placeholder="Выберите склад"
-                                className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 min-w-[220px]"
+                                placeholder="Склад"
+                                className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 "
                                 showClear
                             />
                             <InputText
                                 className=" rounded-lg p-2 border-2"
                                 value={productSearch}
                                 onChange={(e) => setProductSearch(e.target.value)}
-                                placeholder="Поиск товара"
+                                placeholder="Поиск"
                             />
                         </div>
                     </div>

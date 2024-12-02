@@ -5,11 +5,11 @@ import CollapsibleTable from '../components/Accounting/Warehouse/CollapsibleTabl
 
 const AccountingWarehouse = () => {
     return (
-        <>
+        <div className="flex flex-col mt-10">
             <ManageWarehouse />
             <ListOfExpenses />
             <CollapsibleTable />
-        </>
+        </div>
     );
 };
 

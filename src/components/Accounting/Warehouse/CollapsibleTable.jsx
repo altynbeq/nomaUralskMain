@@ -182,10 +182,10 @@ export default function CollapsibleTableWithDetails() {
     return (
         <div className="mx-auto w-[90%]">
             <TableContainer component={Paper} style={{ minHeight: '300px' }}>
-                <div className="flex justify-between items-center p-4">
+                <div className="flex flex-col md:flex-row justify-between md:items-center p-4">
                     <h2 className="text-lg font-bold">Склад</h2>
-                    <div className="flex gap-4 items-center">
-                        <div>
+                    <div className="flex flex-row gap-4 md:gap-4 justify-evenly md:items-center">
+                        <div className="w-fit flex flex-row gap-2">
                             <Calendar
                                 value={dateRange}
                                 onChange={(e) => setDateRange(e.value)}
@@ -193,17 +193,17 @@ export default function CollapsibleTableWithDetails() {
                                 readOnlyInput
                                 showIcon
                                 dateFormat="yy-mm-dd"
-                                placeholder="Выберите диапазон"
-                                className="p-inputtext-sm"
+                                placeholder="Дата"
+                                className="p-inputtext-sm border border-gray-300 w-fit rounded-lg p-2"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Поиск"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="border border-gray-300 rounded-lg p-2"
                             />
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Поиск по названию"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2"
-                        />
                     </div>
                 </div>
                 <Table aria-label="collapsible table">
