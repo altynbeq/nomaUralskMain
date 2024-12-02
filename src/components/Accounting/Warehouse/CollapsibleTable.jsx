@@ -4,14 +4,17 @@ import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
 
 export default function CollapsibleTableWithDetails() {
     const [writeOffs, setWriteOffs] = useState([]);
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
+    const [selectedRow, setSelectedRow] = useState(null);
     const [dates, setDates] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isModalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const currentUserId = localStorage.getItem('_id');
@@ -43,18 +46,16 @@ export default function CollapsibleTableWithDetails() {
     }, []);
 
     useEffect(() => {
-        // Фильтрация списаний по выбранным датам
         let filteredWriteOffs = writeOffs;
 
         if (dates) {
-            const selectedDate = new Date(dates).setHours(0, 0, 0, 0); // Нормализуем выбранную дату
+            const selectedDate = new Date(dates).setHours(0, 0, 0, 0);
             filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
-                const writeOffDate = new Date(writeOff.date).setHours(0, 0, 0, 0); // Нормализуем дату списания
+                const writeOffDate = new Date(writeOff.date).setHours(0, 0, 0, 0);
                 return writeOffDate === selectedDate;
             });
         }
 
-        // Фильтрация по поисковому запросу
         if (searchQuery) {
             filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
                 writeOff.productName.НоменклатураНаименование
@@ -63,7 +64,6 @@ export default function CollapsibleTableWithDetails() {
             );
         }
 
-        // Группировка списаний по дате
         const groupedData = {};
         filteredWriteOffs.forEach((writeOff) => {
             const date = new Date(writeOff.date).toISOString().split('T')[0];
@@ -75,24 +75,81 @@ export default function CollapsibleTableWithDetails() {
             groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
         });
 
-        // Преобразование в массив для отображения
         const groupedWriteOffsArray = Object.values(groupedData);
         setGroupedWriteOffs(groupedWriteOffsArray);
     }, [dates, writeOffs, searchQuery]);
 
+    const openModal = (rowData) => {
+        setSelectedRow(rowData);
+        setModalVisible(true);
+    };
+
     const rowExpansionTemplate = (data) => {
         return (
-            <DataTable value={data.writeOffs}>
-                <Column field="productName.НоменклатураНаименование" header="Наименование товара" />
-                <Column field="quantity" header="Количество" />
-                <Column field="productName.Сумма" header="Сумма" />
-                <Column
-                    field="date"
-                    header="Дата списания"
-                    body={(rowData) => formatDate(rowData.date)}
-                />
-                <Column field="responsible.name" header="Ответственный" />
-            </DataTable>
+            <div className="cursor-pointer">
+                <DataTable
+                    value={data.writeOffs}
+                    onRowClick={(e) => openModal(e.data)}
+                    dataKey="id" // Убедитесь, что `id` уникален для каждой строки
+                >
+                    <Column
+                        field="productName.НоменклатураНаименование"
+                        header="Наименование товара"
+                    />
+                    <Column field="quantity" header="Количество" />
+                    <Column field="productName.Сумма" header="Сумма" />
+                    <Column
+                        field="date"
+                        header="Дата списания"
+                        body={(rowData) => formatDate(rowData.date)}
+                    />
+                    <Column field="responsible.name" header="Ответственный" />
+                </DataTable>
+            </div>
+        );
+    };
+
+    const renderModalContent = () => {
+        if (!selectedRow) return null;
+        return (
+            <div className="flex flex-col gap-2">
+                <p>
+                    <span className="text-bold text-lg">Наименование товара:</span>{' '}
+                    {selectedRow.productName?.НоменклатураНаименование}
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Количество:</span> {selectedRow.quantity}
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Сумма:</span>{' '}
+                    {selectedRow.productName?.Сумма}₸
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Дата списания:</span>{' '}
+                    {formatDate(selectedRow.date)}
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Ответственный:</span>{' '}
+                    {selectedRow.responsible?.name}
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Магазин:</span>{' '}
+                    {selectedRow.organization?.storeName}
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Cклад:</span>{' '}
+                    {selectedRow.warehouse?.warehouseName}
+                </p>
+                <p>
+                    <span className="text-bold text-lg">Причина:</span> {selectedRow.reason}
+                </p>
+                <div className="flex justify-center">
+                    <img
+                        className="w-[400px] h-[400px] rounded-lg"
+                        src={`https://nomalytica-back.onrender.com${selectedRow?.file?.objectURL}`}
+                    />
+                </div>
+            </div>
         );
     };
 
@@ -144,6 +201,15 @@ export default function CollapsibleTableWithDetails() {
                     style={{ padding: '10px 20px', textAlign: 'left' }}
                 />
             </DataTable>
+
+            <Dialog
+                visible={isModalVisible}
+                onHide={() => setModalVisible(false)}
+                header="Детали списания"
+                style={{ width: '35vw' }}
+            >
+                {renderModalContent()}
+            </Dialog>
         </div>
     );
 }
