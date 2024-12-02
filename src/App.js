@@ -151,9 +151,10 @@ const App = () => {
 
     useEffect(() => {
         const currentUserDepartmentId = localStorage.getItem('departmentId');
+        const subuserCompanyId = localStorage.getItem('companyId');
         const companyId = localStorage.getItem('_id');
         if (isValidDepartmentId(currentUserDepartmentId)) {
-            fetchCompanyData(subUser.companyId);
+            fetchCompanyData(subuserCompanyId);
         } else {
             fetchCompanyData(companyId);
         }
