@@ -11,7 +11,7 @@ const Circle = forwardRef(({ className, children }, ref) => {
     return (
         <div
             ref={ref}
-            className={`z-10 flex size-12 items-center justify-center rounded-full border-2 bg-white p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] ${className}`}
+            className={`z-10 flex size-8 md:size-12 items-center justify-center rounded-full border-2 bg-white p-2 md:p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] ${className}`}
         >
             {children}
         </div>
@@ -432,7 +432,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                 className={`mt-10 md:mt-0 ml-auto mr-auto relative flex h-[500px] max-w-[90%] items-center justify-center overflow-hidden rounded-lg border bg-white p-10 md:shadow-xl ${className}`}
                 ref={containerRef}
             >
-                <div className="flex size-full  flex-col h-full items-stretch justify-between gap-10">
+                <div className="flex overflow-x-auto size-full  flex-col h-full items-stretch justify-between gap-10">
                     {/* Top center circle (Level 1) */}
                     <div className="flex justify-center gap-10">
                         {items.map(
@@ -472,6 +472,18 @@ export default function AnimatedBeamMultipleOutputDemo({
 
                     {/* Middle center circle (Level 2) */}
                     <div className="flex justify-center mr-auto ml-auto gap-10">
+                        <div
+                            key={'newDep'}
+                            className="flex flex-col max-w-[120px] items-center gap-4 group cursor-pointer"
+                            onClick={(e) => setAddDepartmentModal(true)}
+                        >
+                            <Circle key={'newDep'}>
+                                <FaPlus color={'#3b82f6'} />
+                            </Circle>
+                            <p className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Добавить
+                            </p>
+                        </div>
                         {items.map(
                             (item, index) =>
                                 item.level === 2 && (
@@ -496,18 +508,6 @@ export default function AnimatedBeamMultipleOutputDemo({
                                     </div>
                                 ),
                         )}
-                        <div
-                            key={'newDep'}
-                            className="flex flex-col max-w-[120px] items-center gap-4 group cursor-pointer"
-                            onClick={(e) => setAddDepartmentModal(true)}
-                        >
-                            <Circle key={'newDep'}>
-                                <FaPlus color={'#3b82f6'} />
-                            </Circle>
-                            <p className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                Добавить
-                            </p>
-                        </div>
                     </div>
                 </div>
 

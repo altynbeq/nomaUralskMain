@@ -612,20 +612,24 @@ const AccountingWorkers = () => {
     });
 
     return (
-        <>
-            {items.length && (
-                <WorkersAnimatedBeam
-                    id={currentUserId}
-                    items={itemsFromStructureSorted}
-                    Icons={Icons}
-                    setItems={setItemsFromStructure}
-                    setUpdate={setUpdate}
-                    defaultImage={defaultImage}
-                />
-            )}
-            <SubusersList />
-            <EmployeeCalendar />
-        </>
+        <div className="w-[100%] items-center justify-center mt-10 md:mt-0">
+            <div className="max-w-[100%]">
+                {items.length && (
+                    <WorkersAnimatedBeam
+                        id={currentUserId}
+                        items={itemsFromStructureSorted}
+                        Icons={Icons}
+                        setItems={setItemsFromStructure}
+                        setUpdate={setUpdate}
+                        defaultImage={defaultImage}
+                    />
+                )}
+            </div>
+            <div className="w-[100%] mt-10 flex items-center justify-center">
+                <SubusersList />
+            </div>
+            {/* <EmployeeCalendar /> */}
+        </div>
     );
 };
 
