@@ -21,24 +21,31 @@ export const AddWarehouse = () => {
     });
     const [errors, setErrors] = useState({}); // Состояние для ошибок
 
+    const removeError = (field) => {
+        setErrors((prevErrors) => {
+            const { [field]: removed, ...rest } = prevErrors;
+            return rest;
+        });
+    };
+
     const handleInputChange = useCallback((e, field) => {
         setFormData((prevData) => ({ ...prevData, [field]: e.target.value }));
-        setErrors({});
+        removeError(field);
     }, []);
 
-    const handleDropdownChange = useCallback((e, field) => {
-        setErrors({});
-        setFormData((prevData) => ({ ...prevData, [field]: e }));
+    const handleDropdownChange = useCallback((value, field) => {
+        setFormData((prevData) => ({ ...prevData, [field]: value }));
+        removeError(field);
     }, []);
 
     const handleDateChange = useCallback((e, field) => {
-        setErrors({});
         setFormData((prevData) => ({ ...prevData, [field]: e.value }));
+        removeError(field);
     }, []);
 
     const handleFileUpload = useCallback((file) => {
-        setErrors({});
         setFormData((prevData) => ({ ...prevData, file })); // Обновляем файл в состоянии
+        removeError('file');
     }, []);
 
     const validate = () => {
@@ -60,24 +67,49 @@ export const AddWarehouse = () => {
     };
 
     const handleSubmit = useCallback(
-        (e) => {
+        async (e) => {
             e.preventDefault();
             if (validate()) {
-                console.log('Form submitted:', formData);
-                // Здесь вы можете отправить данные на сервер
-                // setIsModalOpen(false);
-                // Сброс формы после успешной отправки (опционально)
-                setFormData({
-                    productName: '',
-                    date: null,
-                    organization: '',
-                    responsible: '',
-                    warehouse: '',
-                    reason: '',
-                    quantity: '',
-                    file: null,
-                });
-                setErrors({});
+                const submissionData = new FormData();
+
+                // Сериализация вложенных объектов
+                submissionData.append('productName', JSON.stringify(formData.productName));
+                submissionData.append('date', formData.date.toISOString());
+                submissionData.append('organization', JSON.stringify(formData.organization));
+                submissionData.append('responsible', JSON.stringify(formData.responsible));
+                submissionData.append('warehouse', JSON.stringify(formData.warehouse));
+                submissionData.append('reason', formData.reason);
+                submissionData.append('quantity', formData.quantity);
+                submissionData.append('file', formData.file);
+
+                // const response = await fetch(
+                //     'https://nomalytica-back.onrender.com/api/clientsSpisanie/client-spisanie',
+                //     {
+                //         method: 'POST',
+                //         body: submissionData,
+                //     },
+                // );
+
+                // if (!response.ok) {
+                //     const errorData = await response.json();
+                //     throw new Error(errorData.error || 'Ошибка при отправке данных');
+                // }
+
+                // const responseData = await response.json();
+                // console.log('Form submitted successfully:', responseData);
+                // // setIsModalOpen(false);
+                // // Сброс формы после успешной отправки (опционально)
+                // setFormData({
+                //     productName: null,
+                //     date: null,
+                //     organization: null,
+                //     responsible: null,
+                //     warehouse: null,
+                //     reason: '',
+                //     quantity: '',
+                //     file: null,
+                // });
+                // setErrors({});
             } else {
                 console.log('Validation failed:', errors);
             }
@@ -119,7 +151,7 @@ export const AddWarehouse = () => {
                     handleFileUpload={handleFileUpload}
                     handleSubmit={handleSubmit}
                     handleDropdownChange={handleDropdownChange}
-                    errors={errors} // Передаем ошибки в форму
+                    errors={errors}
                 />
             </Dialog>
         </div>
