@@ -221,17 +221,17 @@ export const MainContent = ({ urls, activeMenu }) => {
             <Dialog
                 visible={showUploadImageModal}
                 onHide={handleModalClose}
-                style={{ width: '25vw' }}
+                className="mx-auto my-4 max-w-lg w-full sm:max-w-sm"
             >
-                <p className="text-center text-lg">
-                    Пожалуйста загрузите аватарку чтобы продолжить
+                <p className="text-center text-lg mb-4">
+                    Пожалуйста, загрузите аватарку, чтобы продолжить
                 </p>
-                <div className="flex mt-5 p-8 gap-4 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
+                <div className="flex mt-5 p-4 sm:p-6 gap-4 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
                     <MdDescription size={32} className="text-blue-500" />
-                    <div className="flex gap-3 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center w-full">
                         <button
-                            className="py-2 px-3 bg-gray-200 text-black rounded-full hover:bg-blue-600 transition-colors font-medium"
-                            onClick={handleUploadButtonClick}
+                            className="py-2 px-4 bg-gray-200 text-black rounded-full hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto"
+                            onClick={() => fileInput.current && fileInput.current.click()}
                         >
                             Загрузить аватар
                         </button>
