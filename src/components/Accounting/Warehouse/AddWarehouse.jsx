@@ -1,3 +1,4 @@
+// AddWarehouse.js
 import { useState, useCallback } from 'react';
 import { MdInsertDriveFile, MdPieChart, MdDescription } from 'react-icons/md';
 import { Dialog } from 'primereact/dialog';
@@ -18,26 +19,70 @@ export const AddWarehouse = () => {
         quantity: '',
         file: null,
     });
+    const [errors, setErrors] = useState({}); // Состояние для ошибок
 
     const handleInputChange = useCallback((e, field) => {
         setFormData((prevData) => ({ ...prevData, [field]: e.target.value }));
+        setErrors({});
+    }, []);
+
+    const handleWareHouseChange = useCallback((e, field) => {
+        setErrors({});
+        setFormData((prevData) => ({ ...prevData, [field]: e }));
     }, []);
 
     const handleDateChange = useCallback((e, field) => {
+        setErrors({});
         setFormData((prevData) => ({ ...prevData, [field]: e.value }));
     }, []);
 
     const handleFileUpload = useCallback((file) => {
+        setErrors({});
         setFormData((prevData) => ({ ...prevData, file })); // Обновляем файл в состоянии
     }, []);
+
+    const validate = () => {
+        const newErrors = {};
+        if (!formData.productName.trim()) newErrors.productName = 'Название товара обязательно';
+        if (!formData.date) newErrors.date = 'Дата обязательна';
+        if (!formData.organization.trim()) newErrors.organization = 'Организация обязательна';
+        if (!formData.responsible.trim()) newErrors.responsible = 'Ответственный обязателен';
+        if (!formData.warehouse) newErrors.warehouse = 'Склад обязателен';
+        if (!formData.reason.trim()) newErrors.reason = 'Причина обязательна';
+        if (!formData.quantity) {
+            newErrors.quantity = 'Количество обязательно';
+        } else if (isNaN(formData.quantity) || Number(formData.quantity) <= 0) {
+            newErrors.quantity = 'Количество должно быть положительным числом';
+        }
+        if (!formData.file) newErrors.file = 'Фото обязательно';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = useCallback(
         (e) => {
             e.preventDefault();
-            console.log('Form submitted:', formData);
-            setIsModalOpen(false);
+            if (validate()) {
+                console.log('Form submitted:', formData);
+                // Здесь вы можете отправить данные на сервер
+                setIsModalOpen(false);
+                // Сброс формы после успешной отправки (опционально)
+                setFormData({
+                    productName: '',
+                    date: null,
+                    organization: '',
+                    responsible: '',
+                    warehouse: '',
+                    reason: '',
+                    quantity: '',
+                    file: null,
+                });
+                setErrors({});
+            } else {
+                console.log('Validation failed:', errors);
+            }
         },
-        [formData],
+        [formData, errors],
     );
 
     return (
@@ -73,6 +118,8 @@ export const AddWarehouse = () => {
                     handleDateChange={handleDateChange}
                     handleFileUpload={handleFileUpload}
                     handleSubmit={handleSubmit}
+                    handleWareHouseChange={handleWareHouseChange}
+                    errors={errors} // Передаем ошибки в форму
                 />
             </Dialog>
         </div>

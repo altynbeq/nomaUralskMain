@@ -1,19 +1,25 @@
+// AddWarehouseForm.js
 import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
 import { FileUpload } from 'primereact/fileupload';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
+import { useStateContext } from '../../../contexts/ContextProvider';
 
 export const AddWarehouseForm = ({
     formData,
     handleInputChange,
     handleDateChange,
+    handleWareHouseChange,
     handleFileUpload, // Обработчик файлов
     handleSubmit,
+    errors, // Получаем ошибки из родительского компонента
 }) => {
     const isSmallScreen = useIsSmallScreen(768);
     const [previewUrl, setPreviewUrl] = useState(null);
+    const { warehouses } = useStateContext();
 
     useEffect(() => {
         if (formData.file) {
@@ -36,8 +42,9 @@ export const AddWarehouseForm = ({
                         value={formData.productName}
                         onChange={(e) => handleInputChange(e, 'productName')}
                         placeholder="Товар"
-                        className="bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px]"
+                        className={`bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
                     />
+                    {errors.productName && <small className="p-error">{errors.productName}</small>}
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Дата</label>
@@ -47,9 +54,10 @@ export const AddWarehouseForm = ({
                         showTime
                         locale="ru"
                         hourFormat="24"
-                        className="max-w-[250px] border-blue-500 border-2 rounded-lg p-1"
+                        className={`max-w-[250px] border-blue-500 border-2 rounded-lg p-1 ${errors.date ? 'border-red-500' : ''}`}
                         placeholder="Дата"
                     />
+                    {errors.date && <small className="p-error">{errors.date}</small>}
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Организация</label>
@@ -57,8 +65,11 @@ export const AddWarehouseForm = ({
                         value={formData.organization}
                         onChange={(e) => handleInputChange(e, 'organization')}
                         placeholder="Организация"
-                        className="bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px]"
+                        className={`bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px] ${errors.organization ? 'border-red-500' : ''}`}
                     />
+                    {errors.organization && (
+                        <small className="p-error">{errors.organization}</small>
+                    )}
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Ответственный</label>
@@ -66,17 +77,22 @@ export const AddWarehouseForm = ({
                         value={formData.responsible}
                         onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
+                        className={`bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white ${errors.responsible ? 'border-red-500' : ''}`}
                     />
+                    {errors.responsible && <small className="p-error">{errors.responsible}</small>}
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Склад</label>
-                    <InputText
+                    <Dropdown
                         value={formData.warehouse}
-                        onChange={(e) => handleInputChange(e, 'warehouse')}
-                        placeholder="Склад товара"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
+                        onChange={(e) => handleWareHouseChange(e.value, 'warehouse')}
+                        options={warehouses}
+                        optionLabel="warehouseName"
+                        placeholder="Склад"
+                        className={`bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
+                        showClear
                     />
+                    {errors.warehouse && <small className="p-error">{errors.warehouse}</small>}
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Причина</label>
@@ -84,22 +100,24 @@ export const AddWarehouseForm = ({
                         value={formData.reason}
                         onChange={(e) => handleInputChange(e, 'reason')}
                         placeholder="Причина"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
+                        className={`bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white ${errors.reason ? 'border-red-500' : ''}`}
                     />
+                    {errors.reason && <small className="p-error">{errors.reason}</small>}
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Количество</label>
                     <InputText
                         value={formData.quantity}
                         onChange={(e) => handleInputChange(e, 'quantity')}
-                        type="number" // Изменено на "text" для тестирования
+                        type="number" // Изменено на "number" для валидации чисел
                         placeholder="Количество"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
+                        className={`bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white ${errors.quantity ? 'border-red-500' : ''}`}
                     />
+                    {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
 
                 {/* Photo Upload */}
-                <div className="space-y-2 col-span-1">
+                <div className="space-y-2 flex flex-col max-w-[250px]">
                     <label className="text-sm font-medium">Фото</label>
                     <FileUpload
                         mode="basic"
@@ -110,8 +128,9 @@ export const AddWarehouseForm = ({
                         customUpload={true}
                         chooseLabel="Загрузить"
                         uploadHandler={(e) => handleFileUpload(e.files[0])} // Передаём файл в родительский обработчик
-                        className="w-full max-w-[250px]"
+                        className={`w-full ${errors.file ? 'border-red-500' : ''}`}
                     />
+                    {errors.file && <small className="p-error">{errors.file}</small>}
                     <p className="text-xs text-gray-500">Сделайте фото товара</p>
                 </div>
 
@@ -130,7 +149,8 @@ export const AddWarehouseForm = ({
             <Button
                 label="Добавить"
                 type="submit"
-                className="flex justify-center bg-blue-500 text-white rounded p-2 w-full mt-10"
+                className={`flex justify-center bg-blue-500 text-white rounded p-2 w-full mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={Object.keys(errors).length > 0}
             />
         </form>
     );
