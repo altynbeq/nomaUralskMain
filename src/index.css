@@ -85,6 +85,11 @@ body {
     font-family: 'Comfortaa', sans-serif;
 }
 
+.p-fileupload-choose {
+    background-color: rgb(59, 130, 246);
+}
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

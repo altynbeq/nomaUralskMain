@@ -61,8 +61,8 @@ export const AddWarehouseForm = ({
                         showTime
                         locale="ru"
                         hourFormat="24"
-                        className={`max-w-[250px] border-blue-500 border-2 rounded-lg p-1 ${errors.date ? 'border-red-500' : ''}`}
-                        placeholder="Дата"
+                        inputStyle={{ backgroundColor: 'rgb(59, 130, 246)', color: 'white' }}
+                        className={`bg-blue-500 max-w-[250px] text-white rounded-lg p-2 ${errors.date ? 'border-red-500' : ''}`}
                     />
                     {errors.date && <small className="p-error">{errors.date}</small>}
                 </div>
@@ -136,9 +136,11 @@ export const AddWarehouseForm = ({
                         maxFileSize={1000000}
                         auto
                         customUpload={true}
+                        contentStyle={{ backgroundColor: 'bg-blue-500' }}
                         chooseLabel="Загрузить"
+                        contentClassName="bg-blue-500"
                         uploadHandler={(e) => handleFileUpload(e.files[0])} // Передаём файл в родительский обработчик
-                        className={`w-full ${errors.file ? 'border-red-500' : ''}`}
+                        className={`bg-blue-500 w-full ${errors.file ? 'border-red-500' : ''}`}
                     />
                     {errors.file && <small className="p-error">{errors.file}</small>}
                     <p className="text-xs text-gray-500">Сделайте фото товара</p>
@@ -156,12 +158,14 @@ export const AddWarehouseForm = ({
                     </div>
                 )}
             </div>
-            <Button
-                label="Добавить"
-                type="submit"
-                className={`flex justify-center bg-blue-500 text-white rounded p-2 w-full mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={Object.keys(errors).length > 0}
-            />
+            <div className="col-span-2 flex justify-center">
+                <Button
+                    label="Добавить"
+                    type="submit"
+                    className={`bg-blue-500 text-white max-w-[250px] rounded p-2 w-full mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={Object.keys(errors).length > 0}
+                />
+            </div>
         </form>
     );
 };

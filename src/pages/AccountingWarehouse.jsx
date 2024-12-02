@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ManageWarehouse from '../components/Accounting/Warehouse/ManageWarehouse';
 import ListOfExpenses from '../components/Accounting/Warehouse/ListOfExpenses';
 import CollapsibleTable from '../components/Accounting/Warehouse/CollapsibleTable';
