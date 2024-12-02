@@ -122,6 +122,8 @@ const App = () => {
                 fetchSubUserData(currentUserDepartmentId);
                 setLoading(false);
                 setSkeletonUp(false);
+                const companyId = localStorage.getItem('companyId');
+                fetchUserStructure(companyId);
             } else {
                 fetchData(currentUserId);
                 fetchUserStructure(currentUserId);
@@ -149,8 +151,11 @@ const App = () => {
 
     useEffect(() => {
         const currentUserDepartmentId = localStorage.getItem('departmentId');
-        if (!isValidDepartmentId(currentUserDepartmentId)) {
+        const companyId = localStorage.getItem('_id');
+        if (isValidDepartmentId(currentUserDepartmentId)) {
             fetchCompanyData(subUser.companyId);
+        } else {
+            fetchCompanyData(companyId);
         }
     }, [subUser]);
 

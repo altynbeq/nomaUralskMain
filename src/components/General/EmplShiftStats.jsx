@@ -1,10 +1,61 @@
-import { useState } from 'react';
-
+import { useState, useEffect, useMemo } from 'react';
+import { useStateContext } from '../../contexts/ContextProvider';
+import { Dropdown } from 'primereact/dropdown';
 export const EmpltSiftStats = () => {
+    const { companyStructure } = useStateContext();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
-    const [selectedStore, setSelectedStore] = useState('Абая');
+    const [selectedStore, setSelectedStore] = useState(null);
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const daysInMonth = useMemo(() => new Date(year, month + 1, 0).getDate(), [month, year]);
+
+    const fetchStats = async () => {
+        if (!selectedStore) {
+            setStats(null);
+            return;
+        }
+        setLoading(true);
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/shifts/stats/${selectedStore._id}/${month + 1}/${year}`,
+                {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                },
+            );
+
+            if (response.ok) {
+                setStats(response.data);
+            }
+        } catch {
+            setStats(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedStore, month, year]);
+
+    const employeesForSelectedDay = useMemo(() => {
+        if (!selectedStore || !selectedDay) return [];
+
+        // Запрос на получение смен для выбранного дня
+        // Возможно, стоит создать отдельный эндпоинт для получения данных по дню
+        // Для упрощения используем уже полученные данные
+
+        // Здесь можно реализовать дополнительную логику, если требуется
+
+        return []; // Пока оставляем пустым
+    }, [selectedStore, selectedDay]);
 
     const toggleView = () => {
         setIsMonthView(!isMonthView);
@@ -28,10 +79,6 @@ export const EmpltSiftStats = () => {
         } else {
             return 'bg-red-500';
         }
-    };
-
-    const handleStoreChange = (event) => {
-        setSelectedStore(event.target.value);
     };
 
     const dailyData = [
@@ -79,10 +126,6 @@ export const EmpltSiftStats = () => {
         },
     ];
 
-    const stores = ['Абая', 'Фурманова', 'Центр'];
-
-    const getProgressWidth = () => '60%';
-
     return (
         <div className="w-[43%] bg-white rounded-lg shadow-md p-4 ">
             <div className="flex items-center mb-4">
@@ -94,17 +137,15 @@ export const EmpltSiftStats = () => {
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
             <div className="flex justify-between mb-4">
-                <select
+                <Dropdown
                     value={selectedStore}
-                    onChange={handleStoreChange}
-                    className="p-2 bg-gray-200 text-black rounded-lg"
-                >
-                    {stores.map((store, index) => (
-                        <option key={index} value={store}>
-                            {store}
-                        </option>
-                    ))}
-                </select>
+                    onChange={(e) => setSelectedStore(e.value)}
+                    options={companyStructure?.stores || []}
+                    optionLabel="storeName"
+                    showClear
+                    placeholder="Выберите магазин"
+                    className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                />
                 <div className="flex items-center justify-center">
                     <div className="relative gap-1 bg-gray-200 rounded-full flex items-center p-1">
                         <button
@@ -130,7 +171,7 @@ export const EmpltSiftStats = () => {
                 <div className="flex flex-row justify-evenly subtle-border p-1">
                     <div className="flex flex-col text-center justify-center">
                         <h3>Количество часов:</h3>
-                        <h3>830</h3>
+                        <h4>{stats?.toFixed(2)} ч</h4>
                     </div>
                     <div>
                         <h3>Отработано:</h3>
@@ -202,17 +243,17 @@ export const EmpltSiftStats = () => {
             </div>
             {isMonthView ? (
                 <div className="grid grid-cols-7 gap-2">
-                    {[...Array(31).keys()].map((day) => (
-                        <button
-                            key={day + 1}
-                            onClick={() => openModal(day + 1)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full ${getDayColor(
-                                day + 1,
-                            )} border text-sm`}
-                        >
-                            {day + 1}
-                        </button>
-                    ))}
+                    {[...Array(daysInMonth)].map((_, index) => {
+                        const dayNumber = index + 1;
+                        return (
+                            <p
+                                key={index}
+                                className={`cursor-pointer w-8 h-8 rounded-full flex items-center justify-center py-1 text-center text-sm text-black ${getDayColor(dayNumber)}`}
+                            >
+                                {dayNumber}
+                            </p>
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="grid grid-cols-7 gap-2">

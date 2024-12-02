@@ -1,10 +1,13 @@
+// AddWarehouse.js
 import { useState, useCallback } from 'react';
 import { MdInsertDriveFile, MdPieChart, MdDescription } from 'react-icons/md';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
+import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 
 export const AddWarehouse = () => {
+    const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
@@ -13,24 +16,105 @@ export const AddWarehouse = () => {
         responsible: '',
         warehouse: '',
         reason: '',
-        quantity: '', // Или 0, если используете type="number"
+        quantity: '',
+        file: null,
     });
+    const [errors, setErrors] = useState({}); // Состояние для ошибок
+
+    const removeError = (field) => {
+        setErrors((prevErrors) => {
+            const { [field]: removed, ...rest } = prevErrors;
+            return rest;
+        });
+    };
 
     const handleInputChange = useCallback((e, field) => {
         setFormData((prevData) => ({ ...prevData, [field]: e.target.value }));
+        removeError(field);
+    }, []);
+
+    const handleDropdownChange = useCallback((value, field) => {
+        setFormData((prevData) => ({ ...prevData, [field]: value }));
+        removeError(field);
     }, []);
 
     const handleDateChange = useCallback((e, field) => {
         setFormData((prevData) => ({ ...prevData, [field]: e.value }));
+        removeError(field);
     }, []);
 
+    const handleFileUpload = useCallback((file) => {
+        setFormData((prevData) => ({ ...prevData, file })); // Обновляем файл в состоянии
+        removeError('file');
+    }, []);
+
+    const validate = () => {
+        const newErrors = {};
+        if (!formData.productName) newErrors.productName = 'Название товара обязательно';
+        if (!formData.date) newErrors.date = 'Дата обязательна';
+        if (!formData.organization) newErrors.organization = 'Организация обязательна';
+        if (!formData.responsible) newErrors.responsible = 'Ответственный обязателен';
+        if (!formData.warehouse) newErrors.warehouse = 'Склад обязателен';
+        if (!formData.reason.trim()) newErrors.reason = 'Причина обязательна';
+        if (!formData.quantity) {
+            newErrors.quantity = 'Количество обязательно';
+        } else if (isNaN(formData.quantity) || Number(formData.quantity) <= 0) {
+            newErrors.quantity = 'Количество должно быть положительным числом';
+        }
+        if (!formData.file) newErrors.file = 'Фото обязательно';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = useCallback(
-        (e) => {
+        async (e) => {
             e.preventDefault();
-            console.log('Form submitted:', formData);
-            setIsModalOpen(false);
+            if (validate()) {
+                const submissionData = new FormData();
+
+                // Сериализация вложенных объектов
+                submissionData.append('productName', JSON.stringify(formData.productName));
+                submissionData.append('date', formData.date.toISOString());
+                submissionData.append('organization', JSON.stringify(formData.organization));
+                submissionData.append('responsible', JSON.stringify(formData.responsible));
+                submissionData.append('warehouse', JSON.stringify(formData.warehouse));
+                submissionData.append('reason', formData.reason);
+                submissionData.append('quantity', formData.quantity);
+                submissionData.append('file', formData.file);
+
+                // const response = await fetch(
+                //     'https://nomalytica-back.onrender.com/api/clientsSpisanie/client-spisanie',
+                //     {
+                //         method: 'POST',
+                //         body: submissionData,
+                //     },
+                // );
+
+                // if (!response.ok) {
+                //     const errorData = await response.json();
+                //     throw new Error(errorData.error || 'Ошибка при отправке данных');
+                // }
+
+                // const responseData = await response.json();
+                // console.log('Form submitted successfully:', responseData);
+                // // setIsModalOpen(false);
+                // // Сброс формы после успешной отправки (опционально)
+                // setFormData({
+                //     productName: null,
+                //     date: null,
+                //     organization: null,
+                //     responsible: null,
+                //     warehouse: null,
+                //     reason: '',
+                //     quantity: '',
+                //     file: null,
+                // });
+                // setErrors({});
+            } else {
+                console.log('Validation failed:', errors);
+            }
         },
-        [formData],
+        [formData, errors],
     );
 
     return (
@@ -48,7 +132,7 @@ export const AddWarehouse = () => {
                             <Button
                                 label="Добавить"
                                 onClick={() => setIsModalOpen(true)}
-                                className="p-button-rounded p-button-info"
+                                className="bg-blue-500 text-white rounded p-2 max-w-[250px]"
                             />
                         </div>
                     </div>
@@ -58,13 +142,16 @@ export const AddWarehouse = () => {
                 header="Добавить списание"
                 visible={isModalOpen}
                 onHide={() => setIsModalOpen(false)}
-                style={{ width: '50vw' }}
+                style={{ width: isSmallScreen ? '150vw' : '40vw' }}
             >
                 <AddWarehouseForm
                     formData={formData}
                     handleInputChange={handleInputChange}
                     handleDateChange={handleDateChange}
+                    handleFileUpload={handleFileUpload}
                     handleSubmit={handleSubmit}
+                    handleDropdownChange={handleDropdownChange}
+                    errors={errors}
                 />
             </Dialog>
         </div>
