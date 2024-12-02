@@ -4,6 +4,7 @@ import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
+import { formatDate } from '../../../methods/dataFormatter';
 
 export default function CollapsibleTableWithDetails() {
     const [writeOffs, setWriteOffs] = useState([]);
@@ -85,7 +86,11 @@ export default function CollapsibleTableWithDetails() {
                 <Column field="productName.НоменклатураНаименование" header="Наименование товара" />
                 <Column field="quantity" header="Количество" />
                 <Column field="productName.Сумма" header="Сумма" />
-                <Column field="reason" header="Причина" />
+                <Column
+                    field="date"
+                    header="Дата списания"
+                    body={(rowData) => formatDate(rowData.date)}
+                />
                 <Column field="responsible.name" header="Ответственный" />
             </DataTable>
         );
