@@ -63,13 +63,13 @@ export default function ListOfExpenses() {
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
                     <p className="flex text-[1rem] font-semibold align-left">Список товаров</p>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
-                        <Button
-                            className=" border-blue-500 border-2 rounded-lg p-2"
-                            label="Редактировать"
-                            icon="pi pi-file-edit"
-                            onClick={() => setEditModalIsVisible(true)}
-                        />
-                        <div className="flex w-fit flex-row md:flex-row gap-2 md:gap-6">
+                        <div className="flex flex-row gap-2">
+                            <Button
+                                className=" border-blue-500 border-2 rounded-lg p-2"
+                                label="Редактировать"
+                                icon="pi pi-file-edit"
+                                onClick={() => setEditModalIsVisible(true)}
+                            />
                             <EditProductModal
                                 warehouses={warehouses}
                                 items={selectedItems}
@@ -85,14 +85,16 @@ export default function ListOfExpenses() {
                                 options={warehouses}
                                 optionLabel="warehouseName"
                                 placeholder="Склад"
-                                className="border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 "
+                                className="border-blue-500 w-fit border-2 rounded-lg focus:ring-2 focus:ring-blue-300 "
                                 showClear
                             />
+                        </div>
+                        <div className="flex ">
                             <InputText
-                                className="border-blue-500 rounded-lg p-2 border-2"
+                                className="border-blue-500 w-full rounded-lg p-2 border-2"
                                 value={productSearch}
                                 onChange={(e) => setProductSearch(e.target.value)}
-                                placeholder="Поиск"
+                                placeholder="Поиск товара"
                             />
                         </div>
                     </div>

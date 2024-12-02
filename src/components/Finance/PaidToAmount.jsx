@@ -69,7 +69,7 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
 
     return (
         <div
-            style={{ alignSelf: 'flex-start', minHeight: 520 }}
+            style={{ alignSelf: '', minHeight: 520 }}
             className={`bg-white dark:text-gray-200 overflow-hidden min-h-[${height}] dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[${comb ? '43%' : '43%'}] p-6 flex flex-col subtle-border`}
         >
             <div className="flex flex-row justify-between mb-4">

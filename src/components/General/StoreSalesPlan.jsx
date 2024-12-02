@@ -65,15 +65,15 @@ export const StoreSalesPlan = () => {
                 </div>
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
-            <div className="flex gap-2 md:gap-0 flex-col md:flex-row justify-between mb-4">
+            <div className="flex gap-2 md:gap-0 flex-row md:flex-row justify-between mb-4">
                 <Dropdown
                     value={selectedStore}
                     onChange={(e) => setSelectedStore(e.value)}
                     options={companyStructure?.stores || []}
                     optionLabel="storeName"
                     showClear
-                    placeholder="Выберите магазин"
-                    className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                    placeholder="Магазин"
+                    className="bg-blue-500 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                 />
                 <div className="flex items-center justify-center ">
                     <div className="relative gap-1  bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
@@ -95,7 +95,7 @@ export const StoreSalesPlan = () => {
                 </div>
             </div>
             <div className="flex flex-col gap-4 justify-between mb-4">
-                <div className="flex flex-col md:flex-row justify-evenly subtle-border p-1">
+                <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-evenly subtle-border p-1">
                     <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Общий план:</h3>
                         <h3>{totalPlan} тг</h3>
@@ -119,7 +119,7 @@ export const StoreSalesPlan = () => {
                         </h3>
                     </div>
                 </div>
-                <div className="flex  flex-col md:flex-row justify-evenly subtle-border p-1">
+                <div className="flex  flex-col gap-2 md:gap-0 md:flex-row justify-evenly subtle-border p-1">
                     <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>План цветок:</h3>
                         <h3> 78 321 231 тг</h3>
@@ -143,7 +143,7 @@ export const StoreSalesPlan = () => {
                         </h3>
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row justify-evenly subtle-border p-1">
+                <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-evenly subtle-border p-1">
                     <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>План сопутка:</h3>
                         <h3> 8 331 400 тг</h3>

@@ -94,24 +94,26 @@ export const SubusersList = () => {
             <div className="flex flex-col md:flex-row gap-4 justify-between mb-4">
                 <h3 className="flex items-center">Сотрудники</h3>
                 <div className="flex flex-col md:flex-row gap-4">
-                    <Dropdown
-                        value={selectedDepartment}
-                        onChange={(e) => setSelectedDepartment(e.value)}
-                        showClear
-                        options={companyStructure?.departments || []}
-                        optionLabel="name"
-                        placeholder="Выберите отдел"
-                        className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    />
-                    <Dropdown
-                        value={selectedStore}
-                        onChange={(e) => setSelectedStore(e.value)}
-                        options={companyStructure?.stores || []}
-                        optionLabel="storeName"
-                        showClear
-                        placeholder="Выберите магазин"
-                        className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    />
+                    <div className="flex flex-row gap-2">
+                        <Dropdown
+                            value={selectedDepartment}
+                            onChange={(e) => setSelectedDepartment(e.value)}
+                            showClear
+                            options={companyStructure?.departments || []}
+                            optionLabel="name"
+                            placeholder="Отдел"
+                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        />
+                        <Dropdown
+                            value={selectedStore}
+                            onChange={(e) => setSelectedStore(e.value)}
+                            options={companyStructure?.stores || []}
+                            optionLabel="storeName"
+                            showClear
+                            placeholder="Магазин"
+                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        />
+                    </div>
                     <InputText
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
