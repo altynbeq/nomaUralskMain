@@ -45,13 +45,11 @@ export default function CollapsibleTableWithDetails() {
         // Фильтрация списаний по выбранным датам
         let filteredWriteOffs = writeOffs;
 
-        if (dates && dates[0] && dates[1]) {
-            const startDate = dates[0];
-            const endDate = dates[1];
-
+        if (dates) {
+            const selectedDate = new Date(dates).setHours(0, 0, 0, 0); // Нормализуем выбранную дату
             filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
-                const writeOffDate = new Date(writeOff.date);
-                return writeOffDate >= startDate && writeOffDate <= endDate;
+                const writeOffDate = new Date(writeOff.date).setHours(0, 0, 0, 0); // Нормализуем дату списания
+                return writeOffDate === selectedDate;
             });
         }
 
