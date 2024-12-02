@@ -93,6 +93,9 @@ export default function CollapsibleTableWithDetails() {
                     dataKey="id"
                     responsiveLayout="stack"
                     breakpoint="960px"
+                    paginator
+                    rows={5}
+                    rowsPerPageOptions={[5, 10, 20]}
                 >
                     <Column
                         field="productName.НоменклатураНаименование"
@@ -184,6 +187,9 @@ export default function CollapsibleTableWithDetails() {
                 dataKey="date"
                 responsiveLayout="stack"
                 breakpoint="960px"
+                paginator
+                rows={10}
+                rowsPerPageOptions={[5, 10, 20]}
             >
                 <Column expander style={{ width: '3em', textAlign: 'center' }} />
                 <Column
