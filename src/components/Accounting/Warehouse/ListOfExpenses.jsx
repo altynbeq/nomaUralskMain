@@ -10,10 +10,15 @@ import { useStateContext } from '../../../contexts/ContextProvider';
 export default function ListOfExpenses() {
     const { products, warehouses } = useStateContext();
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
-    const [selectedWarehouse, setSelectedWarehouse] = useState({});
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [productSearch, setProductSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
+
+    const getWarehouseNameFromProduct = (productName) => {
+        const match = productName.match(/\(([^)]+)\)$/);
+        return match ? match[1] : null;
+    };
 
     const rows = filteredProducts.map((product, index) => ({
         id: product._id || index,
@@ -34,11 +39,23 @@ export default function ListOfExpenses() {
     };
 
     useEffect(() => {
-        const filtered = products.filter((product) =>
-            product.НоменклатураНаименование.toLowerCase().includes(productSearch.toLowerCase()),
-        );
+        const filtered = products.filter((product) => {
+            const matchesProductSearch = product.НоменклатураНаименование
+                .toLowerCase()
+                .includes(productSearch.toLowerCase());
+
+            let matchesWarehouse = true;
+            if (selectedWarehouse && selectedWarehouse.warehouseName) {
+                const productWarehouseName = getWarehouseNameFromProduct(
+                    product.КассаККМНаименование,
+                );
+                matchesWarehouse = productWarehouseName === selectedWarehouse.warehouseName;
+            }
+
+            return matchesProductSearch && matchesWarehouse;
+        });
         setFilteredProducts(filtered);
-    }, [productSearch, products]);
+    }, [productSearch, selectedWarehouse, products]);
 
     return (
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
