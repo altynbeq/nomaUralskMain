@@ -36,7 +36,7 @@ export const AddWarehouseForm = ({
                         value={formData.productName}
                         onChange={(e) => handleInputChange(e, 'productName')}
                         placeholder="Товар"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
+                        className="bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
                 <div className="space-y-2 flex flex-col">
@@ -47,7 +47,7 @@ export const AddWarehouseForm = ({
                         showTime
                         locale="ru"
                         hourFormat="24"
-                        className="w-full"
+                        className="max-w-[250px] border-blue-500 border-2 rounded-lg p-1"
                         placeholder="Дата"
                     />
                 </div>
@@ -57,7 +57,7 @@ export const AddWarehouseForm = ({
                         value={formData.organization}
                         onChange={(e) => handleInputChange(e, 'organization')}
                         placeholder="Организация"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
+                        className="bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px]"
                     />
                 </div>
                 <div className="space-y-2 flex flex-col">
@@ -66,7 +66,7 @@ export const AddWarehouseForm = ({
                         value={formData.responsible}
                         onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
+                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
                     />
                 </div>
                 <div className="space-y-2 flex flex-col">
@@ -75,7 +75,7 @@ export const AddWarehouseForm = ({
                         value={formData.warehouse}
                         onChange={(e) => handleInputChange(e, 'warehouse')}
                         placeholder="Склад товара"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
+                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
                     />
                 </div>
                 <div className="space-y-2 flex flex-col">
@@ -84,7 +84,7 @@ export const AddWarehouseForm = ({
                         value={formData.reason}
                         onChange={(e) => handleInputChange(e, 'reason')}
                         placeholder="Причина"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
+                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
                     />
                 </div>
                 <div className="space-y-2 flex flex-col">
@@ -92,9 +92,9 @@ export const AddWarehouseForm = ({
                     <InputText
                         value={formData.quantity}
                         onChange={(e) => handleInputChange(e, 'quantity')}
-                        type="text" // Изменено на "text" для тестирования
+                        type="number" // Изменено на "text" для тестирования
                         placeholder="Количество"
-                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px]"
+                        className="bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white"
                     />
                 </div>
 
@@ -130,7 +130,7 @@ export const AddWarehouseForm = ({
             <Button
                 label="Добавить"
                 type="submit"
-                className="flex justify-center bg-blue-500 text-white rounded p-2 w-full"
+                className="flex justify-center bg-blue-500 text-white rounded p-2 w-full mt-10"
             />
         </form>
     );
