@@ -137,6 +137,7 @@ export const AddWarehouseForm = ({
                         accept="image/*"
                         maxFileSize={1000000}
                         auto
+                        customUpload
                         chooseLabel="Загрузить"
                         uploadHandler={(e) => handleFileUpload(e.files[0])} // Передаём файл в родительский обработчик
                         className={`rounded-lg ${errors.file ? 'border-red-500' : ''}`}

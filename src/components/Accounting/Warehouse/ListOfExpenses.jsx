@@ -44,10 +44,10 @@ export default function ListOfExpenses() {
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4 ">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
-                    <p className="flex text-[1rem] font-semibold align-left">Список списаний</p>
+                    <p className="flex text-[1rem] font-semibold align-left">Список товаров</p>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <Button
-                            className=" bg-blue-500 text-white rounded-lg p-2"
+                            className=" border-blue-500 border-2 rounded-lg p-2"
                             label="Редактировать"
                             icon="pi pi-file-edit"
                             onClick={() => setEditModalIsVisible(true)}
@@ -68,11 +68,11 @@ export default function ListOfExpenses() {
                                 options={warehouses}
                                 optionLabel="warehouseName"
                                 placeholder="Склад"
-                                className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300 "
+                                className="border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 "
                                 showClear
                             />
                             <InputText
-                                className=" rounded-lg p-2 border-2"
+                                className="border-blue-500 rounded-lg p-2 border-2"
                                 value={productSearch}
                                 onChange={(e) => setProductSearch(e.target.value)}
                                 placeholder="Поиск"
