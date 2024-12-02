@@ -101,7 +101,7 @@ export const SubusersList = () => {
                         options={companyStructure?.departments || []}
                         optionLabel="name"
                         placeholder="Выберите отдел"
-                        className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                     />
                     <Dropdown
                         value={selectedStore}
@@ -110,13 +110,13 @@ export const SubusersList = () => {
                         optionLabel="storeName"
                         showClear
                         placeholder="Выберите магазин"
-                        className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                     />
                     <InputText
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Поиск"
-                        className="flex-1 w-full pl-10 p-2 border border-gray-300 rounded-md"
+                        className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
                     />
                 </div>
             </div>

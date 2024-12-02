@@ -60,7 +60,6 @@ body {
 }
 
 .p-dropdown-label  {
-    color: white;
     font-family: 'Comfortaa', sans-serif;
 }
 
@@ -84,6 +83,19 @@ body {
 .p-component {
     font-family: 'Comfortaa', sans-serif;
 }
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 
 @tailwind base;
 @tailwind components;

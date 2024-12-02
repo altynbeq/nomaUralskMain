@@ -5,13 +5,14 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
+import AlertModal from '../../AlertModal';
 
 export const AddWarehouse = () => {
     const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
-        date: null,
+        date: new Date(),
         organization: '',
         responsible: '',
         warehouse: '',
@@ -19,7 +20,8 @@ export const AddWarehouse = () => {
         quantity: '',
         file: null,
     });
-    const [errors, setErrors] = useState({}); // Состояние для ошибок
+    const [errors, setErrors] = useState({});
+    const [showAlertModal, setShowAlertModal] = useState(false);
 
     const removeError = (field) => {
         setErrors((prevErrors) => {
@@ -81,35 +83,32 @@ export const AddWarehouse = () => {
                 submissionData.append('reason', formData.reason);
                 submissionData.append('quantity', formData.quantity);
                 submissionData.append('file', formData.file);
+                const companyId = localStorage.getItem('companyId');
+                const response = await fetch(
+                    `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
+                    {
+                        method: 'POST',
+                        body: submissionData,
+                    },
+                );
 
-                // const response = await fetch(
-                //     'https://nomalytica-back.onrender.com/api/clientsSpisanie/client-spisanie',
-                //     {
-                //         method: 'POST',
-                //         body: submissionData,
-                //     },
-                // );
-
-                // if (!response.ok) {
-                //     const errorData = await response.json();
-                //     throw new Error(errorData.error || 'Ошибка при отправке данных');
-                // }
-
-                // const responseData = await response.json();
-                // console.log('Form submitted successfully:', responseData);
-                // // setIsModalOpen(false);
-                // // Сброс формы после успешной отправки (опционально)
-                // setFormData({
-                //     productName: null,
-                //     date: null,
-                //     organization: null,
-                //     responsible: null,
-                //     warehouse: null,
-                //     reason: '',
-                //     quantity: '',
-                //     file: null,
-                // });
-                // setErrors({});
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Ошибка при отправке данных');
+                }
+                setIsModalOpen(false);
+                setShowAlertModal(true);
+                setFormData({
+                    productName: null,
+                    date: null,
+                    organization: null,
+                    responsible: null,
+                    warehouse: null,
+                    reason: '',
+                    quantity: '',
+                    file: null,
+                });
+                setErrors({});
             } else {
                 console.log('Validation failed:', errors);
             }
@@ -154,6 +153,11 @@ export const AddWarehouse = () => {
                     errors={errors}
                 />
             </Dialog>
+            <AlertModal
+                open={showAlertModal}
+                message="Вы успешо добавили списание"
+                onClose={() => setShowAlertModal(false)}
+            />
         </div>
     );
 };

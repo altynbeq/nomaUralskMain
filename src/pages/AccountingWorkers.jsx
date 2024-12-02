@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import WorkersAnimatedBeam from '../components/Accounting/Workers/WorkersAnimatedBeam';
 import { SubusersList } from '../components/Accounting/Workers/SubusersList';
-import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
+import { isValidDepartmentId } from '../methods/isValidDepartmentId';
 
 const AccountingWorkers = () => {
     const [structure, setStructure] = useState('');
@@ -14,7 +14,6 @@ const AccountingWorkers = () => {
 
     const fetchStructure = async (id) => {
         const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
-        //   const url = `http://localhost:8888/api/structure/get-structure-by-userId/${id}`;
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -99,10 +98,14 @@ const AccountingWorkers = () => {
         }
 
         const currentUserId = localStorage.getItem('_id');
+        const companyId = localStorage.getItem('companyId');
+        const departmentId = localStorage.getItem('departmentId');
         if (!structure) {
-            fetchStructure(currentUserId).then((result) => {
-                setStructure(result);
-            });
+            fetchStructure(isValidDepartmentId(departmentId) ? companyId : currentUserId).then(
+                (result) => {
+                    setStructure(result);
+                },
+            );
         }
 
         if (structure && departments.length === 0) {
