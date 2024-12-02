@@ -9,6 +9,7 @@ import { useStateContext } from '../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
 import AlertModal from '../components/AlertModal';
 import { isValidDepartmentId } from '../methods/isValidDepartmentId';
+import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
 
 const Calendar = () => {
     const { access } = useStateContext();
@@ -179,65 +180,70 @@ const Calendar = () => {
     };
 
     return (
-        <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
-            <div className="flex justify-between max-h-[40px] mb-16 mt-5">
-                {' '}
-                <Header category="Учёт" title="Смены" />
-                <Dropdown
-                    value={selectedStore}
-                    onChange={(e) => setSelectedStore(e.value)}
-                    options={stores}
-                    optionLabel="storeName"
-                    placeholder="Выберите магазин"
-                    className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    showClear
+        <>
+            <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
+                <div className="flex justify-between max-h-[40px] mb-16 mt-5">
+                    {' '}
+                    <Header category="Учёт" title="Смены" />
+                    <Dropdown
+                        value={selectedStore}
+                        onChange={(e) => setSelectedStore(e.value)}
+                        options={stores}
+                        optionLabel="storeName"
+                        placeholder="Выберите магазин"
+                        className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        showClear
+                    />
+                </div>
+                <AlertModal
+                    open={alertOpen}
+                    message="Пожалуйста, выберите магазин перед добавлением смены."
+                    onClose={() => setAlertOpen(false)}
+                />
+                <ScheduleWithEdit
+                    selectedStore={selectedStore}
+                    open={modal}
+                    setOpen={setModal}
+                    shiftId={selectedShiftId}
+                    fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
+                />
+                <AddShift
+                    selectedStore={selectedStore}
+                    subusers={subusers}
+                    open={modalAddShift}
+                    setOpen={setModalAddShift}
+                    currentShifts={currentShifts}
+                    setCurrentShifts={setCurrentShifts}
+                    fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
+                />
+
+                <FullCalendar
+                    plugins={[dayGridPlugin]}
+                    initialView="dayGridMonth"
+                    weekends={true}
+                    events={currentShifts}
+                    eventContent={renderEventContent}
+                    eventClick={handleEventClick}
+                    locale={ruLocale}
+                    firstDay={1}
+                    fixedWeekCount={false}
+                    headerToolbar={{
+                        left: 'dayGridMonth,dayGridWeek,dayGridDay',
+                        center: 'title',
+                        right: 'customButton prev,next,today',
+                    }}
+                    customButtons={{
+                        customButton: {
+                            text: 'Добавить',
+                            click: openModalAddShift,
+                        },
+                    }}
                 />
             </div>
-            <AlertModal
-                open={alertOpen}
-                message="Пожалуйста, выберите магазин перед добавлением смены."
-                onClose={() => setAlertOpen(false)}
-            />
-            <ScheduleWithEdit
-                selectedStore={selectedStore}
-                open={modal}
-                setOpen={setModal}
-                shiftId={selectedShiftId}
-                fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
-            />
-            <AddShift
-                selectedStore={selectedStore}
-                subusers={subusers}
-                open={modalAddShift}
-                setOpen={setModalAddShift}
-                currentShifts={currentShifts}
-                setCurrentShifts={setCurrentShifts}
-                fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
-            />
-
-            <FullCalendar
-                plugins={[dayGridPlugin]}
-                initialView="dayGridMonth"
-                weekends={true}
-                events={currentShifts}
-                eventContent={renderEventContent}
-                eventClick={handleEventClick}
-                locale={ruLocale}
-                firstDay={1}
-                fixedWeekCount={false}
-                headerToolbar={{
-                    left: 'dayGridMonth,dayGridWeek,dayGridDay',
-                    center: 'title',
-                    right: 'customButton prev,next,today',
-                }}
-                customButtons={{
-                    customButton: {
-                        text: 'Добавить',
-                        click: openModalAddShift,
-                    },
-                }}
-            />
-        </div>
+            <div className="mt-10">
+                <EmployeeCalendar />
+            </div>
+        </>
     );
 };
 

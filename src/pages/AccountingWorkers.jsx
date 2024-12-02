@@ -623,8 +623,12 @@ const AccountingWorkers = () => {
                     defaultImage={defaultImage}
                 />
             )}
-            <SubusersList />
-            <EmployeeCalendar />
+            <div className="flex flex-col items-center justify-center">
+                <SubusersList />
+                <div className="w-[85%]">
+                    <EmployeeCalendar />
+                </div>
+            </div>
         </>
     );
 };

@@ -89,7 +89,7 @@ export const EmpltSiftStats = () => {
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
                     <h2 className="font-semibold text-lg text-black">Опоздания на 11-2024</h2>
-                    <p className="text-gray-500 text-sm">Романтик Уральск</p>
+                    {/* <p className="text-gray-500 text-sm">Романтик Уральск</p> */}
                 </div>
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
