@@ -70,11 +70,11 @@ export const EmplSalesPlans = () => {
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
                     <h2 className="font-semibold text-lg text-black">План Сотрудников</h2>
-                    <p className="text-gray-500 text-sm">Романтик Уральск</p>
+                    <p className="text-gray-500 text-sm">ЭТО ДЕМО, без паники</p>
                 </div>
             </div>
             <hr className="bg-red w-full mx-auto my-4" />
-            <div className="flex gap-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div className="w-full relative">
                     <input
                         type="text"
@@ -84,29 +84,31 @@ export const EmplSalesPlans = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
-                    <Dropdown
-                        value={selectedStore}
-                        onChange={(e) => setSelectedStore(e.value)}
-                        options={companyStructure?.stores || []}
-                        optionLabel="storeName"
-                        placeholder="Выберите магазин"
-                        showClear
-                        className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    />
+                <div className="flex flex-row gap-2 justify-between">
+                    <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
+                        <Dropdown
+                            value={selectedStore}
+                            onChange={(e) => setSelectedStore(e.value)}
+                            options={companyStructure?.stores || []}
+                            optionLabel="storeName"
+                            placeholder="Магазин"
+                            showClear
+                            className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        />
+                    </div>
+                    <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
+                        <Dropdown
+                            value={selectedDepartment}
+                            onChange={(e) => setSelectedDepartment(e.value)}
+                            options={companyStructure?.departments || []}
+                            optionLabel="name"
+                            showClear
+                            placeholder="Отдел"
+                            className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        />
+                    </div>
                 </div>
-                <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
-                    <Dropdown
-                        value={selectedDepartment}
-                        onChange={(e) => setSelectedDepartment(e.value)}
-                        options={companyStructure?.departments || []}
-                        optionLabel="name"
-                        showClear
-                        placeholder="Выберите отдел"
-                        className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    />
-                </div>
-                <div className="relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
+                <div className="w-fit relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                     <button
                         onClick={toggleView}
                         className={`p-1 rounded-full transition-colors duration-300 relative z-2 text-sm ${

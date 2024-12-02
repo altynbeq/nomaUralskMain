@@ -127,16 +127,16 @@ export const EmpltSiftStats = () => {
     ];
 
     return (
-        <div className="w-[43%] bg-white rounded-lg shadow-md p-4 ">
+        <div className="w-[90%] md:w-[43%] bg-white rounded-lg subtle-border shadow-md p-4 ">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
                     <h2 className="font-semibold text-lg text-black">Опоздания на 11-2024</h2>
-                    <p className="text-gray-500 text-sm">Романтик Уральск</p>
+                    <p className="text-gray-500 text-sm">ЭТО ДЕМО, без паники</p>
                 </div>
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
-            <div className="flex justify-between mb-4">
+            <div className="flex flex-col gap-2 md:flex-row md:gap-0 justify-between mb-4">
                 <Dropdown
                     value={selectedStore}
                     onChange={(e) => setSelectedStore(e.value)}
@@ -168,12 +168,12 @@ export const EmpltSiftStats = () => {
                 </div>
             </div>
             <div className="flex flex-col gap-4 justify-between mb-4">
-                <div className="flex flex-row justify-evenly subtle-border p-1">
-                    <div className="flex flex-col text-center justify-center">
+                <div className="flex flex-col md:flex-row justify-evenly subtle-border p-1">
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Количество часов:</h3>
                         <h4>{stats?.toFixed(2)} ч</h4>
                     </div>
-                    <div>
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Отработано:</h3>
                         <h3 className="flex flex-row">
                             480
@@ -182,7 +182,7 @@ export const EmpltSiftStats = () => {
                             </p>
                         </h3>
                     </div>
-                    <div>
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Остаток:</h3>
                         <h3 className="flex flex-row">
                             430
@@ -192,12 +192,12 @@ export const EmpltSiftStats = () => {
                         </h3>
                     </div>
                 </div>
-                <div className="flex flex-row justify-evenly subtle-border p-1">
-                    <div className="flex flex-col text-center justify-center">
-                        <h3>Количество опозданий</h3>
+                <div className="flex flex-col md:flex-row justify-evenly subtle-border p-1">
+                    <div className="flex flex-row md:flex-col text-center justify-center">
+                        <h3>Количество опозданий:</h3>
                         <h3>11</h3>
                     </div>
-                    <div>
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Основное:</h3>
                         <h3 className="flex flex-row">
                             Сатпаев
@@ -206,7 +206,7 @@ export const EmpltSiftStats = () => {
                             </p>
                         </h3>
                     </div>
-                    <div>
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Отдел:</h3>
                         <h3 className="flex flex-row">
                             Флористы
@@ -216,12 +216,12 @@ export const EmpltSiftStats = () => {
                         </h3>
                     </div>
                 </div>
-                <div className="flex flex-row justify-evenly subtle-border p-1">
-                    <div className="flex flex-col text-center justify-center">
+                <div className="flex flex-col md:flex-row justify-evenly subtle-border p-1">
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Cред опоздание:</h3>
                         <h3>16 минут</h3>
                     </div>
-                    <div>
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Макс опоздание:</h3>
                         <h3 className="flex flex-row">
                             42 мин
@@ -230,7 +230,7 @@ export const EmpltSiftStats = () => {
                             </p> */}
                         </h3>
                     </div>
-                    <div>
+                    <div className="flex flex-row md:flex-col text-center justify-center">
                         <h3>Опоздавший:</h3>
                         <h3 className="flex flex-row">
                             Айжан Быржан

@@ -472,6 +472,18 @@ export default function AnimatedBeamMultipleOutputDemo({
 
                     {/* Middle center circle (Level 2) */}
                     <div className="flex justify-center mr-auto ml-auto gap-10">
+                        <div
+                            key={'newDep'}
+                            className="flex flex-col max-w-[120px] items-center gap-4 group cursor-pointer"
+                            onClick={(e) => setAddDepartmentModal(true)}
+                        >
+                            <Circle key={'newDep'}>
+                                <FaPlus color={'#3b82f6'} />
+                            </Circle>
+                            <p className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Добавить
+                            </p>
+                        </div>
                         {items.map(
                             (item, index) =>
                                 item.level === 2 && (
@@ -496,18 +508,6 @@ export default function AnimatedBeamMultipleOutputDemo({
                                     </div>
                                 ),
                         )}
-                        <div
-                            key={'newDep'}
-                            className="flex flex-col max-w-[120px] items-center gap-4 group cursor-pointer"
-                            onClick={(e) => setAddDepartmentModal(true)}
-                        >
-                            <Circle key={'newDep'}>
-                                <FaPlus color={'#3b82f6'} />
-                            </Circle>
-                            <p className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                Добавить
-                            </p>
-                        </div>
                     </div>
                 </div>
 
