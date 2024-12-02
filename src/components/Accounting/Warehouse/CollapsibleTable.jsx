@@ -12,7 +12,7 @@ export default function CollapsibleTableWithDetails() {
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [dates, setDates] = useState(null);
+    const [dateRange, setDateRange] = useState(null); // Раньше: const [dates, setDates] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
 
@@ -48,11 +48,12 @@ export default function CollapsibleTableWithDetails() {
     useEffect(() => {
         let filteredWriteOffs = writeOffs;
 
-        if (dates) {
-            const selectedDate = new Date(dates).setHours(0, 0, 0, 0);
+        if (dateRange && dateRange[0] && dateRange[1]) {
+            const startDate = new Date(dateRange[0]).setHours(0, 0, 0, 0);
+            const endDate = new Date(dateRange[1]).setHours(23, 59, 59, 999);
             filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
-                const writeOffDate = new Date(writeOff.date).setHours(0, 0, 0, 0);
-                return writeOffDate === selectedDate;
+                const writeOffDate = new Date(writeOff.date).getTime();
+                return writeOffDate >= startDate && writeOffDate <= endDate;
             });
         }
 
@@ -77,7 +78,7 @@ export default function CollapsibleTableWithDetails() {
 
         const groupedWriteOffsArray = Object.values(groupedData);
         setGroupedWriteOffs(groupedWriteOffsArray);
-    }, [dates, writeOffs, searchQuery]);
+    }, [dateRange, writeOffs, searchQuery]);
 
     const openModal = (rowData) => {
         setSelectedRow(rowData);
@@ -91,7 +92,6 @@ export default function CollapsibleTableWithDetails() {
                     value={data.writeOffs}
                     onRowClick={(e) => openModal(e.data)}
                     dataKey="id"
-                    responsiveLayout="stack"
                     breakpoint="960px"
                     paginator
                     rows={5}
@@ -164,11 +164,13 @@ export default function CollapsibleTableWithDetails() {
                 <h3 className="text-md mb-4 sm:mb-0">Список списаний</h3>
                 <div className="flex flex-col sm:flex-row justify-end gap-6 mb-3 w-full sm:w-auto">
                     <Calendar
-                        value={dates}
-                        onChange={(e) => setDates(e.value)}
+                        value={dateRange}
+                        selectionMode="range"
+                        onChange={(e) => setDateRange(e.value)}
                         className="border-blue-500 border-2 rounded-lg p-2 w-full sm:w-auto"
-                        placeholder="Дата"
+                        placeholder="Выберите период"
                         locale="ru"
+                        inputStyle={{ width: '100%' }}
                     />
                     <InputText
                         value={searchQuery}
@@ -185,7 +187,6 @@ export default function CollapsibleTableWithDetails() {
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={rowExpansionTemplate}
                 dataKey="date"
-                responsiveLayout="stack"
                 breakpoint="960px"
                 paginator
                 rows={10}
@@ -213,7 +214,9 @@ export default function CollapsibleTableWithDetails() {
                 visible={isModalVisible}
                 onHide={() => setModalVisible(false)}
                 header="Детали списания"
-                style={{ width: '90vw', maxWidth: '500px' }}
+                className="w-full max-w-md mx-2 sm:mx-auto"
+                breakpoints={{ '960px': '90vw' }}
+                style={{ padding: '1rem' }}
             >
                 {renderModalContent()}
             </Dialog>
