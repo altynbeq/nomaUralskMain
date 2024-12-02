@@ -90,7 +90,9 @@ export default function CollapsibleTableWithDetails() {
                 <DataTable
                     value={data.writeOffs}
                     onRowClick={(e) => openModal(e.data)}
-                    dataKey="id" // Убедитесь, что `id` уникален для каждой строки
+                    dataKey="id"
+                    responsiveLayout="stack"
+                    breakpoint="960px"
                 >
                     <Column
                         field="productName.НоменклатураНаименование"
@@ -114,38 +116,38 @@ export default function CollapsibleTableWithDetails() {
         return (
             <div className="flex flex-col gap-2">
                 <p>
-                    <span className="text-bold text-lg">Наименование товара:</span>{' '}
+                    <span className="font-bold text-lg">Наименование товара:</span>{' '}
                     {selectedRow.productName?.НоменклатураНаименование}
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Количество:</span> {selectedRow.quantity}
+                    <span className="font-bold text-lg">Количество:</span> {selectedRow.quantity}
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Сумма:</span>{' '}
+                    <span className="font-bold text-lg">Сумма:</span>{' '}
                     {selectedRow.productName?.Сумма}₸
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Дата списания:</span>{' '}
+                    <span className="font-bold text-lg">Дата списания:</span>{' '}
                     {formatDate(selectedRow.date)}
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Ответственный:</span>{' '}
+                    <span className="font-bold text-lg">Ответственный:</span>{' '}
                     {selectedRow.responsible?.name}
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Магазин:</span>{' '}
+                    <span className="font-bold text-lg">Магазин:</span>{' '}
                     {selectedRow.organization?.storeName}
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Cклад:</span>{' '}
+                    <span className="font-bold text-lg">Cклад:</span>{' '}
                     {selectedRow.warehouse?.warehouseName}
                 </p>
                 <p>
-                    <span className="text-bold text-lg">Причина:</span> {selectedRow.reason}
+                    <span className="font-bold text-lg">Причина:</span> {selectedRow.reason}
                 </p>
                 <div className="flex justify-center">
                     <img
-                        className="w-[400px] h-[400px] rounded-lg"
+                        className="w-full h-auto max-w-md rounded-lg"
                         src={`https://nomalytica-back.onrender.com${selectedRow?.file?.objectURL}`}
                     />
                 </div>
@@ -154,14 +156,14 @@ export default function CollapsibleTableWithDetails() {
     };
 
     return (
-        <div className="mx-auto w-[90%] flex flex-col subtle-border p-4">
-            <div className="flex justify-between items-center">
-                <h3 className="text-md">Список списаний</h3>
-                <div className="flex justify-end gap-6 mb-3">
+        <div className="mx-auto w-full sm:w-[90%] flex flex-col subtle-border p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center">
+                <h3 className="text-md mb-4 sm:mb-0">Список списаний</h3>
+                <div className="flex flex-col sm:flex-row justify-end gap-6 mb-3 w-full sm:w-auto">
                     <Calendar
                         value={dates}
                         onChange={(e) => setDates(e.value)}
-                        className="border-blue-500 border-2 rounded-lg p-2"
+                        className="border-blue-500 border-2 rounded-lg p-2 w-full sm:w-auto"
                         placeholder="Дата"
                         locale="ru"
                     />
@@ -169,7 +171,7 @@ export default function CollapsibleTableWithDetails() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Поиск"
-                        className="border-blue-500 border-2 rounded-lg p-2"
+                        className="border-blue-500 border-2 rounded-lg p-2 w-full sm:w-auto"
                     />
                 </div>
             </div>
@@ -180,25 +182,24 @@ export default function CollapsibleTableWithDetails() {
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={rowExpansionTemplate}
                 dataKey="date"
+                responsiveLayout="stack"
+                breakpoint="960px"
             >
                 <Column expander style={{ width: '3em', textAlign: 'center' }} />
                 <Column
                     field="date"
                     header="Дата"
                     body={(rowData) => new Date(rowData.date).toLocaleDateString()}
-                    style={{ padding: '10px 20px' }}
                 />
                 <Column
                     field="totalSum"
                     header="Сумма"
                     body={(rowData) => `${rowData.totalSum} ₸`}
-                    style={{ padding: '10px 20px', textAlign: 'left' }}
                 />
                 <Column
                     field="totalQuantity"
                     header="Количество"
                     body={(rowData) => rowData.totalQuantity}
-                    style={{ padding: '10px 20px', textAlign: 'left' }}
                 />
             </DataTable>
 
@@ -206,7 +207,7 @@ export default function CollapsibleTableWithDetails() {
                 visible={isModalVisible}
                 onHide={() => setModalVisible(false)}
                 header="Детали списания"
-                style={{ width: '35vw' }}
+                style={{ width: '90vw', maxWidth: '500px' }}
             >
                 {renderModalContent()}
             </Dialog>
