@@ -19,7 +19,7 @@ export const AddWarehouseForm = ({
 }) => {
     const isSmallScreen = useIsSmallScreen(768);
     const [previewUrl, setPreviewUrl] = useState(null);
-    const { warehouses, products, companyStructure } = useStateContext();
+    const { warehouses, products, companyStructure, subUser } = useStateContext();
 
     useEffect(() => {
         if (formData.file) {
@@ -33,17 +33,15 @@ export const AddWarehouseForm = ({
         }
     }, [formData.file]);
 
+    useEffect(() => {
+        handleDropdownChange(subUser, 'responsible');
+    }, [handleDropdownChange, subUser]);
+
     return (
         <form className="px-4" onSubmit={handleSubmit}>
             <div className={`grid gap-4 ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Название товара</label>
-                    {/* <InputText
-                        value={formData.productName}
-                        onChange={(e) => handleInputChange(e, 'productName')}
-                        placeholder="Товар"
-                        className={`bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
-                    /> */}
                     <Dropdown
                         value={formData.productName}
                         onChange={(e) => handleDropdownChange(e.value, 'productName')}
@@ -70,12 +68,6 @@ export const AddWarehouseForm = ({
                 </div>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Организация</label>
-                    {/* <InputText
-                        value={formData.organization}
-                        onChange={(e) => handleInputChange(e, 'organization')}
-                        placeholder="Организация"
-                        className={`bg-blue-500 text-white placeholder-white rounded p-2 max-w-[250px] ${errors.organization ? 'border-red-500' : ''}`}
-                    /> */}
                     <Dropdown
                         value={formData.organization}
                         onChange={(e) => handleDropdownChange(e.value, 'organization')}
@@ -92,8 +84,8 @@ export const AddWarehouseForm = ({
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Ответственный</label>
                     <InputText
-                        value={formData.responsible}
-                        onChange={(e) => handleInputChange(e, 'responsible')}
+                        value={subUser.name}
+                        // onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
                         className={`bg-blue-500 placeholder-white rounded p-2 max-w-[250px] text-white ${errors.responsible ? 'border-red-500' : ''}`}
                     />

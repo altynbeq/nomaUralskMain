@@ -43,10 +43,10 @@ export const AddWarehouse = () => {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.productName.trim()) newErrors.productName = 'Название товара обязательно';
+        if (!formData.productName) newErrors.productName = 'Название товара обязательно';
         if (!formData.date) newErrors.date = 'Дата обязательна';
-        if (!formData.organization.trim()) newErrors.organization = 'Организация обязательна';
-        if (!formData.responsible.trim()) newErrors.responsible = 'Ответственный обязателен';
+        if (!formData.organization) newErrors.organization = 'Организация обязательна';
+        if (!formData.responsible) newErrors.responsible = 'Ответственный обязателен';
         if (!formData.warehouse) newErrors.warehouse = 'Склад обязателен';
         if (!formData.reason.trim()) newErrors.reason = 'Причина обязательна';
         if (!formData.quantity) {
