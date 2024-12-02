@@ -89,11 +89,11 @@ export const SubusersList = () => {
     );
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-4 m-16">
+        <div className="w-[90%] bg-white rounded-lg shadow-md p-4">
             {/* Верхние фильтры */}
-            <div className="flex gap-4 justify-between mb-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between mb-4">
                 <h3 className="flex items-center">Сотрудники</h3>
-                <div className="flex gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
                     <Dropdown
                         value={selectedDepartment}
                         onChange={(e) => setSelectedDepartment(e.value)}

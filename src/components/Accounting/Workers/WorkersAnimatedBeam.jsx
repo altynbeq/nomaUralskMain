@@ -11,7 +11,7 @@ const Circle = forwardRef(({ className, children }, ref) => {
     return (
         <div
             ref={ref}
-            className={`z-10 flex size-12 items-center justify-center rounded-full border-2 bg-white p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] ${className}`}
+            className={`z-10 flex size-8 md:size-12 items-center justify-center rounded-full border-2 bg-white p-2 md:p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] ${className}`}
         >
             {children}
         </div>
@@ -432,7 +432,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                 className={`mt-10 md:mt-0 ml-auto mr-auto relative flex h-[500px] max-w-[90%] items-center justify-center overflow-hidden rounded-lg border bg-white p-10 md:shadow-xl ${className}`}
                 ref={containerRef}
             >
-                <div className="flex size-full  flex-col h-full items-stretch justify-between gap-10">
+                <div className="flex overflow-x-auto size-full  flex-col h-full items-stretch justify-between gap-10">
                     {/* Top center circle (Level 1) */}
                     <div className="flex justify-center gap-10">
                         {items.map(
