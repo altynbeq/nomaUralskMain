@@ -122,6 +122,8 @@ const App = () => {
                 fetchSubUserData(currentUserDepartmentId);
                 setLoading(false);
                 setSkeletonUp(false);
+                const companyId = localStorage.getItem('companyId');
+                fetchUserStructure(companyId);
             } else {
                 fetchData(currentUserId);
                 fetchUserStructure(currentUserId);

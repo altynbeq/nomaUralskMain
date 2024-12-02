@@ -26,7 +26,7 @@ export const AddWarehouse = () => {
         setErrors({});
     }, []);
 
-    const handleWareHouseChange = useCallback((e, field) => {
+    const handleDropdownChange = useCallback((e, field) => {
         setErrors({});
         setFormData((prevData) => ({ ...prevData, [field]: e }));
     }, []);
@@ -65,7 +65,7 @@ export const AddWarehouse = () => {
             if (validate()) {
                 console.log('Form submitted:', formData);
                 // Здесь вы можете отправить данные на сервер
-                setIsModalOpen(false);
+                // setIsModalOpen(false);
                 // Сброс формы после успешной отправки (опционально)
                 setFormData({
                     productName: '',
@@ -118,7 +118,7 @@ export const AddWarehouse = () => {
                     handleDateChange={handleDateChange}
                     handleFileUpload={handleFileUpload}
                     handleSubmit={handleSubmit}
-                    handleWareHouseChange={handleWareHouseChange}
+                    handleDropdownChange={handleDropdownChange}
                     errors={errors} // Передаем ошибки в форму
                 />
             </Dialog>
