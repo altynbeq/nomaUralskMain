@@ -12,7 +12,7 @@ export const AddWarehouse = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
-        date: null,
+        date: new Date(),
         organization: '',
         responsible: '',
         warehouse: '',

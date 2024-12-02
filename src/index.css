@@ -60,7 +60,6 @@ body {
 }
 
 .p-dropdown-label  {
-    color: white;
     font-family: 'Comfortaa', sans-serif;
 }
 
@@ -85,8 +84,16 @@ body {
     font-family: 'Comfortaa', sans-serif;
 }
 
-.p-fileupload-choose {
-    background-color: rgb(59, 130, 246);
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 
