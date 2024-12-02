@@ -10,6 +10,7 @@ export default function CollapsibleTableWithDetails() {
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
     const [dates, setDates] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const currentUserId = localStorage.getItem('_id');
@@ -43,14 +44,24 @@ export default function CollapsibleTableWithDetails() {
     useEffect(() => {
         // Фильтрация списаний по выбранным датам
         let filteredWriteOffs = writeOffs;
+
         if (dates && dates[0] && dates[1]) {
             const startDate = dates[0];
             const endDate = dates[1];
 
-            filteredWriteOffs = writeOffs.filter((writeOff) => {
+            filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
                 const writeOffDate = new Date(writeOff.date);
                 return writeOffDate >= startDate && writeOffDate <= endDate;
             });
+        }
+
+        // Фильтрация по поисковому запросу
+        if (searchQuery) {
+            filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
+                writeOff.productName.НоменклатураНаименование
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase()),
+            );
         }
 
         // Группировка списаний по дате
@@ -68,12 +79,7 @@ export default function CollapsibleTableWithDetails() {
         // Преобразование в массив для отображения
         const groupedWriteOffsArray = Object.values(groupedData);
         setGroupedWriteOffs(groupedWriteOffsArray);
-    }, [dates, writeOffs]);
-
-    const dateBodyTemplate = (rowData) => {
-        const formattedDate = new Date(rowData.date).toLocaleDateString();
-        return `${formattedDate} | Сумма: ${rowData.totalSum} | Количество: ${rowData.totalQuantity}`;
-    };
+    }, [dates, writeOffs, searchQuery]);
 
     const rowExpansionTemplate = (data) => {
         return (
@@ -83,25 +89,29 @@ export default function CollapsibleTableWithDetails() {
                 <Column field="productName.Сумма" header="Сумма" />
                 <Column field="reason" header="Причина" />
                 <Column field="responsible.name" header="Ответственный" />
-                {/* Добавьте дополнительные столбцы при необходимости */}
             </DataTable>
         );
     };
 
     return (
-        <div className="mx-auto w-[90%] flex flex-col">
-            <div className="flex justify-end gap-6 mb-3">
-                <Calendar
-                    value={dates}
-                    onChange={(e) => setDates(e.value)}
-                    className="border-blue-500 border-2 rounded-lg p-2"
-                    placeholder="Дата"
-                    locale="ru"
-                />
-                <InputText
-                    placeholder="Поиск"
-                    className="border-blue-500 border-2 rounded-lg p-2"
-                />
+        <div className="mx-auto w-[90%] flex flex-col subtle-border p-4">
+            <div className="flex justify-between items-center">
+                <h3 className="text-md">Список списаний</h3>
+                <div className="flex justify-end gap-6 mb-3">
+                    <Calendar
+                        value={dates}
+                        onChange={(e) => setDates(e.value)}
+                        className="border-blue-500 border-2 rounded-lg p-2"
+                        placeholder="Дата"
+                        locale="ru"
+                    />
+                    <InputText
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Поиск"
+                        className="border-blue-500 border-2 rounded-lg p-2"
+                    />
+                </div>
             </div>
 
             <DataTable
@@ -121,7 +131,7 @@ export default function CollapsibleTableWithDetails() {
                 <Column
                     field="totalSum"
                     header="Сумма"
-                    body={(rowData) => `${rowData.totalSum} ₸`} // Пример валюты
+                    body={(rowData) => `${rowData.totalSum} ₸`}
                     style={{ padding: '10px 20px', textAlign: 'left' }}
                 />
                 <Column
