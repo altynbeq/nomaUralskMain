@@ -165,20 +165,7 @@ export const AddWarehouseForm = ({
                         )}
                     </div>
                     {errors.file && <small className="p-error">{errors.file}</small>}
-                    <p className="text-xs text-gray-500">Сделайте фото товара</p>
                 </div>
-
-                {/* Предпросмотр загруженного файла */}
-                {previewUrl && (
-                    <div className="flex flex-col items-center md:col-span-2">
-                        <label className="text-sm font-medium">Предпросмотр фото:</label>
-                        <img
-                            src={previewUrl}
-                            alt="Preview"
-                            className="mt-2 max-h-48 object-contain border rounded"
-                        />
-                    </div>
-                )}
             </div>
             <div className="flex justify-center md:col-span-2">
                 <Button
