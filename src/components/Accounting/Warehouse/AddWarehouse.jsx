@@ -132,7 +132,7 @@ export const AddWarehouse = () => {
 
     return (
         <div className="w-[90%] md:w-[40%] subtle-border mx-auto mt-5 md:mt-0 md:pt-0 flex items-center justify-center">
-            <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
+            <div className="w-full bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex m-5 p-8 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
                         <p className="text-gray-600">Заполните данные списания</p>

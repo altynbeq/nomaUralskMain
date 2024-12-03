@@ -118,11 +118,15 @@ export const AddWarehouseForm = ({
                         value={formData.quantity}
                         onChange={(e) => {
                             const value = e.target.value;
-                            if (value > 0) {
+
+                            // Проверяем, является ли значение числом
+                            if (/^\d*$/.test(value)) {
+                                // Разрешаем только числовые значения
                                 handleInputChange(e, 'quantity');
                             }
                         }}
-                        type="number" // Изменено на "number" для валидации чисел
+                        inputMode="numeric"
+                        type="text" // Изменено на "number" для валидации чисел
                         placeholder="Количество"
                         className={`border-blue-500 border-2 placeholder-gray rounded-lg p-2 max-w-[250px]  ${errors.quantity ? 'border-red-500' : ''}`}
                     />
