@@ -191,7 +191,7 @@ const Calendar = () => {
                         options={stores}
                         optionLabel="storeName"
                         placeholder="Выберите магазин"
-                        className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         showClear
                     />
                 </div>

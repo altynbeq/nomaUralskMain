@@ -68,7 +68,7 @@ export const AddShift = (props) => {
                         subUserId: selectedSubuser._id,
                         startTime: start.toISOString(),
                         endTime: end.toISOString(),
-                        selectedStore: props.selectedStore,
+                        selectedStore: props.selectedStore._id,
                     }),
                 },
             );

@@ -21,6 +21,7 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [QRLocation, setQRLocation] = useState(null);
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState(false);
+    const [showGeoErrorModal, setShowGeoErrorModal] = useState(false); // Новое состояние для ошибки геолокации
 
     const updateShift = async (shift) => {
         try {
@@ -104,10 +105,12 @@ export const MainContent = ({ urls, activeMenu }) => {
                     },
                     (error) => {
                         console.error('Ошибка при получении геолокации:', error);
+                        setShowGeoErrorModal(true); // Устанавливаем состояние для отображения модального окна
                     },
                 );
             } else {
                 console.error('Geolocation не поддерживается этим браузером.');
+                setShowGeoErrorModal(true); // Устанавливаем состояние для отображения модального окна
             }
         }
     }, [location.pathname, location.search]);
@@ -242,11 +245,22 @@ export const MainContent = ({ urls, activeMenu }) => {
                     {isUploading && <p className="text-gray-500 text-sm mt-2">Загрузка...</p>}
                 </div>
             </Dialog>
+
+            {/* Модальное окно для результата отметки смены */}
             <AlertModal
                 message={markShiftResultMessage}
                 open={showMarkShiftResultModal}
                 onClose={() => {
                     setShowMarkShiftResultModal(false);
+                }}
+            />
+
+            {/* Модальное окно для ошибки геолокации */}
+            <AlertModal
+                message="Для отметки смены необходимо разрешить доступ к геолокации и снова пройти по QR отметку. В противном случае смена не будет засчитана."
+                open={showGeoErrorModal}
+                onClose={() => {
+                    setShowGeoErrorModal(false);
                 }}
             />
         </>
