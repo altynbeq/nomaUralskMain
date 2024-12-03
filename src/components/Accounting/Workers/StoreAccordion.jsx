@@ -12,6 +12,8 @@ export const StoreAccordion = ({ stores, departments }) => {
     const [showAddDepartmentModal, setShowAddDepartmentModal] = useState(false);
     const [departmentName, setDepartmentName] = useState('');
     const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertModalText, setAlertModalText] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     // Обработчик изменения вкладки
     const onTabChange = (e) => {
@@ -45,10 +47,11 @@ export const StoreAccordion = ({ stores, departments }) => {
         setShowAddDepartmentModal(true);
     };
 
-    const addDeparmentSubmit = async () => {
-        const response = await fetch(
-            `https://nomalytica-back.onrender.com/api/departments/create-department/`,
-            {
+    const addDeparmentSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await fetch(`https://nomalytica-back.onrender.com/api/departments/create-department/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -57,12 +60,15 @@ export const StoreAccordion = ({ stores, departments }) => {
                     storeId: activeStoreId,
                     name: departmentName,
                 }),
-            },
-        );
-        await response.json();
-        if (response.ok) {
+            });
             setShowAlertModal(true);
-            setDepartmentName('');
+            setShowAddDepartmentModal(false);
+            setAlertModalText('Вы успешно добавили департамент.');
+        } catch {
+            setShowAlertModal(true);
+            setAlertModalText('Не удалось добавить департемент, попробуйте снова.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -126,11 +132,22 @@ export const StoreAccordion = ({ stores, departments }) => {
                         className="p-2 border rounded"
                         required
                     />
-                    <button type="submit" className="p-2 bg-blue-500 text-white rounded">
+                    <Button
+                        disabled={isLoading || !departmentName}
+                        type="submit"
+                        className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
                         Добавить
-                    </button>
+                    </Button>
                 </form>
             </Dialog>
+            <AlertModal
+                message={alertModalText}
+                open={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
+            />
         </div>
     );
 };
