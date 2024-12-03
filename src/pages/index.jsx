@@ -1,11 +1,7 @@
 export { default as General } from './General';
 export { default as Finance } from './Finance';
-export { default as Kanban } from './Kanban';
-export { default as Editor } from './Editor';
-export { default as Customers } from './Customers';
 export { default as ColorPicker } from './ColorPicker';
 export { default as Calendar } from './Calendar';
-export { default as Website } from './Website';
 export { default as Workers } from './Workers';
 export { default as Sales } from './Sales';
 export { default as Sklad } from './Sklad';
