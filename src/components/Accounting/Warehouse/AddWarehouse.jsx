@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
+import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 
 export const AddWarehouse = () => {
     const isSmallScreen = useIsSmallScreen(768);
@@ -53,7 +54,7 @@ export const AddWarehouse = () => {
     const validate = () => {
         const newErrors = {};
         if (!formData.productName) newErrors.productName = 'Название товара обязательно';
-        if (!formData.date) newErrors.date = 'Дата обязательна';
+        // if (!formData.date) newErrors.date = 'Дата обязательна';
         if (!formData.organization) newErrors.organization = 'Организация обязательна';
         if (!formData.responsible) newErrors.responsible = 'Ответственный обязателен';
         if (!formData.warehouse) newErrors.warehouse = 'Склад обязателен';
@@ -76,14 +77,19 @@ export const AddWarehouse = () => {
 
                 // Сериализация вложенных объектов
                 submissionData.append('productName', JSON.stringify(formData.productName));
-                submissionData.append('date', formData.date.toISOString());
+                submissionData.append('date', new Date().toISOString());
                 submissionData.append('organization', JSON.stringify(formData.organization));
                 submissionData.append('responsible', JSON.stringify(formData.responsible));
                 submissionData.append('warehouse', JSON.stringify(formData.warehouse));
                 submissionData.append('reason', formData.reason);
                 submissionData.append('quantity', formData.quantity);
                 submissionData.append('file', formData.file);
-                const companyId = localStorage.getItem('companyId');
+                const currentUserDepartmentId = localStorage.getItem('departmentId');
+                const subuserCompanyId = localStorage.getItem('companyId');
+                const userId = localStorage.getItem('_id');
+                const companyId = isValidDepartmentId(currentUserDepartmentId)
+                    ? subuserCompanyId
+                    : userId;
                 const response = await fetch(
                     `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
                     {
