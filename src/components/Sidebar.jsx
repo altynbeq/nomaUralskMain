@@ -25,7 +25,7 @@ const Sidebar = () => {
                         return null;
                     }
 
-                    const filteredCategoryLinks = category.links.filter((link) => {
+                    let filteredCategoryLinks = category.links.filter((link) => {
                         if (access.Analytics) {
                             if (link.name === 'finance' && !access.Analytics.Finance) return false;
                             if (link.name === 'sales' && !access.Analytics.Sales) return false;
@@ -34,6 +34,12 @@ const Sidebar = () => {
                         }
                         return true;
                     });
+
+                    if (Object.keys(subUser).length > 0) {
+                        filteredCategoryLinks = filteredCategoryLinks.filter(
+                            (link) => link.name !== 'sales',
+                        );
+                    }
 
                     if (filteredCategoryLinks.length === 0) {
                         return null;

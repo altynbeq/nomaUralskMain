@@ -180,10 +180,6 @@ export const MainContent = ({ urls, activeMenu }) => {
         }
     };
 
-    const handleUploadButtonClick = () => {
-        fileInput.current.click();
-    };
-
     return (
         <>
             <div

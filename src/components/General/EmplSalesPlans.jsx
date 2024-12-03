@@ -113,7 +113,7 @@ export const EmplSalesPlans = () => {
                             optionLabel="storeName"
                             placeholder="Магазин"
                             showClear
-                            className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                            className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         />
                     </div>
                     <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
@@ -124,7 +124,7 @@ export const EmplSalesPlans = () => {
                             optionLabel="name"
                             showClear
                             placeholder="Отдел"
-                            className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                            className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         />
                     </div>
                 </div>
