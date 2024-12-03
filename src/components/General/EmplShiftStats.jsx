@@ -136,14 +136,14 @@ export const EmpltSiftStats = () => {
                 </div>
             </div>
             <hr className="bg-red max-w-xs mx-auto my-4" />
-            <div className="flex flex-col gap-2 md:flex-row md:gap-0 justify-between mb-4">
+            <div className="flex flex-row gap-2  md:gap-0 justify-between mb-4">
                 <Dropdown
                     value={selectedStore}
                     onChange={(e) => setSelectedStore(e.value)}
                     options={companyStructure?.stores || []}
                     optionLabel="storeName"
                     showClear
-                    placeholder="Выберите магазин"
+                    placeholder="Магазин"
                     className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                 />
                 <div className="flex items-center justify-center">

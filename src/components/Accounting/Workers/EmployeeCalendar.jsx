@@ -116,9 +116,9 @@ export const EmployeeCalendar = () => {
     }, [month, year]);
 
     return (
-        <div className="w-full bg-white p-6">
+        <div className="w-[100%] bg-white p-6">
             {/* Верхняя панель */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-4">
                 <div className="flex items-center gap-2 ml-4 mt-4">
                     <button
                         onClick={handlePrevMonth}
@@ -134,31 +134,35 @@ export const EmployeeCalendar = () => {
                         →
                     </button>
                 </div>
-                <div className="flex gap-4">
-                    <Dropdown
-                        value={selectedDepartment}
-                        onChange={(e) => setSelectedDepartment(e.value)}
-                        showClear
-                        options={companyStructure?.departments || []}
-                        optionLabel="name"
-                        placeholder="Выберите отдел"
-                        className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    />
-                    <Dropdown
-                        value={selectedStore}
-                        onChange={(e) => setSelectedStore(e.value)}
-                        options={companyStructure?.stores || []}
-                        optionLabel="storeName"
-                        showClear
-                        placeholder="Выберите магазин"
-                        className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                    />
-                    <InputText
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Поиск"
-                        className="flex-1 w-full pl-10 p-2 border border-gray-300 rounded-md"
-                    />
+                <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
+                    <div className="flex gap-2 justify-between">
+                        <Dropdown
+                            value={selectedDepartment}
+                            onChange={(e) => setSelectedDepartment(e.value)}
+                            showClear
+                            options={companyStructure?.departments || []}
+                            optionLabel="name"
+                            placeholder="Отдел"
+                            className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        />
+                        <Dropdown
+                            value={selectedStore}
+                            onChange={(e) => setSelectedStore(e.value)}
+                            options={companyStructure?.stores || []}
+                            optionLabel="storeName"
+                            showClear
+                            placeholder="Магазин"
+                            className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                        />
+                    </div>
+                    <div>
+                        <InputText
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Поиск"
+                            className="flex-1 w-full pl-10 p-2 border border-gray-300 rounded-md"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -273,7 +277,7 @@ export const EmployeeCalendar = () => {
                         currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'
                     }`}
                 >
-                    Предыдущая
+                    &lt;
                 </button>
                 <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages || 1}`}</span>
                 <button
@@ -283,7 +287,7 @@ export const EmployeeCalendar = () => {
                         currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'
                     }`}
                 >
-                    Следующая
+                    &gt;
                 </button>
             </div>
         </div>

@@ -180,8 +180,8 @@ const Calendar = () => {
     };
 
     return (
-        <>
-            <div className="m-2 mb-0 p-2 pb-0 bg-white rounded-3xl">
+        <div className="w-[100%] align-center justify-center">
+            <div className="m-2 mt-20 md:mt-0 mb-0 p-2 pb-0 bg-white rounded-3xl">
                 <div className="flex justify-between max-h-[40px] mb-16 mt-5">
                     {' '}
                     <Header category="Учёт" title="Смены" />
@@ -240,8 +240,10 @@ const Calendar = () => {
                     }}
                 />
             </div>
-            <EmployeeCalendar />
-        </>
+            <div className="flex ml-5 mt-10 w-[90%] md:ml-0 md:w-[100%] subtle-border">
+                <EmployeeCalendar />
+            </div>
+        </div>
     );
 };
 

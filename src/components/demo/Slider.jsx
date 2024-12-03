@@ -73,7 +73,7 @@ const Slider = ({ title, data, userKkmUrl }) => {
 
     return (
         <div
-            style={{ alignSelf: 'flex-start' }}
+            style={{ alignSelf: '' }}
             className={`bg-white dark:text-gray-200 justify-center p-6 dark:bg-secondary-dark-bg w-[90%] md:w-[42%] rounded-2xl subtle-border`}
         >
             <div className="flex flex-row justify-between gap-4 ">
