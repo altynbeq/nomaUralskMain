@@ -1,0 +1,136 @@
+// StoreAccordion.jsx
+import React, { useState, useEffect } from 'react';
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import AlertModal from '../../AlertModal';
+
+export const StoreAccordion = ({ stores, departments }) => {
+    const [activeIndex, setActiveIndex] = useState(null);
+    const [activeStoreId, setActiveStoreId] = useState(null);
+    const [filteredDepartments, setFilteredDepartments] = useState([]);
+    const [showAddDepartmentModal, setShowAddDepartmentModal] = useState(false);
+    const [departmentName, setDepartmentName] = useState('');
+    const [showAlertModal, setShowAlertModal] = useState(false);
+
+    // Обработчик изменения вкладки
+    const onTabChange = (e) => {
+        const newIndex = e.index === activeIndex ? null : e.index;
+        setActiveIndex(newIndex);
+        setActiveStoreId(newIndex !== null ? stores[newIndex]._id : null);
+    };
+
+    // Фильтрация департаментов при изменении activeStoreId
+    useEffect(() => {
+        if (activeStoreId) {
+            const filtered = departments.filter((dept) => dept.storeId === activeStoreId);
+            setFilteredDepartments(filtered);
+        } else {
+            setFilteredDepartments([]);
+        }
+    }, [activeStoreId, departments]);
+
+    // Обработчики событий
+    const handleEditDepartment = (dept) => {
+        console.log('Редактировать департамент:', dept);
+        // Реализуйте логику редактирования
+    };
+
+    const handleDeleteDepartment = (dept) => {
+        console.log('Удалить департамент:', dept);
+        // Реализуйте логику удаления
+    };
+
+    const handleAddDepartment = (storeId) => {
+        setShowAddDepartmentModal(true);
+    };
+
+    const addDeparmentSubmit = async () => {
+        const response = await fetch(
+            `https://nomalytica-back.onrender.com/api/departments/create-department/`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    storeId: activeStoreId,
+                    name: departmentName,
+                }),
+            },
+        );
+        await response.json();
+        if (response.ok) {
+            setShowAlertModal(true);
+            setDepartmentName('');
+        }
+    };
+
+    return (
+        <div className="mx-auto w-full sm:w-[90%] p-4">
+            <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
+                {stores.map((store, index) => (
+                    <AccordionTab key={store._id} header={store.storeName}>
+                        {activeIndex === index && (
+                            <div className="p-4">
+                                <ul className="list-none p-0">
+                                    {filteredDepartments.length > 0 ? (
+                                        filteredDepartments.map((dept) => (
+                                            <li
+                                                key={dept._id}
+                                                className="flex justify-between items-center mb-2"
+                                            >
+                                                <span className="text-black">{dept.name}</span>
+                                                <div>
+                                                    <Button
+                                                        icon="pi pi-pencil"
+                                                        className="p-button-text text-blue-500 mr-2"
+                                                        onClick={() => handleEditDepartment(dept)}
+                                                    />
+                                                    <Button
+                                                        icon="pi pi-trash"
+                                                        className="p-button-text text-red-500"
+                                                        onClick={() => handleDeleteDepartment(dept)}
+                                                    />
+                                                </div>
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <li className="text-gray-500">Департаменты отсутствуют.</li>
+                                    )}
+                                </ul>
+                                <Button
+                                    label="Добавить департамент"
+                                    icon="pi pi-plus"
+                                    className="mt-4 p-button-success"
+                                    onClick={() => handleAddDepartment(activeStoreId)}
+                                />
+                            </div>
+                        )}
+                    </AccordionTab>
+                ))}
+            </Accordion>
+            <Dialog
+                header="Добавить департамент"
+                visible={showAddDepartmentModal}
+                onHide={() => setShowAddDepartmentModal(false)}
+            >
+                <form onSubmit={addDeparmentSubmit} className="flex gap-4">
+                    <input
+                        type="text"
+                        placeholder="Название"
+                        value={departmentName}
+                        onChange={(e) => {
+                            setDepartmentName(e.target.value);
+                        }}
+                        className="p-2 border rounded"
+                        required
+                    />
+                    <button type="submit" className="p-2 bg-blue-500 text-white rounded">
+                        Добавить
+                    </button>
+                </form>
+            </Dialog>
+        </div>
+    );
+};
