@@ -144,7 +144,7 @@ export const EmpltSiftStats = () => {
                     optionLabel="storeName"
                     showClear
                     placeholder="Магазин"
-                    className="bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                    className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                 />
                 <div className="flex items-center justify-center">
                     <div className="relative gap-1 bg-gray-200 rounded-full flex items-center p-1">
