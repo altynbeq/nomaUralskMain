@@ -164,6 +164,7 @@ const App = () => {
     }, [subUser]);
 
     const fetchCompanyData = async (companyId) => {
+        console.log('here');
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/companies/${companyId}`,

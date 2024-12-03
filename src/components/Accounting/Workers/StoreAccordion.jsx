@@ -216,6 +216,7 @@ export const StoreAccordion = ({ stores, departments }) => {
 
     const handleSave = async () => {
         const privileges = mapPrivilegesToBackend();
+        setIsLoading(true);
         try {
             const response = await fetch(
                 'https://nomalytica-back.onrender.com/api/access/create-access',
@@ -237,6 +238,8 @@ export const StoreAccordion = ({ stores, departments }) => {
         } catch {
             setShowAlertModal(true);
             setAlertModalText('Не удалось изменить доступы.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -260,6 +263,7 @@ export const StoreAccordion = ({ stores, departments }) => {
         }
 
         const privileges = mapPrivilegesToBackend();
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/access/update-access/${initialAccess._id}`,
@@ -278,6 +282,8 @@ export const StoreAccordion = ({ stores, departments }) => {
         } catch {
             setShowAlertModal(true);
             setAlertModalText('Не удалось изменить доступы.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -458,6 +464,7 @@ export const StoreAccordion = ({ stores, departments }) => {
                             <p>Загрузка...</p>
                         ) : (
                             <Button
+                                disabled={isLoading}
                                 onClick={handleAction}
                                 className="flex w-[50%] justify-center items-center rounded-full border-2 border-blue-500 hover:border-blue-700 py-2"
                             >
