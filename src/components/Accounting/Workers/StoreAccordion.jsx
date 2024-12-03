@@ -4,14 +4,12 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import AlertModal from '../../AlertModal';
-import { ProfileModal } from '../../Accounting/Workers/ProfileModal';
 import { AnalyticsAccess } from '../../Accounting/Workers/AnalyticsAccess';
 import { DataEditing } from '../../Accounting/Workers/DataEditing';
 import {
     DEPARTMENT_ANALYTICS_PRIVILEGES,
     DEPARTMENT_EDITING_PRIVILEGES,
 } from '../../../models/Department';
-import PropTypes from 'prop-types';
 import { StoreDetails } from './StoreDetails';
 
 export const StoreAccordion = ({ stores, departments }) => {
@@ -56,9 +54,28 @@ export const StoreAccordion = ({ stores, departments }) => {
         setShowEditDepartmentModal(true);
     };
 
-    const handleDeleteDepartment = (dept) => {
-        console.log('Удалить департамент:', dept);
-        // Реализуйте логику удаления
+    const handleDeleteDepartment = async (deptId) => {
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/departments/delete-department/${deptId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            if (response.ok) {
+                setShowAlertModal(true);
+                setShowAddDepartmentModal(false);
+                setAlertModalText('Вы успешно удалили департамент.');
+            }
+        } catch {
+            setShowAlertModal(true);
+            setAlertModalText('Не удалось добавить департемент, попробуйте снова.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleAddDepartment = (storeId) => {
@@ -328,11 +345,12 @@ export const StoreAccordion = ({ stores, departments }) => {
                                                         aria-label={`Редактировать департамент ${dept.name}`}
                                                     />
                                                     <Button
+                                                        disabled={isLoading}
                                                         icon="pi pi-trash"
                                                         className="p-button-text text-red-500"
                                                         onClick={(e) => {
                                                             e.stopPropagation(); // Предотвращаем открытие деталей департамента
-                                                            handleDeleteDepartment(dept);
+                                                            handleDeleteDepartment(dept._id);
                                                         }}
                                                         aria-label={`Удалить департамент ${dept.name}`}
                                                     />
@@ -369,13 +387,13 @@ export const StoreAccordion = ({ stores, departments }) => {
                         onChange={(e) => {
                             setDepartmentName(e.target.value);
                         }}
-                        className="p-inputtext p-component p-filled p-mr-2"
+                        className="p-2 border rounded"
                         required
                     />
                     <Button
                         disabled={isLoading || !departmentName}
                         type="submit"
-                        className={`p-button p-component p-button-primary ${
+                        className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
                             isLoading ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                     >
@@ -420,12 +438,12 @@ export const StoreAccordion = ({ stores, departments }) => {
                 onHide={() => setDepartmentDetailsModal({})}
                 style={{ width: '25vw' }}
             >
-                <div className="flex flex-col items-center gap-10">
+                <div className="flex flex-col gap-10">
                     <Button
                         label="Копировать ссылку"
                         icon="pi pi-link"
                         onClick={handleCopyClick}
-                        className="p-button-secondary"
+                        className="p-button-secondary text-left"
                     />
                     <AnalyticsAccess
                         selectedValues={analyticsAccess}
@@ -441,7 +459,7 @@ export const StoreAccordion = ({ stores, departments }) => {
                         ) : (
                             <Button
                                 onClick={handleAction}
-                                className="p-button p-component p-button-success w-1/2 text-center"
+                                className="flex w-[50%] justify-center items-center rounded-full border-2 border-blue-500 hover:border-blue-700 py-2"
                             >
                                 Сохранить
                             </Button>
