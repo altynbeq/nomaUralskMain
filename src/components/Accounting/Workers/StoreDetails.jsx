@@ -1,0 +1,93 @@
+import { useState, useRef } from 'react';
+import { MapPicker } from '../../../components/MapPicker';
+import QRCode from 'react-qr-code';
+import { Button } from 'primereact/button';
+
+export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
+    const qrRef = useRef(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+
+    const handleGeoSave = async () => {
+        if (!selectedLocation || !selectedStore) {
+            return;
+        }
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/stores/update-store/${selectedStore?._id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ location: selectedLocation }), // Передаем координаты в формате lat/lng
+                },
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+                setShowStoreInfoModal(false);
+            } else {
+                alert('Ошибка обновления локации: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Ошибка сохранения локации:', error);
+        }
+    };
+
+    const handleQRDownload = () => {
+        if (qrRef.current) {
+            try {
+                const svg = qrRef.current.querySelector('svg');
+                if (!svg) {
+                    console.error('QR code SVG not found');
+                    return;
+                }
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'qrcode.svg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+
+    return (
+        <div className="flex gap-5">
+            <div className="flex-1 flex flex-col mb-5">
+                <h1 className="text-lg font-semibold text-center">Укажите локацию магазина</h1>
+                <MapPicker
+                    savedSelectedStoreLocation={selectedStore?.location}
+                    selectedLocation={selectedLocation}
+                    setSelectedLocation={setSelectedLocation}
+                />
+                <Button
+                    className="mx-auto mt-5 bg-blue-500 text-white rounded p-2 max-w-[180px]"
+                    onClick={() => handleGeoSave()}
+                    label="Выбрать локацию"
+                />
+            </div>
+            <div className="flex-1 flex flex-col justify-center items-center" ref={qrRef}>
+                <QRCode
+                    title="Nomalytica"
+                    value={'https://nomalytics-romantic.netlify.app?isQrRedirect=true'}
+                    bgColor={'#FFFFFF'}
+                    fgColor={'#000000'}
+                    size={300}
+                />
+                <Button
+                    className="mt-5 bg-blue-500 text-white rounded p-2"
+                    onClick={() => handleQRDownload()}
+                    label="Cкачать QR-код"
+                />
+            </div>
+        </div>
+    );
+};

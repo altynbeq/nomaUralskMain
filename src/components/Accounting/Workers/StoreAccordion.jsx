@@ -11,6 +11,8 @@ import {
     DEPARTMENT_ANALYTICS_PRIVILEGES,
     DEPARTMENT_EDITING_PRIVILEGES,
 } from '../../../models/Department';
+import PropTypes from 'prop-types';
+import { StoreDetails } from './StoreDetails';
 
 export const StoreAccordion = ({ stores, departments }) => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -28,6 +30,8 @@ export const StoreAccordion = ({ stores, departments }) => {
     const [analyticsAccess, setAnalyticsAccess] = useState([]);
     const [dataEditingAccess, setDataEditingAccess] = useState([]);
     const [initialAccess, setInitialAccess] = useState(null);
+    const [showStoreInfoModal, setShowStoreInfoModal] = useState(false);
+    const [selectedStoreInfo, setSelectedStoreInfo] = useState(null);
 
     // Обработчик изменения вкладки
     const onTabChange = (e) => {
@@ -192,6 +196,7 @@ export const StoreAccordion = ({ stores, departments }) => {
             DataManagement: editingPrivileges['Allow'],
         };
     };
+
     const handleSave = async () => {
         const privileges = mapPrivilegesToBackend();
         try {
@@ -269,11 +274,37 @@ export const StoreAccordion = ({ stores, departments }) => {
         }
     };
 
+    // Обработчик кнопки информации
+    const handleStoreInfo = (store) => {
+        setSelectedStoreInfo(store);
+        setShowStoreInfoModal(true);
+    };
+
     return (
         <div className="mx-auto w-full sm:w-[90%] p-4">
             <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
                 {stores.map((store, index) => (
-                    <AccordionTab key={store._id} header={store.storeName}>
+                    <AccordionTab
+                        key={store._id}
+                        header={
+                            <div className="flex justify-between items-center w-full">
+                                <span>{store.storeName}</span>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Предотвращаем переключение аккордеона
+                                        handleStoreInfo(store);
+                                    }}
+                                    className="p-button-text p-0"
+                                    aria-label={`Информация о магазине ${store.storeName}`}
+                                >
+                                    <i
+                                        className="pi pi-info-circle"
+                                        style={{ fontSize: '1.2rem' }}
+                                    ></i>
+                                </button>
+                            </div>
+                        }
+                    >
                         {activeIndex === index && (
                             <div className="p-4">
                                 <ul className="list-none p-0 flex flex-col gap-4">
@@ -289,15 +320,21 @@ export const StoreAccordion = ({ stores, departments }) => {
                                                     <Button
                                                         icon="pi pi-pencil"
                                                         className="p-button-text text-blue-500 mr-2"
-                                                        onClick={() => {
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Предотвращаем открытие деталей департамента
                                                             handleEditDepartment(dept.name);
                                                             setSelectedEditingDepartment(dept);
                                                         }}
+                                                        aria-label={`Редактировать департамент ${dept.name}`}
                                                     />
                                                     <Button
                                                         icon="pi pi-trash"
                                                         className="p-button-text text-red-500"
-                                                        onClick={() => handleDeleteDepartment(dept)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Предотвращаем открытие деталей департамента
+                                                            handleDeleteDepartment(dept);
+                                                        }}
+                                                        aria-label={`Удалить департамент ${dept.name}`}
                                                     />
                                                 </div>
                                             </li>
@@ -317,6 +354,8 @@ export const StoreAccordion = ({ stores, departments }) => {
                     </AccordionTab>
                 ))}
             </Accordion>
+
+            {/* Модальное окно для добавления департамента */}
             <Dialog
                 header="Добавить департамент"
                 visible={showAddDepartmentModal}
@@ -330,13 +369,13 @@ export const StoreAccordion = ({ stores, departments }) => {
                         onChange={(e) => {
                             setDepartmentName(e.target.value);
                         }}
-                        className="p-2 border rounded"
+                        className="p-inputtext p-component p-filled p-mr-2"
                         required
                     />
                     <Button
                         disabled={isLoading || !departmentName}
                         type="submit"
-                        className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
+                        className={`p-button p-component p-button-primary ${
                             isLoading ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                     >
@@ -344,6 +383,8 @@ export const StoreAccordion = ({ stores, departments }) => {
                     </Button>
                 </form>
             </Dialog>
+
+            {/* Модальное окно для редактирования департамента */}
             <Dialog
                 header="Изменить департамент"
                 visible={showEditDepartmentModal}
@@ -357,13 +398,13 @@ export const StoreAccordion = ({ stores, departments }) => {
                         onChange={(e) => {
                             setEditedDepartmentName(e.target.value);
                         }}
-                        className="p-2 border rounded"
+                        className="p-inputtext p-component p-filled p-mr-2"
                         required
                     />
                     <Button
                         disabled={isLoading}
                         type="submit"
-                        className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
+                        className={`p-button p-component p-button-primary ${
                             isLoading ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                     >
@@ -371,15 +412,21 @@ export const StoreAccordion = ({ stores, departments }) => {
                     </Button>
                 </form>
             </Dialog>
+
+            {/* Модальное окно для отображения деталей департамента */}
             <Dialog
                 header="Детали департамента"
-                visible={Object.keys(departmentDetailsModal).length}
+                visible={Object.keys(departmentDetailsModal).length !== 0}
                 onHide={() => setDepartmentDetailsModal({})}
+                style={{ width: '25vw' }}
             >
-                <div className="flex flex-col gap-10">
-                    <button onClick={handleCopyClick}>
-                        <i className="pi pi-link" style={{ fontSize: '2.5rem' }}></i>
-                    </button>
+                <div className="flex flex-col items-center gap-10">
+                    <Button
+                        label="Копировать ссылку"
+                        icon="pi pi-link"
+                        onClick={handleCopyClick}
+                        className="p-button-secondary"
+                    />
                     <AnalyticsAccess
                         selectedValues={analyticsAccess}
                         setSelectedValues={setAnalyticsAccess}
@@ -388,13 +435,13 @@ export const StoreAccordion = ({ stores, departments }) => {
                         selectedValues={dataEditingAccess}
                         setSelectedValues={setDataEditingAccess}
                     />
-                    <div className="flex justify-center items-center">
+                    <div className="flex w-full justify-center items-center">
                         {isLoading ? (
                             <p>Загрузка...</p>
                         ) : (
                             <Button
                                 onClick={handleAction}
-                                className="flex w-[50%] justify-center items-center rounded-full border-2 border-blue-500 hover:border-blue-700 py-2"
+                                className="p-button p-component p-button-success w-1/2 text-center"
                             >
                                 Сохранить
                             </Button>
@@ -402,6 +449,21 @@ export const StoreAccordion = ({ stores, departments }) => {
                     </div>
                 </div>
             </Dialog>
+
+            {/* Модальное окно для отображения информации о магазине */}
+            <Dialog
+                header={`Информация о магазине: ${selectedStoreInfo?.storeName}`}
+                visible={showStoreInfoModal}
+                onHide={() => setShowStoreInfoModal(false)}
+                style={{ width: '60vw' }}
+            >
+                <StoreDetails
+                    setShowStoreInfoModal={setShowStoreInfoModal}
+                    selectedStore={selectedStoreInfo}
+                />
+            </Dialog>
+
+            {/* Модальное окно для оповещений */}
             <AlertModal
                 message={alertModalText}
                 open={showAlertModal}
