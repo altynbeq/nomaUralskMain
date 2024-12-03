@@ -14,6 +14,9 @@ export const StoreAccordion = ({ stores, departments }) => {
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [alertModalText, setAlertModalText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showEditDepartmentModal, setShowEditDepartmentModal] = useState(false);
+    const [editedDepartmentName, setEditedDepartmentName] = useState('');
+    const [selectedEditingDepartment, setSelectedEditingDepartment] = useState(null);
 
     // Обработчик изменения вкладки
     const onTabChange = (e) => {
@@ -33,9 +36,9 @@ export const StoreAccordion = ({ stores, departments }) => {
     }, [activeStoreId, departments]);
 
     // Обработчики событий
-    const handleEditDepartment = (dept) => {
-        console.log('Редактировать департамент:', dept);
-        // Реализуйте логику редактирования
+    const handleEditDepartment = (deptName) => {
+        setEditedDepartmentName(deptName);
+        setShowEditDepartmentModal(true);
     };
 
     const handleDeleteDepartment = (dept) => {
@@ -51,22 +54,58 @@ export const StoreAccordion = ({ stores, departments }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await fetch(`https://nomalytica-back.onrender.com/api/departments/create-department/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/departments/create-department/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        storeId: activeStoreId,
+                        name: departmentName,
+                    }),
                 },
-                body: JSON.stringify({
-                    storeId: activeStoreId,
-                    name: departmentName,
-                }),
-            });
-            setShowAlertModal(true);
-            setShowAddDepartmentModal(false);
-            setAlertModalText('Вы успешно добавили департамент.');
+            );
+            if (response.ok) {
+                setShowAlertModal(true);
+                setShowAddDepartmentModal(false);
+                setAlertModalText('Вы успешно добавили департамент.');
+            }
         } catch {
             setShowAlertModal(true);
             setAlertModalText('Не удалось добавить департемент, попробуйте снова.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const editDeparmentSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/departments/update-department/${selectedEditingDepartment._id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: editedDepartmentName,
+                    }),
+                },
+            );
+            if (response.ok) {
+                setShowAlertModal(true);
+                setShowEditDepartmentModal(false);
+                setSelectedEditingDepartment(null);
+                setEditedDepartmentName('');
+                setAlertModalText('Вы успешно изменили департамент.');
+            }
+        } catch {
+            setShowAlertModal(true);
+            setAlertModalText('Не удалось изменить департемент, попробуйте снова.');
         } finally {
             setIsLoading(false);
         }
@@ -91,7 +130,10 @@ export const StoreAccordion = ({ stores, departments }) => {
                                                     <Button
                                                         icon="pi pi-pencil"
                                                         className="p-button-text text-blue-500 mr-2"
-                                                        onClick={() => handleEditDepartment(dept)}
+                                                        onClick={() => {
+                                                            handleEditDepartment(dept.name);
+                                                            setSelectedEditingDepartment(dept);
+                                                        }}
                                                     />
                                                     <Button
                                                         icon="pi pi-trash"
@@ -140,6 +182,33 @@ export const StoreAccordion = ({ stores, departments }) => {
                         }`}
                     >
                         Добавить
+                    </Button>
+                </form>
+            </Dialog>
+            <Dialog
+                header="Изменить департамент"
+                visible={showEditDepartmentModal}
+                onHide={() => setShowEditDepartmentModal(false)}
+            >
+                <form onSubmit={editDeparmentSubmit} className="flex gap-4">
+                    <input
+                        type="text"
+                        placeholder="Название"
+                        value={editedDepartmentName}
+                        onChange={(e) => {
+                            setEditedDepartmentName(e.target.value);
+                        }}
+                        className="p-2 border rounded"
+                        required
+                    />
+                    <Button
+                        disabled={isLoading}
+                        type="submit"
+                        className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                        Изменить
                     </Button>
                 </form>
             </Dialog>
