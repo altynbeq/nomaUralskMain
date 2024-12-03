@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -22,7 +22,17 @@ const LocationPicker = ({ onLocationSelect }) => {
     return null;
 };
 
-export const MapPicker = ({ selectedLocation, setSelectedLocation }) => {
+export const MapPicker = ({
+    selectedLocation,
+    setSelectedLocation,
+    savedSelectedStoreLocation,
+}) => {
+    useEffect(() => {
+        if (savedSelectedStoreLocation) {
+            setSelectedLocation(savedSelectedStoreLocation);
+        }
+    }, [savedSelectedStoreLocation, setSelectedLocation]);
+
     const handleLocationSelect = (latlng) => {
         setSelectedLocation(latlng);
     };
@@ -30,7 +40,11 @@ export const MapPicker = ({ selectedLocation, setSelectedLocation }) => {
     return (
         <div>
             <MapContainer
-                center={selectedLocation || [51.1694, 71.4491]} // Начальная точка
+                center={
+                    savedSelectedStoreLocation
+                        ? [savedSelectedStoreLocation.lat, savedSelectedStoreLocation.lng]
+                        : [51.1694, 71.4491] // Центр карты по умолчанию
+                }
                 zoom={13}
                 style={{ height: '300px' }}
             >
@@ -39,8 +53,13 @@ export const MapPicker = ({ selectedLocation, setSelectedLocation }) => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <LocationPicker onLocationSelect={handleLocationSelect} />
-                {selectedLocation && (
-                    <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
+                {(selectedLocation || savedSelectedStoreLocation) && (
+                    <Marker
+                        position={[
+                            (selectedLocation || savedSelectedStoreLocation).lat,
+                            (selectedLocation || savedSelectedStoreLocation).lng,
+                        ]}
+                    />
                 )}
             </MapContainer>
         </div>

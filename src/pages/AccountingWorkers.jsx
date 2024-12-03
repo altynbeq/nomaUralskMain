@@ -39,6 +39,7 @@ const AccountingWorkers = () => {
                     icon: defaultImage(),
                     name: item.storeName,
                     level: 1,
+                    location: item.location,
                 });
             }
         });
@@ -112,6 +113,7 @@ const AccountingWorkers = () => {
             setDepartments(buildDepartments(structure));
         }
         if (structure && stores.length === 0) {
+            console.log(structure, 'structure');
             setStores(buildStores(structure));
         }
         if (structure && subUsers.length === 0) {
