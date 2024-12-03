@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ProfileModalHeader } from './ProfileModalHeader';
 import { AnalyticsAccess } from './AnalyticsAccess';
 import { DataEditing } from './DataEditing';
-import { EditDepartment } from './EditDepartment';
 import { Button } from '@mantine/core';
 import {
     Department,
@@ -17,7 +16,6 @@ interface ProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     department: Department;
-    tooltipIconsClickHandler: () => void;
 }
 
 interface DepartAccesses {
@@ -36,12 +34,7 @@ interface DepartAccesses {
     }>;
 }
 
-export const ProfileModal: React.FC<ProfileModalProps> = ({
-    isOpen,
-    onClose,
-    department,
-    tooltipIconsClickHandler,
-}) => {
+export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, department }) => {
     const modalContentRef = useRef<HTMLDivElement>(null);
     const { isLoading, fetchData } = useFetch<DepartAccesses>();
 
@@ -199,10 +192,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 className="bg-white rounded-xl shadow-lg w-[430px] p-6 relative font-comfortaa flex flex-col justify-center gap-10"
             >
                 <ProfileModalHeader onClose={onClose} />
-                <EditDepartment
-                    tooltipIconsClickHandler={tooltipIconsClickHandler}
-                    item={department}
-                />
                 <AnalyticsAccess
                     selectedValues={analyticsAccess}
                     setSelectedValues={setAnalyticsAccess}

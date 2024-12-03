@@ -85,6 +85,9 @@ const App = () => {
         };
 
         const fetchSubUserData = async (departmentId) => {
+            if (!departmentId) {
+                return;
+            }
             try {
                 const response = await fetch(
                     `https://nomalytica-back.onrender.com/api/access/access-and-subusers/${departmentId}`,
