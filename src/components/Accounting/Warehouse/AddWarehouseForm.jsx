@@ -35,12 +35,11 @@ export const AddWarehouseForm = ({
 
     useEffect(() => {
         handleDropdownChange(subUser, 'responsible');
-        handleDateChange(new Date(), 'date');
     }, [handleDateChange, handleDropdownChange, subUser]);
 
     return (
         <form className="px-4" onSubmit={handleSubmit}>
-            <div className={`grid gap-4 ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <div className={`grid gap-4 grid-cols-1 md:grid-cols-2`}>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Название товара</label>
                     <Dropdown
@@ -82,7 +81,7 @@ export const AddWarehouseForm = ({
                     <label className="text-sm font-medium">Ответственный</label>
                     <InputText
                         value={subUser.name}
-                        // onChange={(e) => handleInputChange(e, 'responsible')}
+                        onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
                         className={`border-blue-500 border-2 rounded p-2 max-w-[250px] ${errors.responsible ? 'border-red-500' : ''}`}
                     />
@@ -107,7 +106,7 @@ export const AddWarehouseForm = ({
                         value={formData.reason}
                         onChange={(e) => handleInputChange(e, 'reason')}
                         placeholder="Причина"
-                        className={`border-blue-500 border-2 placeholder-gray rounded p-2 max-w-[250px] text-white ${errors.reason ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 placeholder-gray rounded p-2 max-w-[250px] ${errors.reason ? 'border-red-500' : ''}`}
                     />
                     {errors.reason && <small className="p-error">{errors.reason}</small>}
                 </div>
@@ -148,7 +147,7 @@ export const AddWarehouseForm = ({
 
                 {/* Предпросмотр загруженного файла */}
                 {previewUrl && (
-                    <div className="col-span-2 flex flex-col items-center">
+                    <div className="flex flex-col items-center md:col-span-2">
                         <label className="text-sm font-medium">Предпросмотр фото:</label>
                         <img
                             src={previewUrl}
@@ -158,7 +157,7 @@ export const AddWarehouseForm = ({
                     </div>
                 )}
             </div>
-            <div className="col-span-2 flex justify-center">
+            <div className="flex justify-center md:col-span-2">
                 <Button
                     label="Добавить"
                     type="submit"

@@ -403,6 +403,7 @@ export default function AnimatedBeamMultipleOutputDemo({
                             Укажите локацию магазина
                         </h1>
                         <MapPicker
+                            savedSelectedStoreLocation={selectedStore?.location}
                             selectedLocation={selectedLocation}
                             setSelectedLocation={setSelectedLocation}
                         />
