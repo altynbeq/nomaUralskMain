@@ -31,6 +31,10 @@ export const AddWarehouseForm = ({
         }
     }, [formData.file]);
 
+    const handleRemoveFile = () => {
+        handleFileUpload(null); // Очищаем файл в `formData`
+    };
+
     useEffect(() => {
         handleDropdownChange(subUser, 'responsible');
     }, [handleDateChange, handleDropdownChange, subUser]);
@@ -129,19 +133,36 @@ export const AddWarehouseForm = ({
                 <div className="space-y-2 flex flex-col max-w-[150px]">
                     <label className="text-sm font-medium">Фото</label>
                     <div className="relative">
-                        <input
-                            id="file-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileUpload(e.target.files[0])}
-                            className="hidden" // Скрываем стандартный input
-                        />
-                        <label
-                            htmlFor="file-upload"
-                            className="bg-blue-500 text-white px-4 rounded cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center"
-                        >
-                            Загрузить
-                        </label>
+                        {!formData.file ? (
+                            <>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileUpload(e.target.files[0])}
+                                    className="hidden"
+                                />
+                                <label
+                                    htmlFor="file-upload"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center"
+                                >
+                                    Загрузить фото
+                                </label>
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center">
+                                <img
+                                    src={previewUrl}
+                                    alt="Preview"
+                                    className="max-h-48 object-contain border rounded mb-2"
+                                />
+                                <Button
+                                    label="Удалить фото"
+                                    className="p-button-danger"
+                                    onClick={handleRemoveFile}
+                                />
+                            </div>
+                        )}
                     </div>
                     {errors.file && <small className="p-error">{errors.file}</small>}
                     <p className="text-xs text-gray-500">Сделайте фото товара</p>

@@ -93,6 +93,7 @@ label[for="file-upload"] {
     color: white;
     border-radius: 5px;
     min-height: 43px;
+    min-width: 190px;
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s ease;
