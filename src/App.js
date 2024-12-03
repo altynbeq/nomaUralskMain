@@ -61,6 +61,7 @@ const App = () => {
             try {
                 if (isEmployee()) {
                     await fetchSubUserData();
+                    await fetchCompanyDataForSubuser();
                 } else {
                     await fetchCompanyData();
                 }
@@ -121,6 +122,39 @@ const App = () => {
     const fetchCompanyData = async () => {
         const companyId = localStorage.getItem('_id');
 
+        if (!companyId) {
+            return;
+        }
+
+        try {
+            const [bitrixData, urlsData] = await Promise.all([
+                getLeadsBack(companyId),
+                getUserUrls(companyId),
+            ]);
+
+            if (!bitrixData) {
+                setTechProblem(true);
+                return;
+            }
+
+            setUserData({
+                email: bitrixData.email,
+                name: bitrixData.name,
+            });
+
+            setLeads(JSON.parse(bitrixData.leads));
+            setDeals(JSON.parse(bitrixData.deals));
+            setKKM(JSON.parse(bitrixData.kkmData));
+            setReceipts(JSON.parse(bitrixData.salesReceipt));
+            setSpisanie(JSON.parse(bitrixData.productsSpisanie));
+            setUrls(urlsData);
+        } catch (error) {
+            console.error('Error fetching company data:', error);
+        }
+    };
+
+    const fetchCompanyDataForSubuser = async () => {
+        const companyId = localStorage.getItem('companyId');
         if (!companyId) {
             return;
         }
