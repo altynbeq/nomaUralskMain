@@ -1,3 +1,4 @@
+// App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
@@ -30,7 +31,6 @@ const App = () => {
         setCompanyStructure,
         setProducts,
         setWarehouses,
-        subUser,
     } = useStateContext();
 
     const [loading, setLoading] = useState(true);
@@ -39,43 +39,32 @@ const App = () => {
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
 
+    const isEmployee = () => {
+        const departmentId = localStorage.getItem('departmentId');
+        return !!departmentId && isValidDepartmentId(departmentId);
+    };
+
     useEffect(() => {
         const currentUserId = localStorage.getItem('_id');
         const currentToken = localStorage.getItem('token');
-        const currentUserDepartmentId = localStorage.getItem('departmentId');
         const userLoggedIn = currentUserId !== null && currentToken !== null;
         setIsLoggedIn(userLoggedIn);
 
         const searchParams = new URLSearchParams(window.location.search);
-        const isQr = searchParams.get('isQrRedirect') === 'true'; // Проверяем наличие параметра isQr=true
+        const isQr = searchParams.get('isQrRedirect') === 'true';
 
         if (isQr) {
             setIsQrRedirect(true);
         }
 
-        const fetchData = async (userId) => {
+        const fetchData = async () => {
             try {
-                const [bitrixData, urlsData] = await Promise.all([
-                    getLeadsBack(userId),
-                    getUserUrls(userId),
-                ]);
-
-                if (!bitrixData) {
-                    setTechProblem(true);
-                    return;
+                if (isEmployee()) {
+                    await fetchSubUserData();
+                } else {
+                    await fetchCompanyData();
                 }
-
-                setUserData({
-                    email: bitrixData.email,
-                    name: bitrixData.name,
-                });
-
-                setLeads(JSON.parse(bitrixData.leads));
-                setDeals(JSON.parse(bitrixData.deals));
-                setKKM(JSON.parse(bitrixData.kkmData));
-                setReceipts(JSON.parse(bitrixData.salesReceipt));
-                setSpisanie(JSON.parse(bitrixData.productsSpisanie));
-                setUrls(urlsData);
+                await fetchUserStructure();
             } catch (error) {
                 setTechProblem(true);
             } finally {
@@ -84,58 +73,100 @@ const App = () => {
             }
         };
 
-        const fetchSubUserData = async (departmentId) => {
-            try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/access/access-and-subusers/${departmentId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                const currentUserSubUser = result.subUsers.find(
-                    (user) => user._id === currentUserId,
-                );
-
-                setUserData({
-                    email: currentUserSubUser.email,
-                    name: currentUserSubUser.name,
-                });
-
-                setAccess(result.access);
-                if (currentUserSubUser) {
-                    setSubUser(currentUserSubUser);
-                }
-            } catch (error) {
-                console.error('Error fetching sub-user data:', error);
-            }
-        };
-
         if (userLoggedIn) {
-            if (isValidDepartmentId(currentUserDepartmentId)) {
-                fetchSubUserData(currentUserDepartmentId);
-                setLoading(false);
-                setSkeletonUp(false);
-                const companyId = localStorage.getItem('companyId');
-                fetchUserStructure(companyId);
-            } else {
-                fetchData(currentUserId);
-                fetchUserStructure(currentUserId);
-            }
+            fetchData();
         } else {
             setLoading(false);
             setSkeletonUp(false);
         }
-    }, [setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setSpisanie, setUserData]);
+    }, []);
 
-    const fetchUserStructure = async (id) => {
-        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
+    const fetchSubUserData = async () => {
+        const departmentId = localStorage.getItem('departmentId');
+        const currentUserId = localStorage.getItem('_id');
+
+        if (!departmentId || !currentUserId) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/access/access-and-subusers/${departmentId}`,
+                {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            const currentUserSubUser = result.subUsers.find((user) => user._id === currentUserId);
+
+            if (currentUserSubUser) {
+                setUserData({
+                    email: currentUserSubUser.email,
+                    name: currentUserSubUser.name,
+                });
+                setAccess(result.access);
+                setSubUser(currentUserSubUser);
+            }
+        } catch (error) {
+            console.error('Error fetching sub-user data:', error);
+        }
+    };
+
+    const fetchCompanyData = async () => {
+        const companyId = localStorage.getItem('_id');
+
+        if (!companyId) {
+            return;
+        }
+
+        try {
+            const [bitrixData, urlsData] = await Promise.all([
+                getLeadsBack(companyId),
+                getUserUrls(companyId),
+            ]);
+
+            if (!bitrixData) {
+                setTechProblem(true);
+                return;
+            }
+
+            setUserData({
+                email: bitrixData.email,
+                name: bitrixData.name,
+            });
+
+            setLeads(JSON.parse(bitrixData.leads));
+            setDeals(JSON.parse(bitrixData.deals));
+            setKKM(JSON.parse(bitrixData.kkmData));
+            setReceipts(JSON.parse(bitrixData.salesReceipt));
+            setSpisanie(JSON.parse(bitrixData.productsSpisanie));
+            setUrls(urlsData);
+        } catch (error) {
+            console.error('Error fetching company data:', error);
+        }
+    };
+
+    const fetchUserStructure = async () => {
+        let companyId;
+
+        if (isEmployee()) {
+            companyId = localStorage.getItem('companyId');
+        } else {
+            companyId = localStorage.getItem('_id');
+        }
+
+        if (!companyId) {
+            console.error('Не удалось получить companyId из localStorage.');
+            return;
+        }
+
+        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${companyId}`;
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -143,24 +174,25 @@ const App = () => {
             }
             const data = await response.json();
             setCompanyStructure(data);
-            return data;
         } catch (error) {
             console.error('Failed to fetch data:', error);
         }
     };
 
-    useEffect(() => {
-        const currentUserDepartmentId = localStorage.getItem('departmentId');
-        const subuserCompanyId = localStorage.getItem('companyId');
-        const companyId = localStorage.getItem('_id');
-        if (isValidDepartmentId(currentUserDepartmentId)) {
-            fetchCompanyData(subuserCompanyId);
-        } else {
-            fetchCompanyData(companyId);
-        }
-    }, [subUser]);
+    const fetchCompanyProductsAndWarehouses = async () => {
+        let companyId;
 
-    const fetchCompanyData = async (companyId) => {
+        if (isEmployee()) {
+            companyId = localStorage.getItem('companyId');
+        } else {
+            companyId = localStorage.getItem('_id');
+        }
+
+        if (!companyId) {
+            console.error('Не удалось получить companyId из localStorage.');
+            return;
+        }
+
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
@@ -190,6 +222,12 @@ const App = () => {
             console.error('Error fetching company data:', error);
         }
     };
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchCompanyProductsAndWarehouses();
+        }
+    }, [isLoggedIn]);
 
     if (techProblem) {
         return <TechProb />;

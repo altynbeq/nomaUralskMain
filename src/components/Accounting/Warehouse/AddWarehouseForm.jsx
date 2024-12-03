@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
-import { FileUpload } from 'primereact/fileupload';
-import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import { useStateContext } from '../../../contexts/ContextProvider';
 import { formatDate } from '../../../methods/dataFormatter';
 
@@ -15,9 +13,9 @@ export const AddWarehouseForm = ({
     handleDropdownChange,
     handleFileUpload, // Обработчик файлов
     handleSubmit,
+    isLoading,
     errors, // Получаем ошибки из родительского компонента
 }) => {
-    const isSmallScreen = useIsSmallScreen(768);
     const [previewUrl, setPreviewUrl] = useState(null);
     const { warehouses, products, companyStructure, subUser } = useStateContext();
 
@@ -32,6 +30,10 @@ export const AddWarehouseForm = ({
             setPreviewUrl(null);
         }
     }, [formData.file]);
+
+    const handleRemoveFile = () => {
+        handleFileUpload(null); // Очищаем файл в `formData`
+    };
 
     useEffect(() => {
         handleDropdownChange(subUser, 'responsible');
@@ -116,11 +118,15 @@ export const AddWarehouseForm = ({
                         value={formData.quantity}
                         onChange={(e) => {
                             const value = e.target.value;
-                            if (value > 0) {
+
+                            // Проверяем, является ли значение числом
+                            if (/^\d*$/.test(value)) {
+                                // Разрешаем только числовые значения
                                 handleInputChange(e, 'quantity');
                             }
                         }}
-                        type="number" // Изменено на "number" для валидации чисел
+                        inputMode="numeric"
+                        type="text" // Изменено на "number" для валидации чисел
                         placeholder="Количество"
                         className={`border-blue-500 border-2 placeholder-gray rounded-lg p-2 max-w-[250px]  ${errors.quantity ? 'border-red-500' : ''}`}
                     />
@@ -130,39 +136,47 @@ export const AddWarehouseForm = ({
                 {/* Photo Upload */}
                 <div className="space-y-2 flex flex-col max-w-[150px]">
                     <label className="text-sm font-medium">Фото</label>
-                    <FileUpload
-                        mode="basic"
-                        name="demo[]"
-                        accept="image/*"
-                        maxFileSize={1000000}
-                        auto
-                        customUpload
-                        chooseLabel="Загрузить"
-                        uploadHandler={(e) => handleFileUpload(e.files[0])} // Передаём файл в родительский обработчик
-                        className={`rounded-lg ${errors.file ? 'border-red-500' : ''}`}
-                    />
-                    {errors.file && <small className="p-error">{errors.file}</small>}
-                    <p className="text-xs text-gray-500">Сделайте фото товара</p>
-                </div>
-
-                {/* Предпросмотр загруженного файла */}
-                {previewUrl && (
-                    <div className="flex flex-col items-center md:col-span-2">
-                        <label className="text-sm font-medium">Предпросмотр фото:</label>
-                        <img
-                            src={previewUrl}
-                            alt="Preview"
-                            className="mt-2 max-h-48 object-contain border rounded"
-                        />
+                    <div className="relative">
+                        {!formData.file ? (
+                            <>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileUpload(e.target.files[0])}
+                                    className="hidden"
+                                />
+                                <label
+                                    htmlFor="file-upload"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center"
+                                >
+                                    Загрузить фото
+                                </label>
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center">
+                                <img
+                                    src={previewUrl}
+                                    alt="Preview"
+                                    className="max-h-48 object-contain border rounded mb-2"
+                                />
+                                <Button
+                                    label="Удалить фото"
+                                    className="p-button-danger"
+                                    onClick={handleRemoveFile}
+                                />
+                            </div>
+                        )}
                     </div>
-                )}
+                    {errors.file && <small className="p-error">{errors.file}</small>}
+                </div>
             </div>
             <div className="flex justify-center md:col-span-2">
                 <Button
                     label="Добавить"
                     type="submit"
                     className={`bg-blue-500 text-white max-w-[250px] rounded p-2 w-full mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={Object.keys(errors).length > 0}
+                    disabled={Object.keys(errors).length > 0 || isLoading}
                 />
             </div>
         </form>
