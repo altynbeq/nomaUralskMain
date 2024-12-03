@@ -23,6 +23,7 @@ export const AddWarehouse = () => {
     });
     const [errors, setErrors] = useState({});
     const [showAlertModal, setShowAlertModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const removeError = (field) => {
         setErrors((prevErrors) => {
@@ -90,42 +91,49 @@ export const AddWarehouse = () => {
                 const companyId = isValidDepartmentId(currentUserDepartmentId)
                     ? subuserCompanyId
                     : userId;
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
-                    {
-                        method: 'POST',
-                        body: submissionData,
-                    },
-                );
+                setIsLoading(true);
+                try {
+                    const response = await fetch(
+                        `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
+                        {
+                            method: 'POST',
+                            body: submissionData,
+                        },
+                    );
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Ошибка при отправке данных');
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Ошибка при отправке данных');
+                    }
+                    setIsModalOpen(false);
+                    setShowAlertModal(true);
+                    setFormData({
+                        productName: null,
+                        date: null,
+                        organization: null,
+                        responsible: null,
+                        warehouse: null,
+                        reason: '',
+                        quantity: '',
+                        file: null,
+                    });
+                    setErrors({});
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    setIsLoading(false);
                 }
-                setIsModalOpen(false);
-                setShowAlertModal(true);
-                setFormData({
-                    productName: null,
-                    date: null,
-                    organization: null,
-                    responsible: null,
-                    warehouse: null,
-                    reason: '',
-                    quantity: '',
-                    file: null,
-                });
-                setErrors({});
             } else {
                 console.log('Validation failed:', errors);
             }
         },
-        [formData, errors],
+        [formData, errors, validate],
     );
 
     return (
-        <div className="w-[90%] mb-5 md:w-[40%] subtle-border mx-auto mt-5 md:mt-0 md:pt-0 flex items-center justify-center">
+        <div className="w-[90%] md:w-[40%] subtle-border mx-auto mt-5 md:mt-0 md:pt-0 flex items-center justify-center">
             <div className="w-full h-72 bg-white rounded-lg shadow-md p-6 flex flex-col relative">
-                <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
+                <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex m-5 p-8 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
                         <p className="text-gray-600">Заполните данные списания</p>
                         <div className="flex gap-4 justify-center my-4">
@@ -157,6 +165,7 @@ export const AddWarehouse = () => {
                     handleSubmit={handleSubmit}
                     handleDropdownChange={handleDropdownChange}
                     errors={errors}
+                    isLoading={isLoading}
                 />
             </Dialog>
             <AlertModal

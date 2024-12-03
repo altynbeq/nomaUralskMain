@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
-import { FileUpload } from 'primereact/fileupload';
-import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import { useStateContext } from '../../../contexts/ContextProvider';
 import { formatDate } from '../../../methods/dataFormatter';
 
@@ -15,9 +13,9 @@ export const AddWarehouseForm = ({
     handleDropdownChange,
     handleFileUpload, // Обработчик файлов
     handleSubmit,
+    isLoading,
     errors, // Получаем ошибки из родительского компонента
 }) => {
-    const isSmallScreen = useIsSmallScreen(768);
     const [previewUrl, setPreviewUrl] = useState(null);
     const { warehouses, products, companyStructure, subUser } = useStateContext();
 
@@ -130,17 +128,21 @@ export const AddWarehouseForm = ({
                 {/* Photo Upload */}
                 <div className="space-y-2 flex flex-col max-w-[150px]">
                     <label className="text-sm font-medium">Фото</label>
-                    <FileUpload
-                        mode="basic"
-                        name="demo[]"
-                        accept="image/*"
-                        maxFileSize={1000000}
-                        auto
-                        customUpload
-                        chooseLabel="Загрузить"
-                        uploadHandler={(e) => handleFileUpload(e.files[0])} // Передаём файл в родительский обработчик
-                        className={`rounded-lg ${errors.file ? 'border-red-500' : ''}`}
-                    />
+                    <div className="relative">
+                        <input
+                            id="file-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e.target.files[0])}
+                            className="hidden" // Скрываем стандартный input
+                        />
+                        <label
+                            htmlFor="file-upload"
+                            className="bg-blue-500 text-white px-4 rounded cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center"
+                        >
+                            Загрузить
+                        </label>
+                    </div>
                     {errors.file && <small className="p-error">{errors.file}</small>}
                     <p className="text-xs text-gray-500">Сделайте фото товара</p>
                 </div>
@@ -162,7 +164,7 @@ export const AddWarehouseForm = ({
                     label="Добавить"
                     type="submit"
                     className={`bg-blue-500 text-white max-w-[250px] rounded p-2 w-full mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={Object.keys(errors).length > 0}
+                    disabled={Object.keys(errors).length > 0 || isLoading}
                 />
             </div>
         </form>

@@ -84,6 +84,29 @@ body {
     font-family: 'Comfortaa', sans-serif;
 }
 
+input[type="file"] {
+    display: none;
+}
+
+label[for="file-upload"] {
+    background-color: #1E4DB7;
+    color: white;
+    border-radius: 5px;
+    min-height: 43px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+label[for="file-upload"]:hover {
+    background-color: #163a94;
+}
+
+label[for="file-upload"]:active {
+    background-color: #122e7d;
+}
+
+
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
