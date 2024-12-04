@@ -304,7 +304,7 @@ export const StoreAccordion = ({ stores, departments }) => {
     };
 
     return (
-        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md bg-white">
+        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md mt-10 bg-white">
             <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
                 {stores.map((store, index) => (
                     <AccordionTab
