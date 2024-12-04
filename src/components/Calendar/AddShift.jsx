@@ -46,7 +46,7 @@ addLocale('ru', {
 
 export const AddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
-    const [selectedSubuser, setSelectedSubuser] = useState(null);
+    const [selectedSubusers, setSelectedSubusers] = useState(null);
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -54,7 +54,7 @@ export const AddShift = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSubuser || !start || !end) return;
+        if (!selectedSubusers || !start || !end) return;
         setIsLoading(true);
         try {
             const response = await fetch(
@@ -140,16 +140,17 @@ export const AddShift = (props) => {
                             <div className="mb-8 gap-4 flex flex-col items-center">
                                 <label className="block text-gray-700">Сотрудник:</label>
                                 <AutoComplete
-                                    value={selectedSubuser}
+                                    value={selectedSubusers}
                                     suggestions={filteredUsers}
                                     completeMethod={searchUsers}
-                                    onChange={(e) => setSelectedSubuser(e.value)}
+                                    onChange={(e) => setSelectedSubusers(e.value)}
                                     field="name"
                                     itemTemplate={itemTemplate} // Use the itemTemplate here
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500"
                                     inputClassName="focus:outline-none focus:ring-0"
                                     placeholder="Выберите сотрудника"
                                     panelStyle={{ width: '295px' }}
+                                    multiple
                                 />
                             </div>
                             <div className="mb-4">
