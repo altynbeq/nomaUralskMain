@@ -12,7 +12,7 @@ import {
 } from '../../data/MainDataSource';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
-import { getUserUrls } from '../../methods/getUserUrls';
+import { getUserUrls } from '../../methods/getCompanyData';
 import LoadingSkeleton from '../LoadingSkeleton';
 
 const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {

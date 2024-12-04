@@ -5,7 +5,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart';
 import { FaShare, FaFileDownload } from 'react-icons/fa';
 import { SalesHolePie, FinanceStats, FormatAmount, SpisanieStats } from '../../data/MainDataSource';
-import { getUserUrls } from '../../methods/getUserUrls';
+import { getUserUrls } from '../../methods/getCompanyData';
 import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
 
 function convertUrl(apiUrl) {

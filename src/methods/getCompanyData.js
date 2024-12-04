@@ -1,8 +1,8 @@
-export async function getUserUrls(userId) {
+export async function getCompanyData(companyId) {
     const url = 'https://nomalytica-back.onrender.com/api/users/';
 
     try {
-        const response = await fetch(url + userId);
+        const response = await fetch(url + companyId);
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
         }

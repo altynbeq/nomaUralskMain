@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart';
 import { FinanceHolePie, FinanceStats, FormatAmount } from '../../data/MainDataSource';
-import { getUserUrls } from '../../methods/getUserUrls';
+import { getUserUrls } from '../../methods/getCompanyData';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
 const DailyRevenue = ({ userKkmUrl }) => {
