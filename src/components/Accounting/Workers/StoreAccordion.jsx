@@ -304,10 +304,11 @@ export const StoreAccordion = ({ stores, departments }) => {
     };
 
     return (
-        <div className="mx-auto w-full sm:w-[90%] p-4">
+        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md bg-white">
             <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
                 {stores.map((store, index) => (
                     <AccordionTab
+                        className="bg-white"
                         key={store._id}
                         header={
                             <div className="flex justify-between items-center w-full">
