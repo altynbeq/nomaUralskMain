@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -14,6 +14,7 @@ import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalen
 const Calendar = () => {
     const { access } = useStateContext();
     const [modal, setModal] = useState(false);
+    const [loadingStores, setLoadingStores] = useState(false);
     const [currentShifts, setCurrentShifts] = useState([]);
     const [modalAddShift, setModalAddShift] = useState(false);
     const [stores, setStores] = useState([]);
@@ -22,16 +23,13 @@ const Calendar = () => {
     const [selectedShiftId, setSelectedShiftId] = useState(null);
     const [alertOpen, setAlertOpen] = useState(false);
 
-    function openModal() {
-        setModal(true);
-    }
-    function openModalAddShift() {
+    const openModalAddShift = useCallback(() => {
         if (selectedStore) {
             setModalAddShift(true);
         } else {
             setAlertOpen(true);
         }
-    }
+    }, [selectedStore]);
 
     useEffect(() => {
         const id = localStorage.getItem('_id');
@@ -55,6 +53,7 @@ const Calendar = () => {
     }, [selectedStore]);
 
     const fetchStructure = async (id) => {
+        setLoadingStores(true);
         const url = `https://nomalytica-back.onrender.com/api/subUsers/subuser-stores/${id}`;
         try {
             const response = await fetch(url);
@@ -65,10 +64,13 @@ const Calendar = () => {
             setStores(data);
         } catch (error) {
             console.error('Failed to fetch stores:', error);
+        } finally {
+            setLoadingStores(false);
         }
     };
 
     const fetchUserStructure = async (id) => {
+        setLoadingStores(true);
         const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
         try {
             const response = await fetch(url);
@@ -80,6 +82,8 @@ const Calendar = () => {
             return data;
         } catch (error) {
             console.error('Failed to fetch data:', error);
+        } finally {
+            setLoadingStores(false);
         }
     };
 
@@ -101,30 +105,6 @@ const Calendar = () => {
             setSubusers(data);
         } catch (error) {
             console.error('Failed to fetch subusers:', error);
-        }
-    };
-
-    const fetchAllShifts = async () => {
-        const url = `https://nomalytica-back.onrender.com/api/shifts/all`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-
-            const shifts = data.map((shift) => ({
-                title: shift.subUserId.name,
-                start: new Date(shift.startTime),
-                end: new Date(shift.endTime),
-                extendedProps: {
-                    shiftId: shift._id,
-                    subUserId: shift.subUserId._id,
-                },
-            }));
-            setCurrentShifts(shifts);
-        } catch (error) {
-            console.error('Failed to fetch all shifts:', error);
         }
     };
 
@@ -152,32 +132,36 @@ const Calendar = () => {
         }
     };
 
-    function renderEventContent(eventInfo) {
+    const handleEventClick = useCallback(
+        (info) => {
+            const shiftId = info.event.extendedProps.shiftId;
+            setSelectedShiftId(shiftId);
+            setModal(true);
+        },
+        [setModal, setSelectedShiftId],
+    );
+
+    const renderEventContent = useCallback((eventInfo) => {
         const startTime = eventInfo.event.start;
         const endTime = eventInfo.event.end;
-
         const startTimeFormatted = startTime
             ? startTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
             : '';
         const endTimeFormatted = endTime
             ? endTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
             : '';
-
         return (
-            <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal}>
-                <span className="text-white text-xs">
+            <div
+                className="bg-blue-500 cursor-pointer rounded-lg px-2 w-full flex flex-col"
+                onClick={() => setModal(true)}
+            >
+                <p className="text-white text-xs inline-flex">
                     {startTimeFormatted} - {endTimeFormatted}
-                </span>
-                <strong className="text-white text-xs">{eventInfo.event.title}</strong>
+                </p>
+                <p className="text-white inline-flex text-xs">{eventInfo.event.title}</p>
             </div>
         );
-    }
-
-    const handleEventClick = (info) => {
-        const shiftId = info.event.extendedProps.shiftId;
-        setSelectedShiftId(shiftId);
-        setModal(true);
-    };
+    }, []);
 
     return (
         <div className="w-[100%] align-center justify-center">
@@ -190,7 +174,7 @@ const Calendar = () => {
                         onChange={(e) => setSelectedStore(e.value)}
                         options={stores}
                         optionLabel="storeName"
-                        placeholder="Выберите магазин"
+                        placeholder={loadingStores ? 'Загрузка...' : 'Выберите магазин'}
                         className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         showClear
                     />

@@ -6,8 +6,7 @@ import { Sidebar } from './components';
 import { TechProb, LogInForm } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
-import { getLeadsBack } from './methods/dataFetches/getLeadsBack';
-import { getUserUrls } from './methods/getUserUrls';
+import { getCompanyData } from './methods/getCompanyData';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import { Loader } from './components/Loader';
 import 'primeicons/primeicons.css';
@@ -127,27 +126,24 @@ const App = () => {
         }
 
         try {
-            const [bitrixData, urlsData] = await Promise.all([
-                getLeadsBack(companyId),
-                getUserUrls(companyId),
-            ]);
+            const companyData = await getCompanyData(companyId);
 
-            if (!bitrixData) {
+            if (!companyData) {
                 setTechProblem(true);
                 return;
             }
 
             setUserData({
-                email: bitrixData.email,
-                name: bitrixData.name,
+                email: companyData.email,
+                name: companyData.name,
             });
 
-            setLeads(JSON.parse(bitrixData.leads));
-            setDeals(JSON.parse(bitrixData.deals));
-            setKKM(JSON.parse(bitrixData.kkmData));
-            setReceipts(JSON.parse(bitrixData.salesReceipt));
-            setSpisanie(JSON.parse(bitrixData.productsSpisanie));
-            setUrls(urlsData);
+            setLeads(JSON.parse(companyData.leads));
+            setDeals(JSON.parse(companyData.deals));
+            setKKM(JSON.parse(companyData.kkmData));
+            setReceipts(JSON.parse(companyData.salesReceipt));
+            setSpisanie(JSON.parse(companyData.productsSpisanie));
+            setUrls(companyData);
         } catch (error) {
             console.error('Error fetching company data:', error);
         }
@@ -160,27 +156,19 @@ const App = () => {
         }
 
         try {
-            const [bitrixData, urlsData] = await Promise.all([
-                getLeadsBack(companyId),
-                getUserUrls(companyId),
-            ]);
+            const companyData = await getCompanyData(companyId);
 
-            if (!bitrixData) {
+            if (!companyData) {
                 setTechProblem(true);
                 return;
             }
 
-            setUserData({
-                email: bitrixData.email,
-                name: bitrixData.name,
-            });
-
-            setLeads(JSON.parse(bitrixData.leads));
-            setDeals(JSON.parse(bitrixData.deals));
-            setKKM(JSON.parse(bitrixData.kkmData));
-            setReceipts(JSON.parse(bitrixData.salesReceipt));
-            setSpisanie(JSON.parse(bitrixData.productsSpisanie));
-            setUrls(urlsData);
+            setLeads(JSON.parse(companyData.leads));
+            setDeals(JSON.parse(companyData.deals));
+            setKKM(JSON.parse(companyData.kkmData));
+            setReceipts(JSON.parse(companyData.salesReceipt));
+            setSpisanie(JSON.parse(companyData.productsSpisanie));
+            setUrls(companyData);
         } catch (error) {
             console.error('Error fetching company data:', error);
         }

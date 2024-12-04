@@ -87,7 +87,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
                         subUserId: shift.subUserId._id,
                         startTime: new Date(startTime).toISOString(),
                         endTime: new Date(endTime).toISOString(),
-                        selectedStore,
+                        selectedStore: selectedStore._id,
                     }),
                 },
             );

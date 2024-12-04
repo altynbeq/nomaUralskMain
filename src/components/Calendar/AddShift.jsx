@@ -46,41 +46,88 @@ addLocale('ru', {
 
 export const AddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
-    const [selectedSubuser, setSelectedSubuser] = useState(null);
-    const [start, setStart] = useState(null);
-    const [end, setEnd] = useState(null);
+    const [selectedSubusers, setSelectedSubusers] = useState([]);
+    const [dateRange, setDateRange] = useState(null); // Для выбора периода
+    const [startTime, setStartTime] = useState(null); // Для выбора времени начала
+    const [endTime, setEndTime] = useState(null); // Для выбора времени окончания
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSubuser || !start || !end) return;
+        if (!selectedSubusers.length || !dateRange || !startTime || !endTime) {
+            toast.error('Пожалуйста, выберите сотрудников, период и время смены.');
+            return;
+        }
         setIsLoading(true);
         try {
+            const shifts = [];
+
+            // Generate all dates within the selected date range
+            const dates = [];
+            let currentDate = new Date(dateRange[0]);
+            currentDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(dateRange[1]);
+            endDate.setHours(0, 0, 0, 0);
+
+            while (currentDate <= endDate) {
+                dates.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            // Create shifts for each date and each selected user
+            dates.forEach((date) => {
+                const shiftStart = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate(),
+                    startTime.getHours(),
+                    startTime.getMinutes(),
+                    0,
+                );
+
+                const shiftEnd = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate(),
+                    endTime.getHours(),
+                    endTime.getMinutes(),
+                    0,
+                );
+
+                selectedSubusers.forEach((user) => {
+                    shifts.push({
+                        subUserId: user._id,
+                        startTime: shiftStart.toISOString(),
+                        endTime: shiftEnd.toISOString(),
+                        selectedStore: props.selectedStore._id,
+                    });
+                });
+            });
+
+            // Send the shifts array to the backend
             const response = await fetch(
-                'https://nomalytica-back.onrender.com/api/shifts/create-shift',
+                'https://nomalytica-back.onrender.com/api/shifts/create-shifts',
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        subUserId: selectedSubuser._id,
-                        startTime: start.toISOString(),
-                        endTime: end.toISOString(),
-                        selectedStore: props.selectedStore._id,
-                    }),
+                    body: JSON.stringify({ shifts }),
                 },
             );
 
             if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`);
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Ошибка при создании смен.');
             }
-            toast.success('Смена успешно добавлена');
+
+            toast.success('Смены успешно добавлены');
             await props.fetchShifts();
             props.setOpen(false);
         } catch (error) {
-            console.error('Error adding shift:', error);
+            console.error('Error adding shifts:', error);
+            toast.error(error.message || 'Произошла ошибка при добавлении смен.');
         } finally {
             setIsLoading(false);
         }
@@ -107,7 +154,7 @@ export const AddShift = (props) => {
                 <img
                     src={item.image ? `https://nomalytica-back.onrender.com${item.image}` : avatar}
                     alt={item.name}
-                    className="w-12 h-12 rounded-full mr-2"
+                    className="w-10 h-10 rounded-full mr-2"
                 />
                 <div>
                     <div>{item.name}</div>
@@ -117,71 +164,140 @@ export const AddShift = (props) => {
         );
     };
 
+    const removeSelectedUser = (userToRemove) => {
+        setSelectedSubusers((prevUsers) =>
+            prevUsers.filter((user) => user._id !== userToRemove._id),
+        );
+    };
+
     return (
         <>
             {isModalOpen && (
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-4 rounded-lg shadow-lg min-w-[300]">
-                        <div className="flex justify-between">
-                            <h2
-                                style={{ alignItems: 'center' }}
-                                className="text-lg font-bold flex mr-5 pr-10 mb-4"
-                            >
-                                Добавить новую смену
-                            </h2>
+                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold">Добавить новые смены</h2>
                             <button
                                 onClick={() => props.setOpen(false)}
                                 className="text-gray-500 hover:text-gray-800"
                             >
-                                <FaTimes className="mb-4" />
+                                <FaTimes />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="mb-8 gap-4 flex flex-col items-center">
-                                <label className="block text-gray-700">Сотрудник:</label>
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">Сотрудники:</label>
                                 <AutoComplete
-                                    value={selectedSubuser}
+                                    value={selectedSubusers}
                                     suggestions={filteredUsers}
                                     completeMethod={searchUsers}
-                                    onChange={(e) => setSelectedSubuser(e.value)}
+                                    onChange={(e) => setSelectedSubusers(e.value)}
                                     field="name"
-                                    itemTemplate={itemTemplate} // Use the itemTemplate here
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500"
+                                    itemTemplate={itemTemplate}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                     inputClassName="focus:outline-none focus:ring-0"
-                                    placeholder="Выберите сотрудника"
+                                    placeholder="Выберите сотрудников"
                                     panelStyle={{ width: '295px' }}
+                                    multiple // Для множественного выбора
+                                    dropdown // Для отображения выпадающего списка при клике на иконку
                                 />
                             </div>
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Начало смены:</label>
+
+                            {/* Горизонтальный список выбранных сотрудников */}
+                            {selectedSubusers.length > 0 && (
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 mb-2">
+                                        Выбранные сотрудники:
+                                    </label>
+                                    <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
+                                        {selectedSubusers.map((user) => (
+                                            <div
+                                                key={user._id}
+                                                className="flex items-center bg-gray-100 p-2 rounded-lg"
+                                            >
+                                                <img
+                                                    src={
+                                                        user.image
+                                                            ? `https://nomalytica-back.onrender.com${user.image}`
+                                                            : avatar
+                                                    }
+                                                    alt={user.name}
+                                                    className="w-8 h-8 rounded-full mr-2"
+                                                />
+                                                <span className="text-gray-800 mr-2">
+                                                    {user.name}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeSelectedUser(user)}
+                                                    className="text-black hover:text-red-700"
+                                                >
+                                                    <FaTimes />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Выбор периода смены */}
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">Период смены:</label>
                                 <Calendar
-                                    value={start}
-                                    onChange={(e) => setStart(e.value)}
-                                    showTime
+                                    value={dateRange}
+                                    onChange={(e) => setDateRange(e.value)}
+                                    selectionMode="range"
+                                    showIcon
                                     locale="ru"
-                                    hourFormat="24"
+                                    placeholder="Выберите период"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                    placeholder="Выберите дату и время начала"
                                 />
                             </div>
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Конец смены:</label>
+
+                            {/* Выбор времени начала смены */}
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">
+                                    Время начала смены:
+                                </label>
                                 <Calendar
-                                    value={end}
-                                    onChange={(e) => setEnd(e.value)}
-                                    showTime
-                                    locale="ru"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.value)}
+                                    timeOnly
                                     hourFormat="24"
+                                    showIcon
+                                    locale="ru"
+                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
+                                    placeholder="Выберите время начала"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                    placeholder="Выберите дату и время окончания"
                                 />
                             </div>
+
+                            {/* Выбор времени окончания смены */}
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">
+                                    Время окончания смены:
+                                </label>
+                                <Calendar
+                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.value)}
+                                    timeOnly
+                                    hourFormat="24"
+                                    showIcon
+                                    locale="ru"
+                                    placeholder="Выберите время окончания"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                />
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
-                                    isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
+                                    isLoading
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : 'hover:bg-blue-600'
+                                } transition duration-200`}
                             >
                                 {isLoading ? 'Добавление...' : 'Добавить'}
                             </button>
