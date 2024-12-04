@@ -5,7 +5,6 @@ import ProgressCardColored from '../demo/ProgressLine';
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { totalCounterReceipts, PaidToData, ConvertCalendarDate } from '../../data/MainDataSource';
-import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import LoadingSkeleton from '../LoadingSkeleton';
 
