@@ -10,9 +10,7 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 import CardWithStats from '../components/demo/ChartsHolder';
 import YearBarChart from '../components/demo/YearBarChart';
 import CarouselCard from '../components/demo/Slider';
-
 import { FinanceShare } from '../data/MainDataSource';
-import { fetchDeals } from '../methods/dataFetches/getDealsBitrix';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
@@ -20,12 +18,11 @@ function convertUrl(apiUrl) {
 }
 
 const Finance = ({ urls }) => {
-    const { skeletonUp, kkm, receipts, deals, dateRanges } = useStateContext();
+    const { skeletonUp, kkm, deals } = useStateContext();
     const [financeShare, setFinanceShare] = useState([]);
     const [weekDeals, setWeekDeals] = useState([]);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
-    const [userSpisanieUrl, setUserSpisanieUrl] = useState('');
 
     useEffect(() => {
         if (kkm.monthFormedKKM) {
@@ -48,11 +45,10 @@ const Finance = ({ urls }) => {
             if (convKkm != null && convReceipt != null && convSpis != null) {
                 setUserKkmUrl(convKkm);
                 setUserReceiptsUrl(convReceipt);
-                setUserSpisanieUrl(convSpis);
             }
         }
         window.scrollTo(0, 0);
-    }, []);
+    }, [deals.dealsWeek, kkm.monthFormedKKM, urls.externalApis, weekDeals.avgCheck]);
 
     if (skeletonUp) {
         return (
