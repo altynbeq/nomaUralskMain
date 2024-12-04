@@ -47,34 +47,61 @@ addLocale('ru', {
 export const AddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
     const [selectedSubusers, setSelectedSubusers] = useState([]);
-    const [start, setStart] = useState(null);
-    const [end, setEnd] = useState(null);
+    const [dateRange, setDateRange] = useState(null); // Для выбора периода
+    const [startTime, setStartTime] = useState(null); // Для выбора времени начала
+    const [endTime, setEndTime] = useState(null); // Для выбора времени окончания
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSubusers.length || !start || !end) {
-            toast.error('Пожалуйста, выберите хотя бы одного сотрудника и укажите время смены.');
+        if (!selectedSubusers.length || !dateRange || !startTime || !endTime) {
+            toast.error('Пожалуйста, выберите сотрудников, период и время смены.');
             return;
         }
         setIsLoading(true);
         try {
-            // Создание массива запросов для всех выбранных сотрудников
-            const shiftPromises = selectedSubusers.map((user) =>
-                fetch('https://nomalytica-back.onrender.com/api/shifts/create-shift', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        subUserId: user._id,
-                        startTime: start.toISOString(),
-                        endTime: end.toISOString(),
-                        selectedStore: props.selectedStore._id,
-                    }),
-                }),
-            );
+            // Получаем массив дат из выбранного периода
+            const dates = getDatesInRange(dateRange[0], dateRange[1]);
+
+            // Создание массива запросов для всех выбранных сотрудников и дат
+            const shiftPromises = [];
+
+            selectedSubusers.forEach((user) => {
+                dates.forEach((date) => {
+                    const combinedStart = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate(),
+                        startTime.getHours(),
+                        startTime.getMinutes(),
+                        0,
+                    );
+                    const combinedEnd = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate(),
+                        endTime.getHours(),
+                        endTime.getMinutes(),
+                        0,
+                    );
+
+                    shiftPromises.push(
+                        fetch('https://nomalytica-back.onrender.com/api/shifts/create-shift', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                subUserId: user._id,
+                                startTime: combinedStart.toISOString(),
+                                endTime: combinedEnd.toISOString(),
+                                selectedStore: props.selectedStore._id,
+                            }),
+                        }),
+                    );
+                });
+            });
 
             // Ожидание выполнения всех запросов
             const responses = await Promise.all(shiftPromises);
@@ -134,11 +161,24 @@ export const AddShift = (props) => {
         );
     };
 
+    // Функция для получения массива дат между двумя датами
+    const getDatesInRange = (start, end) => {
+        const date = new Date(start);
+        const dates = [];
+
+        while (date <= end) {
+            dates.push(new Date(date));
+            date.setDate(date.getDate() + 1);
+        }
+
+        return dates;
+    };
+
     return (
         <>
             {isModalOpen && (
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-lg w-full">
+                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-lg font-bold">Добавить новые смены</h2>
                             <button
@@ -158,8 +198,10 @@ export const AddShift = (props) => {
                                     onChange={(e) => setSelectedSubusers(e.value)}
                                     field="name"
                                     itemTemplate={itemTemplate}
-                                    className="w-full rounded-lg border-2 px-3 py-2"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    inputClassName="focus:outline-none focus:ring-0"
                                     placeholder="Выберите сотрудников"
+                                    panelStyle={{ width: '295px' }}
                                     multiple // Для множественного выбора
                                     dropdown // Для отображения выпадающего списка при клике на иконку
                                 />
@@ -192,7 +234,7 @@ export const AddShift = (props) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => removeSelectedUser(user)}
-                                                    className="text-black-500 hover:text-red-700"
+                                                    className="text-red-500 hover:text-red-700"
                                                 >
                                                     <FaTimes />
                                                 </button>
@@ -202,32 +244,54 @@ export const AddShift = (props) => {
                                 </div>
                             )}
 
+                            {/* Выбор периода смены */}
                             <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">Начало смены:</label>
+                                <label className="block text-gray-700 mb-2">Период смены:</label>
                                 <Calendar
-                                    value={start}
-                                    onChange={(e) => setStart(e.value)}
-                                    showTime
-                                    locale="ru"
-                                    hourFormat="24"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                    placeholder="Выберите дату и время начала"
+                                    value={dateRange}
+                                    onChange={(e) => setDateRange(e.value)}
+                                    selectionMode="range"
                                     showIcon
+                                    locale="ru"
+                                    placeholder="Выберите период"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                 />
                             </div>
+
+                            {/* Выбор времени начала смены */}
                             <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">Конец смены:</label>
+                                <label className="block text-gray-700 mb-2">
+                                    Время начала смены:
+                                </label>
                                 <Calendar
-                                    value={end}
-                                    onChange={(e) => setEnd(e.value)}
-                                    showTime
-                                    locale="ru"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.value)}
+                                    timeOnly
                                     hourFormat="24"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                    placeholder="Выберите дату и время окончания"
                                     showIcon
+                                    locale="ru"
+                                    placeholder="Выберите время начала"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                 />
                             </div>
+
+                            {/* Выбор времени окончания смены */}
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">
+                                    Время окончания смены:
+                                </label>
+                                <Calendar
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.value)}
+                                    timeOnly
+                                    hourFormat="24"
+                                    showIcon
+                                    locale="ru"
+                                    placeholder="Выберите время окончания"
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                />
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={isLoading}
