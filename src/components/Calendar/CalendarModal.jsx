@@ -3,6 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import { formatDate } from '../../methods/dataFormatter';
 import { Calendar } from 'primereact/calendar';
 import { addLocale } from 'primereact/api';
+import { useApi } from '../../methods/hooks/useApi';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -42,11 +43,11 @@ addLocale('ru', {
 });
 
 export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selectedStore }) => {
+    const { get, isLoading, error } = useApi();
     const [shift, setShift] = useState(null);
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (open && shiftId) {
@@ -55,22 +56,13 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
     }, [open, shiftId]);
 
     const fetchShiftDetails = async () => {
-        setIsLoading(true);
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/shifts/shift/${shiftId}`,
-            );
-            if (!response.ok) {
-                throw new Error('Failed to fetch shift details');
-            }
-            const data = await response.json();
+            const data = await get(`shifts/shift/${shiftId}`);
             setShift(data);
             setStartTime(new Date(data.startTime));
             setEndTime(new Date(data.endTime));
         } catch (error) {
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -79,7 +71,6 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
     };
 
     const handleSave = async () => {
-        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shiftId}`,
@@ -102,13 +93,10 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
             setOpen(false);
         } catch (error) {
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const handleDelete = async () => {
-        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/delete-shift/${shiftId}`,
@@ -123,8 +111,6 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
             setOpen(false);
         } catch (error) {
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 

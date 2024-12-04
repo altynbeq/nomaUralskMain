@@ -116,14 +116,13 @@ const Calendar = () => {
                 throw new Error(`Error: ${response.status}`);
             }
             const data = await response.json();
-
             const shifts = data.map((shift) => ({
-                title: shift.subUserId.name,
+                title: shift.subUserId?.name || '',
                 start: new Date(shift.startTime),
                 end: new Date(shift.endTime),
                 extendedProps: {
-                    shiftId: shift._id,
-                    subUserId: shift.subUserId._id,
+                    shiftId: shift._id || '',
+                    subUserId: shift.subUserId?._id || '',
                 },
             }));
             setCurrentShifts(shifts);
