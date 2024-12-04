@@ -29,7 +29,6 @@ const Finance = ({ urls }) => {
             setFinanceShare(FinanceShare(kkm.monthFormedKKM));
         }
         if (!weekDeals.avgCheck) {
-            // console.log(deals)
             setWeekDeals(deals.dealsWeek);
         }
         if (urls.externalApis && urls.externalApis.apiUrlKKM) {
@@ -70,10 +69,8 @@ const Finance = ({ urls }) => {
             </div>
             <div className="flex gap-4 w-[100%] items-center align-center flex-col md:flex-row justify-center">
                 <CardWithStats userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
-                {/* <PaidToAmount comb={true} id="PaidToWeek"  title="Выручка"  /> */}
             </div>
             <div className="flex gap-4 w-[100%] items-center align-center flex-col md:flex-row justify-center">
-                {/* <PeriodStats title="Финансы"/> */}
                 <PaidToAmount
                     comb={true}
                     userKkmUrl={userKkmUrl}
