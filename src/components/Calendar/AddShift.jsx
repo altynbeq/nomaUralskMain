@@ -3,7 +3,6 @@ import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Calendar } from 'primereact/calendar';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { addLocale } from 'primereact/api';
 import avatar from '../../data/avatar.jpg';
 
@@ -249,6 +248,7 @@ export const AddShift = (props) => {
                                     selectionMode="range"
                                     showIcon
                                     locale="ru"
+                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
                                     placeholder="Выберите период"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                 />

@@ -46,7 +46,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (open && shiftId) {
@@ -55,6 +55,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
     }, [open, shiftId]);
 
     const fetchShiftDetails = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/shift/${shiftId}`,
@@ -68,6 +69,8 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
             setEndTime(new Date(data.endTime));
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -76,7 +79,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
     };
 
     const handleSave = async () => {
-        setIsSaving(true);
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shiftId}`,
@@ -99,10 +102,13 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
             setOpen(false);
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleDelete = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/delete-shift/${shiftId}`,
@@ -118,7 +124,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
         } catch (error) {
             console.error(error);
         } finally {
-            setIsSaving(false);
+            setIsLoading(false);
         }
     };
 
@@ -168,13 +174,13 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
                                     />
                                 </div>
                                 <button
-                                    disabled={isSaving}
+                                    disabled={isLoading}
                                     onClick={handleSave}
                                     className={`flex bg-green-500 text-white py-2 px-4 rounded ml-auto ${
-                                        isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                                        isLoading ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                 >
-                                    {isSaving ? 'Сохранение...' : 'Сохранить'}
+                                    {isLoading ? 'Сохранение...' : 'Сохранить'}
                                 </button>
                             </>
                         ) : (
@@ -198,8 +204,11 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
                                         Редактировать
                                     </button>
                                     <button
+                                        disabled={isLoading}
                                         onClick={handleDelete}
-                                        className="flex bg-red-500 text-white py-2 px-4 rounded"
+                                        className={`flex  bg-red-500 text-white py-2 px-4 rounded ${
+                                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
                                     >
                                         Удалить
                                     </button>

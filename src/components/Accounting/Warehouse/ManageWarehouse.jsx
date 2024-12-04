@@ -176,7 +176,7 @@ const ManageWarehouse = () => {
                     </h3>
                     <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4">
                         <div className="flex m-5 p-8 flex-col items-center justify-center w-full  border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                            <p className="text-gray-600">Заполните данные списания</p>
+                            <p className="text-gray-600 text-center">Заполните данные списания</p>
                             <div className="flex gap-4 justify-center my-4">
                                 <MdInsertDriveFile size={32} className="text-blue-500" />
                                 <MdPieChart size={32} className="text-blue-500" />
