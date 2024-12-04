@@ -116,7 +116,7 @@ export const EmployeeCalendar = () => {
     }, [month, year]);
 
     return (
-        <div className="w-[100%] bg-white p-6">
+        <div className="w-[100%] bg-white p-6 mx-16 rounded-lg shadow-md">
             {/* Верхняя панель */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-4">
                 <div className="flex items-center gap-2 ml-4 mt-4">
@@ -143,7 +143,7 @@ export const EmployeeCalendar = () => {
                             options={companyStructure?.departments || []}
                             optionLabel="name"
                             placeholder="Отдел"
-                            className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         />
                         <Dropdown
                             value={selectedStore}
@@ -152,7 +152,7 @@ export const EmployeeCalendar = () => {
                             optionLabel="storeName"
                             showClear
                             placeholder="Магазин"
-                            className="flex-1 bg-blue-500 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         />
                     </div>
                     <div>
@@ -160,7 +160,7 @@ export const EmployeeCalendar = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Поиск"
-                            className="flex-1 w-full pl-10 p-2 border border-gray-300 rounded-md"
+                            className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
                         />
                     </div>
                 </div>

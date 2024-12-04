@@ -2,6 +2,7 @@ import React from 'react';
 import { SubusersList } from '../components/Accounting/Workers/SubusersList';
 import { StoreAccordion } from '../components/Accounting/Workers/StoreAccordion';
 import { useStateContext } from '../contexts/ContextProvider';
+import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
 
 const AccountingWorkers = () => {
     const { companyStructure } = useStateContext();
@@ -17,7 +18,9 @@ const AccountingWorkers = () => {
             <div className="w-[100%] mt-10 flex items-center justify-center">
                 <SubusersList />
             </div>
-            {/* <EmployeeCalendar /> */}
+            <div className="w-[100%] mt-10 flex items-center justify-center">
+                <EmployeeCalendar />
+            </div>
         </div>
     );
 };
