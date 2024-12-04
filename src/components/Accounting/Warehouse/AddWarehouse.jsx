@@ -135,7 +135,7 @@ export const AddWarehouse = () => {
             <div className="w-full bg-white rounded-lg shadow-md p-6 flex flex-col relative">
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex m-5 p-8 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                        <p className="text-gray-600">Заполните данные списания</p>
+                        <p className="text-gray-600 text-center">Заполните данные списания</p>
                         <div className="flex gap-4 justify-center my-4">
                             <MdInsertDriveFile size={32} className="text-blue-500" />
                             <MdPieChart size={32} className="text-blue-500" />
