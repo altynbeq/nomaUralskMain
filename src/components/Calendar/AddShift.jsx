@@ -61,63 +61,53 @@ export const AddShift = (props) => {
         }
         setIsLoading(true);
         try {
-            // Получаем массив дат из выбранного периода
-            const dates = getDatesInRange(dateRange[0], dateRange[1]);
+            const combinedStart = new Date(
+                dateRange[0].getFullYear(),
+                dateRange[0].getMonth(),
+                dateRange[0].getDate(),
+                startTime.getHours(),
+                startTime.getMinutes(),
+                0,
+            );
+            // Combine end date and end time
+            const combinedEnd = new Date(
+                dateRange[1].getFullYear(),
+                dateRange[1].getMonth(),
+                dateRange[1].getDate(),
+                endTime.getHours(),
+                endTime.getMinutes(),
+                0,
+            );
+            // Form an array of shifts
+            const shifts = selectedSubusers.map((user) => ({
+                subUserId: user._id,
+                startTime: combinedStart.toISOString(),
+                endTime: combinedEnd.toISOString(),
+                selectedStore: props.selectedStore._id,
+            }));
 
-            // Создание массива запросов для всех выбранных сотрудников и дат
-            const shiftPromises = [];
+            // Отправка массива смен на бэкенд
+            const response = await fetch(
+                'https://nomalytica-back.onrender.com/api/shifts/create-shifts',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ shifts }),
+                },
+            );
 
-            selectedSubusers.forEach((user) => {
-                dates.forEach((date) => {
-                    const combinedStart = new Date(
-                        date.getFullYear(),
-                        date.getMonth(),
-                        date.getDate(),
-                        startTime.getHours(),
-                        startTime.getMinutes(),
-                        0,
-                    );
-                    const combinedEnd = new Date(
-                        date.getFullYear(),
-                        date.getMonth(),
-                        date.getDate(),
-                        endTime.getHours(),
-                        endTime.getMinutes(),
-                        0,
-                    );
-
-                    shiftPromises.push(
-                        fetch('https://nomalytica-back.onrender.com/api/shifts/create-shift', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                subUserId: user._id,
-                                startTime: combinedStart.toISOString(),
-                                endTime: combinedEnd.toISOString(),
-                                selectedStore: props.selectedStore._id,
-                            }),
-                        }),
-                    );
-                });
-            });
-
-            // Ожидание выполнения всех запросов
-            const responses = await Promise.all(shiftPromises);
-
-            // Проверка на успешность всех запросов
-            const allSuccessful = responses.every((response) => response.ok);
-            if (!allSuccessful) {
-                throw new Error('Некоторые смены не были добавлены.');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Ошибка при создании смен.');
             }
-
             toast.success('Смены успешно добавлены');
             await props.fetchShifts();
             props.setOpen(false);
         } catch (error) {
             console.error('Error adding shifts:', error);
-            toast.error('Произошла ошибка при добавлении смен.');
+            toast.error(error.message || 'Произошла ошибка при добавлении смен.');
         } finally {
             setIsLoading(false);
         }
@@ -154,24 +144,10 @@ export const AddShift = (props) => {
         );
     };
 
-    // Функция для удаления выбранного сотрудника
     const removeSelectedUser = (userToRemove) => {
         setSelectedSubusers((prevUsers) =>
             prevUsers.filter((user) => user._id !== userToRemove._id),
         );
-    };
-
-    // Функция для получения массива дат между двумя датами
-    const getDatesInRange = (start, end) => {
-        const date = new Date(start);
-        const dates = [];
-
-        while (date <= end) {
-            dates.push(new Date(date));
-            date.setDate(date.getDate() + 1);
-        }
-
-        return dates;
     };
 
     return (
@@ -270,6 +246,7 @@ export const AddShift = (props) => {
                                     hourFormat="24"
                                     showIcon
                                     locale="ru"
+                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
                                     placeholder="Выберите время начала"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                 />
@@ -281,6 +258,7 @@ export const AddShift = (props) => {
                                     Время окончания смены:
                                 </label>
                                 <Calendar
+                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
                                     value={endTime}
                                     onChange={(e) => setEndTime(e.value)}
                                     timeOnly

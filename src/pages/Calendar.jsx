@@ -147,11 +147,11 @@ const Calendar = () => {
             : '';
 
         return (
-            <div className="bg-blue-500 cursor-pointer rounded-lg p-2 w-full" onClick={openModal}>
-                <span className="text-white text-xs">
+            <div className="bg-blue-500 cursor-pointer rounded-lg px-2 w-full flex flex-col" onClick={openModal}>
+                <p className="text-white text-xs inline-flex">
                     {startTimeFormatted} - {endTimeFormatted}
-                </span>
-                <strong className="text-white text-xs">{eventInfo.event.title}</strong>
+                </p>
+                <p className="text-white inline-flex text-xs">{eventInfo.event.title}</p>
             </div>
         );
     }
