@@ -14,6 +14,7 @@ import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalen
 const Calendar = () => {
     const { access } = useStateContext();
     const [modal, setModal] = useState(false);
+    const [loadingStores, setLoadingStores] = useState(false);
     const [currentShifts, setCurrentShifts] = useState([]);
     const [modalAddShift, setModalAddShift] = useState(false);
     const [stores, setStores] = useState([]);
@@ -55,6 +56,7 @@ const Calendar = () => {
     }, [selectedStore]);
 
     const fetchStructure = async (id) => {
+        setLoadingStores(true);
         const url = `https://nomalytica-back.onrender.com/api/subUsers/subuser-stores/${id}`;
         try {
             const response = await fetch(url);
@@ -65,10 +67,13 @@ const Calendar = () => {
             setStores(data);
         } catch (error) {
             console.error('Failed to fetch stores:', error);
+        } finally {
+            setLoadingStores(false);
         }
     };
 
     const fetchUserStructure = async (id) => {
+        setLoadingStores(true);
         const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
         try {
             const response = await fetch(url);
@@ -80,6 +85,8 @@ const Calendar = () => {
             return data;
         } catch (error) {
             console.error('Failed to fetch data:', error);
+        } finally {
+            setLoadingStores(false);
         }
     };
 
@@ -101,30 +108,6 @@ const Calendar = () => {
             setSubusers(data);
         } catch (error) {
             console.error('Failed to fetch subusers:', error);
-        }
-    };
-
-    const fetchAllShifts = async () => {
-        const url = `https://nomalytica-back.onrender.com/api/shifts/all`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-
-            const shifts = data.map((shift) => ({
-                title: shift.subUserId.name,
-                start: new Date(shift.startTime),
-                end: new Date(shift.endTime),
-                extendedProps: {
-                    shiftId: shift._id,
-                    subUserId: shift.subUserId._id,
-                },
-            }));
-            setCurrentShifts(shifts);
-        } catch (error) {
-            console.error('Failed to fetch all shifts:', error);
         }
     };
 
@@ -190,7 +173,7 @@ const Calendar = () => {
                         onChange={(e) => setSelectedStore(e.value)}
                         options={stores}
                         optionLabel="storeName"
-                        placeholder="Выберите магазин"
+                        placeholder={loadingStores ? 'Загрузка...' : 'Выберите магазин'}
                         className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         showClear
                     />

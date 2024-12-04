@@ -192,7 +192,7 @@ export const AddShift = (props) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => removeSelectedUser(user)}
-                                                    className="text-red-500 hover:text-red-700"
+                                                    className="text-black-500 hover:text-red-700"
                                                 >
                                                     <FaTimes />
                                                 </button>
