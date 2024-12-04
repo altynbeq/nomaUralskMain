@@ -174,7 +174,7 @@ export const AddShift = (props) => {
         <>
             {isModalOpen && (
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full">
+                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-lg font-bold">Добавить новые смены</h2>
                             <button
@@ -209,7 +209,7 @@ export const AddShift = (props) => {
                                     <label className="block text-gray-700 mb-2">
                                         Выбранные сотрудники:
                                     </label>
-                                    <div className="flex flex-row flex-wrap gap-4">
+                                    <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
                                         {selectedSubusers.map((user) => (
                                             <div
                                                 key={user._id}
@@ -230,7 +230,7 @@ export const AddShift = (props) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => removeSelectedUser(user)}
-                                                    className="text-red-500 hover:text-red-700"
+                                                    className="text-black hover:text-red-700"
                                                 >
                                                     <FaTimes />
                                                 </button>

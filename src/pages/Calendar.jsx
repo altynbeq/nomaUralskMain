@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -23,16 +23,13 @@ const Calendar = () => {
     const [selectedShiftId, setSelectedShiftId] = useState(null);
     const [alertOpen, setAlertOpen] = useState(false);
 
-    function openModal() {
-        setModal(true);
-    }
-    function openModalAddShift() {
+    const openModalAddShift = useCallback(() => {
         if (selectedStore) {
             setModalAddShift(true);
         } else {
             setAlertOpen(true);
         }
-    }
+    }, [selectedStore]);
 
     useEffect(() => {
         const id = localStorage.getItem('_id');
@@ -135,32 +132,36 @@ const Calendar = () => {
         }
     };
 
-    function renderEventContent(eventInfo) {
+    const handleEventClick = useCallback(
+        (info) => {
+            const shiftId = info.event.extendedProps.shiftId;
+            setSelectedShiftId(shiftId);
+            setModal(true);
+        },
+        [setModal, setSelectedShiftId],
+    );
+
+    const renderEventContent = useCallback((eventInfo) => {
         const startTime = eventInfo.event.start;
         const endTime = eventInfo.event.end;
-
         const startTimeFormatted = startTime
             ? startTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
             : '';
         const endTimeFormatted = endTime
             ? endTime.toLocaleTimeString(['ru-RU'], { hour: '2-digit', minute: '2-digit' })
             : '';
-
         return (
-            <div className="bg-blue-500 cursor-pointer rounded-lg px-2 w-full flex flex-col" onClick={openModal}>
+            <div
+                className="bg-blue-500 cursor-pointer rounded-lg px-2 w-full flex flex-col"
+                onClick={() => setModal(true)}
+            >
                 <p className="text-white text-xs inline-flex">
                     {startTimeFormatted} - {endTimeFormatted}
                 </p>
                 <p className="text-white inline-flex text-xs">{eventInfo.event.title}</p>
             </div>
         );
-    }
-
-    const handleEventClick = (info) => {
-        const shiftId = info.event.extendedProps.shiftId;
-        setSelectedShiftId(shiftId);
-        setModal(true);
-    };
+    }, []);
 
     return (
         <div className="w-[100%] align-center justify-center">
