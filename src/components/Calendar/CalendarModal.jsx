@@ -43,7 +43,7 @@ addLocale('ru', {
 });
 
 export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selectedStore }) => {
-    const { get, isLoading, error } = useApi();
+    const { get, isLoading } = useApi();
     const [shift, setShift] = useState(null);
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
@@ -173,7 +173,7 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
                             <>
                                 <div>
                                     <p>
-                                        <strong>Сотрудник:</strong> {shift.subUserId.name}
+                                        <strong>Сотрудник:</strong> {shift.subUserId?.name}
                                     </p>
                                     <p>
                                         <strong>Начало смены:</strong> {formatDate(shift.startTime)}
