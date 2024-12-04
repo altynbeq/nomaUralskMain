@@ -4,20 +4,13 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import ProgressCardColored from '../demo/ProgressLine';
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
-import {
-    totalCounterReceipts,
-    TotalCounter,
-    PaidToData,
-    ConvertCalendarDate,
-} from '../../data/MainDataSource';
+import { totalCounterReceipts, PaidToData, ConvertCalendarDate } from '../../data/MainDataSource';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
-import { getUserUrls } from '../../methods/getCompanyData';
 import LoadingSkeleton from '../LoadingSkeleton';
 
 const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
     const { dateRanges, receipts, kkm } = useStateContext();
-    const [totalSum, setTotalSum] = useState();
     const stepperRef = useRef(null);
     const [total, setTotal] = useState(0);
     const [dates, setDates] = useState([
@@ -35,16 +28,7 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
             const properDate = ConvertCalendarDate(e);
 
             const salesList = await getSalesReceiptsFront(userReceiptsUrl, properDate);
-            // console.log("salesList", salesList)
             setPanelData(PaidToData(salesList));
-
-            let kkmList = '';
-            try {
-                kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
-            } catch (e) {
-                // console.log("=>(PaidToAmount.jsx:29) e", e);
-            }
-            // console.log('calend')
             setTotal(totalCounterReceipts(salesList));
             setLoading(false);
         }
@@ -65,7 +49,7 @@ const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
             setPanelData(PaidToData(receipts.monthReceiptsData));
             setTotal(totalCounterReceipts(receipts.monthReceiptsData));
         }
-    }, [receipts]);
+    }, [kkm.monthFormedKKM, receipts]);
 
     return (
         <div

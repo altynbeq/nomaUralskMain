@@ -1,28 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart';
 import { FinanceHolePie, FinanceStats, FormatAmount } from '../../data/MainDataSource';
-import { getUserUrls } from '../../methods/getCompanyData';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 
 const DailyRevenue = ({ userKkmUrl }) => {
-    const { dateRanges, kkm, userId, setKKM } = useStateContext();
+    const { dateRanges, setKKM } = useStateContext();
     const [pieData, setPieData] = useState([]);
     const [financeStats, setFinanceStats] = useState({});
     const date = dateRanges[0].bitrixStartDate.split(' ')[0];
-    const [loading, setLoading] = useState(false);
-    const componentRef = useRef(null);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-    useEffect(() => {
-        if (componentRef.current) {
-            const { offsetWidth, offsetHeight } = componentRef.current;
-            setDimensions({
-                width: offsetWidth,
-                height: offsetHeight,
-            });
-        }
-    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,7 +26,7 @@ const DailyRevenue = ({ userKkmUrl }) => {
         };
 
         fetchData();
-    }, [userKkmUrl, dateRanges[0].bitrixStartDate, dateRanges[0].bitrixEndDate, setKKM]);
+    }, [userKkmUrl, setKKM, dateRanges]);
 
     return (
         <>
