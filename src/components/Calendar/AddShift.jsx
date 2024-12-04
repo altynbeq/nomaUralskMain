@@ -61,32 +61,51 @@ export const AddShift = (props) => {
         }
         setIsLoading(true);
         try {
-            const combinedStart = new Date(
-                dateRange[0].getFullYear(),
-                dateRange[0].getMonth(),
-                dateRange[0].getDate(),
-                startTime.getHours(),
-                startTime.getMinutes(),
-                0,
-            );
-            // Combine end date and end time
-            const combinedEnd = new Date(
-                dateRange[1].getFullYear(),
-                dateRange[1].getMonth(),
-                dateRange[1].getDate(),
-                endTime.getHours(),
-                endTime.getMinutes(),
-                0,
-            );
-            // Form an array of shifts
-            const shifts = selectedSubusers.map((user) => ({
-                subUserId: user._id,
-                startTime: combinedStart.toISOString(),
-                endTime: combinedEnd.toISOString(),
-                selectedStore: props.selectedStore._id,
-            }));
+            const shifts = [];
 
-            // Отправка массива смен на бэкенд
+            // Generate all dates within the selected date range
+            const dates = [];
+            let currentDate = new Date(dateRange[0]);
+            currentDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(dateRange[1]);
+            endDate.setHours(0, 0, 0, 0);
+
+            while (currentDate <= endDate) {
+                dates.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            // Create shifts for each date and each selected user
+            dates.forEach((date) => {
+                const shiftStart = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate(),
+                    startTime.getHours(),
+                    startTime.getMinutes(),
+                    0,
+                );
+
+                const shiftEnd = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate(),
+                    endTime.getHours(),
+                    endTime.getMinutes(),
+                    0,
+                );
+
+                selectedSubusers.forEach((user) => {
+                    shifts.push({
+                        subUserId: user._id,
+                        startTime: shiftStart.toISOString(),
+                        endTime: shiftEnd.toISOString(),
+                        selectedStore: props.selectedStore._id,
+                    });
+                });
+            });
+
+            // Send the shifts array to the backend
             const response = await fetch(
                 'https://nomalytica-back.onrender.com/api/shifts/create-shifts',
                 {
@@ -102,6 +121,7 @@ export const AddShift = (props) => {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Ошибка при создании смен.');
             }
+
             toast.success('Смены успешно добавлены');
             await props.fetchShifts();
             props.setOpen(false);
