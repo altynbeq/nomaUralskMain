@@ -163,11 +163,6 @@ const App = () => {
                 return;
             }
 
-            setUserData({
-                email: companyData.email,
-                name: companyData.name,
-            });
-
             setLeads(JSON.parse(companyData.leads));
             setDeals(JSON.parse(companyData.deals));
             setKKM(JSON.parse(companyData.kkmData));
