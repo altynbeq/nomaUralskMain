@@ -5,7 +5,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart';
 import { FaShare, FaFileDownload } from 'react-icons/fa';
 import { SalesHolePie, FinanceStats, FormatAmount, SpisanieStats } from '../../data/MainDataSource';
-import { getUserUrls } from '../../methods/getCompanyData';
+import { getCompanyData } from '../../methods/getCompanyData';
 import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
 
 function convertUrl(apiUrl) {
@@ -14,7 +14,7 @@ function convertUrl(apiUrl) {
 }
 
 const DailySalesStats = () => {
-    const { dateRanges, kkm, spisanie, setSpisanie } = useStateContext();
+    const { dateRanges, kkm } = useStateContext();
     const date = dateRanges[0].bitrixStartDate.split(' ')[0];
     const [pieData, setPieData] = useState([]);
     const [stats, setStats] = useState({});
@@ -23,10 +23,10 @@ const DailySalesStats = () => {
     useEffect(() => {
         const reqDate = dateRanges[0];
         const getter = async () => {
-            const userId = localStorage.getItem('_id');
-            const userUrls = await getUserUrls(userId);
+            const companyId = localStorage.getItem('_id');
+            const companyData = await getCompanyData(companyId);
 
-            const userSpisanieUrl = convertUrl(userUrls.externalApis.apiUrlSpisanie);
+            const userSpisanieUrl = convertUrl(companyData.externalApis.apiUrlSpisanie);
             const spisanieData = await getSpisanie(userSpisanieUrl, reqDate);
 
             const spis = SpisanieStats(spisanieData).totalSpisanieSum;
@@ -38,7 +38,7 @@ const DailySalesStats = () => {
             setPieData(SalesHolePie(kkm.dayFormedKKM));
             setStats(FinanceStats(kkm.dayFormedKKM));
         }
-    }, []);
+    }, [dateRanges, kkm.dayFormedKKM]);
     return (
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">
             <div className="flex justify-between">
