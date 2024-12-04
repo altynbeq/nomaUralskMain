@@ -88,6 +88,10 @@ body {
     background-color: white;
 }
 
+.p-autocomplete-multiple-container {
+    width: 100%;
+}
+
 input[type="file"] {
     display: none;
 }

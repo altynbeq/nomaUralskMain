@@ -46,7 +46,7 @@ addLocale('ru', {
 
 export const AddShift = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(props.open);
-    const [selectedSubusers, setSelectedSubusers] = useState(null);
+    const [selectedSubusers, setSelectedSubusers] = useState([]);
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -54,33 +54,43 @@ export const AddShift = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSubusers || !start || !end) return;
+        if (!selectedSubusers.length || !start || !end) {
+            toast.error('Пожалуйста, выберите хотя бы одного сотрудника и укажите время смены.');
+            return;
+        }
         setIsLoading(true);
         try {
-            const response = await fetch(
-                'https://nomalytica-back.onrender.com/api/shifts/create-shift',
-                {
+            // Создание массива запросов для всех выбранных сотрудников
+            const shiftPromises = selectedSubusers.map((user) =>
+                fetch('https://nomalytica-back.onrender.com/api/shifts/create-shift', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        subUserId: selectedSubuser._id,
+                        subUserId: user._id,
                         startTime: start.toISOString(),
                         endTime: end.toISOString(),
                         selectedStore: props.selectedStore._id,
                     }),
-                },
+                }),
             );
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`);
+            // Ожидание выполнения всех запросов
+            const responses = await Promise.all(shiftPromises);
+
+            // Проверка на успешность всех запросов
+            const allSuccessful = responses.every((response) => response.ok);
+            if (!allSuccessful) {
+                throw new Error('Некоторые смены не были добавлены.');
             }
-            toast.success('Смена успешно добавлена');
+
+            toast.success('Смены успешно добавлены');
             await props.fetchShifts();
             props.setOpen(false);
         } catch (error) {
-            console.error('Error adding shift:', error);
+            console.error('Error adding shifts:', error);
+            toast.error('Произошла ошибка при добавлении смен.');
         } finally {
             setIsLoading(false);
         }
@@ -107,7 +117,7 @@ export const AddShift = (props) => {
                 <img
                     src={item.image ? `https://nomalytica-back.onrender.com${item.image}` : avatar}
                     alt={item.name}
-                    className="w-12 h-12 rounded-full mr-2"
+                    className="w-10 h-10 rounded-full mr-2"
                 />
                 <div>
                     <div>{item.name}</div>
@@ -117,44 +127,83 @@ export const AddShift = (props) => {
         );
     };
 
+    // Функция для удаления выбранного сотрудника
+    const removeSelectedUser = (userToRemove) => {
+        setSelectedSubusers((prevUsers) =>
+            prevUsers.filter((user) => user._id !== userToRemove._id),
+        );
+    };
+
     return (
         <>
             {isModalOpen && (
                 <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-4 rounded-lg shadow-lg min-w-[300]">
-                        <div className="flex justify-between">
-                            <h2
-                                style={{ alignItems: 'center' }}
-                                className="text-lg font-bold flex mr-5 pr-10 mb-4"
-                            >
-                                Добавить новую смену
-                            </h2>
+                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-lg w-full">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold">Добавить новые смены</h2>
                             <button
                                 onClick={() => props.setOpen(false)}
                                 className="text-gray-500 hover:text-gray-800"
                             >
-                                <FaTimes className="mb-4" />
+                                <FaTimes />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="mb-8 gap-4 flex flex-col items-center">
-                                <label className="block text-gray-700">Сотрудник:</label>
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">Сотрудники:</label>
                                 <AutoComplete
                                     value={selectedSubusers}
                                     suggestions={filteredUsers}
                                     completeMethod={searchUsers}
                                     onChange={(e) => setSelectedSubusers(e.value)}
                                     field="name"
-                                    itemTemplate={itemTemplate} // Use the itemTemplate here
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500"
-                                    inputClassName="focus:outline-none focus:ring-0"
-                                    placeholder="Выберите сотрудника"
-                                    panelStyle={{ width: '295px' }}
-                                    multiple
+                                    itemTemplate={itemTemplate}
+                                    className="w-full rounded-lg border-2 px-3 py-2"
+                                    placeholder="Выберите сотрудников"
+                                    multiple // Для множественного выбора
+                                    dropdown // Для отображения выпадающего списка при клике на иконку
                                 />
                             </div>
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Начало смены:</label>
+
+                            {/* Горизонтальный список выбранных сотрудников */}
+                            {selectedSubusers.length > 0 && (
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 mb-2">
+                                        Выбранные сотрудники:
+                                    </label>
+                                    <div className="flex flex-row flex-wrap gap-4">
+                                        {selectedSubusers.map((user) => (
+                                            <div
+                                                key={user._id}
+                                                className="flex items-center bg-gray-100 p-2 rounded-lg"
+                                            >
+                                                <img
+                                                    src={
+                                                        user.image
+                                                            ? `https://nomalytica-back.onrender.com${user.image}`
+                                                            : avatar
+                                                    }
+                                                    alt={user.name}
+                                                    className="w-8 h-8 rounded-full mr-2"
+                                                />
+                                                <span className="text-gray-800 mr-2">
+                                                    {user.name}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeSelectedUser(user)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <FaTimes />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">Начало смены:</label>
                                 <Calendar
                                     value={start}
                                     onChange={(e) => setStart(e.value)}
@@ -163,10 +212,11 @@ export const AddShift = (props) => {
                                     hourFormat="24"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                     placeholder="Выберите дату и время начала"
+                                    showIcon
                                 />
                             </div>
-                            <div className="mb-4">
-                                <label className="block text-gray-700">Конец смены:</label>
+                            <div className="mb-6">
+                                <label className="block text-gray-700 mb-2">Конец смены:</label>
                                 <Calendar
                                     value={end}
                                     onChange={(e) => setEnd(e.value)}
@@ -175,14 +225,17 @@ export const AddShift = (props) => {
                                     hourFormat="24"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                     placeholder="Выберите дату и время окончания"
+                                    showIcon
                                 />
                             </div>
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className={`flex bg-blue-500 text-white py-2 px-4 rounded ml-auto ${
-                                    isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
+                                    isLoading
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : 'hover:bg-blue-600'
+                                } transition duration-200`}
                             >
                                 {isLoading ? 'Добавление...' : 'Добавить'}
                             </button>
