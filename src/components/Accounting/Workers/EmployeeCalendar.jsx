@@ -19,6 +19,36 @@ export const EmployeeCalendar = () => {
     const [currentSubusers, setCurrentSubusers] = useState([]);
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
 
+    // Вспомогательная функция для расчета опоздания
+    const calculateLateMinutes = (startTime, scanTime) => {
+        if (!startTime || !scanTime) return 0;
+
+        const start = new Date(startTime);
+        const scan = new Date(scanTime);
+
+        const diffMs = scan - start;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+        return diffMinutes > 0 ? diffMinutes : 0;
+    };
+
+    // Вспомогательная функция для расчета отработанного времени
+    const calculateWorkedTime = (scanTime, endScanTime) => {
+        if (!scanTime || !endScanTime) return { hours: 0, minutes: 0 };
+
+        const start = new Date(scanTime);
+        const end = new Date(endScanTime);
+
+        const diffMs = end - start;
+        if (diffMs < 0) return { hours: 0, minutes: 0 }; // Защита от отрицательных значений
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return { hours, minutes };
+    };
+
     const filteredSubusers = useMemo(() => {
         return companyStructure.subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -105,19 +135,6 @@ export const EmployeeCalendar = () => {
         };
     }, [month, year]);
 
-    // Вспомогательная функция для расчета опоздания
-    const calculateLateMinutes = (startTime, scanTime) => {
-        if (!startTime || !scanTime) return 0;
-
-        const start = new Date(startTime);
-        const scan = new Date(scanTime);
-
-        const diffMs = scan - start;
-        const diffMinutes = Math.floor(diffMs / (1000 * 60));
-
-        return diffMinutes > 0 ? diffMinutes : 0;
-    };
-
     const renderDayShiftsModalContent = () => {
         if (selectedDayShiftsModal.length > 0) {
             return (
@@ -128,6 +145,9 @@ export const EmployeeCalendar = () => {
                             const startTime = new Date(shift.startTime);
                             const endTime = new Date(shift.endTime);
                             const scanTime = shift.scanTime ? new Date(shift.scanTime) : null;
+                            const endScanTime = shift.endScanTime
+                                ? new Date(shift.endScanTime)
+                                : null;
                             const durationMs = endTime - startTime;
                             const totalMinutes = Math.floor(durationMs / (1000 * 60));
                             const hours = Math.floor(totalMinutes / 60);
@@ -146,6 +166,16 @@ export const EmployeeCalendar = () => {
                             const lateText =
                                 lateMinutes > 0 ? `Опоздал на ${lateMinutes} мин` : 'Не опоздал';
 
+                            // Расчет отработанного времени
+                            const workedTime = calculateWorkedTime(
+                                shift.scanTime,
+                                shift.endScanTime,
+                            );
+                            const workedTimeText =
+                                workedTime.hours > 0
+                                    ? `${workedTime.hours} ч ${workedTime.minutes > 0 ? `${workedTime.minutes} мин` : ''}`
+                                    : `${workedTime.minutes} мин`;
+
                             return (
                                 <li key={shift._id} className="flex flex-col gap-4">
                                     <div className="flex gap-4">
@@ -154,21 +184,17 @@ export const EmployeeCalendar = () => {
                                         <p>Длительность: {durationText}</p>
                                     </div>
                                     <div className="flex flex-col">
-                                        {shift.endScanTime && (
-                                            <>
-                                                <p>
-                                                    Фактический приход:{' '}
-                                                    {formatOnlyTimeDate(shift.scanTime)}
-                                                </p>
-                                                <p>
-                                                    Фактический уход:{' '}
-                                                    {formatOnlyTimeDate(shift.endScanTime)}
-                                                </p>
-                                                <p>
-                                                    Отработано: {shift.timeWorked.hours} часов{' '}
-                                                    {shift.timeWorked.minutes} минут
-                                                </p>
-                                            </>
+                                        {scanTime && (
+                                            <p>
+                                                Фактический приход:{' '}
+                                                {formatOnlyTimeDate(shift.scanTime)}
+                                            </p>
+                                        )}
+                                        {endScanTime && (
+                                            <p>
+                                                Фактический уход:{' '}
+                                                {formatOnlyTimeDate(shift.endScanTime)}
+                                            </p>
                                         )}
                                         {/* Отображение опоздания */}
                                         <p
@@ -178,6 +204,12 @@ export const EmployeeCalendar = () => {
                                         >
                                             {lateText}
                                         </p>
+                                        {/* Отображение отработанного времени */}
+                                        {scanTime && endScanTime && (
+                                            <p className="text-blue-500">
+                                                Отработано: {workedTimeText}
+                                            </p>
+                                        )}
                                     </div>
                                 </li>
                             );
@@ -306,7 +338,7 @@ export const EmployeeCalendar = () => {
                     </tbody>
                 </table>
             </div>
-            {selectedDayShiftsModal?.length && (
+            {selectedDayShiftsModal?.length > 0 && (
                 <Dialog
                     visible={selectedDayShiftsModal?.length > 0}
                     onHide={() => setSelectedDayShiftsModal([])}
