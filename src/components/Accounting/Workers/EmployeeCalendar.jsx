@@ -161,7 +161,7 @@ export const EmployeeCalendar = () => {
             return (
                 <div>
                     <p>
-                        <span className="text-bold text-lg">Магазин:</span>{' '}
+                        <span className="font-bold text-lg">Магазин:</span>{' '}
                         {selectedDayShiftsModal[0]?.selectedStore.storeName}
                     </p>
                     <ul className="list-none flex-col gap-6 flex">
@@ -183,12 +183,17 @@ export const EmployeeCalendar = () => {
                                     ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
                                     : `${minutes} мин`;
 
-                            const lateMinutes = calculateLateMinutes(
-                                shift.startTime,
-                                shift.scanTime,
-                            );
+                            // Рассчитываем опоздание, если есть startTime и scanTime
+                            const lateMinutes =
+                                shift.startTime && shift.scanTime
+                                    ? calculateLateMinutes(shift.startTime, shift.scanTime)
+                                    : 0;
                             const lateText =
-                                lateMinutes > 0 ? `Опоздал на ${lateMinutes} мин` : 'Не опоздал';
+                                shift.startTime && shift.scanTime
+                                    ? lateMinutes > 0
+                                        ? `Опоздал на ${lateMinutes} мин`
+                                        : 'Не опоздал'
+                                    : '';
 
                             const workedTime = calculateWorkedTime(
                                 shift.scanTime,
@@ -203,22 +208,22 @@ export const EmployeeCalendar = () => {
                                 <li key={shift._id} className="flex flex-col gap-4">
                                     <div className="flex gap-4">
                                         <p>
-                                            <span className="text-bold text-lg">Начало смены:</span>{' '}
+                                            <span className="font-bold text-lg">Начало смены:</span>{' '}
                                             {formatOnlyTimeDate(shift.startTime)}
                                         </p>
                                         <p>
-                                            <span className="text-bold text-lg">Конец смены:</span>{' '}
+                                            <span className="font-bold text-lg">Конец смены:</span>{' '}
                                             {formatOnlyTimeDate(shift.endTime)}
                                         </p>
                                         <p>
-                                            <span className="text-bold text-lg">Длительность:</span>{' '}
+                                            <span className="font-bold text-lg">Длительность:</span>{' '}
                                             {durationText}
                                         </p>
                                     </div>
                                     <div className="flex flex-col">
                                         {scanTime && (
                                             <p>
-                                                <span className="text-bold text-lg">
+                                                <span className="font-bold text-lg">
                                                     Фактический приход:
                                                 </span>{' '}
                                                 {formatOnlyTimeDate(shift.scanTime)}
@@ -226,7 +231,7 @@ export const EmployeeCalendar = () => {
                                         )}
                                         {endScanTime && (
                                             <p>
-                                                <span className="text-bold text-lg">
+                                                <span className="font-bold text-lg">
                                                     Фактический уход:
                                                 </span>{' '}
                                                 {formatOnlyTimeDate(shift.endScanTime)}
@@ -234,17 +239,19 @@ export const EmployeeCalendar = () => {
                                         )}
                                     </div>
                                     <div>
-                                        <p
-                                            className={
-                                                lateMinutes > 0
-                                                    ? 'text-red-500 text-bold text-lg'
-                                                    : 'text-green-500 text-bold text-lg'
-                                            }
-                                        >
-                                            {lateText}
-                                        </p>
+                                        {shift.scanTime && (
+                                            <p
+                                                className={
+                                                    lateMinutes > 0
+                                                        ? 'text-red-500 font-bold text-lg'
+                                                        : 'text-green-500 font-bold text-lg'
+                                                }
+                                            >
+                                                {lateText}
+                                            </p>
+                                        )}
                                         {scanTime && endScanTime && (
-                                            <p className="text-blue-500 text-bold text-lg">
+                                            <p className="text-blue-500 font-bold text-lg">
                                                 Отработано: {workedTimeText}
                                             </p>
                                         )}
