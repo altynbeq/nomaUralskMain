@@ -129,7 +129,6 @@ export const EmployeeCalendar = () => {
                                 hours > 0
                                     ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
                                     : `${minutes} мин`;
-
                             return (
                                 <li key={shift._id}>
                                     <div className="flex gap-4">
@@ -138,7 +137,7 @@ export const EmployeeCalendar = () => {
                                         <p>Длительность: {durationText}</p>
                                     </div>
                                     <div className="flex">
-                                        {shift.scanTime && shift.endScanTime && (
+                                        {shift.endScanTime && (
                                             <div>
                                                 <p>
                                                     Фактический приход:{' '}

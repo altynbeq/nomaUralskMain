@@ -23,7 +23,7 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState(false);
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false); // Новое состояние для ошибки геолокации
 
-    const updateShift = async (shift) => {
+    const updateShiftScan = async (shift) => {
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
@@ -36,13 +36,45 @@ export const MainContent = ({ urls, activeMenu }) => {
                         endTime: shift.endTime,
                         selectedStore: shift.selectedStore._id,
                         scanTime: new Date(),
+                        endScanTime: shift.endScanTime,
                     }),
                 },
             );
 
             if (response.ok) {
                 setShowMarkShiftResultModal(true);
-                setMarkShiftResultMessage('Вы успешно отметили смену.');
+                setMarkShiftResultMessage('Вы успешно отметили начало смены.');
+            } else {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+            }
+        } catch {
+            setShowMarkShiftResultModal(true);
+            setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        }
+    };
+
+    const updateShiftEndScan = async (shift) => {
+        try {
+            const response = await fetch(
+                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subUserId: shift.subUserId,
+                        startTime: shift.startTime,
+                        endTime: shift.endTime,
+                        selectedStore: shift.selectedStore._id,
+                        scanTime: shift.scanTime,
+                        endScanTime: new Date(),
+                    }),
+                },
+            );
+
+            if (response.ok) {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
             } else {
                 setShowMarkShiftResultModal(true);
                 setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
@@ -57,21 +89,16 @@ export const MainContent = ({ urls, activeMenu }) => {
         const today = new Date();
         const todayDateString = today.toISOString().split('T')[0];
 
-        // Фильтруем смены на сегодня, соответствующие текущему subUser и без scanTime
+        // Get today's shifts for the current subUser
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
             const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
             const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
-            const isCurrentSubUser = shift.subUserId === subUser._id; // Предполагается, что subUser имеет поле _id
-            const hasNoScanTime =
-                !shift.scanTime ||
-                new Date(shift.scanTime).toISOString().split('T')[0] !== todayDateString;
-
-            return isToday && isCurrentSubUser && hasNoScanTime;
+            const isCurrentSubUser = shift.subUserId === subUser._id;
+            return isToday && isCurrentSubUser;
         });
 
         if (todaysShifts.length > 0 && currentLocation) {
-            // Проверяем наличие QRLocation один раз
             todaysShifts.forEach((shift) => {
                 const storeLocation = shift.selectedStore.location;
                 if (storeLocation) {
@@ -83,7 +110,19 @@ export const MainContent = ({ urls, activeMenu }) => {
                     );
 
                     if (distance <= 50) {
-                        updateShift(shift);
+                        if (!shift.scanTime) {
+                            // If there's no scanTime, set scanTime (arrival time)
+                            updateShiftScan(shift, 'scanTime');
+                        } else if (!shift.endScanTime) {
+                            // If scanTime exists but endScanTime doesn't, set endScanTime (departure time)
+                            updateShiftEndScan(shift, 'endScanTime');
+                        } else {
+                            // Both scanTime and endScanTime already set
+                            setShowMarkShiftResultModal(true);
+                            setMarkShiftResultMessage(
+                                'Вы уже отметили приход и уход для этой смены.',
+                            );
+                        }
                     } else {
                         setShowMarkShiftResultModal(true);
                         setMarkShiftResultMessage('Вы находитесь слишком далеко от места смены.');
