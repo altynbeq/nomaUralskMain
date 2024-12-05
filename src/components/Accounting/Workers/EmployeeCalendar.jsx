@@ -196,6 +196,8 @@ export const EmployeeCalendar = () => {
                                                 {formatOnlyTimeDate(shift.endScanTime)}
                                             </p>
                                         )}
+                                    </div>
+                                    <div>
                                         {/* Отображение опоздания */}
                                         <p
                                             className={
