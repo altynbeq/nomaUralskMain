@@ -2,14 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { useStateContext } from '../../../contexts/ContextProvider';
-import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
+import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
+import { Dialog } from 'primereact/dialog';
 
 export const EmployeeCalendar = () => {
     const { companyStructure } = useStateContext();
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth()); // Ноябрь (0-11)
     const [year, setYear] = useState(currentDate.getFullYear());
-    const [hoveredCircle, setHoveredCircle] = useState(null); // Для тултипа
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState(''); // Состояние для поиска
     const employeesPerPage = 10; // Количество сотрудников на странице
@@ -17,6 +17,7 @@ export const EmployeeCalendar = () => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [totalPages, setTotalPages] = useState(0);
     const [currentSubusers, setCurrentSubusers] = useState([]);
+    const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
 
     const filteredSubusers = useMemo(() => {
         return companyStructure.subUsers?.filter((subuser) => {
@@ -59,14 +60,6 @@ export const EmployeeCalendar = () => {
         } else {
             setMonth(month + 1);
         }
-    };
-
-    const handleMouseEnter = (employeeIndex, dayIndex) => {
-        setHoveredCircle({ employeeIndex, dayIndex });
-    };
-
-    const handleMouseLeave = () => {
-        setHoveredCircle(null);
     };
 
     useEffect(() => {
@@ -114,6 +107,64 @@ export const EmployeeCalendar = () => {
             );
         };
     }, [month, year]);
+
+    const renderDayShiftsModalContent = () => {
+        console.log(selectedDayShiftsModal);
+        if (selectedDayShiftsModal.length > 0) {
+            return (
+                <div>
+                    <p>Магазин: {selectedDayShiftsModal[0]?.selectedStore.storeName}</p>
+                    <ul className="list-none flex-col gap-6 flex">
+                        {selectedDayShiftsModal.map((shift) => {
+                            // Рассчитываем количество часов и минут в смене
+                            const startTime = new Date(shift.startTime);
+                            const endTime = new Date(shift.endTime);
+                            const durationMs = endTime - startTime; // Разница в миллисекундах
+                            const totalMinutes = Math.floor(durationMs / (1000 * 60)); // Общая продолжительность в минутах
+                            const hours = Math.floor(totalMinutes / 60); // Полные часы
+                            const minutes = totalMinutes % 60; // Остаток минут
+
+                            // Форматируем длительность
+                            const durationText =
+                                hours > 0
+                                    ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
+                                    : `${minutes} мин`;
+
+                            return (
+                                <li key={shift._id}>
+                                    <div className="flex gap-4">
+                                        <p>Начало смены: {formatOnlyTimeDate(shift.startTime)}</p>
+                                        <p>Конец смены: {formatOnlyTimeDate(shift.endTime)}</p>
+                                        <p>Длительность: {durationText}</p>
+                                    </div>
+                                    <div className="flex">
+                                        {shift.scanTime && shift.endScanTime && (
+                                            <div>
+                                                <p>
+                                                    Фактический приход:{' '}
+                                                    {formatOnlyTimeDate(shift.scanTime)}
+                                                </p>
+                                                <p>
+                                                    Фактический уход:{'  '}
+                                                    {formatOnlyTimeDate(shift.endScanTime)}
+                                                </p>
+                                                <p>
+                                                    Отработано:{'  '}
+                                                    {1}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            );
+        } else {
+            return <p>Нет смен</p>;
+        }
+    };
 
     return (
         <div className="w-[100%] bg-white p-6 mx-16 rounded-lg shadow-md">
@@ -215,8 +266,7 @@ export const EmployeeCalendar = () => {
                                         <td
                                             key={dayIndex}
                                             className="py-1 text-center relative"
-                                            onMouseEnter={() => handleMouseEnter(index, dayIndex)}
-                                            onMouseLeave={handleMouseLeave}
+                                            onClick={() => setSelectedDayShiftsModal(shifts)}
                                         >
                                             <div
                                                 className={`w-4 h-4 flex items-center rounded-full ${
@@ -225,40 +275,6 @@ export const EmployeeCalendar = () => {
                                                         : 'bg-gray-200'
                                                 } hover:bg-blue-500`}
                                             ></div>
-                                            {hoveredCircle &&
-                                                hoveredCircle.employeeIndex === index &&
-                                                hoveredCircle.dayIndex === dayIndex && (
-                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px] left-[-100%] transform -translate-x-2/3 top-[-40%] -translate-y-1/2">
-                                                        {shifts.length > 0 ? (
-                                                            shifts.map((shift) => (
-                                                                <div key={shift._id}>
-                                                                    <p>
-                                                                        Начало:{' '}
-                                                                        {formatOnlyTimeDate(
-                                                                            shift.startTime,
-                                                                        )}
-                                                                    </p>
-                                                                    <p>
-                                                                        Конец:{' '}
-                                                                        {formatOnlyTimeDate(
-                                                                            shift.endTime,
-                                                                        )}
-                                                                    </p>
-                                                                    {shift.scanTime && (
-                                                                        <p>
-                                                                            Приход:{' '}
-                                                                            {formatOnlyTimeDate(
-                                                                                shift.scanTime,
-                                                                            )}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <p>Нет смен</p>
-                                                        )}
-                                                    </div>
-                                                )}
                                         </td>
                                     );
                                 })}
@@ -267,7 +283,15 @@ export const EmployeeCalendar = () => {
                     </tbody>
                 </table>
             </div>
-
+            {selectedDayShiftsModal?.length && (
+                <Dialog
+                    visible={selectedDayShiftsModal?.length > 0}
+                    onHide={() => setSelectedDayShiftsModal([])}
+                    header={`Cмена на ${selectedDayShiftsModal[0]?.startTime ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime) : ''}`}
+                >
+                    {renderDayShiftsModalContent()}
+                </Dialog>
+            )}
             {/* Пагинация */}
             <div className="flex justify-between items-center mt-4">
                 <button
