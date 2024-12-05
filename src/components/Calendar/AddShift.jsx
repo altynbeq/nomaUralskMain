@@ -248,7 +248,6 @@ export const AddShift = (props) => {
                                     selectionMode="range"
                                     showIcon
                                     locale="ru"
-                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
                                     placeholder="Выберите период"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                 />
@@ -266,7 +265,6 @@ export const AddShift = (props) => {
                                     hourFormat="24"
                                     showIcon
                                     locale="ru"
-                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
                                     placeholder="Выберите время начала"
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                 />
@@ -278,7 +276,6 @@ export const AddShift = (props) => {
                                     Время окончания смены:
                                 </label>
                                 <Calendar
-                                    onBlur={() => document.dispatchEvent(new Event('keydown'))}
                                     value={endTime}
                                     onChange={(e) => setEndTime(e.value)}
                                     timeOnly
