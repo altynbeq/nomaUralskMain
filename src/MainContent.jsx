@@ -18,7 +18,7 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
-    const [QRLocation, setQRLocation] = useState(null);
+    const [currentLocation, setCurrentLocation] = useState(null);
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState(false);
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false); // Новое состояние для ошибки геолокации
@@ -70,7 +70,7 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isToday && isCurrentSubUser && hasNoScanTime;
         });
 
-        if (todaysShifts.length > 0 && QRLocation) {
+        if (todaysShifts.length > 0 && currentLocation) {
             // Проверяем наличие QRLocation один раз
             todaysShifts.forEach((shift) => {
                 const storeLocation = shift.selectedStore.location;
@@ -78,8 +78,8 @@ export const MainContent = ({ urls, activeMenu }) => {
                     const distance = getDistanceFromLatLonInMeters(
                         storeLocation.lat,
                         storeLocation.lng,
-                        QRLocation.lat,
-                        QRLocation.lng,
+                        currentLocation.lat,
+                        currentLocation.lng,
                     );
 
                     if (distance <= 50) {
@@ -91,7 +91,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [QRLocation, subUserShifts, subUser]);
+    }, [currentLocation, subUserShifts, subUser]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -101,7 +101,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
-                        setQRLocation({ lat: latitude, lng: longitude });
+                        setCurrentLocation({ lat: latitude, lng: longitude });
                     },
                     (error) => {
                         console.error('Ошибка при получении геолокации:', error);
