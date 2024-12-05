@@ -98,6 +98,13 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     // Проверка смен при загрузке геолокации
     useEffect(() => {
+        // Проверяем наличие параметра isQrRedirect в поисковых параметрах URL
+        const searchParams = new URLSearchParams(location.search);
+        const isQr = searchParams.get('isQrRedirect') === 'true';
+
+        // Если переход не по QR (параметр отсутствует или не равен true) – выходим
+        if (!isQr) return;
+
         const today = new Date();
         const todayDateString = today.toISOString().split('T')[0];
 
@@ -138,7 +145,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [currentLocation, subUserShifts, subUser]);
+    }, [subUserShifts, subUser, currentLocation, location.search]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
