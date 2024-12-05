@@ -8,11 +8,11 @@ import { Dialog } from 'primereact/dialog';
 export const EmployeeCalendar = () => {
     const { companyStructure } = useStateContext();
     const currentDate = new Date();
-    const [month, setMonth] = useState(currentDate.getMonth()); // Ноябрь (0-11)
+    const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState(''); // Состояние для поиска
-    const employeesPerPage = 10; // Количество сотрудников на странице
+    const [searchTerm, setSearchTerm] = useState('');
+    const employeesPerPage = 10;
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [totalPages, setTotalPages] = useState(0);
@@ -37,9 +37,8 @@ export const EmployeeCalendar = () => {
         });
     }, [companyStructure, searchTerm, selectedDepartment, selectedStore]);
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate(); // Кол-во дней в месяце
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Получаем название месяца динамически
     const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(
         new Date(year, month),
     );
@@ -100,35 +99,53 @@ export const EmployeeCalendar = () => {
             return (
                 shifts?.filter((shift) => {
                     const shiftStart = new Date(shift.startTime);
-
-                    // Проверяем, начинается ли смена в текущий день
                     return shiftStart >= dayStart && shiftStart <= dayEnd;
                 }) || []
             );
         };
     }, [month, year]);
 
+    // Вспомогательная функция для расчета опоздания
+    const calculateLateMinutes = (startTime, scanTime) => {
+        if (!startTime || !scanTime) return 0;
+
+        const start = new Date(startTime);
+        const scan = new Date(scanTime);
+
+        const diffMs = scan - start;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+        return diffMinutes > 0 ? diffMinutes : 0;
+    };
+
     const renderDayShiftsModalContent = () => {
-        console.log(selectedDayShiftsModal);
         if (selectedDayShiftsModal.length > 0) {
             return (
                 <div>
                     <p>Магазин: {selectedDayShiftsModal[0]?.selectedStore.storeName}</p>
                     <ul className="list-none flex-col gap-6 flex">
                         {selectedDayShiftsModal.map((shift) => {
-                            // Рассчитываем количество часов и минут в смене
                             const startTime = new Date(shift.startTime);
                             const endTime = new Date(shift.endTime);
-                            const durationMs = endTime - startTime; // Разница в миллисекундах
-                            const totalMinutes = Math.floor(durationMs / (1000 * 60)); // Общая продолжительность в минутах
-                            const hours = Math.floor(totalMinutes / 60); // Полные часы
-                            const minutes = totalMinutes % 60; // Остаток минут
+                            const scanTime = shift.scanTime ? new Date(shift.scanTime) : null;
+                            const durationMs = endTime - startTime;
+                            const totalMinutes = Math.floor(durationMs / (1000 * 60));
+                            const hours = Math.floor(totalMinutes / 60);
+                            const minutes = totalMinutes % 60;
 
-                            // Форматируем длительность
                             const durationText =
                                 hours > 0
                                     ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
                                     : `${minutes} мин`;
+
+                            // Расчет опоздания
+                            const lateMinutes = calculateLateMinutes(
+                                shift.startTime,
+                                shift.scanTime,
+                            );
+                            const lateText =
+                                lateMinutes > 0 ? `Опоздал на ${lateMinutes} мин` : 'Не опоздал';
+
                             return (
                                 <li key={shift._id} className="flex flex-col gap-4">
                                     <div className="flex gap-4">
@@ -136,24 +153,31 @@ export const EmployeeCalendar = () => {
                                         <p>Конец смены: {formatOnlyTimeDate(shift.endTime)}</p>
                                         <p>Длительность: {durationText}</p>
                                     </div>
-                                    <div className="flex">
+                                    <div className="flex flex-col">
                                         {shift.endScanTime && (
-                                            <div className="flex gap-4">
+                                            <>
                                                 <p>
                                                     Фактический приход:{' '}
                                                     {formatOnlyTimeDate(shift.scanTime)}
                                                 </p>
                                                 <p>
-                                                    Фактический уход:{'  '}
+                                                    Фактический уход:{' '}
                                                     {formatOnlyTimeDate(shift.endScanTime)}
                                                 </p>
                                                 <p>
-                                                    Отработано:{'  '}
-                                                    {shift.timeWorked.hours} часов{' '}
-                                                    {shift.timeWorked.minutes}
+                                                    Отработано: {shift.timeWorked.hours} часов{' '}
+                                                    {shift.timeWorked.minutes} минут
                                                 </p>
-                                            </div>
+                                            </>
                                         )}
+                                        {/* Отображение опоздания */}
+                                        <p
+                                            className={
+                                                lateMinutes > 0 ? 'text-red-500' : 'text-green-500'
+                                            }
+                                        >
+                                            {lateText}
+                                        </p>
                                     </div>
                                 </li>
                             );
@@ -251,8 +275,7 @@ export const EmployeeCalendar = () => {
                         {currentSubusers?.map((employee, index) => (
                             <tr key={index}>
                                 <td className="px-4 py-2 inline-flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>{' '}
-                                    {/* Серый кружок */}
+                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                                     <div className="flex flex-col">
                                         <p className="text-sm">{`${employee.name}`}</p>
                                         <p className="text-sm">
@@ -265,7 +288,7 @@ export const EmployeeCalendar = () => {
                                     return (
                                         <td
                                             key={dayIndex}
-                                            className="py-1 text-center relative"
+                                            className="py-1 text-center relative cursor-pointer"
                                             onClick={() => setSelectedDayShiftsModal(shifts)}
                                         >
                                             <div
@@ -287,7 +310,7 @@ export const EmployeeCalendar = () => {
                 <Dialog
                     visible={selectedDayShiftsModal?.length > 0}
                     onHide={() => setSelectedDayShiftsModal([])}
-                    header={`Cмена на ${selectedDayShiftsModal[0]?.startTime ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime) : ''}`}
+                    header={`Смена на ${selectedDayShiftsModal[0]?.startTime ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime) : ''}`}
                 >
                     {renderDayShiftsModalContent()}
                 </Dialog>
