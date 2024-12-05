@@ -49,6 +49,22 @@ export const EmployeeCalendar = () => {
         return { hours, minutes };
     };
 
+    // Вспомогательная функция для определения цвета дня
+    const getDayColor = (shifts) => {
+        if (shifts.length === 0) {
+            return 'bg-gray-200';
+        }
+
+        const hasLate = shifts.some(
+            (shift) => calculateLateMinutes(shift.startTime, shift.scanTime) > 0,
+        );
+        if (hasLate) {
+            return 'bg-red-500';
+        }
+
+        return 'bg-blue-500';
+    };
+
     const filteredSubusers = useMemo(() => {
         return companyStructure.subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -319,6 +335,8 @@ export const EmployeeCalendar = () => {
                                 </td>
                                 {[...Array(daysInMonth)].map((_, dayIndex) => {
                                     const shifts = getShiftsForDay(employee.shifts, dayIndex + 1);
+                                    const dayColor = getDayColor(shifts);
+
                                     return (
                                         <td
                                             key={dayIndex}
@@ -326,11 +344,7 @@ export const EmployeeCalendar = () => {
                                             onClick={() => setSelectedDayShiftsModal(shifts)}
                                         >
                                             <div
-                                                className={`w-4 h-4 flex items-center rounded-full ${
-                                                    shifts.length > 0
-                                                        ? 'bg-green-500'
-                                                        : 'bg-gray-200'
-                                                } hover:bg-blue-500`}
+                                                className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
                                             ></div>
                                         </td>
                                     );
