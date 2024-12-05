@@ -142,7 +142,7 @@ export const SubusersList = () => {
                             optionLabel="name"
                             placeholder="Отдел"
                             className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                            disabled={filteredDepartments.length === 0}
+                            disabled={filteredDepartments?.length === 0}
                         />
                     </div>
                     <InputText

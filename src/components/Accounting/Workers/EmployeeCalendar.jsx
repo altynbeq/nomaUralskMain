@@ -1,26 +1,70 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { useStateContext } from '../../../contexts/ContextProvider';
-import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
+import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
+import { Dialog } from 'primereact/dialog';
 
 export const EmployeeCalendar = () => {
     const { companyStructure } = useStateContext();
     const currentDate = new Date();
-    const [month, setMonth] = useState(currentDate.getMonth()); // Ноябрь (0-11)
+    const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
-    const [hoveredCircle, setHoveredCircle] = useState(null); // Для тултипа
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState(''); // Состояние для поиска
-    const employeesPerPage = 10; // Количество сотрудников на странице
+    const [searchTerm, setSearchTerm] = useState('');
+    const employeesPerPage = 10;
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
-    const [totalPages, setTotalPages] = useState(0);
-    const [currentSubusers, setCurrentSubusers] = useState([]);
+    const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
 
+    // Вспомогательная функция для расчета опоздания
+    const calculateLateMinutes = useCallback((startTime, scanTime) => {
+        if (!startTime || !scanTime) return 0;
+        const start = new Date(startTime);
+        const scan = new Date(scanTime);
+        const diffMs = scan - start;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        return diffMinutes > 0 ? diffMinutes : 0;
+    }, []);
+
+    // Вспомогательная функция для расчета отработанного времени
+    const calculateWorkedTime = useCallback((scanTime, endScanTime) => {
+        if (!scanTime || !endScanTime) return { hours: 0, minutes: 0 };
+
+        const start = new Date(scanTime);
+        const end = new Date(endScanTime);
+
+        const diffMs = end - start;
+        if (diffMs < 0) return { hours: 0, minutes: 0 };
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return { hours, minutes };
+    }, []);
+
+    // Создаём мапу для быстрого доступа к названию департамента
+    const departmentsMap = useMemo(() => {
+        const map = new Map();
+        companyStructure?.departments?.forEach((dept) => {
+            map.set(dept._id, dept.name);
+        });
+        return map;
+    }, [companyStructure?.departments]);
+
+    const getDepartmentName = useCallback(
+        (departmentId) => {
+            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
+        },
+        [departmentsMap],
+    );
+
+    // Фильтрация subUsers по критериям
     const filteredSubusers = useMemo(() => {
+        const lowerSearch = searchTerm.toLowerCase();
         return companyStructure.subUsers?.filter((subuser) => {
-            const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = subuser.name.toLowerCase().includes(lowerSearch);
             const matchesDepartment = selectedDepartment
                 ? subuser.departmentId === selectedDepartment._id
                 : true;
@@ -36,84 +80,192 @@ export const EmployeeCalendar = () => {
         });
     }, [companyStructure, searchTerm, selectedDepartment, selectedStore]);
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate(); // Кол-во дней в месяце
-
-    // Получаем название месяца динамически
-    const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(
-        new Date(year, month),
+    const daysInMonth = useMemo(() => new Date(year, month + 1, 0).getDate(), [year, month]);
+    const daysArray = useMemo(
+        () => Array.from({ length: daysInMonth }, (_, i) => i + 1),
+        [daysInMonth],
+    );
+    const monthName = useMemo(
+        () => new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(new Date(year, month)),
+        [year, month],
     );
 
-    const handlePrevMonth = () => {
+    const totalPages = useMemo(
+        () => Math.ceil(filteredSubusers?.length / employeesPerPage),
+        [filteredSubusers, employeesPerPage],
+    );
+
+    const currentSubusers = useMemo(() => {
+        return filteredSubusers?.slice(
+            (currentPage - 1) * employeesPerPage,
+            currentPage * employeesPerPage,
+        );
+    }, [currentPage, filteredSubusers, employeesPerPage]);
+
+    const handlePrevMonth = useCallback(() => {
         if (month === 0) {
             setMonth(11);
-            setYear(year - 1);
+            setYear((prevYear) => prevYear - 1);
         } else {
-            setMonth(month - 1);
+            setMonth((prevMonth) => prevMonth - 1);
         }
-    };
+    }, [month]);
 
-    const handleNextMonth = () => {
+    const handleNextMonth = useCallback(() => {
         if (month === 11) {
             setMonth(0);
-            setYear(year + 1);
+            setYear((prevYear) => prevYear + 1);
         } else {
-            setMonth(month + 1);
+            setMonth((prevMonth) => prevMonth + 1);
         }
-    };
+    }, [month]);
 
-    const handleMouseEnter = (employeeIndex, dayIndex) => {
-        setHoveredCircle({ employeeIndex, dayIndex });
-    };
+    const handlePrevPage = useCallback(() => {
+        setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+    }, []);
 
-    const handleMouseLeave = () => {
-        setHoveredCircle(null);
-    };
+    const handleNextPage = useCallback(() => {
+        setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+    }, [totalPages]);
 
-    useEffect(() => {
-        setTotalPages(Math.ceil(filteredSubusers?.length / employeesPerPage));
-        setCurrentSubusers(
-            filteredSubusers?.slice(
-                (currentPage - 1) * employeesPerPage,
-                currentPage * employeesPerPage,
-            ),
-        );
-    }, [currentPage, filteredSubusers]);
-
-    const handlePrevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const getDepartmentName = (departmentId) => {
-        if (!companyStructure?.departments?.length) return 'Неизвестный департамент';
-
-        const department = companyStructure.departments.find((dept) => dept._id === departmentId);
-
-        return department ? department.name : 'Неизвестный департамент';
-    };
-
+    // Мемоизация функции получения смен за день
     const getShiftsForDay = useMemo(() => {
         return (shifts, day) => {
             const dayStart = new Date(year, month, day, 0, 0, 0);
             const dayEnd = new Date(year, month, day, 23, 59, 59);
-
             return (
                 shifts?.filter((shift) => {
                     const shiftStart = new Date(shift.startTime);
-
-                    // Проверяем, начинается ли смена в текущий день
                     return shiftStart >= dayStart && shiftStart <= dayEnd;
                 }) || []
             );
         };
     }, [month, year]);
+
+    // Определение цвета дня
+    const getDayColor = useCallback(
+        (shifts) => {
+            if (shifts.length === 0) {
+                return 'bg-gray-200';
+            }
+            const hasLate = shifts.some(
+                (shift) => calculateLateMinutes(shift.startTime, shift.scanTime) > 0,
+            );
+            return hasLate ? 'bg-red-500' : 'bg-blue-500';
+        },
+        [calculateLateMinutes],
+    );
+
+    const renderDayShiftsModalContent = useCallback(() => {
+        if (selectedDayShiftsModal.length > 0) {
+            return (
+                <div>
+                    <p>
+                        <span className="font-bold text-lg">Магазин:</span>{' '}
+                        {selectedDayShiftsModal[0]?.selectedStore.storeName}
+                    </p>
+                    <ul className="list-none flex-col gap-6 flex">
+                        {selectedDayShiftsModal.map((shift) => {
+                            const startTime = new Date(shift.startTime);
+                            const endTime = new Date(shift.endTime);
+                            const scanTime = shift.scanTime ? new Date(shift.scanTime) : null;
+                            const endScanTime = shift.endScanTime
+                                ? new Date(shift.endScanTime)
+                                : null;
+
+                            const durationMs = endTime - startTime;
+                            const totalMinutes = Math.floor(durationMs / (1000 * 60));
+                            const hours = Math.floor(totalMinutes / 60);
+                            const minutes = totalMinutes % 60;
+
+                            const durationText =
+                                hours > 0
+                                    ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
+                                    : `${minutes} мин`;
+
+                            // Рассчитываем опоздание, если есть startTime и scanTime
+                            const lateMinutes =
+                                shift.startTime && shift.scanTime
+                                    ? calculateLateMinutes(shift.startTime, shift.scanTime)
+                                    : 0;
+                            const lateText =
+                                shift.startTime && shift.scanTime
+                                    ? lateMinutes > 0
+                                        ? `Опоздал на ${lateMinutes} мин`
+                                        : 'Не опоздал'
+                                    : '';
+
+                            const workedTime = calculateWorkedTime(
+                                shift.scanTime,
+                                shift.endScanTime,
+                            );
+                            const workedTimeText =
+                                workedTime.hours > 0
+                                    ? `${workedTime.hours} ч ${workedTime.minutes > 0 ? `${workedTime.minutes} мин` : ''}`
+                                    : `${workedTime.minutes} мин`;
+
+                            return (
+                                <li key={shift._id} className="flex flex-col gap-4">
+                                    <div className="flex gap-4">
+                                        <p>
+                                            <span className="font-bold text-lg">Начало смены:</span>{' '}
+                                            {formatOnlyTimeDate(shift.startTime)}
+                                        </p>
+                                        <p>
+                                            <span className="font-bold text-lg">Конец смены:</span>{' '}
+                                            {formatOnlyTimeDate(shift.endTime)}
+                                        </p>
+                                        <p>
+                                            <span className="font-bold text-lg">Длительность:</span>{' '}
+                                            {durationText}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        {scanTime && (
+                                            <p>
+                                                <span className="font-bold text-lg">
+                                                    Фактический приход:
+                                                </span>{' '}
+                                                {formatOnlyTimeDate(shift.scanTime)}
+                                            </p>
+                                        )}
+                                        {endScanTime && (
+                                            <p>
+                                                <span className="font-bold text-lg">
+                                                    Фактический уход:
+                                                </span>{' '}
+                                                {formatOnlyTimeDate(shift.endScanTime)}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        {shift.scanTime && (
+                                            <p
+                                                className={
+                                                    lateMinutes > 0
+                                                        ? 'text-red-500 font-bold text-lg'
+                                                        : 'text-green-500 font-bold text-lg'
+                                                }
+                                            >
+                                                {lateText}
+                                            </p>
+                                        )}
+                                        {scanTime && endScanTime && (
+                                            <p className="text-blue-500 font-bold text-lg">
+                                                Отработано: {workedTimeText}
+                                            </p>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            );
+        } else {
+            return <p>Нет смен</p>;
+        }
+    }, [selectedDayShiftsModal, calculateLateMinutes, calculateWorkedTime]);
 
     return (
         <div className="w-[100%] bg-white p-6 mx-16 rounded-lg shadow-md">
@@ -172,22 +324,22 @@ export const EmployeeCalendar = () => {
                     <thead>
                         <tr>
                             <th className="px-2 py-2 text-left">Сотрудник</th>
-                            {[...Array(daysInMonth)].map((_, index) => (
-                                <th key={index} className="px-2 py-1 text-center text-sm">
-                                    {index + 1}
+                            {daysArray.map((day) => (
+                                <th key={day} className="px-2 py-1 text-center text-sm">
+                                    {day}
                                 </th>
                             ))}
                         </tr>
                         <tr>
                             <th className="px-2 py-1 text-left"></th>
-                            {[...Array(daysInMonth)].map((_, index) => {
-                                const date = new Date(year, month, index + 1);
+                            {daysArray.map((day) => {
+                                const date = new Date(year, month, day);
                                 const weekDay = new Intl.DateTimeFormat('ru-RU', {
                                     weekday: 'short',
                                 }).format(date);
                                 return (
                                     <th
-                                        key={index}
+                                        key={day}
                                         className="py-1 text-center text-xs text-gray-500"
                                     >
                                         {weekDay}
@@ -200,65 +352,27 @@ export const EmployeeCalendar = () => {
                         {currentSubusers?.map((employee, index) => (
                             <tr key={index}>
                                 <td className="px-4 py-2 inline-flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>{' '}
-                                    {/* Серый кружок */}
+                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                                     <div className="flex flex-col">
-                                        <p className="text-sm">{`${employee.name}`}</p>
+                                        <p className="text-sm">{employee.name}</p>
                                         <p className="text-sm">
                                             ({getDepartmentName(employee.departmentId)})
                                         </p>
                                     </div>
                                 </td>
-                                {[...Array(daysInMonth)].map((_, dayIndex) => {
-                                    const shifts = getShiftsForDay(employee.shifts, dayIndex + 1);
+                                {daysArray.map((day) => {
+                                    const shifts = getShiftsForDay(employee.shifts, day);
+                                    const dayColor = getDayColor(shifts);
+
                                     return (
                                         <td
-                                            key={dayIndex}
-                                            className="py-1 text-center relative"
-                                            onMouseEnter={() => handleMouseEnter(index, dayIndex)}
-                                            onMouseLeave={handleMouseLeave}
+                                            key={day}
+                                            className="py-1 text-center relative cursor-pointer"
+                                            onClick={() => setSelectedDayShiftsModal(shifts)}
                                         >
                                             <div
-                                                className={`w-4 h-4 flex items-center rounded-full ${
-                                                    shifts.length > 0
-                                                        ? 'bg-green-500'
-                                                        : 'bg-gray-200'
-                                                } hover:bg-blue-500`}
+                                                className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
                                             ></div>
-                                            {hoveredCircle &&
-                                                hoveredCircle.employeeIndex === index &&
-                                                hoveredCircle.dayIndex === dayIndex && (
-                                                    <div className="absolute z-10 p-2 text-sm bg-white border rounded-lg shadow-lg text-black min-w-[180px] left-[-100%] transform -translate-x-2/3 top-[-40%] -translate-y-1/2">
-                                                        {shifts.length > 0 ? (
-                                                            shifts.map((shift) => (
-                                                                <div key={shift._id}>
-                                                                    <p>
-                                                                        Начало:{' '}
-                                                                        {formatOnlyTimeDate(
-                                                                            shift.startTime,
-                                                                        )}
-                                                                    </p>
-                                                                    <p>
-                                                                        Конец:{' '}
-                                                                        {formatOnlyTimeDate(
-                                                                            shift.endTime,
-                                                                        )}
-                                                                    </p>
-                                                                    {shift.scanTime && (
-                                                                        <p>
-                                                                            Приход:{' '}
-                                                                            {formatOnlyTimeDate(
-                                                                                shift.scanTime,
-                                                                            )}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <p>Нет смен</p>
-                                                        )}
-                                                    </div>
-                                                )}
                                         </td>
                                     );
                                 })}
@@ -267,7 +381,19 @@ export const EmployeeCalendar = () => {
                     </tbody>
                 </table>
             </div>
-
+            {selectedDayShiftsModal?.length > 0 && (
+                <Dialog
+                    visible={selectedDayShiftsModal?.length > 0}
+                    onHide={() => setSelectedDayShiftsModal([])}
+                    header={`Смена на ${
+                        selectedDayShiftsModal[0]?.startTime
+                            ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime)
+                            : ''
+                    }`}
+                >
+                    {renderDayShiftsModalContent()}
+                </Dialog>
+            )}
             {/* Пагинация */}
             <div className="flex justify-between items-center mt-4">
                 <button
