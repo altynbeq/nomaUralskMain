@@ -130,7 +130,7 @@ export const EmployeeCalendar = () => {
                                     ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
                                     : `${minutes} мин`;
                             return (
-                                <li key={shift._id}>
+                                <li key={shift._id} className="flex flex-col gap-4">
                                     <div className="flex gap-4">
                                         <p>Начало смены: {formatOnlyTimeDate(shift.startTime)}</p>
                                         <p>Конец смены: {formatOnlyTimeDate(shift.endTime)}</p>
@@ -138,7 +138,7 @@ export const EmployeeCalendar = () => {
                                     </div>
                                     <div className="flex">
                                         {shift.endScanTime && (
-                                            <div>
+                                            <div className="flex gap-4">
                                                 <p>
                                                     Фактический приход:{' '}
                                                     {formatOnlyTimeDate(shift.scanTime)}
@@ -149,7 +149,8 @@ export const EmployeeCalendar = () => {
                                                 </p>
                                                 <p>
                                                     Отработано:{'  '}
-                                                    {1}
+                                                    {shift.timeWorked.hours} часов{' '}
+                                                    {shift.timeWorked.minutes}
                                                 </p>
                                             </div>
                                         )}
