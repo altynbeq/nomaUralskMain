@@ -11,6 +11,7 @@ import CardWithStats from '../components/demo/ChartsHolder';
 import YearBarChart from '../components/demo/YearBarChart';
 import CarouselCard from '../components/demo/Slider';
 import { FinanceShare } from '../data/MainDataSource';
+import { Navigate } from 'react-router-dom';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
@@ -57,6 +58,10 @@ const Finance = ({ urls }) => {
                 <LoadingSkeleton />
             </div>
         );
+    }
+
+    if (localStorage.getItem('companyId') === '6720f0a45801c6007e836aa4') {
+        return <Navigate to="/no-access" replace />;
     }
     return (
         <div className="mt-12 flex flex-col justify-center align-center gap-8">

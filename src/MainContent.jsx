@@ -10,6 +10,7 @@ import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
+import { NoAccess } from './pages';
 
 // Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
@@ -116,7 +117,6 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isToday && isCurrentSubUser;
         });
 
-        console.log(todaysShifts.length, currentLocation);
         if (todaysShifts.length > 0 && currentLocation) {
             todaysShifts.forEach((shift) => {
                 const storeLocation = shift.selectedStore.location;
@@ -289,6 +289,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                             <Route path="/calendar" element={<Calendar />} />
                             <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
                             <Route path="/accounting-workers" element={<AccountingWorkers />} />
+                            <Route path="/no-access" element={<NoAccess />} />
                         </Routes>
                     </Suspense>
                     <Footer />
