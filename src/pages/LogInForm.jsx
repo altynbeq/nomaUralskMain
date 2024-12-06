@@ -4,22 +4,31 @@ import { FaChartPie, FaEye, FaEyeSlash } from 'react-icons/fa';
 import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
 import AlertModal from '../components/AlertModal';
+import { Button } from 'primereact/button';
+import { useApi } from '../methods/hooks/useApi';
+import { Dialog } from 'primereact/dialog';
+import { InputText } from 'primereact/inputtext';
 
 const LogInForm = ({ isQrRedirect }) => {
-    const { handleLogin, userId } = useStateContext();
+    const { post } = useApi();
+    const [resettedPassword, setResettedPassword] = useState('');
+    const [resettedEmail, setResettedEmail] = useState('');
+    const { handleLogin } = useStateContext();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [localStorageData, setLocalStorageData] = useState([]);
     const [currentUrl, setCurrentUrl] = useState(window.location.href);
-    const [department, setDepartment] = useState('');
-    const [token, setToken] = useState('');
     const [name, setName] = useState('');
     const [regBtnActive, setRegBtnActive] = useState(true);
     const [alertOpen, setAlertOpen] = useState({
         login: false,
         signUp: false,
     });
+    const [showReset, setShowReset] = useState(false);
+    const [showSuccessPass, setShowSuccessPass] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [alertModalResultMessage, setAlertModalResultMessage] = useState('');
 
     const deactivateRegBtn = () => {
         setRegBtnActive(false);
@@ -111,6 +120,30 @@ const LogInForm = ({ isQrRedirect }) => {
         handleRegistration();
     };
 
+    const sendPassword = async () => {
+        setIsLoading(true);
+        try {
+            const password = await post('users/reset_password_temporary', {
+                email: resettedEmail,
+            });
+            if (password) {
+                setResettedPassword(password);
+                setShowSuccessPass(true);
+                setShowReset(false);
+            }
+        } catch (error) {
+            setShowSuccessPass(true);
+            setShowReset(false);
+            setAlertModalResultMessage('Вы ввели неверную почту');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const onForgotPass = () => {
+        setShowReset(true);
+    };
+
     return (
         <div
             className="min-h-screen flex items-center justify-center bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8"
@@ -186,11 +219,43 @@ const LogInForm = ({ isQrRedirect }) => {
 
                         <div className="flex items-center justify-center">
                             <div className="text-sm">
-                                <a href="#" className="font-medium hover:text-gray-600">
+                                <Button
+                                    onClick={onForgotPass}
+                                    className="font-medium hover:text-gray-600"
+                                >
                                     Забыли пароль?
-                                </a>
+                                </Button>
                             </div>
                         </div>
+
+                        <Dialog
+                            visible={showReset}
+                            onHide={() => setShowReset(false)}
+                            header="Восстановить пароль"
+                        >
+                            <InputText
+                                className="mt-5 border-2 p-2 w-full"
+                                onChange={(e) => setResettedEmail(e.target.value)}
+                                placeholder="Введите вашу почту"
+                                value={resettedEmail}
+                            />
+                            <Button
+                                disabled={isLoading || !resettedEmail}
+                                className="mt-10 border-blue-500 border-2 p-2 flex justify-center mx-auto"
+                                label="Получить новый пароль"
+                                onClick={sendPassword}
+                            />
+                        </Dialog>
+
+                        <AlertModal
+                            open={showSuccessPass}
+                            message={
+                                alertModalResultMessage
+                                    ? alertModalResultMessage
+                                    : `Ваш новый пароль - ${resettedPassword.temporaryPassword}`
+                            }
+                            onClose={() => setShowSuccessPass(false)}
+                        />
 
                         <div>
                             <button
