@@ -25,7 +25,7 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { setUserImage, userImage, subUserShifts, subUser } = useStateContext();
+    const { setUserImage, userImage, subUserShifts, subUser, companyStructure } = useStateContext();
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -117,36 +117,46 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isToday && isCurrentSubUser;
         });
 
-        if (todaysShifts.length > 0 && currentLocation) {
+        if (todaysShifts.length > 0 && currentLocation && companyStructure?.stores?.length > 0) {
             todaysShifts.forEach((shift) => {
-                const storeLocation = shift.selectedStore.location;
-                if (storeLocation) {
-                    const distance = getDistanceFromLatLonInMeters(
-                        storeLocation.lat,
-                        storeLocation.lng,
-                        currentLocation.lat,
-                        currentLocation.lng,
-                    );
+                let isWithinAnyStore = false;
+                let matchedStoreId = null;
 
-                    if (distance <= 50) {
-                        if (!shift.scanTime) {
-                            updateShiftScan(shift);
-                        } else if (!shift.endScanTime) {
-                            updateShiftEndScan(shift);
-                        } else {
-                            setShowMarkShiftResultModal(true);
-                            setMarkShiftResultMessage(
-                                'Вы уже отметили приход и уход для этой смены.',
-                            );
+                // Проверяем расстояние до всех магазинов
+                companyStructure.stores.forEach((store) => {
+                    const storeLocation = store.location;
+                    if (storeLocation) {
+                        const distance = getDistanceFromLatLonInMeters(
+                            storeLocation.lat,
+                            storeLocation.lng,
+                            currentLocation.lat,
+                            currentLocation.lng,
+                        );
+
+                        if (distance <= 50) {
+                            isWithinAnyStore = true;
+                            matchedStoreId = store._id;
                         }
+                    }
+                });
+
+                if (isWithinAnyStore && matchedStoreId) {
+                    // Проверяем, была ли уже отметка
+                    if (!shift.scanTime) {
+                        updateShiftScan(shift, matchedStoreId);
+                    } else if (!shift.endScanTime) {
+                        updateShiftEndScan(shift, matchedStoreId);
                     } else {
                         setShowMarkShiftResultModal(true);
-                        setMarkShiftResultMessage('Вы находитесь слишком далеко от места смены.');
+                        setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
                     }
+                } else {
+                    setShowMarkShiftResultModal(true);
+                    setMarkShiftResultMessage('Вы находитесь слишком далеко от любого магазина.');
                 }
             });
         }
-    }, [subUserShifts, subUser, currentLocation]);
+    }, [subUserShifts, subUser, currentLocation, companyStructure]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
