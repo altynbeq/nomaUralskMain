@@ -132,8 +132,8 @@ const LogInForm = ({ isQrRedirect }) => {
                 setShowReset(false);
             }
         } catch (error) {
-            console.log(error);
             setShowSuccessPass(true);
+            setShowReset(false);
             setAlertModalResultMessage('Вы ввели неверную почту');
         } finally {
             setIsLoading(false);
