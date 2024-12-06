@@ -116,6 +116,7 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isToday && isCurrentSubUser;
         });
 
+        console.log(todaysShifts.length, currentLocation);
         if (todaysShifts.length > 0 && currentLocation) {
             todaysShifts.forEach((shift) => {
                 const storeLocation = shift.selectedStore.location;
@@ -145,7 +146,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [subUserShifts, subUser, currentLocation, location.search]);
+    }, [subUserShifts, subUser, currentLocation]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
