@@ -18,6 +18,8 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
+        const companyId = localStorage.getItem('companyId');
+
         if (access && Object.keys(subUser).length > 0) {
             const newFilteredLinks = links
                 .map((category) => {
@@ -34,6 +36,13 @@ const Sidebar = () => {
                         }
                         return true;
                     });
+
+                    // Условие для скрытия "finance" при определенном companyId
+                    if (companyId === '6720f0a45801c6007e836aa4') {
+                        filteredCategoryLinks = filteredCategoryLinks.filter(
+                            (link) => link.name !== 'finance',
+                        );
+                    }
 
                     if (Object.keys(subUser).length > 0) {
                         filteredCategoryLinks = filteredCategoryLinks.filter(
@@ -54,7 +63,29 @@ const Sidebar = () => {
 
             setFilteredLinks(newFilteredLinks);
         } else {
-            setFilteredLinks(links);
+            setFilteredLinks(
+                links
+                    .map((category) => {
+                        let filteredCategoryLinks = category.links;
+
+                        // Условие для скрытия "finance" при определенном companyId
+                        if (companyId === '6720f0a45801c6007e836aa4') {
+                            filteredCategoryLinks = filteredCategoryLinks.filter(
+                                (link) => link.name !== 'finance',
+                            );
+                        }
+
+                        if (filteredCategoryLinks.length === 0) {
+                            return null;
+                        }
+
+                        return {
+                            ...category,
+                            links: filteredCategoryLinks,
+                        };
+                    })
+                    .filter((category) => category !== null),
+            );
         }
     }, [access, subUser]);
 
