@@ -1,5 +1,5 @@
 // src/components/LogInForm.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useStateContext } from './../contexts/ContextProvider';
 import { FaChartPie, FaEye, FaEyeSlash } from 'react-icons/fa';
 import bgDesk from '../data/LogInBgDesk.png';
@@ -11,7 +11,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 
 const LogInForm = ({ isQrRedirect }) => {
-    const { handleLogin } = useStateContext();
+    const { setIsLoggedIn, setUserRole } = useStateContext();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -33,19 +33,16 @@ const LogInForm = ({ isQrRedirect }) => {
             const response = await axiosInstance.post('/auth/login', { email, password });
             const data = response.data;
 
-            if (data.message === 'Login successful') {
+            if (data.isSuccess) {
+                setIsLoggedIn(true);
+                setUserRole(data.role);
                 localStorage.setItem('accessToken', data.accessToken); // Сохранение access token
-                handleLogin(data.user.id); // Обновление состояния пользователя в контексте
-                // Перенаправление на главную страницу
                 if (isQrRedirect) {
                     window.location.href = '/general?isQrRedirect=true';
                 } else {
+                    console.log('here');
                     window.location.href = '/general';
                 }
-            } else {
-                setAlertOpen({
-                    login: true,
-                });
             }
         } catch (error) {
             console.error('Error:', error);

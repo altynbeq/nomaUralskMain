@@ -30,11 +30,11 @@ const App = () => {
         setCompanyStructure,
         setProducts,
         setWarehouses,
+        isLoggedIn,
     } = useStateContext();
 
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [techProblem, setTechProblem] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
 
@@ -44,11 +44,6 @@ const App = () => {
     };
 
     useEffect(() => {
-        const currentUserId = localStorage.getItem('_id');
-        const currentToken = localStorage.getItem('token');
-        const userLoggedIn = currentUserId !== null && currentToken !== null;
-        setIsLoggedIn(userLoggedIn);
-
         const searchParams = new URLSearchParams(window.location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
 
@@ -57,6 +52,7 @@ const App = () => {
         }
 
         const fetchData = async () => {
+            setIsLoading(true);
             try {
                 if (isEmployee()) {
                     await fetchSubUserData();
@@ -68,15 +64,15 @@ const App = () => {
             } catch (error) {
                 setTechProblem(true);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
                 setSkeletonUp(false);
             }
         };
 
-        if (userLoggedIn) {
+        if (isLoggedIn) {
             fetchData();
         } else {
-            setLoading(false);
+            setIsLoading(false);
             setSkeletonUp(false);
         }
     }, []);
@@ -245,17 +241,11 @@ const App = () => {
         }
     };
 
-    useEffect(() => {
-        if (isLoggedIn) {
-            fetchCompanyProductsAndWarehouses();
-        }
-    }, [isLoggedIn]);
-
     if (techProblem) {
         return <TechProb />;
     }
 
-    if (loading) {
+    if (isLoading) {
         return <Loader />;
     }
 
