@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -38,16 +38,18 @@ const Calendar = () => {
     }, [selectedStore]);
 
     const getShiftsFromSubUsers = (subUsers) => {
-        const shifts = subUsers.flatMap((subUser) => subUser.shifts);
-        return shifts.map((shift) => ({
-            title: subUsers.find((s) => s._id === shift.subUserId)?.name || '',
-            start: new Date(shift.startTime),
-            end: new Date(shift.endTime),
-            extendedProps: {
-                shiftId: shift._id || '',
-                subUserId: shift.subUserId || '',
-            },
-        }));
+        return subUsers.flatMap((subUser) =>
+            subUser.shifts.map((shift) => ({
+                title: subUser.name,
+                start: new Date(shift.startTime),
+                end: new Date(shift.endTime),
+                extendedProps: {
+                    shiftId: shift._id || '',
+                    subUserId: shift.subUserId || '',
+                    selectedStoreId: shift.selectedStore?._id || '',
+                },
+            })),
+        );
     };
 
     const handleEventClick = useCallback(
@@ -80,6 +82,16 @@ const Calendar = () => {
             </div>
         );
     }, []);
+
+    const filteredEvents = useMemo(() => {
+        const allEvents = getShiftsFromSubUsers(subUsers);
+        if (selectedStore) {
+            return allEvents.filter(
+                (event) => event.extendedProps.selectedStoreId === selectedStore._id,
+            );
+        }
+        return allEvents;
+    }, [subUsers, selectedStore]);
 
     return (
         <div className="w-[100%] align-center justify-center">
@@ -123,7 +135,7 @@ const Calendar = () => {
                     plugins={[dayGridPlugin]}
                     initialView="dayGridMonth"
                     weekends={true}
-                    events={getShiftsFromSubUsers(subUsers)}
+                    events={filteredEvents}
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     locale={ruLocale}
