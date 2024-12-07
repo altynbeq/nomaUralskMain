@@ -15,7 +15,6 @@ import { useAuthStore } from '../store/authStore';
 
 const LogInForm = ({ isQrRedirect }) => {
     const navigate = useNavigate();
-    const { setIsLoggedIn, setUserRole } = useStateContext();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
