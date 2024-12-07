@@ -112,7 +112,6 @@ const App = () => {
             const url = `/structure/get-structure-by-userId/${companyId}`;
             try {
                 const response = await axiosInstance(url);
-                console.log(response);
                 setDepartments(response.data.departments);
                 setStores(response.data.stores);
                 setSubUsers(response.data.subUsers);

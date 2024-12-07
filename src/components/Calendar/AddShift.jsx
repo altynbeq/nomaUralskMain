@@ -122,7 +122,6 @@ export const AddShift = (props) => {
             }
 
             toast.success('Смены успешно добавлены');
-            await props.fetchShifts();
             props.setOpen(false);
         } catch (error) {
             console.error('Error adding shifts:', error);

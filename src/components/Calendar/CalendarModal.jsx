@@ -42,7 +42,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selectedStore }) => {
+export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStore }) => {
     const { get, isLoading } = useApi();
     const [shift, setShift] = useState(null);
     const [editing, setEditing] = useState(false);
@@ -88,7 +88,6 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
             if (!response.ok) {
                 throw new Error('Failed to update shift');
             }
-            await fetchShifts();
             setEditing(false);
             setOpen(false);
         } catch (error) {
@@ -107,7 +106,6 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, fetchShifts, selected
             if (!response.ok) {
                 throw new Error('Failed to delete shift');
             }
-            await fetchShifts();
             setOpen(false);
         } catch (error) {
             console.error(error);

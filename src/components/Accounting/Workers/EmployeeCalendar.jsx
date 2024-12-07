@@ -1,12 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { useStateContext } from '../../../contexts/ContextProvider';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 import { Dialog } from 'primereact/dialog';
 
-export const EmployeeCalendar = () => {
-    const { companyStructure } = useStateContext();
+export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
@@ -47,11 +45,11 @@ export const EmployeeCalendar = () => {
     // Создаём мапу для быстрого доступа к названию департамента
     const departmentsMap = useMemo(() => {
         const map = new Map();
-        companyStructure?.departments?.forEach((dept) => {
+        departments?.forEach((dept) => {
             map.set(dept._id, dept.name);
         });
         return map;
-    }, [companyStructure?.departments]);
+    }, [departments]);
 
     const getDepartmentName = useCallback(
         (departmentId) => {
@@ -63,22 +61,20 @@ export const EmployeeCalendar = () => {
     // Фильтрация subUsers по критериям
     const filteredSubusers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
-        return companyStructure.subUsers?.filter((subuser) => {
+        return subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(lowerSearch);
             const matchesDepartment = selectedDepartment
                 ? subuser.departmentId === selectedDepartment._id
                 : true;
 
-            const subuserDepartment = companyStructure.departments.find(
-                (dept) => dept._id === subuser.departmentId,
-            );
+            const subuserDepartment = departments.find((dept) => dept._id === subuser.departmentId);
             const subuserStoreId = subuserDepartment ? subuserDepartment.storeId : null;
 
             const matchesStore = selectedStore ? subuserStoreId === selectedStore._id : true;
 
             return matchesSearch && matchesDepartment && matchesStore;
         });
-    }, [companyStructure, searchTerm, selectedDepartment, selectedStore]);
+    }, [departments, searchTerm, selectedDepartment, selectedStore, subUsers]);
 
     const daysInMonth = useMemo(() => new Date(year, month + 1, 0).getDate(), [year, month]);
     const daysArray = useMemo(
@@ -292,7 +288,7 @@ export const EmployeeCalendar = () => {
                             value={selectedDepartment}
                             onChange={(e) => setSelectedDepartment(e.value)}
                             showClear
-                            options={companyStructure?.departments || []}
+                            options={departments || []}
                             optionLabel="name"
                             placeholder="Отдел"
                             className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
@@ -300,7 +296,7 @@ export const EmployeeCalendar = () => {
                         <Dropdown
                             value={selectedStore}
                             onChange={(e) => setSelectedStore(e.value)}
-                            options={companyStructure?.stores || []}
+                            options={stores || []}
                             optionLabel="storeName"
                             showClear
                             placeholder="Магазин"
