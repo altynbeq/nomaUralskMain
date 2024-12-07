@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { dailyData } from '../../data/dailyData';
-import { useStateContext } from '../../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
 
-export const StoreSalesPlan = () => {
-    const { companyStructure } = useStateContext();
-
+export const StoreSalesPlan = ({ stores }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
@@ -38,14 +35,12 @@ export const StoreSalesPlan = () => {
     useEffect(() => {
         if (selectedStore) {
             // Общий план для выбранного магазина
-            const store = companyStructure?.stores?.find(
-                (store) => store.storeName === selectedStore.storeName,
-            );
+            const store = stores?.find((store) => store.storeName === selectedStore.storeName);
             setTotalPlan(store?.plans?.reduce((total, plan) => total + plan.goal, 0) || 0);
         } else {
             // Общий план для всех магазинов
             setTotalPlan(
-                companyStructure?.stores?.reduce(
+                stores?.reduce(
                     (total, store) =>
                         total +
                         (store.plans?.reduce((storeTotal, plan) => storeTotal + plan.goal, 0) || 0),
@@ -53,7 +48,7 @@ export const StoreSalesPlan = () => {
                 ),
             );
         }
-    }, [companyStructure?.stores, selectedStore]);
+    }, [stores, selectedStore]);
 
     return (
         <div className="w-[90%] md:w-[43%] mt-10 md:mt-0 subtle-border  bg-white rounded-lg shadow-md p-4 ">
@@ -69,7 +64,7 @@ export const StoreSalesPlan = () => {
                 <Dropdown
                     value={selectedStore}
                     onChange={(e) => setSelectedStore(e.value)}
-                    options={companyStructure?.stores || []}
+                    options={stores || []}
                     optionLabel="storeName"
                     showClear
                     placeholder="Магазин"

@@ -53,7 +53,7 @@ export const GeneralCompany = ({ urls }) => {
     return (
         <div className="mt-12 flex flex-col gap-6 align-center w-[100%] justify-center">
             <div className="flex mt-5 gap-10  w-[100%]  flex-col md:flex-row align-center items-center  justify-center align-top">
-                <StoreSalesPlan />
+                <StoreSalesPlan stores={stores} />
                 <EmpltSiftStats stores={stores} />
             </div>
             <div className="flex mt-5 gap-10 w-[100%] flex-col md:flex-col justify-center align-top items-center">
