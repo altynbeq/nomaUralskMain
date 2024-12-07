@@ -71,8 +71,8 @@ const Finance = ({ urls }) => {
             <div className="flex mt-5 w-[100%] align-center gap-4 flex-wrap md:flex-row justify-center">
                 <DailyRevenue userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
                 <div className=" flex justify-center gap-4 align-center flex-col w-[100%] md:w-[30%]">
-                    <WeaklyRevenueOverviewStacked deals={weekDeals} />
-                    <TotalRevenuePie />
+                    <WeaklyRevenueOverviewStacked deals={deals} />
+                    <TotalRevenuePie deals={deals} />
                 </div>
             </div>
             <div className="flex gap-4 w-[100%] items-center align-center flex-col md:flex-row justify-center">
