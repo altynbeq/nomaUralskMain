@@ -8,7 +8,6 @@ import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import { getCompanyData } from './methods/getCompanyData';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
-import { Loader } from './components/Loader';
 import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
@@ -33,7 +32,6 @@ const App = () => {
         isLoggedIn,
     } = useStateContext();
 
-    const [isLoading, setIsLoading] = useState(true);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
@@ -52,7 +50,6 @@ const App = () => {
         }
 
         const fetchData = async () => {
-            setIsLoading(true);
             try {
                 if (isEmployee()) {
                     await fetchSubUserData();
@@ -64,7 +61,6 @@ const App = () => {
             } catch (error) {
                 setTechProblem(true);
             } finally {
-                setIsLoading(false);
                 setSkeletonUp(false);
             }
         };
@@ -72,7 +68,6 @@ const App = () => {
         if (isLoggedIn) {
             fetchData();
         } else {
-            setIsLoading(false);
             setSkeletonUp(false);
         }
     }, []);
@@ -249,26 +244,22 @@ const App = () => {
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
             <BrowserRouter>
                 {!isLoggedIn && <LogInForm isQrRedirect={isQrRedirect} />};
-                {isLoading ? (
-                    <Loader />
-                ) : (
-                    <div className="flex relative dark:bg-main-dark-bg">
-                        <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
-                            <TooltipComponent content="Settings" position="Top" />
-                        </div>
-                        {activeMenu ? (
-                            <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
-                                <Sidebar />
-                            </div>
-                        ) : (
-                            <div className="w-0 dark:bg-secondary-dark-bg">
-                                <Sidebar />
-                            </div>
-                        )}
-                        <ToastContainer position="top-center" autoClose={5000} />
-                        <MainContent urls={urls} activeMenu={activeMenu} />
+                <div className="flex relative dark:bg-main-dark-bg">
+                    <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
+                        <TooltipComponent content="Settings" position="Top" />
                     </div>
-                )}
+                    {activeMenu ? (
+                        <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
+                            <Sidebar />
+                        </div>
+                    ) : (
+                        <div className="w-0 dark:bg-secondary-dark-bg">
+                            <Sidebar />
+                        </div>
+                    )}
+                    <ToastContainer position="top-center" autoClose={5000} />
+                    <MainContent urls={urls} activeMenu={activeMenu} />
+                </div>
             </BrowserRouter>
         </div>
     );
