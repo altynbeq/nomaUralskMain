@@ -12,6 +12,7 @@ import YearBarChart from '../components/demo/YearBarChart';
 import CarouselCard from '../components/demo/Slider';
 import { FinanceShare } from '../data/MainDataSource';
 import { Navigate } from 'react-router-dom';
+import { useCompanyStore } from '../store/companyStore';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
@@ -19,11 +20,13 @@ function convertUrl(apiUrl) {
 }
 
 const Finance = ({ urls }) => {
-    const { skeletonUp, kkm, deals } = useStateContext();
+    const { skeletonUp } = useStateContext();
     const [financeShare, setFinanceShare] = useState([]);
     const [weekDeals, setWeekDeals] = useState([]);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
+    const kkm = useCompanyStore((state) => state.kkm);
+    const deals = useCompanyStore((state) => state.deals);
 
     useEffect(() => {
         if (kkm.monthFormedKKM) {
