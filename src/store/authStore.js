@@ -9,5 +9,6 @@ export const useAuthStore = create((set) => ({
     clearAccessToken: () => set({ accessToken: null }),
     setUser: (userData) => set({ user: userData }),
     clearUser: () => set({ user: null }),
-    setIsLoggedIn: (isLoggedInState) => set({ isLoggedIn: isLoggedInState }),
+    setIsLoggedIn: (isLoggedIn) => set({ isLoggedIn: isLoggedIn }),
+    clearIsLoggedIn: () => set({ isLoggedIn: false }),
 }));

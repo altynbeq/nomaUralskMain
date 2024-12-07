@@ -6,13 +6,14 @@ import avatar from '../data/avatar.jpg';
 import { useAuthStore } from '../store/authStore';
 
 const UserProfile = () => {
-    const { currentColor, handleLogOut, userData, userImage } = useStateContext();
+    const { currentColor, userData, userImage } = useStateContext();
 
     const userName = userData?.name || 'Unknown User';
     const userEmail = userData?.email || 'Unknown Email';
     const clearAuthData = useAuthStore((state) => {
         state.clearAccessToken();
         state.clearUser();
+        state.clearIsLoggedIn();
     });
     return (
         <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-4 md:p-8 rounded-lg w-[90%] md:w-[30%]">

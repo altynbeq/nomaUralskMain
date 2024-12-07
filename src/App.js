@@ -31,7 +31,7 @@ const App = () => {
         setProducts,
         setWarehouses,
     } = useStateContext();
-    const { isLoggedIn } = useAuthStore.getState();
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);

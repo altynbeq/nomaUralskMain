@@ -1,6 +1,5 @@
 // src/components/LogInForm.jsx
 import React, { useState } from 'react';
-import { useStateContext } from './../contexts/ContextProvider';
 import { FaChartPie, FaEye, FaEyeSlash } from 'react-icons/fa';
 import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
@@ -123,16 +122,9 @@ const LogInForm = ({ isQrRedirect }) => {
         >
             <AlertModal
                 open={alertOpen.login || alertOpen.signUp}
-                message={
-                    alertOpen.login
-                        ? 'Введены не верные данные'
-                        : alertOpen.signUp
-                          ? 'Вы успешно зарегистрировались'
-                          : ''
-                }
+                message={''}
                 onClose={() => {
                     setAlertOpen(false);
-                    window.location.href = '/general';
                 }}
             />
             <div className="max-w-md w-full bg-white p-8 border-8-grey rounded-2xl space-y-8">
