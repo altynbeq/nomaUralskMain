@@ -5,7 +5,7 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart';
 import { FaShare, FaFileDownload } from 'react-icons/fa';
 import { SalesHolePie, FinanceStats, FormatAmount, SpisanieStats } from '../../data/MainDataSource';
-import { getCompanyData } from '../../methods/getCompanyData';
+import { useCompanyStore } from '../../store/companyStore';
 import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
 
 function convertUrl(apiUrl) {
@@ -13,8 +13,9 @@ function convertUrl(apiUrl) {
     return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
 }
 
-const DailySalesStats = () => {
-    const { dateRanges, kkm } = useStateContext();
+const DailySalesStats = ({ kkm }) => {
+    const { dateRanges } = useStateContext();
+    const companyData = useCompanyStore((state) => state.user);
     const date = dateRanges[0].bitrixStartDate.split(' ')[0];
     const [pieData, setPieData] = useState([]);
     const [stats, setStats] = useState({});
@@ -23,9 +24,6 @@ const DailySalesStats = () => {
     useEffect(() => {
         const reqDate = dateRanges[0];
         const getter = async () => {
-            const companyId = localStorage.getItem('_id');
-            const companyData = await getCompanyData(companyId);
-
             const userSpisanieUrl = convertUrl(companyData.externalApis.apiUrlSpisanie);
             const spisanieData = await getSpisanie(userSpisanieUrl, reqDate);
 

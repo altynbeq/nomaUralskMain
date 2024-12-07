@@ -1,27 +1,12 @@
-import React, { useState, useRef } from 'react';
-import {
-    FaDollarSign,
-    FaMoneyBillAlt,
-    FaMoneyBill,
-    FaBox,
-    FaFilter,
-    FaChartBar,
-} from 'react-icons/fa';
-import { Dropdown } from 'primereact/dropdown';
+import React, { useRef } from 'react';
+import { FaDollarSign, FaMoneyBillAlt, FaMoneyBill } from 'react-icons/fa';
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { FormatAmount } from '../../data/MainDataSource';
-import { useStateContext } from '../../contexts/ContextProvider';
 
-const WeeklyStats = ({ idcomp, title }) => {
+const WeeklyStats = ({ title, kkm, deals }) => {
     const stepperRef = useRef(null);
-    const { kkm, deals } = useStateContext();
-    const [selectedStore, setSelectedStore] = useState('Все магазины');
-    const stores = ['Все магазины', 'Алматы', 'Сатпаева', 'Панфилова'];
 
-    const handleStoreChange = (e) => {
-        setSelectedStore(e);
-    };
     const financeStatsTemplate = [
         {
             id: '1',
