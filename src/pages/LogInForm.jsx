@@ -18,7 +18,7 @@ const LogInForm = ({ isQrRedirect }) => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [localStorageData, setLocalStorageData] = useState([]);
-    const [currentUrl, setCurrentUrl] = useState(window.location.href);
+    const [currentUrl] = useState(window.location.href);
     const [name, setName] = useState('');
     const [regBtnActive, setRegBtnActive] = useState(true);
     const [alertOpen, setAlertOpen] = useState({
