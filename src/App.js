@@ -1,5 +1,5 @@
 // App.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { Sidebar } from './components';
@@ -12,6 +12,7 @@ import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuthStore, useProfileStore, useCompanyStore } from './store/index';
+import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
     const {
@@ -38,9 +39,9 @@ const App = () => {
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
 
-    const isEmployee = () => {
+    const isEmployee = useCallback(() => {
         return user.role === 'subUser';
-    };
+    }, [user.role]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -91,6 +92,27 @@ const App = () => {
         setWriteOffs,
         user,
     ]);
+
+    useEffect(() => {
+        const fetchUserStructure = async () => {
+            const companyId = isEmployee() ? '' : user.id;
+
+            if (!companyId) {
+                console.error('Не удалось получить companyId из localStorage.');
+                return;
+            }
+
+            const url = `/structure/get-structure-by-userId/${companyId}`;
+            try {
+                const response = await axiosInstance(url);
+                console.log(response);
+                setCompanyStructure(response.data);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+            }
+        };
+        fetchUserStructure();
+    }, [isEmployee, setCompanyStructure, user.id]);
 
     // useEffect(() => {
     // const searchParams = new URLSearchParams(window.location.search);
@@ -225,33 +247,6 @@ const App = () => {
             setUrls(companyData);
         } catch (error) {
             console.error('Error fetching company data:', error);
-        }
-    };
-
-    const fetchUserStructure = async () => {
-        let companyId;
-
-        if (isEmployee()) {
-            companyId = localStorage.getItem('companyId');
-        } else {
-            companyId = localStorage.getItem('_id');
-        }
-
-        if (!companyId) {
-            console.error('Не удалось получить companyId из localStorage.');
-            return;
-        }
-
-        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${companyId}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-            setCompanyStructure(data);
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
         }
     };
 
