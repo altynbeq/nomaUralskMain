@@ -136,13 +136,13 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
                         <Group justify="space-between" mt="xl" />
                         <div className="flex flex-row gap-5 justify-center">
                             <Button
-                                text="Download"
+                                text="Cкачать"
                                 bgColor="#1e4db6"
                                 borderRadius="24px"
                                 icon={<FaFileDownload />}
                             />
                             <Button
-                                text="Share"
+                                text="Поделиться"
                                 bgColor="#1e4db6"
                                 borderRadius="24px"
                                 icon={<FaShare />}
