@@ -3,13 +3,17 @@ import { FaRegTimesCircle } from 'react-icons/fa';
 import { Button } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
 import avatar from '../data/avatar.jpg';
+import { useAuthStore } from '../store/authStore';
 
 const UserProfile = () => {
     const { currentColor, handleLogOut, userData, userImage } = useStateContext();
 
     const userName = userData?.name || 'Unknown User';
     const userEmail = userData?.email || 'Unknown Email';
-
+    const clearAuthData = useAuthStore((state) => {
+        state.clearAccessToken();
+        state.clearUser();
+    });
     return (
         <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-4 md:p-8 rounded-lg w-[90%] md:w-[30%]">
             <div className="flex justify-between text-black items-center">
@@ -41,7 +45,7 @@ const UserProfile = () => {
             <div className="mt-5">
                 <button
                     type="button"
-                    onClick={() => handleLogOut()}
+                    onClick={clearAuthData}
                     style={{ backgroundColor: currentColor }}
                     className="flex text-white flex-row rounded-2xl justify-center align-center gap-1 px-4 py-2 w-full hover:drop-shadow-xl"
                 >
