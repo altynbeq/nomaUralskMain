@@ -9,16 +9,16 @@ import { Button } from 'primereact/button';
 import { axiosInstance } from '../api/axiosInstance'; // Импорт обновленного axiosInstance
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { useNavigate } from 'react-router-dom';
+import { Loader } from '../components/Loader';
 
 const LogInForm = ({ isQrRedirect }) => {
+    const navigate = useNavigate();
     const { setIsLoggedIn, setUserRole } = useStateContext();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [alertOpen, setAlertOpen] = useState({
-        login: false,
-        signUp: false,
-    });
+    const [alertOpen, setAlertOpen] = useState(false);
     const [showReset, setShowReset] = useState(false);
     const [showSuccessPass, setShowSuccessPass] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +29,7 @@ const LogInForm = ({ isQrRedirect }) => {
     // Обработка логина
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         try {
             const response = await axiosInstance.post('/auth/login', { email, password });
             const data = response.data;
@@ -38,17 +39,15 @@ const LogInForm = ({ isQrRedirect }) => {
                 setUserRole(data.role);
                 localStorage.setItem('accessToken', data.accessToken); // Сохранение access token
                 if (isQrRedirect) {
-                    window.location.href = '/general?isQrRedirect=true';
+                    navigate('/general?isQrRedirect=true');
                 } else {
-                    console.log('here');
-                    window.location.href = '/general';
+                    navigate('/general');
                 }
             }
         } catch (error) {
-            console.error('Error:', error);
-            setAlertOpen({
-                login: true,
-            });
+            setAlertOpen(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -71,7 +70,7 @@ const LogInForm = ({ isQrRedirect }) => {
             });
 
             if (response.status === 200) {
-                setAlertOpen({ signUp: true });
+                setAlertOpen(true);
                 // Деактивация кнопки регистрации
                 // Вы можете добавить дополнительную логику, если необходимо
             }
@@ -109,6 +108,10 @@ const LogInForm = ({ isQrRedirect }) => {
     const onForgotPass = () => {
         setShowReset(true);
     };
+
+    if (isLoading) {
+        return <Loader />;
+    }
 
     return (
         <div
