@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
     DailySalesStats,
     YearStats,
-    MonthlyTotalSalesChart,
     OverallRevenueChart,
     WeeklyStats,
     MonthlyConversion,
 } from '../components/Sales';
 import StatsBoxes from '../components/Sales/StatsBoxes';
-import PeriodStats from '../components/demo/PeriodStats';
 import CardWithBarChart from '../components/demo/CardWithBarChart';
 import TableSort from '../components/demo/TablesList';
 import CarouselCard from '../components/demo/Slider';
@@ -23,8 +21,7 @@ import {
     SalesBarSeriesByStore,
 } from '../data/MainDataSource';
 import ProductStatsComp from '../components/demo/ProductsStatComp';
-import { getLeadsBack } from '../methods/dataFetches/getLeadsBack';
-import { parse } from 'postcss';
+import { useCompanyStore } from '../store/companyStore';
 
 function generateConversionSeries(leadsSeries, dealsSeries) {
     return leadsSeries.map((lead, index) => {
@@ -54,8 +51,11 @@ function convertUrl(apiUrl) {
 
 const Sales = ({ urls }) => {
     const [salesShare, setSalesShare] = useState([]);
-    const { skeletonUp, kkm, receipts, leads, deals, setLeads, dateRanges } = useStateContext();
-    const [ready, setReady] = useState(false);
+    const { skeletonUp } = useStateContext();
+    const kkm = useCompanyStore((state) => state.kkm);
+    const receipts = useCompanyStore((state) => state.receipts);
+    const leads = useCompanyStore((state) => state.leads);
+    const deals = useCompanyStore((state) => state.deals);
     const [productsGridRows, setProductGridRows] = useState([]);
     const [productStats, setProductStats] = useState({});
     const [barSeriesAll, setBarSeriesAll] = useState([]);
@@ -79,9 +79,6 @@ const Sales = ({ urls }) => {
 
             const conversion = generateConversionSeries(leads.series, deals.dealsMonth.salesSeries);
             const totalSeriesL = formData(leads.series, conversion);
-
-            // console.log("Leads:", leads);
-            // console.log("Deals:", deals);
 
             setTotalSerues(totalSeriesL);
         }
