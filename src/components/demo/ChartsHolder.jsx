@@ -15,9 +15,12 @@ import {
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import LoadingSkeleton from '../LoadingSkeleton';
+import { useCompanyStore } from '../../store/companyStore';
 
 const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
-    const { dateRanges, receipts, kkm } = useStateContext();
+    const { dateRanges } = useStateContext();
+    const kkm = useCompanyStore((state) => state.kkm);
+    const receipts = useCompanyStore((state) => state.receipts);
     const [chartSeries, setChartSeries] = useState([]);
     const [stats, setStats] = useState({});
     const [totalSum, setTotalSum] = useState(0);
@@ -64,7 +67,7 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
             setChartSeries(FinanceLineChartSeries(receipts.monthReceiptsData));
             setStats(FinanceStats(kkm.monthFormedKKM));
         }
-    }, [receipts]);
+    }, [kkm.monthFormedKKM, receipts]);
 
     return (
         <>
