@@ -1,3 +1,4 @@
+// src/components/LogInForm.jsx
 import React, { useEffect, useState } from 'react';
 import { useStateContext } from './../contexts/ContextProvider';
 import { FaChartPie, FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -5,22 +6,15 @@ import bgDesk from '../data/LogInBgDesk.png';
 import bgMob from '../data/LogInBgMob.png';
 import AlertModal from '../components/AlertModal';
 import { Button } from 'primereact/button';
-import { useApi } from '../methods/hooks/useApi';
+import { axiosInstance } from '../api/axiosInstance'; // Импорт обновленного axiosInstance
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 
 const LogInForm = ({ isQrRedirect }) => {
-    const { post } = useApi();
-    const [resettedPassword, setResettedPassword] = useState('');
-    const [resettedEmail, setResettedEmail] = useState('');
     const { handleLogin } = useStateContext();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [localStorageData, setLocalStorageData] = useState([]);
-    const [currentUrl] = useState(window.location.href);
-    const [name, setName] = useState('');
-    const [regBtnActive, setRegBtnActive] = useState(true);
     const [alertOpen, setAlertOpen] = useState({
         login: false,
         signUp: false,
@@ -29,62 +23,40 @@ const LogInForm = ({ isQrRedirect }) => {
     const [showSuccessPass, setShowSuccessPass] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [alertModalResultMessage, setAlertModalResultMessage] = useState('');
+    const [name, setName] = useState('');
+    const [resettedPassword, setResettedPassword] = useState('');
 
-    const deactivateRegBtn = () => {
-        setRegBtnActive(false);
-    };
-
-    useEffect(() => {
-        if (!localStorageData.length) {
-            return;
-        }
-        localStorage.setItem('_id', localStorageData[0]);
-        localStorage.setItem('token', localStorageData[1]);
-        localStorage.setItem('departmentId', localStorageData[2]);
-        localStorage.setItem('companyId', localStorageData[3]);
-        if (isQrRedirect) {
-            window.location.href = '/general?isQrRedirect=true';
-        } else {
-            window.location.href = '/general';
-        }
-    }, [isQrRedirect, localStorageData]);
-
-    const handleSubmit = (e) => {
+    // Обработка логина
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const handleLogIn = (email, password) => {
-            const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            };
-            const url = `https://nomalytica-back.onrender.com/api/users/login`;
-            fetch(url, requestOptions)
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.message === 'Login successful') {
-                        if (data.user?.role === 'subUser') {
-                            setLocalStorageData([
-                                data.user._id,
-                                data.token,
-                                data.user?.departmentId,
-                                data?.user?.companyId,
-                            ]);
-                        } else {
-                            setLocalStorageData([data.user._id, data.token]);
-                        }
-                        handleLogin(data.user._id);
-                    } else {
-                        setAlertOpen({
-                            login: true,
-                        });
-                    }
-                })
-                .catch((error) => console.error('Error:', error));
-        };
-        handleLogIn(email, password);
+        try {
+            const response = await axiosInstance.post('/auth/login', { email, password });
+            const data = response.data;
+
+            if (data.message === 'Login successful') {
+                localStorage.setItem('accessToken', data.accessToken); // Сохранение access token
+                handleLogin(data.user.id); // Обновление состояния пользователя в контексте
+                // Перенаправление на главную страницу
+                if (isQrRedirect) {
+                    window.location.href = '/general?isQrRedirect=true';
+                } else {
+                    window.location.href = '/general';
+                }
+            } else {
+                setAlertOpen({
+                    login: true,
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setAlertOpen({
+                login: true,
+            });
+        }
     };
 
-    const handleSubmitRegistration = (e) => {
+    // Обработка регистрации
+    const handleSubmitRegistration = async (e) => {
         e.preventDefault();
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -94,42 +66,39 @@ const LogInForm = ({ isQrRedirect }) => {
             alert('Company ID is missing in the URL');
             return;
         }
-        const handleRegistration = () => {
-            const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    input: { email, password, name },
-                    departmentLink: currentUrl,
-                    companyId,
-                }),
-            };
-            const url = `https://nomalytica-back.onrender.com/api/subUsers/create-subuser`;
-
-            fetch(url, requestOptions).then((res) => {
-                if (!res.ok) {
-                    res.text().then((error) => alert(error));
-                }
-                if (res.ok) {
-                    res.json().then(() => setAlertOpen({ signUp: true }));
-                    deactivateRegBtn();
-                }
+        try {
+            const response = await axiosInstance.post('/subUsers/create-subuser', {
+                input: { email, password, name },
+                departmentLink: window.location.href,
+                companyId,
             });
-        };
 
-        handleRegistration();
+            if (response.status === 200) {
+                setAlertOpen({ signUp: true });
+                // Деактивация кнопки регистрации
+                // Вы можете добавить дополнительную логику, если необходимо
+            }
+        } catch (error) {
+            if (error.response && error.response.data) {
+                alert(error.response.data.message || 'Registration failed');
+            } else {
+                alert('Registration failed');
+            }
+        }
     };
 
+    // Обработка сброса пароля
     const sendPassword = async () => {
         setIsLoading(true);
         try {
-            const password = await post('users/reset_password_temporary', {
-                email: resettedEmail,
+            const response = await axiosInstance.post('/users/reset_password_temporary', {
+                email: email, // Используем email из состояния
             });
-            if (password) {
-                setResettedPassword(password);
+            if (response.data) {
                 setShowSuccessPass(true);
                 setShowReset(false);
+                setResettedPassword(response.data.newPassword);
+                // Можно отображать сообщение или временный пароль
             }
         } catch (error) {
             setShowSuccessPass(true);
@@ -170,7 +139,7 @@ const LogInForm = ({ isQrRedirect }) => {
                     <h2>malytica</h2>
                 </div>
 
-                {!currentUrl.includes('register') && (
+                {!window.location.href.includes('register') && (
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                         <input type="hidden" name="remember" value="true" />
                         <div className="rounded-xl flex flex-col gap-4 shadow-sm -space-y-px">
@@ -235,12 +204,12 @@ const LogInForm = ({ isQrRedirect }) => {
                         >
                             <InputText
                                 className="mt-5 border-2 p-2 w-full"
-                                onChange={(e) => setResettedEmail(e.target.value)}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Введите вашу почту"
-                                value={resettedEmail}
+                                value={email}
                             />
                             <Button
-                                disabled={isLoading || !resettedEmail}
+                                disabled={isLoading || !email}
                                 className="mt-10 border-blue-500 border-2 p-2 flex justify-center mx-auto"
                                 label="Получить новый пароль"
                                 onClick={sendPassword}
@@ -252,7 +221,7 @@ const LogInForm = ({ isQrRedirect }) => {
                             message={
                                 alertModalResultMessage
                                     ? alertModalResultMessage
-                                    : `Ваш новый пароль - ${resettedPassword.temporaryPassword}`
+                                    : `Ваш новый пароль - ${showSuccessPass && 'temporaryPassword' in resettedPassword ? resettedPassword.temporaryPassword : ''}`
                             }
                             onClose={() => setShowSuccessPass(false)}
                         />
@@ -260,7 +229,6 @@ const LogInForm = ({ isQrRedirect }) => {
                         <div>
                             <button
                                 type="submit"
-                                onClick={handleSubmit}
                                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -283,7 +251,7 @@ const LogInForm = ({ isQrRedirect }) => {
                         </div>
                     </form>
                 )}
-                {currentUrl.includes('register') && (
+                {window.location.href.includes('register') && (
                     <form className="mt-8 space-y-6" onSubmit={handleSubmitRegistration}>
                         <input type="hidden" name="remember" value="true" />
                         <div className="rounded-xl flex flex-col gap-4 shadow-sm -space-y-px">
@@ -344,20 +312,11 @@ const LogInForm = ({ isQrRedirect }) => {
                             </div>
                         </div>
 
-                        {/*<div className="flex items-center justify-center">*/}
-                        {/*  <div className="text-sm">*/}
-                        {/*    <a href="#" className="font-medium hover:text-gray-600">*/}
-                        {/*      Забыли пароль?*/}
-                        {/*    </a>*/}
-                        {/*  </div>*/}
-                        {/*</div>*/}
-
                         <div>
                             <button
-                                disabled={!regBtnActive}
+                                disabled={!email || !password || !name}
                                 type="submit"
-                                onClick={handleSubmitRegistration}
-                                className={`${!regBtnActive ? 'opacity-10' : ''} group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                                className={`${!email || !password || !name ? 'opacity-50 cursor-not-allowed' : 'opacity-100'} group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
                             >
                                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                                     <svg
