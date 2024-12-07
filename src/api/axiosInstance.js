@@ -1,5 +1,6 @@
 // src/methods/axiosInstance.js
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 // Создание экземпляра axios
 export const axiosInstance = axios.create({
@@ -34,9 +35,9 @@ const refreshToken = () => {
 // Интерцептор запросов для добавления токена в заголовок
 axiosInstance.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken'); // Предполагается, что токен хранится в localStorage
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        const { accessToken } = useAuthStore.getState();
+        if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
         }
         return config;
     },
