@@ -13,6 +13,8 @@ import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuthStore } from './store/authStore';
+import { useApi } from './methods/hooks/useApi';
+import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
     const {
@@ -32,9 +34,11 @@ const App = () => {
         setWarehouses,
     } = useStateContext();
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+    const user = useAuthStore((state) => state.user);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
+    const { get } = useApi();
 
     const isEmployee = () => {
         const departmentId = localStorage.getItem('departmentId');
@@ -49,27 +53,36 @@ const App = () => {
             setIsQrRedirect(true);
         }
 
-        const fetchData = async () => {
-            try {
-                if (isEmployee()) {
-                    await fetchSubUserData();
-                    await fetchCompanyDataForSubuser();
-                } else {
-                    await fetchCompanyData();
-                }
-                await fetchUserStructure();
-            } catch (error) {
-                setTechProblem(true);
-            } finally {
-                setSkeletonUp(false);
-            }
-        };
-
-        if (isLoggedIn) {
-            fetchData();
-        } else {
-            setSkeletonUp(false);
+        if (!isLoggedIn) {
+            return;
         }
+
+        if (user && user.role === 'user') {
+            const companyData = getCompanyData(user.id);
+            console.log(companyData);
+        }
+
+        // const fetchData = async () => {
+        //     try {
+        //         if (isEmployee()) {
+        //             await fetchSubUserData();
+        //             await fetchCompanyDataForSubuser();
+        //         } else {
+        //             await fetchCompanyData();
+        //         }
+        //         await fetchUserStructure();
+        //     } catch (error) {
+        //         setTechProblem(true);
+        //     } finally {
+        //         setSkeletonUp(false);
+        //     }
+        // };
+
+        // if (isLoggedIn) {
+        //     fetchData();
+        // } else {
+        //     setSkeletonUp(false);
+        // }
     }, []);
 
     const fetchSubUserData = async () => {
@@ -109,9 +122,7 @@ const App = () => {
         }
     };
 
-    const fetchCompanyData = async () => {
-        const companyId = localStorage.getItem('_id');
-
+    const fetchCompanyData = async (companyId) => {
         if (!companyId) {
             return;
         }
