@@ -46,7 +46,7 @@ const UserProfile = () => {
             <div className="mt-5">
                 <button
                     type="button"
-                    onClick={clearAuthData}
+                    onClick={() => clearAuthData()}
                     style={{ backgroundColor: currentColor }}
                     className="flex text-white flex-row rounded-2xl justify-center align-center gap-1 px-4 py-2 w-full hover:drop-shadow-xl"
                 >
