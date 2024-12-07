@@ -37,7 +37,6 @@ export const ContextProvider = ({ children }) => {
     const [warehouses, setWarehouses] = useState([]);
     const [products, setProducts] = useState([]);
     const [subUserShifts, setSubUserShifts] = useState([]);
-    const [isSubuser, setIsSubuser] = useState(false);
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
