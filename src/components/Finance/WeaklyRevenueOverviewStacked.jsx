@@ -16,7 +16,7 @@ const WeaklyRevenueOverviewStacked = ({ deals }) => {
         Sunday: 'Вс',
     };
     useEffect(() => {
-        if (deals.dealsWeek) {
+        if (deals?.dealsWeek) {
             const russianSalesSeries = deals.dealsWeek.avgCheckSeries.map((item) => ({
                 ...item,
                 x: russianDaysMap[item.x] || item.x,

@@ -29,11 +29,11 @@ const Finance = ({ urls }) => {
     const deals = useCompanyStore((state) => state.deals);
 
     useEffect(() => {
-        if (kkm.monthFormedKKM) {
+        if (kkm?.monthFormedKKM) {
             setFinanceShare(FinanceShare(kkm.monthFormedKKM));
         }
-        if (!weekDeals.avgCheck) {
-            setWeekDeals(deals.dealsWeek);
+        if (!weekDeals?.avgCheck) {
+            setWeekDeals(deals?.dealsWeek);
         }
         if (urls.externalApis && urls.externalApis.apiUrlKKM) {
             const convKkm = urls.externalApis.apiUrlKKM
@@ -51,7 +51,7 @@ const Finance = ({ urls }) => {
             }
         }
         window.scrollTo(0, 0);
-    }, [deals.dealsWeek, kkm.monthFormedKKM, urls.externalApis, weekDeals.avgCheck]);
+    }, [deals?.dealsWeek, kkm?.monthFormedKKM, urls?.externalApis, weekDeals?.avgCheck]);
 
     if (skeletonUp) {
         return (
