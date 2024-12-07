@@ -12,6 +12,7 @@ import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuthStore } from './store/authStore';
 
 const App = () => {
     const {
@@ -29,9 +30,8 @@ const App = () => {
         setCompanyStructure,
         setProducts,
         setWarehouses,
-        isLoggedIn,
     } = useStateContext();
-
+    const { isLoggedIn } = useAuthStore.getState();
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);

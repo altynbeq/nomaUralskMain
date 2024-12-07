@@ -19,6 +19,7 @@ const LogInForm = ({ isQrRedirect }) => {
     const [password, setPassword] = useState('');
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
     const setUser = useAuthStore((state) => state.setUser);
+    const setIsLoggedIn = useAuthStore((state) => state.setIsLoggedIn);
     const [showPassword, setShowPassword] = useState(false);
     const [alertOpen, setAlertOpen] = useState(false);
     const [showReset, setShowReset] = useState(false);
@@ -39,6 +40,7 @@ const LogInForm = ({ isQrRedirect }) => {
             if (isSuccess) {
                 setAccessToken(accessToken);
                 setUser(user);
+                setIsLoggedIn(true);
                 if (isQrRedirect) {
                     navigate('/general?isQrRedirect=true');
                 } else {
