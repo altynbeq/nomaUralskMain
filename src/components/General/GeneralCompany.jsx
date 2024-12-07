@@ -22,10 +22,10 @@ export const GeneralCompany = ({ urls }) => {
     const { kkm, writeOffs } = useCompanyStore.getState();
 
     useEffect(() => {
-        if (kkm.monthFormedKKM && writeOffs.monthSpisanie) {
+        if (kkm?.monthFormedKKM && writeOffs?.monthSpisanie) {
             setReady(true);
         }
-        if (urls.externalApis && urls.externalApis.apiUrlKKM) {
+        if (urls?.externalApis && urls?.externalApis?.apiUrlKKM) {
             const convKkm = urls.externalApis.apiUrlKKM
                 ? convertUrl(urls.externalApis.apiUrlKKM)
                 : null;

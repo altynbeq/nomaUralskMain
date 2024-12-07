@@ -11,8 +11,7 @@ import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useAuthStore } from './store/authStore';
-import { useCompanyStore } from './store/companyStore';
+import { useAuthStore, useProfileStore, useCompanyStore } from './store/index';
 
 const App = () => {
     const {
@@ -33,6 +32,8 @@ const App = () => {
     const setReceipts = useCompanyStore((state) => state.setReceipts);
     const setWriteOffs = useCompanyStore((state) => state.setWriteOffs);
     const setDeals = useCompanyStore((state) => state.setDeals);
+    const setName = useProfileStore((state) => state.setName);
+    const setEmail = useProfileStore((state) => state.setEmail);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
@@ -61,12 +62,13 @@ const App = () => {
                         console.error('No company data received');
                         return;
                     }
-
                     setLeads(JSON.parse(companyData.leads));
                     setDeals(JSON.parse(companyData.deals));
                     setKKM(JSON.parse(companyData.kkmData));
                     setReceipts(JSON.parse(companyData.salesReceipt));
                     setWriteOffs(JSON.parse(companyData.productsSpisanie));
+                    setEmail(companyData.email);
+                    setName(companyData.name);
                     setUrls(companyData);
                 } catch (error) {
                     console.error('Error fetching data:', error);
@@ -77,7 +79,18 @@ const App = () => {
         };
 
         fetchData();
-    }, [isLoggedIn, setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setWriteOffs, user]);
+    }, [
+        isLoggedIn,
+        setDeals,
+        setEmail,
+        setKKM,
+        setLeads,
+        setName,
+        setReceipts,
+        setSkeletonUp,
+        setWriteOffs,
+        user,
+    ]);
 
     // useEffect(() => {
     // const searchParams = new URLSearchParams(window.location.search);

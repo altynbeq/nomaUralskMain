@@ -1,20 +1,22 @@
-import React from 'react';
 import { FaRegTimesCircle } from 'react-icons/fa';
 import { Button } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
 import avatar from '../data/avatar.jpg';
-import { useAuthStore } from '../store/authStore';
+import { useProfileStore, useAuthStore } from '../store/index';
 
 const UserProfile = () => {
-    const { currentColor, userData, userImage } = useStateContext();
+    const { userImage } = useStateContext();
+    const profileName = useProfileStore.getState()?.name;
+    const profileEmail = useProfileStore.getState()?.email;
+    const clearAccessToken = useAuthStore((state) => state.clearAccessToken);
+    const clearUser = useAuthStore((state) => state.clearUser);
+    const clearIsLoggedIn = useAuthStore((state) => state.clearIsLoggedIn);
+    const clearAuthData = () => {
+        clearAccessToken();
+        clearUser();
+        clearIsLoggedIn();
+    };
 
-    const userName = userData?.name || 'Unknown User';
-    const userEmail = userData?.email || 'Unknown Email';
-    const clearAuthData = useAuthStore((state) => {
-        state.clearAccessToken();
-        state.clearUser();
-        state.clearIsLoggedIn();
-    });
     return (
         <div className="nav-item absolute right-5 top-16 bg-white subtle-border dark:bg-[#42464D] p-4 md:p-8 rounded-lg w-[90%] md:w-[30%]">
             <div className="flex justify-between text-black items-center">
@@ -36,10 +38,10 @@ const UserProfile = () => {
                 />
                 <div className="overflow-hidden text-center md:text-left">
                     <p className="font-semibold text-xl dark:text-gray-200 break-words">
-                        {userName}
+                        {profileName}
                     </p>
                     <p className="text-gray-500 text-sm font-semibold dark:text-gray-400 break-words">
-                        {userEmail}
+                        {profileEmail}
                     </p>
                 </div>
             </div>
@@ -47,8 +49,7 @@ const UserProfile = () => {
                 <button
                     type="button"
                     onClick={() => clearAuthData()}
-                    style={{ backgroundColor: currentColor }}
-                    className="flex text-white flex-row rounded-2xl justify-center align-center gap-1 px-4 py-2 w-full hover:drop-shadow-xl"
+                    className="bg-blue-500 flex text-white flex-row rounded-2xl justify-center align-center gap-1 px-4 py-2 w-full hover:drop-shadow-xl"
                 >
                     <div className="text-white">Выйти</div>
                 </button>

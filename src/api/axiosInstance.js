@@ -28,7 +28,7 @@ const processQueue = (error, token = null) => {
 };
 
 // Функция для обновления токена
-const refreshToken = () => {
+const refreshToken = async () => {
     return axiosInstance.post('/auth/refresh-token').then((response) => response.data.accessToken);
 };
 
@@ -51,7 +51,6 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-
         // Проверяем, является ли ошибка 401 и не был ли запрос уже повторен
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {
