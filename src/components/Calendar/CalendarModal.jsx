@@ -3,7 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import { formatDate } from '../../methods/dataFormatter';
 import { Calendar } from 'primereact/calendar';
 import { addLocale } from 'primereact/api';
-import { useApi } from '../../methods/hooks/useApi';
+import { axiosInstance } from '../../api/axiosInstance';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -42,8 +42,8 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStore }) => {
-    const { get, isLoading } = useApi();
+export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStoreId }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [shift, setShift] = useState(null);
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState('');
@@ -56,13 +56,16 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStore }) => {
     }, [open, shiftId]);
 
     const fetchShiftDetails = async () => {
+        setIsLoading(true);
         try {
-            const data = await get(`shifts/shift/${shiftId}`);
-            setShift(data);
-            setStartTime(new Date(data.startTime));
-            setEndTime(new Date(data.endTime));
+            const response = await axiosInstance.get(`shifts/shift/${shiftId}`);
+            setShift(response.data);
+            setStartTime(new Date(response.data.startTime));
+            setEndTime(new Date(response.data.endTime));
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -71,31 +74,25 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStore }) => {
     };
 
     const handleSave = async () => {
+        setIsLoading(true);
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shiftId}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subUserId: shift.subUserId._id,
-                        startTime: new Date(startTime).toISOString(),
-                        endTime: new Date(endTime).toISOString(),
-                        selectedStore: selectedStore._id,
-                    }),
-                },
-            );
-            if (!response.ok) {
-                throw new Error('Failed to update shift');
-            }
+            await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
+                subUserId: shift.subUserId._id,
+                startTime: new Date(startTime).toISOString(),
+                endTime: new Date(endTime).toISOString(),
+                selectedStore: selectedStoreId,
+            });
             setEditing(false);
             setOpen(false);
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleDelete = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `https://nomalytica-back.onrender.com/api/shifts/delete-shift/${shiftId}`,
@@ -109,6 +106,8 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStore }) => {
             setOpen(false);
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -174,10 +173,11 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStore }) => {
                                         <strong>Сотрудник:</strong> {shift.subUserId?.name}
                                     </p>
                                     <p>
-                                        <strong>Начало смены:</strong> {formatDate(shift.startTime)}
+                                        <strong>Начало смены:</strong>{' '}
+                                        {formatDate(shift?.startTime)}
                                     </p>
                                     <p>
-                                        <strong>Конец смены:</strong> {formatDate(shift.endTime)}
+                                        <strong>Конец смены:</strong> {formatDate(shift?.endTime)}
                                     </p>
                                 </div>
                                 <div className="flex gap-2 mt-4">

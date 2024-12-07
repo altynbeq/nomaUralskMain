@@ -18,6 +18,7 @@ const Calendar = () => {
     const [currentShifts, setCurrentShifts] = useState([]);
     const [modalAddShift, setModalAddShift] = useState(false);
     const [selectedStore, setSelectedStore] = useState(null);
+    const [selectedStoreId, setSelectedStoreId] = useState(null);
     const [selectedShiftId, setSelectedShiftId] = useState(null);
     const [alertOpen, setAlertOpen] = useState(false);
 
@@ -55,7 +56,9 @@ const Calendar = () => {
     const handleEventClick = useCallback(
         (info) => {
             const shiftId = info.event.extendedProps.shiftId;
+            const selectedStoreId = info.event.extendedProps.selectedStoreId;
             setSelectedShiftId(shiftId);
+            setSelectedStoreId(selectedStoreId);
             setModal(true);
         },
         [setModal, setSelectedShiftId],
@@ -115,11 +118,10 @@ const Calendar = () => {
                     onClose={() => setAlertOpen(false)}
                 />
                 <ScheduleWithEdit
-                    selectedStore={selectedStore}
+                    selectedStoreId={selectedStore ? selectedStore._id : selectedStoreId}
                     open={modal}
                     setOpen={setModal}
                     shiftId={selectedShiftId}
-                    // fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
                 />
                 <AddShift
                     selectedStore={selectedStore}
@@ -128,7 +130,6 @@ const Calendar = () => {
                     setOpen={setModalAddShift}
                     currentShifts={currentShifts}
                     setCurrentShifts={setCurrentShifts}
-                    // fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
                 />
 
                 <FullCalendar
