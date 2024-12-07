@@ -94,15 +94,9 @@ export const ScheduleWithEdit = ({ open, setOpen, shiftId, selectedStoreId }) =>
     const handleDelete = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(
+            await axiosInstance.delete(
                 `https://nomalytica-back.onrender.com/api/shifts/delete-shift/${shiftId}`,
-                {
-                    method: 'DELETE',
-                },
             );
-            if (!response.ok) {
-                throw new Error('Failed to delete shift');
-            }
             setOpen(false);
         } catch (error) {
             console.error(error);
