@@ -11,7 +11,12 @@ import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useAuthStore, useProfileStore, useCompanyStore } from './store/index';
+import {
+    useAuthStore,
+    useProfileStore,
+    useCompanyStore,
+    useCompanyStructureStore,
+} from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
@@ -22,7 +27,6 @@ const App = () => {
         setUserData,
         setAccess,
         setSubUser,
-        setCompanyStructure,
         setProducts,
         setWarehouses,
     } = useStateContext();
@@ -35,13 +39,16 @@ const App = () => {
     const setDeals = useCompanyStore((state) => state.setDeals);
     const setName = useProfileStore((state) => state.setName);
     const setEmail = useProfileStore((state) => state.setEmail);
+    const setDepartments = useCompanyStructureStore((state) => state.setDepartments);
+    const setStores = useCompanyStructureStore((state) => state.setStores);
+    const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
 
     const isEmployee = useCallback(() => {
-        return user.role === 'subUser';
-    }, [user.role]);
+        return user?.role === 'subUser';
+    }, [user?.role]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -95,7 +102,7 @@ const App = () => {
 
     useEffect(() => {
         const fetchUserStructure = async () => {
-            const companyId = isEmployee() ? '' : user.id;
+            const companyId = isEmployee() ? '' : user?.id;
 
             if (!companyId) {
                 console.error('Не удалось получить companyId из localStorage.');
@@ -106,13 +113,15 @@ const App = () => {
             try {
                 const response = await axiosInstance(url);
                 console.log(response);
-                setCompanyStructure(response.data);
+                setDepartments(response.data.departments);
+                setStores(response.data.stores);
+                setSubUsers(response.data.subUsers);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             }
         };
         fetchUserStructure();
-    }, [isEmployee, setCompanyStructure, user.id]);
+    }, [isEmployee, setDepartments, setStores, setSubUsers, user?.id]);
 
     // useEffect(() => {
     // const searchParams = new URLSearchParams(window.location.search);

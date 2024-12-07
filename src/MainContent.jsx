@@ -11,6 +11,7 @@ import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
+import { useCompanyStructureStore } from './store/companyStructureStore';
 
 // Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
@@ -25,7 +26,8 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { setUserImage, userImage, subUserShifts, subUser, companyStructure } = useStateContext();
+    const stores = useCompanyStructureStore.getState().stores;
+    const { setUserImage, userImage, subUserShifts, subUser } = useStateContext();
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -117,13 +119,13 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isToday && isCurrentSubUser;
         });
 
-        if (todaysShifts.length > 0 && currentLocation && companyStructure?.stores?.length > 0) {
+        if (todaysShifts.length > 0 && currentLocation && stores?.length > 0) {
             todaysShifts.forEach((shift) => {
                 let isWithinAnyStore = false;
                 let matchedStoreId = null;
 
                 // Проверяем расстояние до всех магазинов
-                companyStructure.stores.forEach((store) => {
+                stores.forEach((store) => {
                     const storeLocation = store.location;
                     if (storeLocation) {
                         const distance = getDistanceFromLatLonInMeters(
@@ -156,7 +158,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [subUserShifts, subUser, currentLocation, companyStructure]);
+    }, [subUserShifts, subUser, currentLocation, stores]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
