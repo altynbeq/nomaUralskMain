@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { GeneralCompany } from '../components/General/GeneralCompany';
 import { GeneralSubuser } from '../components/General/GeneralSubuser';
-import { isValidDepartmentId } from '../methods/isValidDepartmentId';
+import { useAuthStore } from '../store/authStore';
 
 const General = ({ urls }) => {
-    const [generalType, setGeneralType] = useState();
-    useEffect(() => {
-        const currentUserDepartmentId = localStorage.getItem('departmentId');
-        setGeneralType(isValidDepartmentId(currentUserDepartmentId) ? 'subUser' : 'user');
-    }, []);
-
-    return generalType === 'user' ? <GeneralCompany urls={urls} /> : <GeneralSubuser />;
+    const user = useAuthStore((state) => state.user);
+    return user.role === 'user' ? <GeneralCompany urls={urls} /> : <GeneralSubuser />;
 };
 
 export default General;

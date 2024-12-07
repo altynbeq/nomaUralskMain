@@ -67,31 +67,31 @@ export const Profile = () => {
         setIsModalOpen(true);
     };
 
-    useEffect(() => {
-        const subuserId = localStorage.getItem('_id');
-        const fetchSubUserShifts = async () => {
-            try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/shifts/${subuserId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
+    // useEffect(() => {
+    //     const subuserId = localStorage.getItem('_id');
+    //     const fetchSubUserShifts = async () => {
+    //         try {
+    //             const response = await fetch(
+    //                 `https://nomalytica-back.onrender.com/api/shifts/${subuserId}`,
+    //                 {
+    //                     method: 'GET',
+    //                     headers: { 'Content-Type': 'application/json' },
+    //                 },
+    //             );
 
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
-                }
+    //             if (!response.ok) {
+    //                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    //             }
 
-                const result = await response.json();
-                setSubuserShifts(result);
-                setSubUserShifts(result);
-            } catch (error) {
-                console.error('Error fetching sub-user data:', error);
-            }
-        };
-        fetchSubUserShifts();
-    }, []);
+    //             const result = await response.json();
+    //             setSubuserShifts(result);
+    //             setSubUserShifts(result);
+    //         } catch (error) {
+    //             console.error('Error fetching sub-user data:', error);
+    //         }
+    //     };
+    //     fetchSubUserShifts();
+    // }, []);
 
     const getDaysInMonth = (year, month) => {
         return new Date(year, month + 1, 0).getDate();

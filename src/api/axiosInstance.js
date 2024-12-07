@@ -72,7 +72,7 @@ axiosInstance.interceptors.response.use(
 
             try {
                 const newToken = await refreshToken();
-                localStorage.setItem('accessToken', newToken);
+                useAuthStore.getState().setAccessToken(newToken);
                 axiosInstance.defaults.headers.common['Authorization'] = 'Bearer ' + newToken;
                 originalRequest.headers['Authorization'] = 'Bearer ' + newToken;
                 processQueue(null, newToken);

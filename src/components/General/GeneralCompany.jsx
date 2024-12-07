@@ -8,19 +8,21 @@ import { StoreSalesPlan } from '../General/StoreSalesPlan';
 import { EmplSalesPlans } from '../General/EmplSalesPlans';
 import { EmpltSiftStats } from './EmplShiftStats';
 import { SetStoresSalesPlan } from './SetStoresSalesPlan';
+import { useCompanyStore } from '../../store/companyStore';
 
 function convertUrl(apiUrl) {
     return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
 }
 
 export const GeneralCompany = ({ urls }) => {
-    const { kkm, skeletonUp, spisanie } = useStateContext();
+    const { skeletonUp } = useStateContext();
     const [ready, setReady] = useState(false);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
+    const { kkm, writeOffs } = useCompanyStore.getState();
 
     useEffect(() => {
-        if (kkm.monthFormedKKM && spisanie.monthSpisanie) {
+        if (kkm.monthFormedKKM && writeOffs.monthSpisanie) {
             setReady(true);
         }
         if (urls.externalApis && urls.externalApis.apiUrlKKM) {

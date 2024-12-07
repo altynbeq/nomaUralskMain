@@ -22,7 +22,6 @@ export const ContextProvider = ({ children }) => {
     const [isLoading, setLoading] = useState(true);
     const [kkm, setKKM] = useState({});
     const [receipts, setReceipts] = useState({});
-    const [spisanie, setSpisanie] = useState({});
     const [leads, setLeads] = useState({});
     const [deals, setDeals] = useState({});
     const [userData, setUserData] = useState({});
@@ -81,8 +80,6 @@ export const ContextProvider = ({ children }) => {
             setDeals,
             receipts,
             setReceipts,
-            spisanie,
-            setSpisanie,
             isLoading,
             setLoading,
             kkm,
@@ -132,7 +129,6 @@ export const ContextProvider = ({ children }) => {
             leads,
             deals,
             receipts,
-            spisanie,
             isLoading,
             kkm,
             skeletonUp,

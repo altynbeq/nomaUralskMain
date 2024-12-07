@@ -7,25 +7,18 @@ import { TechProb, LogInForm } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import { getCompanyData } from './methods/getCompanyData';
-import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuthStore } from './store/authStore';
-import { useApi } from './methods/hooks/useApi';
-import { axiosInstance } from './api/axiosInstance';
+import { useCompanyStore } from './store/companyStore';
 
 const App = () => {
     const {
         currentMode,
-        setLeads,
-        setDeals,
         activeMenu,
-        setKKM,
         setSkeletonUp,
-        setReceipts,
-        setSpisanie,
         setUserData,
         setAccess,
         setSubUser,
@@ -35,14 +28,17 @@ const App = () => {
     } = useStateContext();
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const user = useAuthStore((state) => state.user);
+    const setLeads = useCompanyStore((state) => state.setLeads);
+    const setKKM = useCompanyStore((state) => state.setKKM);
+    const setReceipts = useCompanyStore((state) => state.setReceipts);
+    const setWriteOffs = useCompanyStore((state) => state.setWriteOffs);
+    const setDeals = useCompanyStore((state) => state.setDeals);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
-    const { get } = useApi();
 
     const isEmployee = () => {
-        const departmentId = localStorage.getItem('departmentId');
-        return !!departmentId && isValidDepartmentId(departmentId);
+        return user.role === 'subUser';
     };
 
     useEffect(() => {
@@ -52,38 +48,88 @@ const App = () => {
         if (isQr) {
             setIsQrRedirect(true);
         }
-
-        if (!isLoggedIn) {
-            return;
-        }
-
-        if (user && user.role === 'user') {
-            const companyData = getCompanyData(user.id);
-            console.log(companyData);
-        }
-
-        // const fetchData = async () => {
-        //     try {
-        //         if (isEmployee()) {
-        //             await fetchSubUserData();
-        //             await fetchCompanyDataForSubuser();
-        //         } else {
-        //             await fetchCompanyData();
-        //         }
-        //         await fetchUserStructure();
-        //     } catch (error) {
-        //         setTechProblem(true);
-        //     } finally {
-        //         setSkeletonUp(false);
-        //     }
-        // };
-
-        // if (isLoggedIn) {
-        //     fetchData();
-        // } else {
-        //     setSkeletonUp(false);
-        // }
     }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!isLoggedIn) return;
+
+            if (user && user.role === 'user') {
+                try {
+                    const companyData = await getCompanyData(user.id);
+                    if (!companyData) {
+                        console.error('No company data received');
+                        return;
+                    }
+
+                    setLeads(JSON.parse(companyData.leads));
+                    setDeals(JSON.parse(companyData.deals));
+                    setKKM(JSON.parse(companyData.kkmData));
+                    setReceipts(JSON.parse(companyData.salesReceipt));
+                    setWriteOffs(JSON.parse(companyData.productsSpisanie));
+                    setUrls(companyData);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                } finally {
+                    setSkeletonUp(false);
+                }
+            }
+        };
+
+        fetchData();
+    }, [isLoggedIn, setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setWriteOffs, user]);
+
+    // useEffect(() => {
+    // const searchParams = new URLSearchParams(window.location.search);
+    // const isQr = searchParams.get('isQrRedirect') === 'true';
+
+    // if (isQr) {
+    //     setIsQrRedirect(true);
+    // }
+
+    //     if (!isLoggedIn) {
+    //         return;
+    //     }
+
+    //     if (user && user.role === 'user') {
+    //         const fetchCompanyData = async () => {
+    //             const companyData = await getCompanyData(user.id); // Добавляем await
+    //             if (!companyData) {
+    //                 console.error('Failed to fetch company data or companyData is null');
+    //                 return;
+    //             }
+    //             setLeads(JSON.parse(companyData.leads));
+    //             setDeals(JSON.parse(companyData.deals));
+    //             setKKM(JSON.parse(companyData.kkmData));
+    //             setReceipts(JSON.parse(companyData.salesReceipt));
+    //             setSpisanie(JSON.parse(companyData.productsSpisanie));
+    //             setUrls(companyData);
+    //         };
+    //         fetchCompanyData();
+    //     }
+
+    // const fetchData = async () => {
+    //     try {
+    //         if (isEmployee()) {
+    //             await fetchSubUserData();
+    //             await fetchCompanyDataForSubuser();
+    //         } else {
+    //             await fetchCompanyData();
+    //         }
+    //         await fetchUserStructure();
+    //     } catch (error) {
+    //         setTechProblem(true);
+    //     } finally {
+    //         setSkeletonUp(false);
+    //     }
+    // };
+
+    // if (isLoggedIn) {
+    //     fetchData();
+    // } else {
+    //     setSkeletonUp(false);
+    // }
+    // }, []);
 
     const fetchSubUserData = async () => {
         const departmentId = localStorage.getItem('departmentId');
@@ -139,13 +185,6 @@ const App = () => {
                 email: companyData.email,
                 name: companyData.name,
             });
-
-            setLeads(JSON.parse(companyData.leads));
-            setDeals(JSON.parse(companyData.deals));
-            setKKM(JSON.parse(companyData.kkmData));
-            setReceipts(JSON.parse(companyData.salesReceipt));
-            setSpisanie(JSON.parse(companyData.productsSpisanie));
-            setUrls(companyData);
         } catch (error) {
             console.error('Error fetching company data:', error);
         }
@@ -169,7 +208,7 @@ const App = () => {
             setDeals(JSON.parse(companyData.deals));
             setKKM(JSON.parse(companyData.kkmData));
             setReceipts(JSON.parse(companyData.salesReceipt));
-            setSpisanie(JSON.parse(companyData.productsSpisanie));
+            setWriteOffs(JSON.parse(companyData.productsSpisanie));
             setUrls(companyData);
         } catch (error) {
             console.error('Error fetching company data:', error);
