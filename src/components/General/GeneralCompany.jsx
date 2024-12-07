@@ -66,7 +66,6 @@ export const GeneralCompany = ({ urls }) => {
 
             <div className="flex w-[100%] flex-wrap  justify-center align-top xs:flex-col    gap-4 items-center">
                 <PaidToAmount
-                    userKkmUrl={userKkmUrl}
                     userReceiptsUrl={userReceiptsUrl}
                     height="520px"
                     comb={true}

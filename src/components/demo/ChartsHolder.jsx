@@ -116,18 +116,18 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
                         <div className="  border-t-1 pr-2 flex  py-2 flex-row md:w-[100%] gap-8 justify-center ">
                             <div className="flex justify-center  border-color  flex-col text-start ">
                                 <p className="text-gray-500 mt-1">Выручка</p>
-                                <span className="text-1xl ">{totalSum} ₸</span>
+                                <span className="text-1xl ">{totalSum || 0} ₸</span>
                             </div>
                             <div className="flex md:border-l-1 pl-2 flex-col text-start">
                                 <p className="text-gray-500 mt-1">Средний чек</p>
                                 <p className="text-[1rem] font-semibold">
-                                    {FormatAmount(Math.round(plainTotal / stats.salesCount))} ₸
+                                    {FormatAmount(Math.round(plainTotal / stats.salesCount)) || 0} ₸
                                 </p>
                             </div>
                             <div className="flex justify-center border-l-1  pl-2 flex-col text-start ">
                                 <p className="text-gray-500 mt-1">Продаж</p>
                                 <p className="text-1xl font-semibold">
-                                    {FormatAmount(stats.salesCount)}
+                                    {FormatAmount(stats.salesCount) || 0}
                                 </p>
                             </div>
                         </div>
