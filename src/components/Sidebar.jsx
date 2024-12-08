@@ -20,7 +20,9 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        console.log(access);
+        if (!access && !subUser) {
+            return;
+        }
         if (access && Object.keys(subUser).length > 0) {
             const newFilteredLinks = links
                 .map((category) => {
