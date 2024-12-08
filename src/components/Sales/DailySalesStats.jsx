@@ -31,7 +31,6 @@ const DailySalesStats = ({ kkm }) => {
             const companyId = user.companyId ? user.companyId : user.id;
             const companyData = await getCompanyData(companyId);
             const userSpisanieUrl = convertUrl(companyData?.externalApis?.apiUrlSpisanie);
-            console.log(userSpisanieUrl);
             const spisanieData = await getSpisanie(userSpisanieUrl, reqDate);
 
             const spis = SpisanieStats(spisanieData)?.totalSpisanieSum;
