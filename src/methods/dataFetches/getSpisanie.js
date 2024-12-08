@@ -38,24 +38,4 @@ export async function getSpisanie(api, dateRanges) {
     const data = await fetchDataForRange(api, dateRanges.startDate, dateRanges.endDate);
     const formedSpisanieData = await calculateSpisanieStats(data);
     return formedSpisanieData;
-    // if (Array.isArray(dateRanges) && dateRanges[0]) {
-    //     const [dayRange, weekRange, monthRange] = dateRanges;
-
-    //     // Fetch data for each time period
-    //     const [dayData, weekData, monthData] = await Promise.all([
-    //         fetchDataForRange(dayRange.startDate, dayRange.endDate),
-    //         fetchDataForRange(weekRange.startDate, weekRange.endDate),
-    //         fetchDataForRange(monthRange.startDate, monthRange.endDate),
-    //     ]);
-    //     const final = {
-    //         daySpisanie: calculateSpisanieStats(dayData),
-    //         weekSpisanie: calculateSpisanieStats(weekData),
-    //         monthSpisanie: calculateSpisanieStats(monthData)
-    //     }
-    //     return final;
-    // } else {
-    //     const data = await fetchDataForRange(dateRanges.startDate, dateRanges.endDate);
-    //     const formedSpisanieData = await calculateSpisanieStats(data);
-    //     return formedSpisanieData;
-    // }
 }
