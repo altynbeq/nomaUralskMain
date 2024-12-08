@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
-import { useStateContext } from '../../../contexts/ContextProvider';
 import { formatDate } from '../../../methods/dataFormatter';
+import { useCompanyStore, useCompanyStructureStore, useSubUserStore } from '../../../store';
 
 export const AddWarehouseForm = ({
     formData,
@@ -17,7 +17,10 @@ export const AddWarehouseForm = ({
     errors, // Получаем ошибки из родительского компонента
 }) => {
     const [previewUrl, setPreviewUrl] = useState(null);
-    const { warehouses, products, companyStructure, subUser } = useStateContext();
+    const warehouses = useCompanyStore((state) => state.warehouses);
+    const products = useCompanyStore((state) => state.products);
+    const stores = useCompanyStructureStore((state) => state.stores);
+    const subUser = useSubUserStore((state) => state.subUser);
 
     useEffect(() => {
         if (formData.file) {
@@ -69,7 +72,7 @@ export const AddWarehouseForm = ({
                     <Dropdown
                         value={formData.organization}
                         onChange={(e) => handleDropdownChange(e.value, 'organization')}
-                        options={companyStructure?.stores || []}
+                        options={stores || []}
                         optionLabel="storeName"
                         placeholder="Магазин"
                         className={`border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
