@@ -5,11 +5,13 @@ import { MdOutlineCancel } from 'react-icons/md';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { links } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
+import { useSubUserStore } from '../store/index';
 
 const Sidebar = () => {
-    const { currentColor, activeMenu, setActiveMenu, screenSize, access, subUser } =
-        useStateContext();
+    const { currentColor, activeMenu, setActiveMenu, screenSize } = useStateContext();
     const [filteredLinks, setFilteredLinks] = useState([]);
+    const access = useSubUserStore((state) => state.accesses);
+    const subUser = useSubUserStore((state) => state.subUser);
 
     const handleCloseSideBar = () => {
         if (activeMenu !== undefined && screenSize <= 900) {
@@ -18,9 +20,10 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        const companyId = localStorage.getItem('companyId');
-
-        if (access && Object.keys(subUser).length > 0) {
+        if (!access && !subUser) {
+            return;
+        }
+        if (access && subUser && Object.keys(subUser).length > 0) {
             const newFilteredLinks = links
                 .map((category) => {
                     if (category.title === 'Учёт' && !access.DataManagement) {
@@ -38,7 +41,7 @@ const Sidebar = () => {
                     });
 
                     // Условие для скрытия "finance" при определенном companyId
-                    if (companyId === '6720f0a45801c6007e836aa4') {
+                    if (subUser?.companyId === '6720f0a45801c6007e836aa4') {
                         filteredCategoryLinks = filteredCategoryLinks.filter(
                             (link) => link.name !== 'finance',
                         );
@@ -69,7 +72,7 @@ const Sidebar = () => {
                         let filteredCategoryLinks = category.links;
 
                         // Условие для скрытия "finance" при определенном companyId
-                        if (companyId === '6720f0a45801c6007e836aa4') {
+                        if (subUser?.companyId === '6720f0a45801c6007e836aa4') {
                             filteredCategoryLinks = filteredCategoryLinks.filter(
                                 (link) => link.name !== 'finance',
                             );

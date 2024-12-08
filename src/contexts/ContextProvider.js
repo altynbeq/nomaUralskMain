@@ -22,10 +22,8 @@ export const ContextProvider = ({ children }) => {
     const [isLoading, setLoading] = useState(true);
     const [kkm, setKKM] = useState({});
     const [receipts, setReceipts] = useState({});
-    const [spisanie, setSpisanie] = useState({});
     const [leads, setLeads] = useState({});
     const [deals, setDeals] = useState({});
-    const [userId, setUserId] = useState('');
     const [userData, setUserData] = useState({});
     const [access, setAccess] = useState({
         Analytics: {},
@@ -37,7 +35,8 @@ export const ContextProvider = ({ children }) => {
     const [warehouses, setWarehouses] = useState([]);
     const [products, setProducts] = useState([]);
     const [subUserShifts, setSubUserShifts] = useState([]);
-    const [isSubuser, setIsSubuser] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState('');
 
     const setMode = (e) => {
         setCurrentMode(e.target.value);
@@ -58,11 +57,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const handleClick = (clicked) => setIsClicked({ ...initialState, [clicked]: true });
-    const handleLogin = (id) => {
-        setUserId(id);
-    };
     const handleLogOut = () => {
-        setUserId('');
         localStorage.clear();
         window.location.reload();
     };
@@ -85,8 +80,6 @@ export const ContextProvider = ({ children }) => {
             setDeals,
             receipts,
             setReceipts,
-            spisanie,
-            setSpisanie,
             isLoading,
             setLoading,
             kkm,
@@ -110,8 +103,6 @@ export const ContextProvider = ({ children }) => {
             setColor,
             themeSettings,
             setThemeSettings,
-            handleLogin,
-            userId,
             handleLogOut,
             userData,
             setUserData,
@@ -129,12 +120,15 @@ export const ContextProvider = ({ children }) => {
             setProducts,
             subUserShifts,
             setSubUserShifts,
+            isLoggedIn,
+            setIsLoggedIn,
+            userRole,
+            setUserRole,
         }),
         [
             leads,
             deals,
             receipts,
-            spisanie,
             isLoading,
             kkm,
             skeletonUp,
@@ -145,7 +139,6 @@ export const ContextProvider = ({ children }) => {
             screenSize,
             isClicked,
             themeSettings,
-            userId,
             userData,
             access,
             subUser,
@@ -157,6 +150,10 @@ export const ContextProvider = ({ children }) => {
             setProducts,
             subUserShifts,
             setSubUserShifts,
+            isLoggedIn,
+            setIsLoggedIn,
+            userRole,
+            setUserRole,
         ],
     );
 

@@ -6,6 +6,7 @@ import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import avatar from '../data/avatar.jpg';
 import { Cart, Notification, UserProfile } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
+import { useAuthStore } from '../store/authStore';
 
 const NavButton = ({ title, customFunc, icon, color, dotColor }) => (
     <TooltipComponent content={title} position="BottomCenter">
@@ -33,8 +34,9 @@ const Navbar = () => {
         isClicked,
         setScreenSize,
         screenSize,
-        userData,
     } = useStateContext();
+
+    const { name, image } = useAuthStore.getState().user;
 
     useEffect(() => {
         const handleResize = () => setScreenSize(window.innerWidth);
@@ -44,7 +46,7 @@ const Navbar = () => {
         handleResize();
 
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [setScreenSize]);
 
     useEffect(() => {
         if (screenSize <= 900) {
@@ -52,7 +54,7 @@ const Navbar = () => {
         } else {
             setActiveMenu(true);
         }
-    }, [screenSize]);
+    }, [screenSize, setActiveMenu]);
 
     const handleActiveMenu = () => setActiveMenu(!activeMenu);
 
@@ -77,12 +79,14 @@ const Navbar = () => {
                         className="flex items-center gap-2 cursor-pointer p-1 hover:bg-light-gray rounded-lg"
                         onClick={() => handleClick('userProfile')}
                     >
-                        <img className="rounded-full w-8 h-8" src={avatar} alt="user-profile" />
+                        <img
+                            className="rounded-full w-8 h-8"
+                            src={image ? `https://nomalytica-back.onrender.com${image}` : avatar}
+                            alt="user-profile"
+                        />
                         <p>
                             <span className="text-gray-400 text-14">Привет,</span>{' '}
-                            <span className="text-gray-400 font-bold ml-1 text-14">
-                                {userData?.name}
-                            </span>
+                            <span className="text-gray-400 font-bold ml-1 text-14">{name}</span>
                         </p>
                         <MdKeyboardArrowDown className="text-gray-400 text-14" />
                     </div>

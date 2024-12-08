@@ -2,6 +2,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useEffect, useState } from 'react';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const SubuserEditModal = ({ isVisible, subuser, onClose, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,22 +14,10 @@ export const SubuserEditModal = ({ isVisible, subuser, onClose, onSuccess }) => 
 
     const onSave = async () => {
         setIsLoading(true);
-        console.log(subuserName);
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/subUsers/update-subuser-name/${subuser._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: subuserName,
-                    }),
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error('Failed to update store');
-            }
+            await axiosInstance.put(`subUsers/update-subuser-name/${subuser._id}`, {
+                name: subuserName,
+            });
             onSuccess();
         } catch (error) {
             console.error('Error updating store:', error.message);

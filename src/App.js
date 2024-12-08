@@ -1,5 +1,5 @@
 // App.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { Sidebar } from './components';
@@ -7,281 +7,187 @@ import { TechProb, LogInForm } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import { getCompanyData } from './methods/getCompanyData';
-import { isValidDepartmentId } from './methods/isValidDepartmentId';
-import { Loader } from './components/Loader';
 import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {
+    useAuthStore,
+    useCompanyStore,
+    useCompanyStructureStore,
+    useSubUserStore,
+} from './store/index';
+import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
-    const {
-        currentMode,
-        setLeads,
-        setDeals,
-        activeMenu,
-        setKKM,
-        setSkeletonUp,
-        setReceipts,
-        setSpisanie,
-        setUserData,
-        setAccess,
-        setSubUser,
-        setCompanyStructure,
-        setProducts,
-        setWarehouses,
-    } = useStateContext();
-
-    const [loading, setLoading] = useState(true);
+    const { currentMode, activeMenu, setSkeletonUp } = useStateContext();
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+    const user = useAuthStore((state) => state.user);
+    const setLeads = useCompanyStore((state) => state.setLeads);
+    const setKKM = useCompanyStore((state) => state.setKKM);
+    const setReceipts = useCompanyStore((state) => state.setReceipts);
+    const setWriteOffs = useCompanyStore((state) => state.setWriteOffs);
+    const setProducts = useCompanyStore((state) => state.setProducts);
+    const setWarehouses = useCompanyStore((state) => state.setWarehouses);
+    const setDeals = useCompanyStore((state) => state.setDeals);
+    const setDepartments = useCompanyStructureStore((state) => state.setDepartments);
+    const setStores = useCompanyStructureStore((state) => state.setStores);
+    const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
+    const setAccesses = useSubUserStore((state) => state.setAccesses);
+    const setSubUserShifts = useSubUserStore((state) => state.setShifts);
+    const setSubUser = useSubUserStore((state) => state.setSubUser);
     const [techProblem, setTechProblem] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
 
-    const isEmployee = () => {
-        const departmentId = localStorage.getItem('departmentId');
-        return !!departmentId && isValidDepartmentId(departmentId);
-    };
+    const isEmployee = useCallback(() => {
+        return user?.role === 'subUser';
+    }, [user?.role]);
 
     useEffect(() => {
-        const currentUserId = localStorage.getItem('_id');
-        const currentToken = localStorage.getItem('token');
-        const userLoggedIn = currentUserId !== null && currentToken !== null;
-        setIsLoggedIn(userLoggedIn);
-
         const searchParams = new URLSearchParams(window.location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
 
         if (isQr) {
             setIsQrRedirect(true);
         }
+    }, []);
 
+    useEffect(() => {
         const fetchData = async () => {
+            if (!isLoggedIn) return;
+
             try {
-                if (isEmployee()) {
-                    await fetchSubUserData();
-                    await fetchCompanyDataForSubuser();
-                } else {
-                    await fetchCompanyData();
+                const companyData = await getCompanyData(
+                    user.role === 'user' ? user.id : user.companyId,
+                );
+                if (!companyData) {
+                    return;
                 }
-                await fetchUserStructure();
+                setLeads(JSON.parse(companyData.leads));
+                setDeals(JSON.parse(companyData.deals));
+                setKKM(JSON.parse(companyData.kkmData));
+                setReceipts(JSON.parse(companyData.salesReceipt));
+                setWriteOffs(JSON.parse(companyData.productsSpisanie));
+                setUrls(companyData);
             } catch (error) {
-                setTechProblem(true);
+                console.error('Error fetching data:', error);
             } finally {
-                setLoading(false);
                 setSkeletonUp(false);
             }
         };
 
-        if (userLoggedIn) {
-            fetchData();
-        } else {
-            setLoading(false);
-            setSkeletonUp(false);
-        }
-    }, []);
-
-    const fetchSubUserData = async () => {
-        const departmentId = localStorage.getItem('departmentId');
-        const currentUserId = localStorage.getItem('_id');
-
-        if (!departmentId || !currentUserId) {
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/access/access-and-subusers/${departmentId}`,
-                {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status} - ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            const currentUserSubUser = result.subUsers.find((user) => user._id === currentUserId);
-
-            if (currentUserSubUser) {
-                setUserData({
-                    email: currentUserSubUser.email,
-                    name: currentUserSubUser.name,
-                });
-                setAccess(result.access);
-                setSubUser(currentUserSubUser);
-            }
-        } catch (error) {
-            console.error('Error fetching sub-user data:', error);
-        }
-    };
-
-    const fetchCompanyData = async () => {
-        const companyId = localStorage.getItem('_id');
-
-        if (!companyId) {
-            return;
-        }
-
-        try {
-            const companyData = await getCompanyData(companyId);
-
-            if (!companyData) {
-                setTechProblem(true);
-                return;
-            }
-
-            setUserData({
-                email: companyData.email,
-                name: companyData.name,
-            });
-
-            setLeads(JSON.parse(companyData.leads));
-            setDeals(JSON.parse(companyData.deals));
-            setKKM(JSON.parse(companyData.kkmData));
-            setReceipts(JSON.parse(companyData.salesReceipt));
-            setSpisanie(JSON.parse(companyData.productsSpisanie));
-            setUrls(companyData);
-        } catch (error) {
-            console.error('Error fetching company data:', error);
-        }
-    };
-
-    const fetchCompanyDataForSubuser = async () => {
-        const companyId = localStorage.getItem('companyId');
-        if (!companyId) {
-            return;
-        }
-
-        try {
-            const companyData = await getCompanyData(companyId);
-
-            if (!companyData) {
-                setTechProblem(true);
-                return;
-            }
-
-            setLeads(JSON.parse(companyData.leads));
-            setDeals(JSON.parse(companyData.deals));
-            setKKM(JSON.parse(companyData.kkmData));
-            setReceipts(JSON.parse(companyData.salesReceipt));
-            setSpisanie(JSON.parse(companyData.productsSpisanie));
-            setUrls(companyData);
-        } catch (error) {
-            console.error('Error fetching company data:', error);
-        }
-    };
-
-    const fetchUserStructure = async () => {
-        let companyId;
-
-        if (isEmployee()) {
-            companyId = localStorage.getItem('companyId');
-        } else {
-            companyId = localStorage.getItem('_id');
-        }
-
-        if (!companyId) {
-            console.error('Не удалось получить companyId из localStorage.');
-            return;
-        }
-
-        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${companyId}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-            setCompanyStructure(data);
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-        }
-    };
-
-    const fetchCompanyProductsAndWarehouses = async () => {
-        let companyId;
-
-        if (isEmployee()) {
-            companyId = localStorage.getItem('companyId');
-        } else {
-            companyId = localStorage.getItem('_id');
-        }
-
-        if (!companyId) {
-            console.error('Не удалось получить companyId из localStorage.');
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/companies/${companyId}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            setProducts(data.products);
-            if (data.warehouses) {
-                setWarehouses(
-                    data.warehouses.map((warehouseName, index) => ({
-                        warehouseName,
-                        id: index.toString(),
-                    })),
-                );
-            }
-        } catch (error) {
-            console.error('Error fetching company data:', error);
-        }
-    };
+        fetchData();
+    }, [isLoggedIn, setDeals, setKKM, setLeads, setReceipts, setSkeletonUp, setWriteOffs, user]);
 
     useEffect(() => {
-        if (isLoggedIn) {
-            fetchCompanyProductsAndWarehouses();
+        const fetchUserStructure = async () => {
+            const companyId = user?.companyId ? user.companyId : user?.id;
+            if (!companyId) {
+                return;
+            }
+            const url = `/structure/get-structure-by-userId/${companyId}`;
+            try {
+                const response = await axiosInstance(url);
+                setDepartments(response.data.departments);
+                setStores(response.data.stores);
+                setSubUsers(response.data.subUsers);
+                if (isEmployee()) {
+                    const subUser = response.data.subUsers.find((s) => s._id === user?.id);
+                    setSubUser(subUser);
+                    setSubUserShifts(subUser.shifts);
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+            }
+        };
+        fetchUserStructure();
+    }, [
+        isEmployee,
+        setDepartments,
+        setStores,
+        setSubUser,
+        setSubUserShifts,
+        setSubUsers,
+        user?.companyId,
+        user?.id,
+    ]);
+
+    useEffect(() => {
+        if (user?.role === 'subUser') {
+            const subUserId = user?.id;
+            const fetchSubUserData = async () => {
+                try {
+                    const response = await axiosInstance.get(
+                        `access/access-and-subusers/${user?.departmentId}`,
+                    );
+                    const currentUserSubUser = response.data.subUsers.find(
+                        (user) => user._id === subUserId,
+                    );
+                    if (currentUserSubUser) {
+                        setAccesses(response.data.access);
+                    }
+                } catch (error) {
+                    console.error('Error fetching sub-user data:', error);
+                }
+            };
+            fetchSubUserData();
         }
-    }, [isLoggedIn]);
+    }, [setAccesses, user?.departmentId, user?.id, user?.role]);
+
+    useEffect(() => {
+        const fetchCompanyProductsAndWarehouses = async () => {
+            const companyId = isEmployee() ? user?.companyId : user?.id;
+
+            if (!companyId) {
+                return;
+            }
+
+            try {
+                const response = await axiosInstance.get(`/companies/${companyId}`);
+                setProducts(response.data.products);
+                if (response.data.warehouses) {
+                    setWarehouses(
+                        response.data.warehouses.map((warehouseName, index) => ({
+                            warehouseName,
+                            id: index.toString(),
+                        })),
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching company data:', error);
+            }
+        };
+        fetchCompanyProductsAndWarehouses();
+    }, [isEmployee, setProducts, setWarehouses, user?.companyId, user?.id]);
 
     if (techProblem) {
         return <TechProb />;
     }
 
-    if (loading) {
-        return <Loader />;
-    }
-
-    if (!isLoggedIn) {
-        return <LogInForm isQrRedirect={isQrRedirect} />;
-    }
-
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
             <BrowserRouter>
-                <div className="flex relative dark:bg-main-dark-bg">
-                    <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
-                        <TooltipComponent content="Settings" position="Top" />
+                {isLoggedIn ? (
+                    <div className="flex relative dark:bg-main-dark-bg">
+                        <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
+                            <TooltipComponent content="Settings" position="Top" />
+                        </div>
+                        {activeMenu ? (
+                            <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
+                                <Sidebar />
+                            </div>
+                        ) : (
+                            <div className="w-0 dark:bg-secondary-dark-bg">
+                                <Sidebar />
+                            </div>
+                        )}
+                        <ToastContainer position="top-center" autoClose={5000} />
+                        <MainContent urls={urls} activeMenu={activeMenu} />
                     </div>
-                    {activeMenu ? (
-                        <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
-                            <Sidebar />
-                        </div>
-                    ) : (
-                        <div className="w-0 dark:bg-secondary-dark-bg">
-                            <Sidebar />
-                        </div>
-                    )}
-                    <ToastContainer position="top-center" autoClose={5000} />
-                    <MainContent urls={urls} activeMenu={activeMenu} />
-                </div>
+                ) : (
+                    <LogInForm isQrRedirect={isQrRedirect} />
+                )}
             </BrowserRouter>
         </div>
     );

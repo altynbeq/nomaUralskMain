@@ -7,6 +7,7 @@ import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
 import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const AddWarehouse = () => {
     const isSmallScreen = useIsSmallScreen(768);
@@ -52,7 +53,7 @@ export const AddWarehouse = () => {
         removeError('file');
     }, []);
 
-    const validate = () => {
+    const validate = useCallback(() => {
         const newErrors = {};
         if (!formData.productName) newErrors.productName = 'Название товара обязательно';
         // if (!formData.date) newErrors.date = 'Дата обязательна';
@@ -68,7 +69,15 @@ export const AddWarehouse = () => {
         if (!formData.file) newErrors.file = 'Фото обязательно';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    };
+    }, [
+        formData.file,
+        formData.organization,
+        formData.productName,
+        formData.quantity,
+        formData.reason,
+        formData.responsible,
+        formData.warehouse,
+    ]);
 
     const handleSubmit = useCallback(
         async (e) => {
@@ -93,18 +102,10 @@ export const AddWarehouse = () => {
                     : userId;
                 setIsLoading(true);
                 try {
-                    const response = await fetch(
-                        `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
-                        {
-                            method: 'POST',
-                            body: submissionData,
-                        },
+                    await axiosInstance.post(
+                        `/clientsSpisanie/${companyId}/write-off`,
+                        submissionData,
                     );
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Ошибка при отправке данных');
-                    }
                     setIsModalOpen(false);
                     setShowAlertModal(true);
                     setFormData({

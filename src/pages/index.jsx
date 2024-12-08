@@ -8,5 +8,4 @@ export { default as Sklad } from './Sklad';
 export { default as LogInForm } from './LogInForm';
 export { default as NoAccess } from './NoAccess';
 export { default as ComingSoon } from './ComingSoon';
-export { default as Loader } from './Loader';
 export { default as TechProb } from './TechProb';

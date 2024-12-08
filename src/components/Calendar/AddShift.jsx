@@ -5,6 +5,7 @@ import { Calendar } from 'primereact/calendar';
 import { toast } from 'react-toastify';
 import { addLocale } from 'primereact/api';
 import avatar from '../../data/avatar.jpg';
+import { axiosInstance } from '../../api/axiosInstance';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -105,24 +106,8 @@ export const AddShift = (props) => {
             });
 
             // Send the shifts array to the backend
-            const response = await fetch(
-                'https://nomalytica-back.onrender.com/api/shifts/create-shifts',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ shifts }),
-                },
-            );
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Ошибка при создании смен.');
-            }
-
+            await axiosInstance.post('/shifts/create-shifts', { shifts });
             toast.success('Смены успешно добавлены');
-            await props.fetchShifts();
             props.setOpen(false);
         } catch (error) {
             console.error('Error adding shifts:', error);

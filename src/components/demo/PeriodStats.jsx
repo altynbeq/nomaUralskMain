@@ -4,34 +4,27 @@ import { StepperPanel } from 'primereact/stepperpanel';
 import { Calendar } from 'primereact/calendar';
 import { useStateContext } from '../../contexts/ContextProvider';
 import {
-    StoresList,
     FormatAmount,
     totalCounterReceipts,
     TotalCounter,
     ConvertCalendarDate,
 } from '../../data/MainDataSource';
-import {
-    FaDollarSign,
-    FaMoneyBillAlt,
-    FaBoxOpen,
-    FaRegThumbsDown,
-    FaMoneyBill,
-    FaBox,
-    FaFilter,
-    FaChartBar,
-} from 'react-icons/fa';
+import { FaDollarSign, FaMoneyBillAlt, FaMoneyBill, FaBox, FaFilter } from 'react-icons/fa';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import LoadingSkeleton from '../LoadingSkeleton';
+import { useCompanyStore } from '../../store/companyStore';
 
-const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
+const PeriodStats = ({ title, userKkmUrl }) => {
     const stepperRef = useRef(null);
-    const { dateRanges, receipts, kkm, spisanie, deals } = useStateContext();
+    const receipts = useCompanyStore((state) => state.receipts);
+    const kkm = useCompanyStore((state) => state.kkm);
+    const deals = useCompanyStore((state) => state.deals);
+    const { dateRanges } = useStateContext();
     const [total, setTotal] = useState(0);
     const [dates, setDates] = useState([
         new Date(dateRanges[1].startDate.replace('%20', ' ')),
         new Date(dateRanges[1].endDate.replace('%20', ' ')),
     ]);
-    const [panelData, setPanelData] = useState([]);
     const [kkmStats, setKkmStats] = useState([]);
     const [loading, setLoading] = useState(false);
     const componentRef = useRef(null);
@@ -42,7 +35,6 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
             setLoading(true);
             const properDate = ConvertCalendarDate(e);
             const kkmList = await getKKMReceiptsFront(userKkmUrl, properDate);
-            // console.log("LIIISTTTKKKMMM", kkmList)
             setKkmStats(kkmList);
             setTotal(TotalCounter(kkmList));
             setLoading(false);
@@ -60,7 +52,7 @@ const PeriodStats = ({ idcomp, title, urls, userKkmUrl }) => {
                 height: offsetHeight,
             });
         }
-    }, [receipts]);
+    }, [kkm.monthFormedKKM, receipts]);
 
     const financeStatsTemplate = [
         {

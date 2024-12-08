@@ -1,25 +1,24 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import { ScheduleWithEdit } from '../components/Calendar/CalendarModal';
 import { AddShift } from '../components/Calendar/AddShift';
 import ruLocale from '@fullcalendar/core/locales/ru';
-import { useStateContext } from '../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
 import AlertModal from '../components/AlertModal';
-import { isValidDepartmentId } from '../methods/isValidDepartmentId';
 import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
+import { useCompanyStructureStore } from '../store/companyStructureStore';
 
 const Calendar = () => {
-    const { access } = useStateContext();
+    const stores = useCompanyStructureStore((state) => state.stores);
+    const subUsers = useCompanyStructureStore((state) => state.subUsers);
+    const departments = useCompanyStructureStore((state) => state.departments);
     const [modal, setModal] = useState(false);
-    const [loadingStores, setLoadingStores] = useState(false);
     const [currentShifts, setCurrentShifts] = useState([]);
     const [modalAddShift, setModalAddShift] = useState(false);
-    const [stores, setStores] = useState([]);
     const [selectedStore, setSelectedStore] = useState(null);
-    const [subusers, setSubusers] = useState([]);
+    const [selectedStoreId, setSelectedStoreId] = useState(null);
     const [selectedShiftId, setSelectedShiftId] = useState(null);
     const [alertOpen, setAlertOpen] = useState(false);
 
@@ -32,109 +31,34 @@ const Calendar = () => {
     }, [selectedStore]);
 
     useEffect(() => {
-        const id = localStorage.getItem('_id');
-        const departmentId = localStorage.getItem('departmentId');
-        if (isValidDepartmentId(departmentId)) {
-            if (id && access.DataManagement) {
-                fetchStructure(id);
-            }
-        } else {
-            fetchUserStructure(id);
-        }
-    }, [access.DataManagement]);
-
-    useEffect(() => {
         if (selectedStore) {
-            fetchSubusers(selectedStore._id);
-            fetchShiftsByStore(selectedStore._id);
+            // fetchShiftsByStore(selectedStore._id);
         } else {
             setCurrentShifts([]);
         }
     }, [selectedStore]);
 
-    const fetchStructure = async (id) => {
-        setLoadingStores(true);
-        const url = `https://nomalytica-back.onrender.com/api/subUsers/subuser-stores/${id}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-            setStores(data);
-        } catch (error) {
-            console.error('Failed to fetch stores:', error);
-        } finally {
-            setLoadingStores(false);
-        }
-    };
-
-    const fetchUserStructure = async (id) => {
-        setLoadingStores(true);
-        const url = `https://nomalytica-back.onrender.com/api/structure/get-structure-by-userId/${id}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-            setStores(data.stores);
-            return data;
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-        } finally {
-            setLoadingStores(false);
-        }
-    };
-
-    const fetchSubusers = async () => {
-        let companyId;
-        const departmentId = localStorage.getItem('departmentId');
-        if (isValidDepartmentId(departmentId)) {
-            companyId = localStorage.getItem('companyId');
-        } else {
-            companyId = localStorage.getItem('_id');
-        }
-        const url = `https://nomalytica-back.onrender.com/api/subusers/subusers-by-company/${companyId}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-            setSubusers(data);
-        } catch (error) {
-            console.error('Failed to fetch subusers:', error);
-        }
-    };
-
-    const fetchShiftsByStore = async (storeId) => {
-        const url = `https://nomalytica-back.onrender.com/api/shifts/store/${storeId}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-            const data = await response.json();
-            const shifts = data.map((shift) => ({
-                title: shift.subUserId?.name || '',
+    const getShiftsFromSubUsers = (subUsers) => {
+        return subUsers.flatMap((subUser) =>
+            subUser.shifts.map((shift) => ({
+                title: subUser.name,
                 start: new Date(shift.startTime),
                 end: new Date(shift.endTime),
                 extendedProps: {
                     shiftId: shift._id || '',
-                    subUserId: shift.subUserId?._id || '',
+                    subUserId: shift.subUserId || '',
+                    selectedStoreId: shift.selectedStore?._id || '',
                 },
-            }));
-            setCurrentShifts(shifts);
-        } catch (error) {
-            console.error('Failed to fetch shifts by store:', error);
-        }
+            })),
+        );
     };
 
     const handleEventClick = useCallback(
         (info) => {
             const shiftId = info.event.extendedProps.shiftId;
+            const selectedStoreId = info.event.extendedProps.selectedStoreId;
             setSelectedShiftId(shiftId);
+            setSelectedStoreId(selectedStoreId);
             setModal(true);
         },
         [setModal, setSelectedShiftId],
@@ -162,6 +86,16 @@ const Calendar = () => {
         );
     }, []);
 
+    const filteredEvents = useMemo(() => {
+        const allEvents = getShiftsFromSubUsers(subUsers);
+        if (selectedStore) {
+            return allEvents.filter(
+                (event) => event.extendedProps.selectedStoreId === selectedStore._id,
+            );
+        }
+        return allEvents;
+    }, [subUsers, selectedStore]);
+
     return (
         <div className="w-[100%] align-center justify-center">
             <div className="m-2 mt-20 md:mt-0 mb-0 p-2 pb-0 bg-white rounded-3xl">
@@ -173,7 +107,7 @@ const Calendar = () => {
                         onChange={(e) => setSelectedStore(e.value)}
                         options={stores}
                         optionLabel="storeName"
-                        placeholder={loadingStores ? 'Загрузка...' : 'Выберите магазин'}
+                        placeholder="Выберите магазин"
                         className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         showClear
                     />
@@ -184,27 +118,25 @@ const Calendar = () => {
                     onClose={() => setAlertOpen(false)}
                 />
                 <ScheduleWithEdit
-                    selectedStore={selectedStore}
+                    selectedStoreId={selectedStore ? selectedStore._id : selectedStoreId}
                     open={modal}
                     setOpen={setModal}
                     shiftId={selectedShiftId}
-                    fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
                 />
                 <AddShift
                     selectedStore={selectedStore}
-                    subusers={subusers}
+                    subusers={subUsers}
                     open={modalAddShift}
                     setOpen={setModalAddShift}
                     currentShifts={currentShifts}
                     setCurrentShifts={setCurrentShifts}
-                    fetchShifts={() => fetchShiftsByStore(selectedStore._id)}
                 />
 
                 <FullCalendar
                     plugins={[dayGridPlugin]}
                     initialView="dayGridMonth"
                     weekends={true}
-                    events={currentShifts}
+                    events={filteredEvents}
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     locale={ruLocale}
@@ -224,7 +156,7 @@ const Calendar = () => {
                 />
             </div>
             <div className="flex ml-5 mt-10 w-[90%] md:ml-0 md:w-[100%] subtle-border">
-                <EmployeeCalendar />
+                <EmployeeCalendar stores={stores} departments={departments} subUsers={subUsers} />
             </div>
         </div>
     );

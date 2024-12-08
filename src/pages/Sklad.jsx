@@ -12,6 +12,7 @@ import {
     GridProductListCols,
     SpisanieBarSeriesByStore,
 } from '../data/MainDataSource';
+import { useCompanyStore } from '../store/companyStore';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
@@ -19,7 +20,9 @@ function convertUrl(apiUrl) {
 }
 
 const Sklad = ({ urls }) => {
-    const { skeletonUp, kkm, spisanie } = useStateContext();
+    const kkm = useCompanyStore((state) => state.kkm);
+    const writeOffs = useCompanyStore((state) => state.writeOffs);
+    const { skeletonUp } = useStateContext();
     const [productStats, setProductStats] = useState({});
     const [productsGridRows, setProductGridRows] = useState([]);
     const [tableRows, setTableRows] = useState([]);
@@ -27,18 +30,17 @@ const Sklad = ({ urls }) => {
     const [spisanieBarSeries, setSpisanieBarSeries] = useState([]);
 
     const [userKkmUrl, setUserKkmUrl] = useState('');
-    const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
     const [userSpisanieUrl, setUserSpisanieUrl] = useState('');
 
     useEffect(() => {
-        if (kkm.monthFormedKKM && spisanie.monthSpisanie) {
+        if (kkm?.monthFormedKKM && writeOffs?.monthSpisanie) {
             setProductGridRows(ProductSoldGridList(kkm.monthFormedKKM));
-            setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
-            setTableRows(GridSpisanieListRows(spisanie.monthSpisanie));
+            setSpisanieStats(SpisanieStats(writeOffs.monthSpisanie));
+            setTableRows(GridSpisanieListRows(writeOffs.monthSpisanie));
             setProductStats(ProductsStats(kkm.monthFormedKKM));
-            setSpisanieBarSeries(SpisanieBarSeriesByStore(spisanie.monthSpisanie));
+            setSpisanieBarSeries(SpisanieBarSeriesByStore(writeOffs.monthSpisanie));
         }
-        if (urls.externalApis && urls.externalApis.apiUrlKKM) {
+        if (urls?.externalApis && urls?.externalApis?.apiUrlKKM) {
             const convKkm = urls.externalApis.apiUrlKKM
                 ? convertUrl(urls.externalApis.apiUrlKKM)
                 : null;
@@ -50,12 +52,11 @@ const Sklad = ({ urls }) => {
                 : null;
             if (convKkm != null && convReceipt != null && convSpis != null) {
                 setUserKkmUrl(convKkm);
-                setUserReceiptsUrl(convReceipt);
                 setUserSpisanieUrl(convSpis);
             }
         }
         window.scrollTo(0, 0);
-    }, [kkm.monthFormedKKM, spisanie.monthSpisanie, urls.externalApis]);
+    }, [kkm?.monthFormedKKM, writeOffs?.monthSpisanie, urls?.externalApis]);
 
     if (skeletonUp) {
         return (
@@ -75,7 +76,6 @@ const Sklad = ({ urls }) => {
                     title="Списания за месяц"
                     series={spisanieBarSeries}
                 />
-                {/* <ProductStatsComp title="Товары" stats={productStats} /> */}
             </div>
             <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center align-center  items-center">
                 <TableSort

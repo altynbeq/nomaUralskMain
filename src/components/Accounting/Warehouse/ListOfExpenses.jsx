@@ -5,10 +5,11 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { EditProductModal } from '../../../components/EditProductModal';
-import { useStateContext } from '../../../contexts/ContextProvider';
+import { useCompanyStore } from '../../../store';
 
 export default function ListOfExpenses() {
-    const { products, warehouses } = useStateContext();
+    const warehouses = useCompanyStore((state) => state.warehouses);
+    const products = useCompanyStore((state) => state.products);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -39,22 +40,24 @@ export default function ListOfExpenses() {
     };
 
     useEffect(() => {
-        const filtered = products.filter((product) => {
-            const matchesProductSearch = product.НоменклатураНаименование
-                .toLowerCase()
-                .includes(productSearch.toLowerCase());
+        if (products?.length) {
+            const filtered = products.filter((product) => {
+                const matchesProductSearch = product.НоменклатураНаименование
+                    .toLowerCase()
+                    .includes(productSearch.toLowerCase());
 
-            let matchesWarehouse = true;
-            if (selectedWarehouse && selectedWarehouse.warehouseName) {
-                const productWarehouseName = getWarehouseNameFromProduct(
-                    product.КассаККМНаименование,
-                );
-                matchesWarehouse = productWarehouseName === selectedWarehouse.warehouseName;
-            }
+                let matchesWarehouse = true;
+                if (selectedWarehouse && selectedWarehouse.warehouseName) {
+                    const productWarehouseName = getWarehouseNameFromProduct(
+                        product.КассаККМНаименование,
+                    );
+                    matchesWarehouse = productWarehouseName === selectedWarehouse.warehouseName;
+                }
 
-            return matchesProductSearch && matchesWarehouse;
-        });
-        setFilteredProducts(filtered);
+                return matchesProductSearch && matchesWarehouse;
+            });
+            setFilteredProducts(filtered);
+        }
     }, [productSearch, selectedWarehouse, products]);
 
     return (

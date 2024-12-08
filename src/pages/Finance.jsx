@@ -12,6 +12,7 @@ import YearBarChart from '../components/demo/YearBarChart';
 import CarouselCard from '../components/demo/Slider';
 import { FinanceShare } from '../data/MainDataSource';
 import { Navigate } from 'react-router-dom';
+import { useCompanyStore } from '../store/companyStore';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
@@ -19,18 +20,20 @@ function convertUrl(apiUrl) {
 }
 
 const Finance = ({ urls }) => {
-    const { skeletonUp, kkm, deals } = useStateContext();
+    const { skeletonUp } = useStateContext();
     const [financeShare, setFinanceShare] = useState([]);
     const [weekDeals, setWeekDeals] = useState([]);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
+    const kkm = useCompanyStore((state) => state.kkm);
+    const deals = useCompanyStore((state) => state.deals);
 
     useEffect(() => {
-        if (kkm.monthFormedKKM) {
+        if (kkm?.monthFormedKKM) {
             setFinanceShare(FinanceShare(kkm.monthFormedKKM));
         }
-        if (!weekDeals.avgCheck) {
-            setWeekDeals(deals.dealsWeek);
+        if (!weekDeals?.avgCheck) {
+            setWeekDeals(deals?.dealsWeek);
         }
         if (urls.externalApis && urls.externalApis.apiUrlKKM) {
             const convKkm = urls.externalApis.apiUrlKKM
@@ -48,7 +51,7 @@ const Finance = ({ urls }) => {
             }
         }
         window.scrollTo(0, 0);
-    }, [deals.dealsWeek, kkm.monthFormedKKM, urls.externalApis, weekDeals.avgCheck]);
+    }, [deals?.dealsWeek, kkm?.monthFormedKKM, urls?.externalApis, weekDeals?.avgCheck]);
 
     if (skeletonUp) {
         return (
@@ -68,8 +71,8 @@ const Finance = ({ urls }) => {
             <div className="flex mt-5 w-[100%] align-center gap-4 flex-wrap md:flex-row justify-center">
                 <DailyRevenue userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
                 <div className=" flex justify-center gap-4 align-center flex-col w-[100%] md:w-[30%]">
-                    <WeaklyRevenueOverviewStacked deals={weekDeals} />
-                    <TotalRevenuePie />
+                    <WeaklyRevenueOverviewStacked deals={deals} />
+                    <TotalRevenuePie deals={deals} />
                 </div>
             </div>
             <div className="flex gap-4 w-[100%] items-center align-center flex-col md:flex-row justify-center">

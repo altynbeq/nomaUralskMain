@@ -15,9 +15,12 @@ import {
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import LoadingSkeleton from '../LoadingSkeleton';
+import { useCompanyStore } from '../../store/companyStore';
 
 const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
-    const { dateRanges, receipts, kkm } = useStateContext();
+    const { dateRanges } = useStateContext();
+    const kkm = useCompanyStore((state) => state.kkm);
+    const receipts = useCompanyStore((state) => state.receipts);
     const [chartSeries, setChartSeries] = useState([]);
     const [stats, setStats] = useState({});
     const [totalSum, setTotalSum] = useState(0);
@@ -64,7 +67,7 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
             setChartSeries(FinanceLineChartSeries(receipts.monthReceiptsData));
             setStats(FinanceStats(kkm.monthFormedKKM));
         }
-    }, [receipts]);
+    }, [kkm.monthFormedKKM, receipts]);
 
     return (
         <>
@@ -113,18 +116,18 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
                         <div className="  border-t-1 pr-2 flex  py-2 flex-row md:w-[100%] gap-8 justify-center ">
                             <div className="flex justify-center  border-color  flex-col text-start ">
                                 <p className="text-gray-500 mt-1">Выручка</p>
-                                <span className="text-1xl ">{totalSum} ₸</span>
+                                <span className="text-1xl ">{totalSum || 0} ₸</span>
                             </div>
                             <div className="flex md:border-l-1 pl-2 flex-col text-start">
                                 <p className="text-gray-500 mt-1">Средний чек</p>
                                 <p className="text-[1rem] font-semibold">
-                                    {FormatAmount(Math.round(plainTotal / stats.salesCount))} ₸
+                                    {FormatAmount(Math.round(plainTotal / stats.salesCount)) || 0} ₸
                                 </p>
                             </div>
                             <div className="flex justify-center border-l-1  pl-2 flex-col text-start ">
                                 <p className="text-gray-500 mt-1">Продаж</p>
                                 <p className="text-1xl font-semibold">
-                                    {FormatAmount(stats.salesCount)}
+                                    {FormatAmount(stats.salesCount) || 0}
                                 </p>
                             </div>
                         </div>
@@ -133,13 +136,13 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
                         <Group justify="space-between" mt="xl" />
                         <div className="flex flex-row gap-5 justify-center">
                             <Button
-                                text="Download"
+                                text="Cкачать"
                                 bgColor="#1e4db6"
                                 borderRadius="24px"
                                 icon={<FaFileDownload />}
                             />
                             <Button
-                                text="Share"
+                                text="Поделиться"
                                 bgColor="#1e4db6"
                                 borderRadius="24px"
                                 icon={<FaShare />}

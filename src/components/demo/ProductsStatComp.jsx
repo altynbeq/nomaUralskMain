@@ -8,9 +8,9 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import { getKKMReceiptsFront } from '../../methods/dataFetches/getKKM';
 import LoadingSkeleton from '../LoadingSkeleton';
 
-const ProductsStatsComp = ({ idcomp, title, userKkmUrl }) => {
+const ProductsStatsComp = ({ title, userKkmUrl, kkm }) => {
     const stepperRef = useRef(null);
-    const { dateRanges, kkm } = useStateContext();
+    const { dateRanges } = useStateContext();
     const [dates, setDates] = useState([
         new Date(dateRanges[1].startDate.replace('%20', ' ')),
         new Date(dateRanges[1].endDate.replace('%20', ' ')),

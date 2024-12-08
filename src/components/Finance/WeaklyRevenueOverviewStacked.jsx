@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useStateContext } from '../../contexts/ContextProvider';
 import BarChartRe from '../ReCharts/BarCharts';
-import { fetchDeals } from '../../methods/dataFetches/getDealsBitrix';
 
-const WeaklyRevenueOverviewStacked = () => {
-    const { currentColor, dateRanges, deals } = useStateContext();
+const WeaklyRevenueOverviewStacked = ({ deals }) => {
+    const { currentColor } = useStateContext();
     const [russianSalesSeries, setrussianSalesSeries] = useState([]);
-    const [dealsSeries, setDealsSeries] = useState({});
 
     const russianDaysMap = {
         Monday: 'Пн',
@@ -18,7 +16,7 @@ const WeaklyRevenueOverviewStacked = () => {
         Sunday: 'Вс',
     };
     useEffect(() => {
-        if (deals.dealsWeek) {
+        if (deals?.dealsWeek) {
             const russianSalesSeries = deals.dealsWeek.avgCheckSeries.map((item) => ({
                 ...item,
                 x: russianDaysMap[item.x] || item.x,

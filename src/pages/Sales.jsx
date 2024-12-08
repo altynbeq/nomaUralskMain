@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
     DailySalesStats,
     YearStats,
-    MonthlyTotalSalesChart,
     OverallRevenueChart,
     WeeklyStats,
     MonthlyConversion,
 } from '../components/Sales';
 import StatsBoxes from '../components/Sales/StatsBoxes';
-import PeriodStats from '../components/demo/PeriodStats';
 import CardWithBarChart from '../components/demo/CardWithBarChart';
 import TableSort from '../components/demo/TablesList';
 import CarouselCard from '../components/demo/Slider';
@@ -23,8 +21,7 @@ import {
     SalesBarSeriesByStore,
 } from '../data/MainDataSource';
 import ProductStatsComp from '../components/demo/ProductsStatComp';
-import { getLeadsBack } from '../methods/dataFetches/getLeadsBack';
-import { parse } from 'postcss';
+import { useCompanyStore } from '../store/companyStore';
 
 function generateConversionSeries(leadsSeries, dealsSeries) {
     return leadsSeries.map((lead, index) => {
@@ -54,34 +51,30 @@ function convertUrl(apiUrl) {
 
 const Sales = ({ urls }) => {
     const [salesShare, setSalesShare] = useState([]);
-    const { skeletonUp, kkm, receipts, leads, deals, setLeads, dateRanges } = useStateContext();
-    const [ready, setReady] = useState(false);
+    const { skeletonUp } = useStateContext();
+    const kkm = useCompanyStore((state) => state.kkm);
+    const receipts = useCompanyStore((state) => state.receipts);
+    const leads = useCompanyStore((state) => state.leads);
+    const deals = useCompanyStore((state) => state.deals);
     const [productsGridRows, setProductGridRows] = useState([]);
     const [productStats, setProductStats] = useState({});
     const [barSeriesAll, setBarSeriesAll] = useState([]);
     const [barSeriesByStore, setBarSeriesByStore] = useState([]);
-    const [leadsSeries, setLeadsSeries] = useState([]);
     const [totalSeries, setTotalSerues] = useState([]);
     const [userKkmUrl, setUserKkmUrl] = useState('');
-    const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
     const [userSpisanieUrl, setUserSpisanieUrl] = useState('');
 
     useEffect(() => {
-        if (kkm.monthFormedKKM && receipts.monthReceiptsData) {
+        if (kkm?.monthFormedKKM && receipts?.monthReceiptsData) {
             setSalesShare(SaleShare(kkm.monthFormedKKM));
             setProductGridRows(ProductSoldGridList(kkm.monthFormedKKM));
             setProductStats(ProductsStats(kkm.monthFormedKKM));
             setBarSeriesAll(SalesBarSeriesAll(kkm.monthFormedKKM));
             setBarSeriesByStore(SalesBarSeriesByStore(kkm.monthFormedKKM));
         }
-        if (leads.series && deals.dealsMonth) {
-            setLeadsSeries(leads.series);
-
+        if (leads?.series && deals?.dealsMonth) {
             const conversion = generateConversionSeries(leads.series, deals.dealsMonth.salesSeries);
             const totalSeriesL = formData(leads.series, conversion);
-
-            // console.log("Leads:", leads);
-            // console.log("Deals:", deals);
 
             setTotalSerues(totalSeriesL);
         }
@@ -97,13 +90,17 @@ const Sales = ({ urls }) => {
                 : null;
             if (convKkm != null && convReceipt != null && convSpis != null) {
                 setUserKkmUrl(convKkm);
-                setUserReceiptsUrl(convReceipt);
                 setUserSpisanieUrl(convSpis);
             }
         }
         window.scrollTo(0, 0);
-    }, []);
-    // console.log("barSeriesAll", barSeriesAll);
+    }, [
+        deals?.dealsMonth,
+        kkm?.monthFormedKKM,
+        leads?.series,
+        receipts?.monthReceiptsData,
+        urls?.externalApis,
+    ]);
     if (skeletonUp) {
         return (
             <div className="flex mx-10 flex-col gap-6 justify-evenly align-center text-center w-[100%]">
@@ -116,8 +113,13 @@ const Sales = ({ urls }) => {
     return (
         <div className="mt-12 flex flex-col gap-3  justify-center ">
             <div className="flex  w-[100%] flex-wrap  justify-center align-top xs:flex-col    gap-[0.5rem] items-center">
-                <DailySalesStats />
-                <WeeklyStats idcomp="weekStats" title="Дневная статистика" />
+                <DailySalesStats kkm={kkm} />
+                <WeeklyStats
+                    deals={deals}
+                    kkm={kkm}
+                    idcomp="weekStats"
+                    title="Дневная статистика"
+                />
             </div>
             <div className="flex w-[100%] flex-wrap align-center justify-center gap-[1.5rem] items-center">
                 <StatsBoxes
@@ -145,7 +147,12 @@ const Sales = ({ urls }) => {
                     data={salesShare}
                     title="Доли продаж"
                 />
-                <ProductStatsComp title="Товары" userKkmUrl={userKkmUrl} stats={productStats} />
+                <ProductStatsComp
+                    kkm={kkm}
+                    title="Товары"
+                    userKkmUrl={userKkmUrl}
+                    stats={productStats}
+                />
                 {/* <PeriodStats title="Товары" stats={salesStats} statsTwo={salesStatsTwo} statsThree={salesStats} /> */}
             </div>
             <div className="flex w-[100%] align-center  flex-wrap justify-center gap-[1.5rem]  items-center">

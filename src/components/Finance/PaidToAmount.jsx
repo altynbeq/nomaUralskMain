@@ -7,9 +7,12 @@ import { StepperPanel } from 'primereact/stepperpanel';
 import { totalCounterReceipts, PaidToData, ConvertCalendarDate } from '../../data/MainDataSource';
 import { getSalesReceiptsFront } from '../../methods/dataFetches/getSalesReceipts';
 import LoadingSkeleton from '../LoadingSkeleton';
+import { useCompanyStore } from '../../store/companyStore';
 
-const PaidToAmount = ({ comb, title, height, userKkmUrl, userReceiptsUrl }) => {
-    const { dateRanges, receipts, kkm } = useStateContext();
+const PaidToAmount = ({ comb, title, height, userReceiptsUrl }) => {
+    const { dateRanges } = useStateContext();
+    const kkm = useCompanyStore((state) => state.kkm);
+    const receipts = useCompanyStore((state) => state.receipts);
     const stepperRef = useRef(null);
     const [total, setTotal] = useState(0);
     const [dates, setDates] = useState([

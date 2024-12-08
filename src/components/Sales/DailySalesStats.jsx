@@ -5,16 +5,17 @@ import { useStateContext } from '../../contexts/ContextProvider';
 import HolePie from '../ReCharts/HolePieChart';
 import { FaShare, FaFileDownload } from 'react-icons/fa';
 import { SalesHolePie, FinanceStats, FormatAmount, SpisanieStats } from '../../data/MainDataSource';
-import { getCompanyData } from '../../methods/getCompanyData';
+import { useCompanyStore } from '../../store/companyStore';
 import { getSpisanie } from '../../methods/dataFetches/getSpisanie';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
-    return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
+    return apiUrl?.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
 }
 
-const DailySalesStats = () => {
-    const { dateRanges, kkm } = useStateContext();
+const DailySalesStats = ({ kkm }) => {
+    const { dateRanges } = useStateContext();
+    const companyData = useCompanyStore((state) => state.user);
     const date = dateRanges[0].bitrixStartDate.split(' ')[0];
     const [pieData, setPieData] = useState([]);
     const [stats, setStats] = useState({});
@@ -23,14 +24,11 @@ const DailySalesStats = () => {
     useEffect(() => {
         const reqDate = dateRanges[0];
         const getter = async () => {
-            const companyId = localStorage.getItem('_id');
-            const companyData = await getCompanyData(companyId);
-
-            const userSpisanieUrl = convertUrl(companyData.externalApis.apiUrlSpisanie);
+            const userSpisanieUrl = convertUrl(companyData?.externalApis?.apiUrlSpisanie);
             const spisanieData = await getSpisanie(userSpisanieUrl, reqDate);
 
-            const spis = SpisanieStats(spisanieData).totalSpisanieSum;
-            const numericValue = parseFloat(spis.replace(/,/g, ''));
+            const spis = SpisanieStats(spisanieData)?.totalSpisanieSum;
+            const numericValue = parseFloat(spis?.replace(/,/g, ''));
             steSpisanieSum(numericValue);
         };
         getter();
@@ -38,7 +36,7 @@ const DailySalesStats = () => {
             setPieData(SalesHolePie(kkm.dayFormedKKM));
             setStats(FinanceStats(kkm.dayFormedKKM));
         }
-    }, [dateRanges, kkm.dayFormedKKM]);
+    }, [companyData?.externalApis?.apiUrlSpisanie, dateRanges, kkm?.dayFormedKKM]);
     return (
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[55%]  rounded-2xl subtle-border">
             <div className="flex justify-between">

@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import HalfPie from '../ReCharts/HalfPieChart';
-import { useStateContext } from '../../contexts/ContextProvider';
 
-const TotalRevenuePie = () => {
-    const { deals } = useStateContext();
-
+const TotalRevenuePie = ({ deals }) => {
     const [data, setData] = useState([]);
 
     useEffect(() => {

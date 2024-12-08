@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useStateContext } from '../../contexts/ContextProvider';
 import { Dropdown } from 'primereact/dropdown';
-export const EmpltSiftStats = () => {
-    const { companyStructure } = useStateContext();
+
+export const EmpltSiftStats = ({ stores }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
@@ -140,7 +139,7 @@ export const EmpltSiftStats = () => {
                 <Dropdown
                     value={selectedStore}
                     onChange={(e) => setSelectedStore(e.value)}
-                    options={companyStructure?.stores || []}
+                    options={stores || []}
                     optionLabel="storeName"
                     showClear
                     placeholder="Магазин"

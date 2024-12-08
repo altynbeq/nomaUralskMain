@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
-import { useStateContext } from '../../contexts/ContextProvider';
+import { useSubUserStore } from '../../store/index';
+import avatar from '../../data/avatar.jpg';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
-    const [subuserShifts, setSubuserShifts] = useState([]);
     const [selectedShift, setSelectedShift] = useState(null);
-    const { setSubUserShifts } = useStateContext();
+    const subUsersShifts = useSubUserStore((state) => state.shifts);
+    const subUserImage = useSubUserStore((state) => state.subUser?.image);
 
     const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -44,7 +45,7 @@ export const Profile = () => {
     const getDayColor = (date) => {
         const formattedDate = formatDate(date);
 
-        const hasShift = subuserShifts.some((shift) => {
+        const hasShift = subUsersShifts?.some((shift) => {
             const startDate = shift.startTime.slice(0, 10);
             const endDate = shift.endTime.slice(0, 10);
             return startDate === formattedDate || endDate === formattedDate;
@@ -57,7 +58,7 @@ export const Profile = () => {
         setSelectedDay(date);
         const formattedDate = formatDate(date);
 
-        const shift = subuserShifts.find((shift) => {
+        const shift = subUsersShifts?.find((shift) => {
             const startDate = shift.startTime.slice(0, 10);
             const endDate = shift.endTime.slice(0, 10);
             return startDate === formattedDate || endDate === formattedDate;
@@ -66,32 +67,6 @@ export const Profile = () => {
         setSelectedShift(shift || null);
         setIsModalOpen(true);
     };
-
-    useEffect(() => {
-        const subuserId = localStorage.getItem('_id');
-        const fetchSubUserShifts = async () => {
-            try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/shifts/${subuserId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                setSubuserShifts(result);
-                setSubUserShifts(result);
-            } catch (error) {
-                console.error('Error fetching sub-user data:', error);
-            }
-        };
-        fetchSubUserShifts();
-    }, []);
 
     const getDaysInMonth = (year, month) => {
         return new Date(year, month + 1, 0).getDate();
@@ -105,11 +80,19 @@ export const Profile = () => {
     return (
         <div className="w-[90%] md:w-[50%] ml-5 bg-white subtle-border rounded-lg shadow-md p-4">
             <div className="flex flex-row justify-between">
-                <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                <div className="flex items-center">
+                    <img
+                        className="h-12 w-12 object-fill rounded-full inline-flex mr-4"
+                        src={
+                            subUserImage
+                                ? `https://nomalytica-back.onrender.com${subUserImage}`
+                                : avatar
+                        }
+                        alt="user-profile"
+                    />
                     <div>
                         <h2 className="font-semibold text-lg text-black">
-                            План на {getCurrentMonthYear()}
+                            Смены на {getCurrentMonthYear()}
                         </h2>
                     </div>
                 </div>

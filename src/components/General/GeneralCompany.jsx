@@ -8,22 +8,25 @@ import { StoreSalesPlan } from '../General/StoreSalesPlan';
 import { EmplSalesPlans } from '../General/EmplSalesPlans';
 import { EmpltSiftStats } from './EmplShiftStats';
 import { SetStoresSalesPlan } from './SetStoresSalesPlan';
+import { useCompanyStore, useCompanyStructureStore } from '../../store/index';
 
 function convertUrl(apiUrl) {
     return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
 }
 
 export const GeneralCompany = ({ urls }) => {
-    const { kkm, skeletonUp, spisanie } = useStateContext();
+    const { skeletonUp } = useStateContext();
     const [ready, setReady] = useState(false);
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
+    const { kkm, writeOffs } = useCompanyStore.getState();
+    const stores = useCompanyStructureStore((state) => state.stores);
 
     useEffect(() => {
-        if (kkm.monthFormedKKM && spisanie.monthSpisanie) {
+        if (kkm?.monthFormedKKM && writeOffs?.monthSpisanie) {
             setReady(true);
         }
-        if (urls.externalApis && urls.externalApis.apiUrlKKM) {
+        if (urls?.externalApis && urls?.externalApis?.apiUrlKKM) {
             const convKkm = urls.externalApis.apiUrlKKM
                 ? convertUrl(urls.externalApis.apiUrlKKM)
                 : null;
@@ -35,7 +38,7 @@ export const GeneralCompany = ({ urls }) => {
                 setUserReceiptsUrl(convReceipt);
             }
         }
-    }, []);
+    }, [kkm?.monthFormedKKM, urls.externalApis, writeOffs?.monthSpisanie]);
 
     if (!ready && skeletonUp) {
         return (
@@ -50,8 +53,8 @@ export const GeneralCompany = ({ urls }) => {
     return (
         <div className="mt-12 flex flex-col gap-6 align-center w-[100%] justify-center">
             <div className="flex mt-5 gap-10  w-[100%]  flex-col md:flex-row align-center items-center  justify-center align-top">
-                <StoreSalesPlan />
-                <EmpltSiftStats />
+                <StoreSalesPlan stores={stores} />
+                <EmpltSiftStats stores={stores} />
             </div>
             <div className="flex mt-5 gap-10 w-[100%] flex-col md:flex-col justify-center align-top items-center">
                 <SetStoresSalesPlan />
@@ -63,7 +66,6 @@ export const GeneralCompany = ({ urls }) => {
 
             <div className="flex w-[100%] flex-wrap  justify-center align-top xs:flex-col    gap-4 items-center">
                 <PaidToAmount
-                    userKkmUrl={userKkmUrl}
                     userReceiptsUrl={userReceiptsUrl}
                     height="520px"
                     comb={true}

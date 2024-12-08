@@ -4,13 +4,13 @@ import { Dialog } from 'primereact/dialog';
 import { MdDescription } from 'react-icons/md';
 import { Navbar, Footer } from './components';
 import './App.css';
-import { useStateContext } from './contexts/ContextProvider';
-import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
+import { useCompanyStructureStore, useSubUserStore } from './store/index';
+import { axiosInstance } from './api/axiosInstance';
 
 // Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
@@ -25,7 +25,9 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { setUserImage, userImage, subUserShifts, subUser, companyStructure } = useStateContext();
+    const stores = useCompanyStructureStore((state) => state.stores);
+    const subUserShifts = useSubUserStore((state) => state.shifts);
+    const subUser = useSubUserStore((state) => state.subUser);
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -33,34 +35,22 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState('');
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-
     const fileInput = useRef(null);
+    const hasExecuted = useRef(false);
 
     const updateShiftScan = async (shift) => {
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subUserId: shift.subUserId,
-                        startTime: shift.startTime,
-                        endTime: shift.endTime,
-                        selectedStore: shift.selectedStore._id,
-                        scanTime: new Date(),
-                        endScanTime: shift.endScanTime,
-                    }),
-                },
-            );
+            await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
+                subUserId: shift.subUserId,
+                startTime: shift.startTime,
+                endTime: shift.endTime,
+                selectedStore: shift.selectedStore._id,
+                scanTime: new Date(),
+                endScanTime: shift.endScanTime,
+            });
 
             setShowMarkShiftResultModal(true);
-            if (response.ok) {
-                setMarkShiftResultMessage('Вы успешно отметили начало смены.');
-            } else {
-                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
-            }
+            setMarkShiftResultMessage('Вы успешно отметили начало смены.');
         } catch {
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
@@ -69,28 +59,17 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const updateShiftEndScan = async (shift) => {
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subUserId: shift.subUserId,
-                        startTime: shift.startTime,
-                        endTime: shift.endTime,
-                        selectedStore: shift.selectedStore._id,
-                        scanTime: shift.scanTime,
-                        endScanTime: new Date(),
-                    }),
-                },
-            );
+            await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
+                subUserId: shift.subUserId,
+                startTime: shift.startTime,
+                endTime: shift.endTime,
+                selectedStore: shift.selectedStore._id,
+                scanTime: shift.scanTime,
+                endScanTime: new Date(),
+            });
 
             setShowMarkShiftResultModal(true);
-            if (response.ok) {
-                setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
-            } else {
-                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
-            }
+            setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
         } catch {
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
@@ -117,13 +96,13 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isToday && isCurrentSubUser;
         });
 
-        if (todaysShifts.length > 0 && currentLocation && companyStructure?.stores?.length > 0) {
+        if (todaysShifts.length > 0 && currentLocation && stores?.length > 0) {
             todaysShifts.forEach((shift) => {
                 let isWithinAnyStore = false;
                 let matchedStoreId = null;
 
                 // Проверяем расстояние до всех магазинов
-                companyStructure.stores.forEach((store) => {
+                stores.forEach((store) => {
                     const storeLocation = store.location;
                     if (storeLocation) {
                         const distance = getDistanceFromLatLonInMeters(
@@ -141,6 +120,10 @@ export const MainContent = ({ urls, activeMenu }) => {
                 });
 
                 if (isWithinAnyStore && matchedStoreId) {
+                    if (hasExecuted.current) {
+                        return; // Если уже выполнилось, выходим
+                    }
+                    hasExecuted.current = true; // Устанавливаем флаг
                     // Проверяем, была ли уже отметка
                     if (!shift.scanTime) {
                         updateShiftScan(shift, matchedStoreId);
@@ -156,7 +139,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [subUserShifts, subUser, currentLocation, companyStructure]);
+    }, [subUserShifts, subUser, currentLocation, stores, location.search]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
@@ -181,72 +164,26 @@ export const MainContent = ({ urls, activeMenu }) => {
         }
     }, [location.pathname, location.search]);
 
-    // Загрузка аватара
     useEffect(() => {
-        const departmentId = localStorage.getItem('departmentId');
-        const subuserId = localStorage.getItem('_id');
-
-        const fetchSubUserImage = async () => {
-            try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/subusers/byId/${subuserId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                if (!result.image) {
-                    setShowUploadImageModal(true);
-                } else {
-                    setUserImage(result.image);
-                }
-            } catch (error) {
-                console.error('Error fetching sub-user data:', error);
-            } finally {
-                // Завершаем загрузку после проверки изображения
-                setIsLoading(false);
-            }
-        };
-
-        if (isValidDepartmentId(departmentId) && !userImage) {
-            fetchSubUserImage();
-        } else {
-            // Если уже есть userImage или департамент невалиден - считать, что загрузка завершена
-            setIsLoading(false);
+        if (subUser && !subUser.image) {
+            setShowUploadImageModal(true);
         }
-    }, [location.pathname, setUserImage, userImage]);
+    }, [subUser]);
 
     const handleModalClose = () => {
         setShowUploadImageModal(false);
     };
 
     const handleFileUpload = async (event) => {
-        const userId = localStorage.getItem('_id');
         const file = event.target.files[0];
         if (file) {
             const formData = new FormData();
             formData.append('avatar', file);
-
+            setIsUploading(true);
             try {
-                setIsUploading(true);
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/subusers/subusers/${userId}/avatar`,
-                    {
-                        method: 'POST',
-                        body: formData,
-                    },
-                );
-                if (!response.ok) {
-                    throw new Error('Failed to upload avatar');
-                }
-                const result = await response.json();
-                setUserImage(result.image);
+                await axiosInstance.post(`/subusers/subusers/${subUser.id}/avatar`, {
+                    formData,
+                });
                 setShowUploadImageModal(false);
             } catch (error) {
                 console.error('Error uploading avatar:', error);
@@ -258,53 +195,45 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     return (
         <>
-            {isLoading ? (
-                // Показываем лоадер, пока идет загрузка необходимых данных
-                <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-                    <Loader />
+            <div
+                className={
+                    activeMenu
+                        ? 'dark:bg-main-dark-bg bg-main-bg min-h-screen md:ml-72 w-full'
+                        : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
+                }
+            >
+                <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+                    <Navbar />
                 </div>
-            ) : (
-                // Основной контент приложения
-                <div
-                    className={
-                        activeMenu
-                            ? 'dark:bg-main-dark-bg bg-main-bg min-h-screen md:ml-72 w-full'
-                            : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
+
+                {/* Оборачиваем маршруты в Suspense для лентяйной загрузки страниц */}
+                <Suspense
+                    fallback={
+                        <div className="flex items-center justify-center h-96">
+                            <Loader />
+                        </div>
                     }
                 >
-                    <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
-                        <Navbar />
-                    </div>
-
-                    {/* Оборачиваем маршруты в Suspense для лентяйной загрузки страниц */}
-                    <Suspense
-                        fallback={
-                            <div className="flex items-center justify-center h-96">
-                                <Loader />
-                            </div>
-                        }
-                    >
-                        <Routes>
-                            <Route path="/" element={<General urls={urls} />} />
-                            <Route path="/general" element={<General urls={urls} />} />
-                            <Route path="/finance" element={<Finance urls={urls} />} />
-                            <Route path="/sales" element={<Sales urls={urls} />} />
-                            <Route path="/workers" element={<Workers urls={urls} />} />
-                            <Route path="/sklad" element={<Sklad urls={urls} />} />
-                            <Route path="/docs" element={<ComingSoon />} />
-                            <Route path="/resources" element={<ComingSoon />} />
-                            <Route path="/support" element={<ComingSoon />} />
-                            <Route path="/Q&A" element={<ComingSoon />} />
-                            <Route path="/login" element={<LogInForm />} />
-                            <Route path="/calendar" element={<Calendar />} />
-                            <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
-                            <Route path="/accounting-workers" element={<AccountingWorkers />} />
-                            <Route path="/no-access" element={<NoAccess />} />
-                        </Routes>
-                    </Suspense>
-                    <Footer />
-                </div>
-            )}
+                    <Routes>
+                        <Route path="/" element={<General urls={urls} />} />
+                        <Route path="/general" element={<General urls={urls} />} />
+                        <Route path="/finance" element={<Finance urls={urls} />} />
+                        <Route path="/sales" element={<Sales urls={urls} />} />
+                        <Route path="/workers" element={<Workers urls={urls} />} />
+                        <Route path="/sklad" element={<Sklad urls={urls} />} />
+                        <Route path="/docs" element={<ComingSoon />} />
+                        <Route path="/resources" element={<ComingSoon />} />
+                        <Route path="/support" element={<ComingSoon />} />
+                        <Route path="/Q&A" element={<ComingSoon />} />
+                        <Route path="/login" element={<LogInForm />} />
+                        <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
+                        <Route path="/accounting-workers" element={<AccountingWorkers />} />
+                        <Route path="/no-access" element={<NoAccess />} />
+                    </Routes>
+                </Suspense>
+                <Footer />
+            </div>
 
             <Dialog
                 visible={showUploadImageModal}

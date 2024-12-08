@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar } from 'primereact/calendar';
-import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
+import { axiosInstance } from '../../../api/axiosInstance';
+import { useAuthStore } from '../../../store/authStore';
 
 export default function CollapsibleTableWithDetails() {
+    const clientId = useAuthStore((state) => state.user.id);
     const [writeOffs, setWriteOffs] = useState([]);
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
@@ -17,67 +19,55 @@ export default function CollapsibleTableWithDetails() {
     const [isModalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
-        const currentUserId = localStorage.getItem('_id');
-        const companyId = localStorage.getItem('companyId');
-        const departmentId = localStorage.getItem('departmentId');
-        const clientId = isValidDepartmentId(departmentId) ? companyId : currentUserId;
-
-        const fetchWriteOffs = async () => {
+        const fetchWriteOffs = async (clientId) => {
             try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/clientsSpisanie/${clientId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    setWriteOffs(data.writeOffs);
-                } else {
-                    console.error('Не удалось загрузить данные списаний');
-                }
+                const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
+                setWriteOffs(response.data.writeOffs);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
             }
         };
 
-        fetchWriteOffs();
-    }, []);
+        if (clientId) {
+            fetchWriteOffs(clientId);
+        }
+    }, [clientId]);
 
     useEffect(() => {
-        let filteredWriteOffs = writeOffs;
+        if (writeOffs.length) {
+            let filteredWriteOffs = writeOffs;
 
-        if (dateRange && dateRange[0] && dateRange[1]) {
-            const startDate = new Date(dateRange[0]).setHours(0, 0, 0, 0);
-            const endDate = new Date(dateRange[1]).setHours(23, 59, 59, 999);
-            filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
-                const writeOffDate = new Date(writeOff.date).getTime();
-                return writeOffDate >= startDate && writeOffDate <= endDate;
-            });
-        }
-
-        if (searchQuery) {
-            filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
-                writeOff.productName.НоменклатураНаименование
-                    ?.toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
-            );
-        }
-
-        const groupedData = {};
-        filteredWriteOffs.forEach((writeOff) => {
-            const date = new Date(writeOff.date).toISOString().split('T')[0];
-            if (!groupedData[date]) {
-                groupedData[date] = { date, writeOffs: [], totalSum: 0, totalQuantity: 0 };
+            if (dateRange && dateRange[0] && dateRange[1]) {
+                const startDate = new Date(dateRange[0]).setHours(0, 0, 0, 0);
+                const endDate = new Date(dateRange[1]).setHours(23, 59, 59, 999);
+                filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
+                    const writeOffDate = new Date(writeOff.date).getTime();
+                    return writeOffDate >= startDate && writeOffDate <= endDate;
+                });
             }
-            groupedData[date].writeOffs.push(writeOff);
-            groupedData[date].totalSum += writeOff.productName.Сумма;
-            groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
-        });
 
-        const groupedWriteOffsArray = Object.values(groupedData);
-        setGroupedWriteOffs(groupedWriteOffsArray);
+            if (searchQuery) {
+                filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
+                    writeOff.productName.НоменклатураНаименование
+                        ?.toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                );
+            }
+
+            const groupedData = {};
+            filteredWriteOffs.forEach((writeOff) => {
+                const date = new Date(writeOff.date).toISOString().split('T')[0];
+                if (!groupedData[date]) {
+                    groupedData[date] = { date, writeOffs: [], totalSum: 0, totalQuantity: 0 };
+                }
+                groupedData[date].writeOffs.push(writeOff);
+                groupedData[date].totalSum += writeOff.productName.Сумма;
+                groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
+            });
+
+            const groupedWriteOffsArray = Object.values(groupedData);
+            setGroupedWriteOffs(groupedWriteOffsArray);
+        }
     }, [dateRange, writeOffs, searchQuery]);
 
     const openModal = (rowData) => {
