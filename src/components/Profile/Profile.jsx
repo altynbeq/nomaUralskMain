@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import { useSubUserStore } from '../../store/index';
+import avatar from '../../data/avatar.jpg';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -9,6 +10,7 @@ export const Profile = () => {
     const [isMonthView, setIsMonthView] = useState(true);
     const [selectedShift, setSelectedShift] = useState(null);
     const subUsersShifts = useSubUserStore((state) => state.shifts);
+    const subUserImage = useSubUserStore((state) => state.subUser?.image);
 
     const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -78,11 +80,19 @@ export const Profile = () => {
     return (
         <div className="w-[90%] md:w-[50%] ml-5 bg-white subtle-border rounded-lg shadow-md p-4">
             <div className="flex flex-row justify-between">
-                <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                <div className="flex items-center">
+                    <img
+                        className="h-12 w-12 object-fill rounded-full inline-flex mr-4"
+                        src={
+                            subUserImage
+                                ? `https://nomalytica-back.onrender.com${subUserImage}`
+                                : avatar
+                        }
+                        alt="user-profile"
+                    />
                     <div>
                         <h2 className="font-semibold text-lg text-black">
-                            План на {getCurrentMonthYear()}
+                            Смены на {getCurrentMonthYear()}
                         </h2>
                     </div>
                 </div>
