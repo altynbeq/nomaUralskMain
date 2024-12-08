@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Calendar } from 'primereact/calendar';
@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { addLocale } from 'primereact/api';
 import avatar from '../../data/avatar.jpg';
 import { axiosInstance } from '../../api/axiosInstance';
+import { useCompanyStructureStore } from '../../store';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -52,6 +53,7 @@ export const AddShift = (props) => {
     const [endTime, setEndTime] = useState(null); // Для выбора времени окончания
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const departments = useCompanyStructureStore((state) => state.departments);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -142,7 +144,9 @@ export const AddShift = (props) => {
                 />
                 <div>
                     <div>{item.name}</div>
-                    <div className="text-gray-500 text-sm">{item.departmentId?.name}</div>
+                    <div className="text-gray-500 text-sm">
+                        {getDepartmentName(item.departmentId)}
+                    </div>
                 </div>
             </div>
         );
@@ -153,6 +157,21 @@ export const AddShift = (props) => {
             prevUsers.filter((user) => user._id !== userToRemove._id),
         );
     };
+
+    const departmentsMap = useMemo(() => {
+        const map = new Map();
+        departments?.forEach((dept) => {
+            map.set(dept._id, dept.name);
+        });
+        return map;
+    }, [departments]);
+
+    const getDepartmentName = useCallback(
+        (departmentId) => {
+            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
+        },
+        [departmentsMap],
+    );
 
     return (
         <>
