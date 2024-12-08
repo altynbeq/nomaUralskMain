@@ -25,7 +25,7 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const stores = useCompanyStructureStore.getState().stores;
+    const stores = useCompanyStructureStore((state) => state.stores);
     const subUserShifts = useSubUserStore((state) => state.shifts);
     const subUser = useSubUserStore((state) => state.subUser);
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
@@ -35,8 +35,6 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState('');
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
     const fileInput = useRef(null);
 
     const updateShiftScan = async (shift) => {
