@@ -3,6 +3,8 @@ import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import { useSubUserStore } from '../../store/index';
 import avatar from '../../data/avatar.jpg';
+import { startOfWeek, addDays, format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,35 +22,18 @@ export const Profile = () => {
 
     const getCurrentWeekDates = () => {
         const currentDate = new Date();
-        const dayOfWeek = currentDate.getDay() || 7; // Понедельник как первый день
-        const monday = new Date(currentDate);
-        monday.setDate(currentDate.getDate() - dayOfWeek + 1);
-
-        const weekDates = [];
-
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(monday);
-            date.setDate(monday.getDate() + i);
-            weekDates.push(date);
-        }
-
-        return weekDates;
+        const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // Понедельник как первый день
+        return Array.from({ length: 7 }, (_, i) => addDays(start, i));
     };
 
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = `0${date.getMonth() + 1}`.slice(-2);
-        const day = `0${date.getDate()}`.slice(-2);
-        return `${year}-${month}-${day}`;
-    };
+    const formatDate = (date) => format(date, 'yyyy-MM-dd', { locale: ru });
 
     const getDayColor = (date) => {
         const formattedDate = formatDate(date);
 
         const hasShift = subUsersShifts?.some((shift) => {
             const startDate = shift.startTime.slice(0, 10);
-            const endDate = shift.endTime.slice(0, 10);
-            return startDate === formattedDate || endDate === formattedDate;
+            return startDate === formattedDate;
         });
 
         return hasShift ? 'bg-blue-500 text-white' : 'bg-gray-300';
@@ -60,8 +45,7 @@ export const Profile = () => {
 
         const shift = subUsersShifts?.find((shift) => {
             const startDate = shift.startTime.slice(0, 10);
-            const endDate = shift.endTime.slice(0, 10);
-            return startDate === formattedDate || endDate === formattedDate;
+            return startDate === formattedDate;
         });
 
         setSelectedShift(shift || null);
@@ -122,12 +106,12 @@ export const Profile = () => {
                 <div className="grid grid-cols-7 gap-2">
                     {/* Месячный вид */}
                     {[...Array(daysInMonth).keys()].map((day) => {
-                        const date = new Date(currentYear, currentMonth, day + 1);
+                        const date = new Date(currentYear, currentMonth, day);
                         return (
                             <button
                                 key={day + 1}
                                 onClick={() => openModal(date)}
-                                className={`w-8 h-8 flex items-center justify-center rounded-full ${getDayColor(
+                                className={`w-12 h-12 flex items-center justify-center rounded-full ${getDayColor(
                                     date,
                                 )} border text-sm`}
                             >
@@ -143,7 +127,7 @@ export const Profile = () => {
                         <button
                             key={index}
                             onClick={() => openModal(date)}
-                            className={`w-8 h-8 p-6 flex flex-col items-center justify-center rounded-full ${getDayColor(
+                            className={`w-12 h-12 flex flex-col items-center justify-center rounded-full ${getDayColor(
                                 date,
                             )} border text-sm`}
                         >
