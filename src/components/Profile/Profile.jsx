@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
-import { useProfileStore } from '../../store/index';
+import { useSubUserStore } from '../../store/index';
 
 export const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
     const [selectedShift, setSelectedShift] = useState(null);
-    const subUsersShifts = useProfileStore((state) => state.shifts);
+    const subUsersShifts = useSubUserStore((state) => state.shifts);
 
     const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 

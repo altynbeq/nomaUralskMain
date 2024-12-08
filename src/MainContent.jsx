@@ -125,6 +125,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                     }
                     hasExecuted.current = true; // Устанавливаем флаг
                     // Проверяем, была ли уже отметка
+                    console.log(shift);
                     if (!shift.scanTime) {
                         updateShiftScan(shift, matchedStoreId);
                     } else if (!shift.endScanTime) {

@@ -40,22 +40,24 @@ export default function ListOfExpenses() {
     };
 
     useEffect(() => {
-        const filtered = products.filter((product) => {
-            const matchesProductSearch = product.НоменклатураНаименование
-                .toLowerCase()
-                .includes(productSearch.toLowerCase());
+        if (products?.length) {
+            const filtered = products.filter((product) => {
+                const matchesProductSearch = product.НоменклатураНаименование
+                    .toLowerCase()
+                    .includes(productSearch.toLowerCase());
 
-            let matchesWarehouse = true;
-            if (selectedWarehouse && selectedWarehouse.warehouseName) {
-                const productWarehouseName = getWarehouseNameFromProduct(
-                    product.КассаККМНаименование,
-                );
-                matchesWarehouse = productWarehouseName === selectedWarehouse.warehouseName;
-            }
+                let matchesWarehouse = true;
+                if (selectedWarehouse && selectedWarehouse.warehouseName) {
+                    const productWarehouseName = getWarehouseNameFromProduct(
+                        product.КассаККМНаименование,
+                    );
+                    matchesWarehouse = productWarehouseName === selectedWarehouse.warehouseName;
+                }
 
-            return matchesProductSearch && matchesWarehouse;
-        });
-        setFilteredProducts(filtered);
+                return matchesProductSearch && matchesWarehouse;
+            });
+            setFilteredProducts(filtered);
+        }
     }, [productSearch, selectedWarehouse, products]);
 
     return (
