@@ -4,7 +4,6 @@ import { Dialog } from 'primereact/dialog';
 import { MdDescription } from 'react-icons/md';
 import { Navbar, Footer } from './components';
 import './App.css';
-import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
@@ -36,7 +35,7 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState('');
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const fileInput = useRef(null);
 
@@ -170,42 +169,16 @@ export const MainContent = ({ urls, activeMenu }) => {
         }
     }, [location.pathname, location.search]);
 
-    // Загрузка аватара
-    useEffect(() => {
-        const fetchSubUserImage = async () => {
-            try {
-                const response = await axiosInstance(`/subusers/byId/${subUser.id}`);
-
-                if (!response.data.image) {
-                    setShowUploadImageModal(true);
-                }
-            } catch (error) {
-                console.error('Error fetching sub-user data:', error);
-            } finally {
-                // Завершаем загрузку после проверки изображения
-                setIsLoading(false);
-            }
-        };
-
-        if (subUser.image) {
-            fetchSubUserImage();
-        } else {
-            // Если уже есть userImage или департамент невалиден - считать, что загрузка завершена
-            setIsLoading(false);
-        }
-    }, [location.pathname, subUser.id, subUser.image]);
-
     const handleModalClose = () => {
         setShowUploadImageModal(false);
     };
 
     const handleFileUpload = async (event) => {
-        setIsUploading(true);
         const file = event.target.files[0];
         if (file) {
             const formData = new FormData();
             formData.append('avatar', file);
-
+            setIsUploading(true);
             try {
                 await axiosInstance.post(`/subusers/subusers/${subUser.id}/avatar`, {
                     formData,
@@ -221,53 +194,45 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     return (
         <>
-            {isLoading ? (
-                // Показываем лоадер, пока идет загрузка необходимых данных
-                <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-                    <Loader />
+            <div
+                className={
+                    activeMenu
+                        ? 'dark:bg-main-dark-bg bg-main-bg min-h-screen md:ml-72 w-full'
+                        : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
+                }
+            >
+                <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+                    <Navbar />
                 </div>
-            ) : (
-                // Основной контент приложения
-                <div
-                    className={
-                        activeMenu
-                            ? 'dark:bg-main-dark-bg bg-main-bg min-h-screen md:ml-72 w-full'
-                            : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
+
+                {/* Оборачиваем маршруты в Suspense для лентяйной загрузки страниц */}
+                <Suspense
+                    fallback={
+                        <div className="flex items-center justify-center h-96">
+                            <Loader />
+                        </div>
                     }
                 >
-                    <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
-                        <Navbar />
-                    </div>
-
-                    {/* Оборачиваем маршруты в Suspense для лентяйной загрузки страниц */}
-                    <Suspense
-                        fallback={
-                            <div className="flex items-center justify-center h-96">
-                                <Loader />
-                            </div>
-                        }
-                    >
-                        <Routes>
-                            <Route path="/" element={<General urls={urls} />} />
-                            <Route path="/general" element={<General urls={urls} />} />
-                            <Route path="/finance" element={<Finance urls={urls} />} />
-                            <Route path="/sales" element={<Sales urls={urls} />} />
-                            <Route path="/workers" element={<Workers urls={urls} />} />
-                            <Route path="/sklad" element={<Sklad urls={urls} />} />
-                            <Route path="/docs" element={<ComingSoon />} />
-                            <Route path="/resources" element={<ComingSoon />} />
-                            <Route path="/support" element={<ComingSoon />} />
-                            <Route path="/Q&A" element={<ComingSoon />} />
-                            <Route path="/login" element={<LogInForm />} />
-                            <Route path="/calendar" element={<Calendar />} />
-                            <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
-                            <Route path="/accounting-workers" element={<AccountingWorkers />} />
-                            <Route path="/no-access" element={<NoAccess />} />
-                        </Routes>
-                    </Suspense>
-                    <Footer />
-                </div>
-            )}
+                    <Routes>
+                        <Route path="/" element={<General urls={urls} />} />
+                        <Route path="/general" element={<General urls={urls} />} />
+                        <Route path="/finance" element={<Finance urls={urls} />} />
+                        <Route path="/sales" element={<Sales urls={urls} />} />
+                        <Route path="/workers" element={<Workers urls={urls} />} />
+                        <Route path="/sklad" element={<Sklad urls={urls} />} />
+                        <Route path="/docs" element={<ComingSoon />} />
+                        <Route path="/resources" element={<ComingSoon />} />
+                        <Route path="/support" element={<ComingSoon />} />
+                        <Route path="/Q&A" element={<ComingSoon />} />
+                        <Route path="/login" element={<LogInForm />} />
+                        <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
+                        <Route path="/accounting-workers" element={<AccountingWorkers />} />
+                        <Route path="/no-access" element={<NoAccess />} />
+                    </Routes>
+                </Suspense>
+                <Footer />
+            </div>
 
             <Dialog
                 visible={showUploadImageModal}
