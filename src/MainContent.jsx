@@ -36,10 +36,11 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState('');
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
     const fileInput = useRef(null);
+    const hasExecuted = useRef(false);
 
     const updateShiftScan = async (shift) => {
         try {
-            const response = await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
+            await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
                 subUserId: shift.subUserId,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
@@ -49,11 +50,7 @@ export const MainContent = ({ urls, activeMenu }) => {
             });
 
             setShowMarkShiftResultModal(true);
-            if (response.ok) {
-                setMarkShiftResultMessage('Вы успешно отметили начало смены.');
-            } else {
-                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
-            }
+            setMarkShiftResultMessage('Вы успешно отметили начало смены.');
         } catch {
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
@@ -62,7 +59,7 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const updateShiftEndScan = async (shift) => {
         try {
-            const response = await axiosInstance(`/shifts/update-shift/${shift._id}`, {
+            await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
                 subUserId: shift.subUserId,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
@@ -72,11 +69,7 @@ export const MainContent = ({ urls, activeMenu }) => {
             });
 
             setShowMarkShiftResultModal(true);
-            if (response.ok) {
-                setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
-            } else {
-                setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
-            }
+            setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
         } catch {
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
@@ -127,6 +120,10 @@ export const MainContent = ({ urls, activeMenu }) => {
                 });
 
                 if (isWithinAnyStore && matchedStoreId) {
+                    if (hasExecuted.current) {
+                        return; // Если уже выполнилось, выходим
+                    }
+                    hasExecuted.current = true; // Устанавливаем флаг
                     // Проверяем, была ли уже отметка
                     if (!shift.scanTime) {
                         updateShiftScan(shift, matchedStoreId);
