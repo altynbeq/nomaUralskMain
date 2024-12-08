@@ -10,7 +10,6 @@ import { useAuthStore } from '../../../store/authStore';
 
 export default function CollapsibleTableWithDetails() {
     const clientId = useAuthStore((state) => state.user.id);
-    console.log(clientId);
     const [writeOffs, setWriteOffs] = useState([]);
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
@@ -23,8 +22,7 @@ export default function CollapsibleTableWithDetails() {
         const fetchWriteOffs = async (clientId) => {
             try {
                 const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
-                const data = await response.data;
-                setWriteOffs(data);
+                setWriteOffs(response.data.writeOffs);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
             }
@@ -36,38 +34,41 @@ export default function CollapsibleTableWithDetails() {
     }, [clientId]);
 
     useEffect(() => {
-        let filteredWriteOffs = writeOffs;
+        if (writeOffs) {
+            let filteredWriteOffs = writeOffs;
 
-        if (dateRange && dateRange[0] && dateRange[1]) {
-            const startDate = new Date(dateRange[0]).setHours(0, 0, 0, 0);
-            const endDate = new Date(dateRange[1]).setHours(23, 59, 59, 999);
-            filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
-                const writeOffDate = new Date(writeOff.date).getTime();
-                return writeOffDate >= startDate && writeOffDate <= endDate;
-            });
-        }
-
-        if (searchQuery) {
-            filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
-                writeOff.productName.НоменклатураНаименование
-                    ?.toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
-            );
-        }
-
-        const groupedData = {};
-        filteredWriteOffs.forEach((writeOff) => {
-            const date = new Date(writeOff.date).toISOString().split('T')[0];
-            if (!groupedData[date]) {
-                groupedData[date] = { date, writeOffs: [], totalSum: 0, totalQuantity: 0 };
+            if (dateRange && dateRange[0] && dateRange[1]) {
+                const startDate = new Date(dateRange[0]).setHours(0, 0, 0, 0);
+                const endDate = new Date(dateRange[1]).setHours(23, 59, 59, 999);
+                filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
+                    const writeOffDate = new Date(writeOff.date).getTime();
+                    return writeOffDate >= startDate && writeOffDate <= endDate;
+                });
             }
-            groupedData[date].writeOffs.push(writeOff);
-            groupedData[date].totalSum += writeOff.productName.Сумма;
-            groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
-        });
 
-        const groupedWriteOffsArray = Object.values(groupedData);
-        setGroupedWriteOffs(groupedWriteOffsArray);
+            if (searchQuery) {
+                filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
+                    writeOff.productName.НоменклатураНаименование
+                        ?.toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                );
+            }
+
+            const groupedData = {};
+            console.log(filteredWriteOffs);
+            filteredWriteOffs.forEach((writeOff) => {
+                const date = new Date(writeOff.date).toISOString().split('T')[0];
+                if (!groupedData[date]) {
+                    groupedData[date] = { date, writeOffs: [], totalSum: 0, totalQuantity: 0 };
+                }
+                groupedData[date].writeOffs.push(writeOff);
+                groupedData[date].totalSum += writeOff.productName.Сумма;
+                groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
+            });
+
+            const groupedWriteOffsArray = Object.values(groupedData);
+            setGroupedWriteOffs(groupedWriteOffsArray);
+        }
     }, [dateRange, writeOffs, searchQuery]);
 
     const openModal = (rowData) => {

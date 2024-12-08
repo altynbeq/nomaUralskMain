@@ -3,30 +3,23 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
-import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { formatDate } from '../../../methods/dataFormatter';
 import 'primeicons/primeicons.css';
+import { useAuthStore } from '../../../store';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const WriteoffList = () => {
     const [writeOffs, setWriteOffs] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
+    const user = useAuthStore((state) => state.user);
 
     useEffect(() => {
-        const currentUserId = localStorage.getItem('_id');
-        const companyId = localStorage.getItem('companyId');
-        const departmentId = localStorage.getItem('departmentId');
-        const clientId = isValidDepartmentId(departmentId) ? companyId : currentUserId;
+        const clientId = user.role === 'subUser' ? user.id : user.companyId;
 
         const fetchWriteOffs = async () => {
             try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/clientsSpisanie/${clientId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
+                const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
                 if (response.ok) {
                     const data = await response.json();
                     setWriteOffs(data.writeOffs);
@@ -39,7 +32,7 @@ export const WriteoffList = () => {
         };
 
         fetchWriteOffs();
-    }, []);
+    }, [user.companyId, user.id, user.role]);
 
     // Функция для фильтрации данных
     const getFilteredWriteOffs = () => {

@@ -7,6 +7,7 @@ import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
 import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const AddWarehouse = () => {
     const isSmallScreen = useIsSmallScreen(768);
@@ -93,12 +94,9 @@ export const AddWarehouse = () => {
                     : userId;
                 setIsLoading(true);
                 try {
-                    const response = await fetch(
+                    const response = await axiosInstance.post(
                         `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
-                        {
-                            method: 'POST',
-                            body: submissionData,
-                        },
+                        submissionData,
                     );
 
                     if (!response.ok) {
