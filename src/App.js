@@ -11,7 +11,12 @@ import 'primeicons/primeicons.css';
 import { MainContent } from './MainContent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useAuthStore, useCompanyStore, useCompanyStructureStore } from './store/index';
+import {
+    useAuthStore,
+    useCompanyStore,
+    useCompanyStructureStore,
+    useSubUserStore,
+} from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
@@ -29,6 +34,7 @@ const App = () => {
     const setStores = useCompanyStructureStore((state) => state.setStores);
     const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
     const setAccesses = useCompanyStructureStore((state) => state.setAccesses);
+    const setSubUserShifts = useCompanyStructureStore((state) => state.subUserShifts);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
@@ -87,12 +93,24 @@ const App = () => {
                 setDepartments(response.data.departments);
                 setStores(response.data.stores);
                 setSubUsers(response.data.subUsers);
+                if (isEmployee()) {
+                    const subUserShifts = response.data.subUsers.find((s) => s.id === user?.id);
+                    setSubUserShifts(subUserShifts);
+                }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             }
         };
         fetchUserStructure();
-    }, [isEmployee, setDepartments, setStores, setSubUsers, user?.companyid, user?.id]);
+    }, [
+        isEmployee,
+        setDepartments,
+        setStores,
+        setSubUserShifts,
+        setSubUsers,
+        user?.companyid,
+        user?.id,
+    ]);
 
     useEffect(() => {
         if (user && user.role === 'subUser') {

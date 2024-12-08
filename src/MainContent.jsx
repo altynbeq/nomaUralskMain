@@ -27,7 +27,7 @@ const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
     const stores = useCompanyStructureStore.getState().stores;
-    const { setUserImage, userImage, subUserShifts, subUser } = useStateContext();
+    const subUsers = useCompanyStructureStore.getState().subUsers;
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
