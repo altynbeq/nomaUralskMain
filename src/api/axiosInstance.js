@@ -101,10 +101,11 @@ axiosInstance.interceptors.response.use(
                 processQueue(null, newToken);
                 return axiosInstance(originalRequest);
             } catch (err) {
+                console.log(err);
                 processQueue(err, null);
                 useAuthStore.getState().setAccessToken(null);
                 useAuthStore.getState().reset();
-                window.location.href = '/login';
+                // window.location.href = '/login';
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { MapPicker } from '../../../components/MapPicker';
 import QRCode from 'react-qr-code';
 import { Button } from 'primereact/button';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
     const qrRef = useRef(null);
@@ -12,16 +13,9 @@ export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
             return;
         }
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/stores/update-store/${selectedStore?._id}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ location: selectedLocation }), // Передаем координаты в формате lat/lng
-                },
-            );
+            const response = await axiosInstance.put(`/stores/update-store/${selectedStore?._id}`, {
+                location: selectedLocation, // Передаем координаты в формате lat/lng
+            });
 
             const data = await response.json();
             if (response.ok) {
