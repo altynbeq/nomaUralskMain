@@ -114,12 +114,12 @@ const App = () => {
     ]);
 
     useEffect(() => {
-        if (user.role === 'subUser') {
-            const subUserId = user.id;
+        if (user?.role === 'subUser') {
+            const subUserId = user?.id;
             const fetchSubUserData = async () => {
                 try {
                     const response = await axiosInstance.get(
-                        `access/access-and-subusers/${user.departmentId}`,
+                        `access/access-and-subusers/${user?.departmentId}`,
                     );
                     const currentUserSubUser = response.data.subUsers.find(
                         (user) => user._id === subUserId,
@@ -133,7 +133,7 @@ const App = () => {
             };
             fetchSubUserData();
         }
-    }, [setAccesses, user.departmentId, user.id, user.role]);
+    }, [setAccesses, user?.departmentId, user?.id, user?.role]);
 
     useEffect(() => {
         const fetchCompanyProductsAndWarehouses = async () => {

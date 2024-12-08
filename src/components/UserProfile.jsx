@@ -2,21 +2,16 @@ import { FaRegTimesCircle } from 'react-icons/fa';
 import { Button } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
 import avatar from '../data/avatar.jpg';
-import { useProfileStore, useAuthStore } from '../store/index';
+import { useAuthStore, useSubUserStore } from '../store/index';
 
 const UserProfile = () => {
     const { userImage } = useStateContext();
-    const profileName = useProfileStore.getState()?.name;
-    const profileEmail = useProfileStore.getState()?.email;
-    const clearAccessToken = useAuthStore((state) => state.clearAccessToken);
-    const clearUser = useAuthStore((state) => state.clearUser);
-    const clearIsLoggedIn = useAuthStore((state) => state.clearIsLoggedIn);
-    const clearProfile = useProfileStore((state) => state.clearProfle);
-    const clearAuthData = () => {
-        clearAccessToken();
-        clearUser();
-        clearIsLoggedIn();
-        clearProfile();
+    const reset = useAuthStore((state) => state.reset);
+    const user = useAuthStore((state) => state.user);
+    const clearSubUserStore = useSubUserStore((state) => state.clearSubUserStore);
+    const clearAuthData = async () => {
+        reset();
+        clearSubUserStore(); // Очищает SubUser store
     };
 
     return (
@@ -40,10 +35,10 @@ const UserProfile = () => {
                 />
                 <div className="overflow-hidden text-center md:text-left">
                     <p className="font-semibold text-xl dark:text-gray-200 break-words">
-                        {profileName}
+                        {user?.name}
                     </p>
                     <p className="text-gray-500 text-sm font-semibold dark:text-gray-400 break-words">
-                        {profileEmail}
+                        {user?.email}
                     </p>
                 </div>
             </div>

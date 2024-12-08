@@ -6,7 +6,7 @@ import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import avatar from '../data/avatar.jpg';
 import { Cart, Notification, UserProfile } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
-import { useProfileStore } from '../store/profileStore';
+import { useAuthStore } from '../store/authStore';
 
 const NavButton = ({ title, customFunc, icon, color, dotColor }) => (
     <TooltipComponent content={title} position="BottomCenter">
@@ -36,7 +36,7 @@ const Navbar = () => {
         screenSize,
     } = useStateContext();
 
-    const { name } = useProfileStore.getState();
+    const { name } = useAuthStore.getState().user;
 
     useEffect(() => {
         const handleResize = () => setScreenSize(window.innerWidth);
