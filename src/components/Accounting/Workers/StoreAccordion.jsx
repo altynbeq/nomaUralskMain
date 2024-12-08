@@ -11,6 +11,8 @@ import {
     DEPARTMENT_EDITING_PRIVILEGES,
 } from '../../../models/Department';
 import { StoreDetails } from './StoreDetails';
+import { axiosInstance } from '../../../api/axiosInstance';
+import { useAuthStore } from '../../../store/authStore';
 
 export const StoreAccordion = ({ stores, departments }) => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -30,6 +32,7 @@ export const StoreAccordion = ({ stores, departments }) => {
     const [initialAccess, setInitialAccess] = useState(null);
     const [showStoreInfoModal, setShowStoreInfoModal] = useState(false);
     const [selectedStoreInfo, setSelectedStoreInfo] = useState(null);
+    const user = useAuthStore((state) => state.user);
 
     // Обработчик изменения вкладки
     const onTabChange = (e) => {
@@ -56,14 +59,8 @@ export const StoreAccordion = ({ stores, departments }) => {
 
     const handleDeleteDepartment = async (deptId) => {
         try {
-            const response = await fetch(
+            const response = await axiosInstance.delete(
                 `https://nomalytica-back.onrender.com/api/departments/delete-department/${deptId}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                },
             );
             if (response.ok) {
                 setShowAlertModal(true);
@@ -86,17 +83,11 @@ export const StoreAccordion = ({ stores, departments }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await fetch(
+            const response = await axiosInstance.post(
                 `https://nomalytica-back.onrender.com/api/departments/create-department/`,
                 {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        storeId: activeStoreId,
-                        name: departmentName,
-                    }),
+                    storeId: activeStoreId,
+                    name: departmentName,
                 },
             );
             if (response.ok) {
@@ -116,16 +107,10 @@ export const StoreAccordion = ({ stores, departments }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await fetch(
+            const response = await axiosInstance.put(
                 `https://nomalytica-back.onrender.com/api/departments/update-department/${selectedEditingDepartment._id}`,
                 {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: editedDepartmentName,
-                    }),
+                    name: editedDepartmentName,
                 },
             );
             if (response.ok) {
@@ -144,7 +129,7 @@ export const StoreAccordion = ({ stores, departments }) => {
     };
 
     const handleCopyClick = () => {
-        const companyId = localStorage.getItem('_id');
+        const companyId = user?.companyId ? user.companyId : user?.id;
         navigator.clipboard
             .writeText(`${departmentDetailsModal?.departmentLink}&companyId=${companyId}`)
             .then(() => {
