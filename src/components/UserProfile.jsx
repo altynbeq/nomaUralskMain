@@ -1,16 +1,23 @@
 import { FaRegTimesCircle } from 'react-icons/fa';
 import { Button } from '.';
-import { useStateContext } from '../contexts/ContextProvider';
 import avatar from '../data/avatar.jpg';
 import { useAuthStore, useSubUserStore } from '../store/index';
+import { axiosInstance } from '../api/axiosInstance';
 
 const UserProfile = () => {
     const reset = useAuthStore((state) => state.reset);
     const user = useAuthStore((state) => state.user);
     const clearSubUserStore = useSubUserStore((state) => state.clearSubUserStore);
     const clearAuthData = async () => {
-        reset();
-        clearSubUserStore(); // Очищает SubUser store
+        try {
+            const result = await axiosInstance.post('/auth/logout');
+            if (result.status === 200) {
+                reset();
+                clearSubUserStore();
+            }
+        } catch (error) {
+            alert('Не удалось разлогиниться');
+        }
     };
 
     return (
