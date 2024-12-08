@@ -82,12 +82,11 @@ const App = () => {
 
     useEffect(() => {
         const fetchUserStructure = async () => {
-            const companyId = isEmployee() ? user?.companyid : user?.id;
-
+            const companyId = user?.companyId ? user.companyId : user?.id;
             if (!companyId) {
                 return;
             }
-
+            console.log('here');
             const url = `/structure/get-structure-by-userId/${companyId}`;
             try {
                 const response = await axiosInstance(url);
