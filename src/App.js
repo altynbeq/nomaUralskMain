@@ -92,7 +92,6 @@ const App = () => {
                 setDepartments(response.data.departments);
                 setStores(response.data.stores);
                 setSubUsers(response.data.subUsers);
-                console.log(response.data.subUsers);
                 if (isEmployee()) {
                     const subUser = response.data.subUsers.find((s) => s._id === user?.id);
                     console.log(subUser);

@@ -60,9 +60,9 @@ export const StoreAccordion = ({ stores, departments }) => {
     const handleDeleteDepartment = async (deptId) => {
         try {
             const response = await axiosInstance.delete(
-                `https://nomalytica-back.onrender.com/api/departments/delete-department/${deptId}`,
+                `/api/departments/delete-department/${deptId}`,
             );
-            if (response.ok) {
+            if (response.data) {
                 setShowAlertModal(true);
                 setShowAddDepartmentModal(false);
                 setAlertModalText('Вы успешно удалили департамент.');
@@ -83,14 +83,11 @@ export const StoreAccordion = ({ stores, departments }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post(
-                `https://nomalytica-back.onrender.com/api/departments/create-department/`,
-                {
-                    storeId: activeStoreId,
-                    name: departmentName,
-                },
-            );
-            if (response.ok) {
+            const response = await axiosInstance.post(`/api/departments/create-department/`, {
+                storeId: activeStoreId,
+                name: departmentName,
+            });
+            if (response.data) {
                 setShowAlertModal(true);
                 setShowAddDepartmentModal(false);
                 setAlertModalText('Вы успешно добавили департамент.');
@@ -108,12 +105,12 @@ export const StoreAccordion = ({ stores, departments }) => {
         setIsLoading(true);
         try {
             const response = await axiosInstance.put(
-                `https://nomalytica-back.onrender.com/api/departments/update-department/${selectedEditingDepartment._id}`,
+                `/departments/update-department/${selectedEditingDepartment._id}`,
                 {
                     name: editedDepartmentName,
                 },
             );
-            if (response.ok) {
+            if (response.data) {
                 setShowAlertModal(true);
                 setShowEditDepartmentModal(false);
                 setSelectedEditingDepartment(null);
@@ -148,23 +145,17 @@ export const StoreAccordion = ({ stores, departments }) => {
         setDepartmentDetailsModal(dept);
         const fetchAccesses = async (deptId) => {
             try {
-                const result = await fetch(
-                    `https://nomalytica-back.onrender.com/api/access/access-and-subusers/${deptId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
+                const response = await axiosInstance.get(`/access/access-and-subusers/${deptId}`);
 
-                const data = await result.json();
+                if (response.data && response.data.access) {
+                    setInitialAccess(response.data.access);
+                    const analyticsAccessFromBackend = Object.keys(
+                        response.data.access.Analytics,
+                    ).filter((key) => response.data.access.Analytics[key] === true);
 
-                if (data && data.access) {
-                    setInitialAccess(data.access);
-                    const analyticsAccessFromBackend = Object.keys(data.access.Analytics).filter(
-                        (key) => data.access.Analytics[key] === true,
-                    );
-
-                    const editingAccessFromBackend = data.access.DataManagement ? ['Allow'] : [];
+                    const editingAccessFromBackend = response.data.access.DataManagement
+                        ? ['Allow']
+                        : [];
                     setAnalyticsAccess(analyticsAccessFromBackend);
                     setDataEditingAccess(editingAccessFromBackend);
                 } else {
