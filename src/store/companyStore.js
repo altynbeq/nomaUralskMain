@@ -7,6 +7,8 @@ export const useCompanyStore = create((set) => ({
     receipts: null,
     writeOffs: null,
     urls: null,
+    products: [],
+    warehouses: [],
     name: '',
     email: '',
     setLeads: (leads) => set({ leads: leads }),
@@ -17,4 +19,6 @@ export const useCompanyStore = create((set) => ({
     setUrls: (urls) => set({ urls: urls }),
     setName: (name) => set({ name: name }),
     setEmail: (email) => set({ email: email }),
+    setProducts: (products) => set({ products: products }),
+    setWarehouses: (warehouses) => set({ warehouses: warehouses }),
 }));

@@ -11,10 +11,12 @@ const UserProfile = () => {
     const clearAccessToken = useAuthStore((state) => state.clearAccessToken);
     const clearUser = useAuthStore((state) => state.clearUser);
     const clearIsLoggedIn = useAuthStore((state) => state.clearIsLoggedIn);
+    const clearProfile = useProfileStore((state) => state.clearProfle);
     const clearAuthData = () => {
         clearAccessToken();
         clearUser();
         clearIsLoggedIn();
+        clearProfile();
     };
 
     return (

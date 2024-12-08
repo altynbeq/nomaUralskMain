@@ -10,10 +10,12 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { useNavigate } from 'react-router-dom';
 import { Loader } from '../components/Loader';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, useProfileStore } from '../store/index';
 
 const LogInForm = ({ isQrRedirect }) => {
     const navigate = useNavigate();
+    const setProfileName = useProfileStore((state) => state.setName);
+    const setProfileEmail = useProfileStore((state) => state.setEmail);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
@@ -33,13 +35,13 @@ const LogInForm = ({ isQrRedirect }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            console.log(email, password);
             const response = await axiosInstance.post('/auth/login', { email, password });
             const { accessToken, user, isSuccess } = response.data;
-
             if (isSuccess) {
                 setAccessToken(accessToken);
                 setUser(user);
+                setProfileName(user.email);
+                setProfileEmail(user.name);
                 setIsLoggedIn(true);
                 if (isQrRedirect) {
                     navigate('/general?isQrRedirect=true');

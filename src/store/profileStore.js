@@ -5,4 +5,9 @@ export const useProfileStore = create((set) => ({
     email: '',
     setName: (name) => set({ name: name }),
     setEmail: (email) => set({ email: email }),
+    clearProfle: () =>
+        set({
+            email: '',
+            name: '',
+        }),
 }));
