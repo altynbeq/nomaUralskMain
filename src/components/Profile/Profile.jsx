@@ -56,7 +56,7 @@ export const Profile = () => {
         setSelectedDay(date);
         const formattedDate = formatDate(date);
 
-        const shift = subUsersShifts.find((shift) => {
+        const shift = subUsersShifts?.find((shift) => {
             const startDate = shift.startTime.slice(0, 10);
             const endDate = shift.endTime.slice(0, 10);
             return startDate === formattedDate || endDate === formattedDate;

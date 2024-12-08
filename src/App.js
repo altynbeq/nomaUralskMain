@@ -86,15 +86,16 @@ const App = () => {
             if (!companyId) {
                 return;
             }
-            console.log('here');
             const url = `/structure/get-structure-by-userId/${companyId}`;
             try {
                 const response = await axiosInstance(url);
                 setDepartments(response.data.departments);
                 setStores(response.data.stores);
                 setSubUsers(response.data.subUsers);
+                console.log(response.data.subUsers);
                 if (isEmployee()) {
-                    const subUser = response.data.subUsers.find((s) => s.id === user?.id);
+                    const subUser = response.data.subUsers.find((s) => s._id === user?.id);
+                    console.log(subUser);
                     setSubUser(subUser);
                     setSubUserShifts(subUser.shifts);
                 }
@@ -110,7 +111,8 @@ const App = () => {
         setSubUser,
         setSubUserShifts,
         setSubUsers,
-        user?.companyid,
+        user.companyId,
+        user.companyid,
         user?.id,
     ]);
 
