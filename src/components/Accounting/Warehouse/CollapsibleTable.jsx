@@ -34,7 +34,7 @@ export default function CollapsibleTableWithDetails() {
     }, [clientId]);
 
     useEffect(() => {
-        if (writeOffs) {
+        if (writeOffs.length) {
             let filteredWriteOffs = writeOffs;
 
             if (dateRange && dateRange[0] && dateRange[1]) {
@@ -55,7 +55,6 @@ export default function CollapsibleTableWithDetails() {
             }
 
             const groupedData = {};
-            console.log(filteredWriteOffs);
             filteredWriteOffs.forEach((writeOff) => {
                 const date = new Date(writeOff.date).toISOString().split('T')[0];
                 if (!groupedData[date]) {

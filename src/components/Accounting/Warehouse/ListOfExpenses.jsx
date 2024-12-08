@@ -5,10 +5,11 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { EditProductModal } from '../../../components/EditProductModal';
-import { useStateContext } from '../../../contexts/ContextProvider';
+import { useCompanyStore } from '../../../store';
 
 export default function ListOfExpenses() {
-    const { products, warehouses } = useStateContext();
+    const warehouses = useCompanyStore((state) => state.warehouses);
+    const products = useCompanyStore((state) => state.products);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [filteredProducts, setFilteredProducts] = useState([]);
