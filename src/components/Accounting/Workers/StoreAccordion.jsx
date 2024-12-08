@@ -241,16 +241,12 @@ export const StoreAccordion = ({ stores, departments }) => {
         const privileges = mapPrivilegesToBackend();
         setIsLoading(true);
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/access/update-access/${initialAccess._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(privileges),
-                },
+            const response = await axiosInstance.put(
+                `/access/update-access/${initialAccess._id}`,
+                privileges,
             );
 
-            if (response.ok) {
+            if (response.data) {
                 setShowAlertModal(true);
                 setAlertModalText('Вы успешно изменили доступы.');
                 setDepartmentDetailsModal({});

@@ -94,7 +94,6 @@ const App = () => {
                 setSubUsers(response.data.subUsers);
                 if (isEmployee()) {
                     const subUser = response.data.subUsers.find((s) => s._id === user?.id);
-                    console.log(subUser);
                     setSubUser(subUser);
                     setSubUserShifts(subUser.shifts);
                 }
@@ -115,17 +114,16 @@ const App = () => {
     ]);
 
     useEffect(() => {
-        if (user && user.role === 'subUser') {
+        if (user.role === 'subUser') {
+            const subUserId = user.id;
             const fetchSubUserData = async () => {
                 try {
                     const response = await axiosInstance.get(
                         `access/access-and-subusers/${user.departmentId}`,
                     );
-
                     const currentUserSubUser = response.data.subUsers.find(
-                        (user) => user._id === user.id,
+                        (user) => user._id === subUserId,
                     );
-
                     if (currentUserSubUser) {
                         setAccesses(response.data.access);
                     }
@@ -135,7 +133,7 @@ const App = () => {
             };
             fetchSubUserData();
         }
-    }, [setAccesses, user]);
+    }, [setAccesses, user.departmentId, user.id, user.role]);
 
     useEffect(() => {
         const fetchCompanyProductsAndWarehouses = async () => {
