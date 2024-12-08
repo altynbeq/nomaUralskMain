@@ -91,18 +91,19 @@ const LogInForm = ({ isQrRedirect }) => {
     const sendPassword = async () => {
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post('/users/reset_password_temporary', {
+            const response = await axiosInstance.post('/auth/reset_password_temporary', {
                 email: email, // Используем email из состояния
             });
             if (response.data) {
                 setShowSuccessPass(true);
                 setShowReset(false);
-                setResettedPassword(response.data.newPassword);
+                setResettedPassword(response.data.temporaryPassword);
                 // Можно отображать сообщение или временный пароль
             }
         } catch (error) {
             setShowSuccessPass(true);
             setShowReset(false);
+            setEmail('');
             setAlertModalResultMessage('Вы ввели неверную почту');
         } finally {
             setIsLoading(false);
@@ -214,7 +215,7 @@ const LogInForm = ({ isQrRedirect }) => {
                             message={
                                 alertModalResultMessage
                                     ? alertModalResultMessage
-                                    : `Ваш новый пароль - ${showSuccessPass && 'temporaryPassword' in resettedPassword ? resettedPassword.temporaryPassword : ''}`
+                                    : `Ваш новый пароль - ${resettedPassword}`
                             }
                             onClose={() => setShowSuccessPass(false)}
                         />
