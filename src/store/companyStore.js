@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
 export const useCompanyStore = create((set) => ({
-    leads: null,
-    deals: null,
-    kkm: null,
-    receipts: null,
-    writeOffs: null,
-    urls: null,
+    leads: [],
+    deals: [],
+    kkm: [],
+    receipts: [],
+    writeOffs: [],
+    urls: [],
     products: [],
     warehouses: [],
     name: '',
