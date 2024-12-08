@@ -33,7 +33,7 @@ const App = () => {
     const setDepartments = useCompanyStructureStore((state) => state.setDepartments);
     const setStores = useCompanyStructureStore((state) => state.setStores);
     const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
-    const setAccesses = useCompanyStructureStore((state) => state.setAccesses);
+    const setAccesses = useSubUserStore((state) => state.setAccesses);
     const setSubUserShifts = useSubUserStore((state) => state.setShifts);
     const setSubUser = useSubUserStore((state) => state.setSubUser);
     const [techProblem, setTechProblem] = useState(false);
