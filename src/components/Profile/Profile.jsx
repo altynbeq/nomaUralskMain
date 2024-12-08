@@ -43,7 +43,7 @@ export const Profile = () => {
     const getDayColor = (date) => {
         const formattedDate = formatDate(date);
 
-        const hasShift = subUsersShifts.some((shift) => {
+        const hasShift = subUsersShifts?.some((shift) => {
             const startDate = shift.startTime.slice(0, 10);
             const endDate = shift.endTime.slice(0, 10);
             return startDate === formattedDate || endDate === formattedDate;

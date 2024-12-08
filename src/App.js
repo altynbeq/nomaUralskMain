@@ -34,7 +34,8 @@ const App = () => {
     const setStores = useCompanyStructureStore((state) => state.setStores);
     const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
     const setAccesses = useCompanyStructureStore((state) => state.setAccesses);
-    const setSubUserShifts = useCompanyStructureStore((state) => state.subUserShifts);
+    const setSubUserShifts = useSubUserStore((state) => state.setShifts);
+    const setSubUser = useSubUserStore((state) => state.setSubUser);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
@@ -94,8 +95,9 @@ const App = () => {
                 setStores(response.data.stores);
                 setSubUsers(response.data.subUsers);
                 if (isEmployee()) {
-                    const subUserShifts = response.data.subUsers.find((s) => s.id === user?.id);
-                    setSubUserShifts(subUserShifts);
+                    const subUser = response.data.subUsers.find((s) => s.id === user?.id);
+                    setSubUser(subUser);
+                    setSubUserShifts(subUser.shifts);
                 }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
@@ -106,6 +108,7 @@ const App = () => {
         isEmployee,
         setDepartments,
         setStores,
+        setSubUser,
         setSubUserShifts,
         setSubUsers,
         user?.companyid,

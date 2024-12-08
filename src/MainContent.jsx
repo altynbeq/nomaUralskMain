@@ -4,14 +4,14 @@ import { Dialog } from 'primereact/dialog';
 import { MdDescription } from 'react-icons/md';
 import { Navbar, Footer } from './components';
 import './App.css';
-import { useStateContext } from './contexts/ContextProvider';
 import { isValidDepartmentId } from './methods/isValidDepartmentId';
 import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
-import { useCompanyStructureStore } from './store/companyStructureStore';
+import { useCompanyStructureStore, useSubUserStore } from './store/index';
+import { axiosInstance } from './api/axiosInstance';
 
 // Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
@@ -27,7 +27,8 @@ const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
     const stores = useCompanyStructureStore.getState().stores;
-    const subUsers = useCompanyStructureStore.getState().subUsers;
+    const subUserShifts = useSubUserStore((state) => state.shifts);
+    const subUser = useSubUserStore((state) => state.subUser);
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -41,21 +42,14 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const updateShiftScan = async (shift) => {
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subUserId: shift.subUserId,
-                        startTime: shift.startTime,
-                        endTime: shift.endTime,
-                        selectedStore: shift.selectedStore._id,
-                        scanTime: new Date(),
-                        endScanTime: shift.endScanTime,
-                    }),
-                },
-            );
+            const response = await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
+                subUserId: shift.subUserId,
+                startTime: shift.startTime,
+                endTime: shift.endTime,
+                selectedStore: shift.selectedStore._id,
+                scanTime: new Date(),
+                endScanTime: shift.endScanTime,
+            });
 
             setShowMarkShiftResultModal(true);
             if (response.ok) {
@@ -71,21 +65,14 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const updateShiftEndScan = async (shift) => {
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/shifts/update-shift/${shift._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subUserId: shift.subUserId,
-                        startTime: shift.startTime,
-                        endTime: shift.endTime,
-                        selectedStore: shift.selectedStore._id,
-                        scanTime: shift.scanTime,
-                        endScanTime: new Date(),
-                    }),
-                },
-            );
+            const response = await axiosInstance(`/shifts/update-shift/${shift._id}`, {
+                subUserId: shift.subUserId,
+                startTime: shift.startTime,
+                endTime: shift.endTime,
+                selectedStore: shift.selectedStore._id,
+                scanTime: shift.scanTime,
+                endScanTime: new Date(),
+            });
 
             setShowMarkShiftResultModal(true);
             if (response.ok) {
@@ -158,7 +145,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [subUserShifts, subUser, currentLocation, stores]);
+    }, [subUserShifts, subUser, currentLocation, stores, location.search]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
@@ -185,28 +172,12 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     // Загрузка аватара
     useEffect(() => {
-        const departmentId = localStorage.getItem('departmentId');
-        const subuserId = localStorage.getItem('_id');
-
         const fetchSubUserImage = async () => {
             try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/subusers/byId/${subuserId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
+                const response = await axiosInstance(`/subusers/byId/${subUser.id}`);
 
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                if (!result.image) {
+                if (!response.data.image) {
                     setShowUploadImageModal(true);
-                } else {
-                    setUserImage(result.image);
                 }
             } catch (error) {
                 console.error('Error fetching sub-user data:', error);
@@ -216,39 +187,29 @@ export const MainContent = ({ urls, activeMenu }) => {
             }
         };
 
-        if (isValidDepartmentId(departmentId) && !userImage) {
+        if (subUser.image) {
             fetchSubUserImage();
         } else {
             // Если уже есть userImage или департамент невалиден - считать, что загрузка завершена
             setIsLoading(false);
         }
-    }, [location.pathname, setUserImage, userImage]);
+    }, [location.pathname, subUser.id, subUser.image]);
 
     const handleModalClose = () => {
         setShowUploadImageModal(false);
     };
 
     const handleFileUpload = async (event) => {
-        const userId = localStorage.getItem('_id');
+        setIsUploading(true);
         const file = event.target.files[0];
         if (file) {
             const formData = new FormData();
             formData.append('avatar', file);
 
             try {
-                setIsUploading(true);
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/subusers/subusers/${userId}/avatar`,
-                    {
-                        method: 'POST',
-                        body: formData,
-                    },
-                );
-                if (!response.ok) {
-                    throw new Error('Failed to upload avatar');
-                }
-                const result = await response.json();
-                setUserImage(result.image);
+                await axiosInstance.post(`/subusers/subusers/${subUser.id}/avatar`, {
+                    formData,
+                });
                 setShowUploadImageModal(false);
             } catch (error) {
                 console.error('Error uploading avatar:', error);
