@@ -60,10 +60,8 @@ const Sales = ({ urls }) => {
     const [productStats, setProductStats] = useState({});
     const [barSeriesAll, setBarSeriesAll] = useState([]);
     const [barSeriesByStore, setBarSeriesByStore] = useState([]);
-    const [leadsSeries, setLeadsSeries] = useState([]);
     const [totalSeries, setTotalSerues] = useState([]);
     const [userKkmUrl, setUserKkmUrl] = useState('');
-    const [userReceiptsUrl, setUserReceiptsUrl] = useState('');
     const [userSpisanieUrl, setUserSpisanieUrl] = useState('');
 
     useEffect(() => {
@@ -75,8 +73,6 @@ const Sales = ({ urls }) => {
             setBarSeriesByStore(SalesBarSeriesByStore(kkm.monthFormedKKM));
         }
         if (leads?.series && deals?.dealsMonth) {
-            setLeadsSeries(leads.series);
-
             const conversion = generateConversionSeries(leads.series, deals.dealsMonth.salesSeries);
             const totalSeriesL = formData(leads.series, conversion);
 
@@ -94,7 +90,6 @@ const Sales = ({ urls }) => {
                 : null;
             if (convKkm != null && convReceipt != null && convSpis != null) {
                 setUserKkmUrl(convKkm);
-                setUserReceiptsUrl(convReceipt);
                 setUserSpisanieUrl(convSpis);
             }
         }

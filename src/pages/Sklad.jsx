@@ -76,7 +76,6 @@ const Sklad = ({ urls }) => {
                     title="Списания за месяц"
                     series={spisanieBarSeries}
                 />
-                {/* <ProductStatsComp title="Товары" stats={productStats} /> */}
             </div>
             <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center align-center  items-center">
                 <TableSort

@@ -102,7 +102,7 @@ const App = () => {
 
     useEffect(() => {
         const fetchUserStructure = async () => {
-            const companyId = isEmployee() ? '' : user?.id;
+            const companyId = isEmployee() ? user?.companyid : user?.id;
 
             if (!companyId) {
                 console.error('Не удалось получить companyId из localStorage.');
@@ -120,7 +120,7 @@ const App = () => {
             }
         };
         fetchUserStructure();
-    }, [isEmployee, setDepartments, setStores, setSubUsers, user?.id]);
+    }, [isEmployee, setDepartments, setStores, setSubUsers, user?.companyid, user?.id]);
 
     // useEffect(() => {
     // const searchParams = new URLSearchParams(window.location.search);
@@ -309,23 +309,26 @@ const App = () => {
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
             <BrowserRouter>
-                {!isLoggedIn && <LogInForm isQrRedirect={isQrRedirect} />}
-                <div className="flex relative dark:bg-main-dark-bg">
-                    <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
-                        <TooltipComponent content="Settings" position="Top" />
+                {isLoggedIn ? (
+                    <div className="flex relative dark:bg-main-dark-bg">
+                        <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
+                            <TooltipComponent content="Settings" position="Top" />
+                        </div>
+                        {activeMenu ? (
+                            <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
+                                <Sidebar />
+                            </div>
+                        ) : (
+                            <div className="w-0 dark:bg-secondary-dark-bg">
+                                <Sidebar />
+                            </div>
+                        )}
+                        <ToastContainer position="top-center" autoClose={5000} />
+                        <MainContent urls={urls} activeMenu={activeMenu} />
                     </div>
-                    {activeMenu ? (
-                        <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
-                            <Sidebar />
-                        </div>
-                    ) : (
-                        <div className="w-0 dark:bg-secondary-dark-bg">
-                            <Sidebar />
-                        </div>
-                    )}
-                    <ToastContainer position="top-center" autoClose={5000} />
-                    <MainContent urls={urls} activeMenu={activeMenu} />
-                </div>
+                ) : (
+                    <LogInForm isQrRedirect={isQrRedirect} />
+                )}
             </BrowserRouter>
         </div>
     );

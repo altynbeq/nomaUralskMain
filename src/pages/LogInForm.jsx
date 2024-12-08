@@ -33,6 +33,7 @@ const LogInForm = ({ isQrRedirect }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
+            console.log(email, password);
             const response = await axiosInstance.post('/auth/login', { email, password });
             const { accessToken, user, isSuccess } = response.data;
 
