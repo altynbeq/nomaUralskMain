@@ -31,14 +31,14 @@ const Sklad = ({ urls }) => {
     const [userSpisanieUrl, setUserSpisanieUrl] = useState('');
 
     useEffect(() => {
-        if (kkm.monthFormedKKM && spisanie.monthSpisanie) {
+        if (kkm?.monthFormedKKM && spisanie?.monthSpisanie) {
             setProductGridRows(ProductSoldGridList(kkm.monthFormedKKM));
             setSpisanieStats(SpisanieStats(spisanie.monthSpisanie));
             setTableRows(GridSpisanieListRows(spisanie.monthSpisanie));
             setProductStats(ProductsStats(kkm.monthFormedKKM));
             setSpisanieBarSeries(SpisanieBarSeriesByStore(spisanie.monthSpisanie));
         }
-        if (urls.externalApis && urls.externalApis.apiUrlKKM) {
+        if (urls?.externalApis && urls?.externalApis?.apiUrlKKM) {
             const convKkm = urls.externalApis.apiUrlKKM
                 ? convertUrl(urls.externalApis.apiUrlKKM)
                 : null;
@@ -55,7 +55,7 @@ const Sklad = ({ urls }) => {
             }
         }
         window.scrollTo(0, 0);
-    }, [kkm.monthFormedKKM, spisanie.monthSpisanie, urls.externalApis]);
+    }, [kkm?.monthFormedKKM, spisanie?.monthSpisanie, urls?.externalApis]);
 
     if (skeletonUp) {
         return (

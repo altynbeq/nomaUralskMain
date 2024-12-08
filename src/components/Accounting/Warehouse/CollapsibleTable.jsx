@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar } from 'primereact/calendar';
-import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
+import { axiosInstance } from '../../../api/axiosInstance';
+import { useAuthStore } from '../../../store/authStore';
 
 export default function CollapsibleTableWithDetails() {
+    const clientId = useAuthStore((state) => state.user.id);
+    console.log(clientId);
     const [writeOffs, setWriteOffs] = useState([]);
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
@@ -17,33 +20,20 @@ export default function CollapsibleTableWithDetails() {
     const [isModalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
-        const currentUserId = localStorage.getItem('_id');
-        const companyId = localStorage.getItem('companyId');
-        const departmentId = localStorage.getItem('departmentId');
-        const clientId = isValidDepartmentId(departmentId) ? companyId : currentUserId;
-
-        const fetchWriteOffs = async () => {
+        const fetchWriteOffs = async (clientId) => {
             try {
-                const response = await fetch(
-                    `https://nomalytica-back.onrender.com/api/clientsSpisanie/${clientId}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    },
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    setWriteOffs(data.writeOffs);
-                } else {
-                    console.error('Не удалось загрузить данные списаний');
-                }
+                const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
+                const data = await response.data;
+                setWriteOffs(data);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
             }
         };
 
-        fetchWriteOffs();
-    }, []);
+        if (clientId) {
+            fetchWriteOffs(clientId);
+        }
+    }, [clientId]);
 
     useEffect(() => {
         let filteredWriteOffs = writeOffs;

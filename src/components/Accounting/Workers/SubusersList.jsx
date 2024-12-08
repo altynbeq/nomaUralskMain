@@ -4,14 +4,11 @@ import { InputText } from 'primereact/inputtext';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { useStateContext } from '../../../contexts/ContextProvider';
 import { SubuserEditModal } from './SubuserEditModal';
 import { SubuserDeleteModal } from './SubuserDeleteModal';
 import AlertModal from '../../AlertModal';
 
-export const SubusersList = () => {
-    const { companyStructure } = useStateContext();
-
+export const SubusersList = ({ departments, subUsers, stores }) => {
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,12 +20,10 @@ export const SubusersList = () => {
     // Фильтрация отделов на основе выбранного магазина
     const filteredDepartments = useMemo(() => {
         if (selectedStore) {
-            return companyStructure.departments.filter(
-                (dept) => dept.storeId === selectedStore._id,
-            );
+            return departments.filter((dept) => dept.storeId === selectedStore._id);
         }
-        return companyStructure.departments;
-    }, [selectedStore, companyStructure.departments]);
+        return departments;
+    }, [selectedStore, departments]);
 
     // Сброс выбранного отдела, если он не принадлежит выбранному магазину
     useEffect(() => {
@@ -44,28 +39,20 @@ export const SubusersList = () => {
 
     // Логика фильтрации сотрудников
     const filteredSubusers = useMemo(() => {
-        return companyStructure.subUsers?.filter((subuser) => {
+        return subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesDepartment = selectedDepartment
                 ? subuser.departmentId === selectedDepartment._id
                 : true;
 
-            const subuserDepartment = companyStructure.departments.find(
-                (dept) => dept._id === subuser.departmentId,
-            );
+            const subuserDepartment = departments.find((dept) => dept._id === subuser.departmentId);
             const subuserStoreId = subuserDepartment ? subuserDepartment.storeId : null;
 
             const matchesStore = selectedStore ? subuserStoreId === selectedStore._id : true;
 
             return matchesSearch && matchesDepartment && matchesStore;
         });
-    }, [
-        companyStructure.subUsers,
-        companyStructure.departments,
-        searchTerm,
-        selectedDepartment,
-        selectedStore,
-    ]);
+    }, [subUsers, departments, searchTerm, selectedDepartment, selectedStore]);
 
     const nameTemplate = (rowData) => (
         <div className="flex items-center">
@@ -128,7 +115,7 @@ export const SubusersList = () => {
                         <Dropdown
                             value={selectedStore}
                             onChange={(e) => setSelectedStore(e.value)}
-                            options={companyStructure?.stores || []}
+                            options={stores || []}
                             optionLabel="storeName"
                             showClear
                             placeholder="Магазин"
