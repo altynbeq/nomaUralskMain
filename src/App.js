@@ -111,8 +111,7 @@ const App = () => {
         setSubUser,
         setSubUserShifts,
         setSubUsers,
-        user.companyId,
-        user.companyid,
+        user?.companyId,
         user?.id,
     ]);
 
