@@ -38,6 +38,8 @@ export const MainContent = ({ urls, activeMenu }) => {
     const fileInput = useRef(null);
     const hasExecuted = useRef(false);
 
+    console.log(subUser);
+
     const updateShiftScan = async (shift) => {
         try {
             await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
@@ -164,6 +166,12 @@ export const MainContent = ({ urls, activeMenu }) => {
             }
         }
     }, [location.pathname, location.search]);
+
+    useEffect(() => {
+        if (subUser && !subUser.image) {
+            setShowUploadImageModal(true);
+        }
+    }, [subUser]);
 
     const handleModalClose = () => {
         setShowUploadImageModal(false);
