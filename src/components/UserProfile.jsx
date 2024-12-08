@@ -5,7 +5,6 @@ import avatar from '../data/avatar.jpg';
 import { useAuthStore, useSubUserStore } from '../store/index';
 
 const UserProfile = () => {
-    const { userImage } = useStateContext();
     const reset = useAuthStore((state) => state.reset);
     const user = useAuthStore((state) => state.user);
     const clearSubUserStore = useSubUserStore((state) => state.clearSubUserStore);
@@ -30,7 +29,7 @@ const UserProfile = () => {
             <div className="flex flex-col md:flex-row gap-5 items-center mt-6 border-color border-b-1 pb-6">
                 <img
                     className="rounded-full h-24 w-24"
-                    src={userImage ? `https://nomalytica-back.onrender.com${userImage}` : avatar}
+                    src={user?.image ? `https://nomalytica-back.onrender.com${user.image}` : avatar}
                     alt="user-profile"
                 />
                 <div className="overflow-hidden text-center md:text-left">

@@ -36,7 +36,7 @@ const Navbar = () => {
         screenSize,
     } = useStateContext();
 
-    const { name } = useAuthStore.getState().user;
+    const { name, image } = useAuthStore.getState().user;
 
     useEffect(() => {
         const handleResize = () => setScreenSize(window.innerWidth);
@@ -79,7 +79,11 @@ const Navbar = () => {
                         className="flex items-center gap-2 cursor-pointer p-1 hover:bg-light-gray rounded-lg"
                         onClick={() => handleClick('userProfile')}
                     >
-                        <img className="rounded-full w-8 h-8" src={avatar} alt="user-profile" />
+                        <img
+                            className="rounded-full w-8 h-8"
+                            src={image ? `https://nomalytica-back.onrender.com${image}` : avatar}
+                            alt="user-profile"
+                        />
                         <p>
                             <span className="text-gray-400 text-14">Привет,</span>{' '}
                             <span className="text-gray-400 font-bold ml-1 text-14">{name}</span>

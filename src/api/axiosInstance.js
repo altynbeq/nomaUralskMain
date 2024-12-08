@@ -2,13 +2,22 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-// Создание экземпляра axios
+// Основной экземпляр axios
 export const axiosInstance = axios.create({
     baseURL: 'https://nomalytica-back.onrender.com/api', // Ваш базовый URL
     headers: {
         'Content-Type': 'application/json',
     },
     withCredentials: true, // Важно для отправки HttpOnly cookies
+});
+
+// Отдельный экземпляр axios без интерсепторов для refresh-token запросов
+const axiosWithoutInterceptors = axios.create({
+    baseURL: 'https://nomalytica-back.onrender.com/api',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true,
 });
 
 // Переменные для управления состоянием обновления токена
@@ -29,7 +38,9 @@ const processQueue = (error, token = null) => {
 
 // Функция для обновления токена
 const refreshToken = async () => {
-    return axiosInstance.post('/auth/refresh-token').then((response) => response.data.accessToken);
+    return axiosWithoutInterceptors
+        .post('/auth/refresh-token')
+        .then((response) => response.data.accessToken);
 };
 
 // Интерцептор запросов для добавления токена в заголовок
@@ -51,10 +62,24 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        // Проверяем, является ли ошибка 401 и не был ли запрос уже повторен
+
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
+
+        // Проверяем, был ли запрос уже повторен
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
+            // Исключаем запросы на обновление токена из обработки интерсептором
+            if (originalRequest.url.includes('/auth/refresh-token')) {
+                // Если refresh-token запрос получил 401, перенаправляем на страницу входа
+                useAuthStore.getState().setAccessToken(null);
+                window.location.href = '/login';
+                return Promise.reject(error);
+            }
+
+            originalRequest._retry = true;
+
             if (isRefreshing) {
-                // Если обновление уже происходит, добавляем запрос в очередь
                 try {
                     const token = await new Promise((resolve, reject) => {
                         failedQueue.push({ resolve, reject });
@@ -66,7 +91,6 @@ axiosInstance.interceptors.response.use(
                 }
             }
 
-            originalRequest._retry = true;
             isRefreshing = true;
 
             try {
@@ -79,6 +103,7 @@ axiosInstance.interceptors.response.use(
             } catch (err) {
                 processQueue(err, null);
                 useAuthStore.getState().setAccessToken(null);
+                useAuthStore.getState().reset();
                 window.location.href = '/login';
                 return Promise.reject(err);
             } finally {
@@ -89,3 +114,5 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
     },
 );
+
+export default axiosInstance;

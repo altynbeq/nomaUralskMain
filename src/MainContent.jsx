@@ -38,8 +38,6 @@ export const MainContent = ({ urls, activeMenu }) => {
     const fileInput = useRef(null);
     const hasExecuted = useRef(false);
 
-    console.log(subUser);
-
     const updateShiftScan = async (shift) => {
         try {
             await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
@@ -127,7 +125,6 @@ export const MainContent = ({ urls, activeMenu }) => {
                     }
                     hasExecuted.current = true; // Устанавливаем флаг
                     // Проверяем, была ли уже отметка
-                    console.log(shift);
                     if (!shift.scanTime) {
                         updateShiftScan(shift, matchedStoreId);
                     } else if (!shift.endScanTime) {
