@@ -94,15 +94,10 @@ export const AddWarehouse = () => {
                     : userId;
                 setIsLoading(true);
                 try {
-                    const response = await axiosInstance.post(
-                        `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
+                    await axiosInstance.post(
+                        `/clientsSpisanie/${companyId}/write-off`,
                         submissionData,
                     );
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Ошибка при отправке данных');
-                    }
                     setIsModalOpen(false);
                     setShowAlertModal(true);
                     setFormData({

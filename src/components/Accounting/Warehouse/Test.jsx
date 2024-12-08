@@ -20,12 +20,7 @@ export const WriteoffList = () => {
         const fetchWriteOffs = async () => {
             try {
                 const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setWriteOffs(data.writeOffs);
-                } else {
-                    console.error('Не удалось загрузить данные списаний');
-                }
+                setWriteOffs(response.data.writeOffs);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
             }
