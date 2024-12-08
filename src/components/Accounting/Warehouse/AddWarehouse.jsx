@@ -53,7 +53,7 @@ export const AddWarehouse = () => {
         removeError('file');
     }, []);
 
-    const validate = () => {
+    const validate = useCallback(() => {
         const newErrors = {};
         if (!formData.productName) newErrors.productName = 'Название товара обязательно';
         // if (!formData.date) newErrors.date = 'Дата обязательна';
@@ -69,7 +69,15 @@ export const AddWarehouse = () => {
         if (!formData.file) newErrors.file = 'Фото обязательно';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    };
+    }, [
+        formData.file,
+        formData.organization,
+        formData.productName,
+        formData.quantity,
+        formData.reason,
+        formData.responsible,
+        formData.warehouse,
+    ]);
 
     const handleSubmit = useCallback(
         async (e) => {
