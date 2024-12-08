@@ -23,7 +23,7 @@ const Sidebar = () => {
         if (!access && !subUser) {
             return;
         }
-        if (access && Object.keys(subUser).length > 0) {
+        if (access && subUser && Object.keys(subUser).length > 0) {
             const newFilteredLinks = links
                 .map((category) => {
                     if (category.title === 'Учёт' && !access.DataManagement) {
