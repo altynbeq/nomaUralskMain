@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { DataTable } from 'primereact/datatable';
@@ -68,9 +68,9 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         <p className="text-sm text-gray-500">{rowData.email || 'Не указан'}</p>
     );
 
-    const dateTemplate = (rowData) => (
+    const departmentTemplate = (rowData) => (
         <p className="text-sm text-gray-500">
-            {rowData.createdAt ? new Date(rowData.createdAt).toLocaleDateString() : 'Неизвестно'}
+            {rowData.departmentId ? getDepartmentName(rowData.departmentId) : 'Неизвестно'}
         </p>
     );
 
@@ -103,6 +103,22 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                 }}
             />
         </div>
+    );
+
+    // Создаём мапу для быстрого доступа к названию департамента
+    const departmentsMap = useMemo(() => {
+        const map = new Map();
+        departments?.forEach((dept) => {
+            map.set(dept._id, dept.name);
+        });
+        return map;
+    }, [departments]);
+
+    const getDepartmentName = useCallback(
+        (departmentId) => {
+            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
+        },
+        [departmentsMap],
     );
 
     return (
@@ -144,8 +160,8 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
             {/* Таблица */}
             <DataTable value={filteredSubusers} className="w-full">
                 <Column header="Сотрудник" body={nameTemplate} />
-                <Column header="Email" body={emailTemplate} />
-                <Column header="Дата" body={dateTemplate} />
+                <Column header="Департамент" body={departmentTemplate} />
+                <Column header="Почта" body={emailTemplate} />
                 <Column header="Действия" body={actionTemplate} />
             </DataTable>
 
