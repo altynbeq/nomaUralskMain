@@ -8,7 +8,7 @@ const TotalRevenuePie = ({ deals }) => {
         if (deals.dealsMonth && deals.dealsMonth.dealsSource) {
             setData(deals.dealsMonth.dealsSource);
         }
-    }, []);
+    }, [deals.dealsMonth]);
 
     return (
         <div className="bg-white dark:text-gray-200  dark:bg-secondary-dark-bg rounded-2xl p-4 m-3 flex flex-col  items-center  subtle-border">
