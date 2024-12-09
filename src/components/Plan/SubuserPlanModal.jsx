@@ -5,6 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import avatar from '../../data/avatar.jpg';
+import axiosInstance from '../../api/axiosInstance';
 
 export const SubuserPlanModal = ({ isVisible, onHide, subuser, successSetPlan }) => {
     const categories = ['Розы', 'Шоколадки', 'Боксы'];
@@ -44,14 +45,9 @@ export const SubuserPlanModal = ({ isVisible, onHide, subuser, successSetPlan })
                 goal: plan.goal,
                 category: plan.category,
             }));
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/subUsers/update-subuser/${subuser._id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ plans: sanitizedPlans }),
-                },
-            );
+            const response = await axiosInstance.put(`/subUsers/update-subuser/${subuser._id}`, {
+                plans: sanitizedPlans,
+            });
             if (!response.ok) {
                 throw new Error('Failed to update store');
             }
