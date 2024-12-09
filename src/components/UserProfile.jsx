@@ -3,6 +3,7 @@ import { Button } from '.';
 import avatar from '../data/avatar.jpg';
 import { useAuthStore, useSubUserStore } from '../store/index';
 import { axiosInstance } from '../api/axiosInstance';
+import AlertModal from './AlertModal';
 
 const UserProfile = () => {
     const reset = useAuthStore((state) => state.reset);

@@ -6,17 +6,18 @@ import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
-import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { axiosInstance } from '../../../api/axiosInstance';
+import { useAuthStore } from '../../../store';
 
 export const AddWarehouse = () => {
+    const user = useAuthStore((state) => state.user);
     const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
         date: new Date(),
         organization: '',
-        responsible: '',
+        responsible: user?.name,
         warehouse: '',
         reason: '',
         quantity: '',
@@ -94,12 +95,7 @@ export const AddWarehouse = () => {
                 submissionData.append('reason', formData.reason);
                 submissionData.append('quantity', formData.quantity);
                 submissionData.append('file', formData.file);
-                const currentUserDepartmentId = localStorage.getItem('departmentId');
-                const subuserCompanyId = localStorage.getItem('companyId');
-                const userId = localStorage.getItem('_id');
-                const companyId = isValidDepartmentId(currentUserDepartmentId)
-                    ? subuserCompanyId
-                    : userId;
+                const companyId = user?.companyId ? user?.companyId : user?.id;
                 setIsLoading(true);
                 try {
                     await axiosInstance.post(
@@ -128,7 +124,19 @@ export const AddWarehouse = () => {
                 console.log('Validation failed:', errors);
             }
         },
-        [formData, errors, validate],
+        [
+            validate,
+            formData.productName,
+            formData.organization,
+            formData.responsible,
+            formData.warehouse,
+            formData.reason,
+            formData.quantity,
+            formData.file,
+            user?.companyId,
+            user?.id,
+            errors,
+        ],
     );
 
     return (
