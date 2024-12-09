@@ -74,7 +74,7 @@ const LogInForm = ({ isQrRedirect }) => {
                 companyId,
             });
             if (response.status === 201) {
-                window.location.href = '/';
+                setShowSuccessReg(true);
             }
         } catch (error) {
             if (error.response && error.response.data) {
@@ -332,8 +332,11 @@ const LogInForm = ({ isQrRedirect }) => {
             </div>
             <AlertModal
                 open={showSuccessReg}
-                message={'Вы успешно зарегистрировались'}
-                onClose={() => setShowSuccessReg(false)}
+                message={'Вы успешно зарегистрировались. Нажмите на кнопку чтобы зайти в сервис'}
+                onClose={() => {
+                    setShowSuccessReg(false);
+                    window.location.href = '/';
+                }}
             />
         </div>
     );
