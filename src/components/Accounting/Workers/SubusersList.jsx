@@ -161,7 +161,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
             <DataTable value={filteredSubusers} className="w-full">
                 <Column header="Сотрудник" body={nameTemplate} />
                 <Column header="Департамент" body={departmentTemplate} />
-                <Column header="Email" body={emailTemplate} />
+                <Column header="Почта" body={emailTemplate} />
                 <Column header="Действия" body={actionTemplate} />
             </DataTable>
 
