@@ -20,7 +20,7 @@ import {
 import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
-    const { currentMode, activeMenu, setSkeletonUp, setAccess } = useStateContext();
+    const { currentMode, activeMenu, setSkeletonUp } = useStateContext();
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const user = useAuthStore((state) => state.user);
     const setLeads = useCompanyStore((state) => state.setLeads);

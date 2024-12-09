@@ -26,7 +26,6 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const { access } = useStateContext();
     const stores = useCompanyStructureStore((state) => state.stores);
     const subUserShifts = useSubUserStore((state) => state.shifts);
     const subUser = useSubUserStore((state) => state.subUser);
@@ -230,11 +229,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route path="/sales" element={<Sales urls={urls} />} />
                                 <Route path="/workers" element={<Workers urls={urls} />} />
                                 <Route path="/sklad" element={<Sklad urls={urls} />} />
-
-                                <Route
-                                    path="/calendar"
-                                    element={access?.DataManagement ? <Calendar /> : <NoAccess />}
-                                />
+                                <Route path="/calendar" element={<Calendar />} />
                                 <Route
                                     path="/accounting-warehouse"
                                     element={<AccountingWarehouse />}
@@ -246,7 +241,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route
                                     path="/finance"
                                     element={
-                                        access?.Analytics?.Finance ? (
+                                        user?.access?.Analytics?.Finance ? (
                                             <Finance urls={urls} />
                                         ) : (
                                             <NoAccess />
@@ -256,7 +251,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route
                                     path="/sales"
                                     element={
-                                        access?.Analytics?.Sales ? (
+                                        user?.access?.Analytics?.Sales ? (
                                             <Sales urls={urls} />
                                         ) : (
                                             <NoAccess />
@@ -266,7 +261,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route
                                     path="/workers"
                                     element={
-                                        access?.Analytics?.Workers ? (
+                                        user?.access?.Analytics?.Workers ? (
                                             <Workers urls={urls} />
                                         ) : (
                                             <NoAccess />
@@ -276,7 +271,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route
                                     path="/sklad"
                                     element={
-                                        access?.Analytics?.Warehouse ? (
+                                        user?.access?.Analytics?.Warehouse ? (
                                             <Sklad urls={urls} />
                                         ) : (
                                             <NoAccess />
@@ -286,12 +281,14 @@ export const MainContent = ({ urls, activeMenu }) => {
 
                                 <Route
                                     path="/calendar"
-                                    element={access?.DataManagement ? <Calendar /> : <NoAccess />}
+                                    element={
+                                        user?.access?.DataManagement ? <Calendar /> : <NoAccess />
+                                    }
                                 />
                                 <Route
                                     path="/accounting-warehouse"
                                     element={
-                                        access?.DataManagement ? (
+                                        user?.access?.DataManagement ? (
                                             <AccountingWarehouse />
                                         ) : (
                                             <NoAccess />
@@ -301,7 +298,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route
                                     path="/accounting-workers"
                                     element={
-                                        access?.DataManagement ? (
+                                        user?.access?.DataManagement ? (
                                             <AccountingWorkers />
                                         ) : (
                                             <NoAccess />
