@@ -20,7 +20,7 @@ import {
 import { axiosInstance } from './api/axiosInstance';
 
 const App = () => {
-    const { currentMode, activeMenu, setSkeletonUp } = useStateContext();
+    const { currentMode, activeMenu, setSkeletonUp, setAccess } = useStateContext();
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const user = useAuthStore((state) => state.user);
     const setLeads = useCompanyStore((state) => state.setLeads);
@@ -33,7 +33,6 @@ const App = () => {
     const setDepartments = useCompanyStructureStore((state) => state.setDepartments);
     const setStores = useCompanyStructureStore((state) => state.setStores);
     const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
-    const setAccesses = useSubUserStore((state) => state.setAccesses);
     const setSubUserShifts = useSubUserStore((state) => state.setShifts);
     const setSubUser = useSubUserStore((state) => state.setSubUser);
     const [techProblem, setTechProblem] = useState(false);
@@ -127,7 +126,7 @@ const App = () => {
                         (user) => user._id === subUserId,
                     );
                     if (currentUserSubUser) {
-                        setAccesses(response.data.access);
+                        setAccess(response.data.access);
                     }
                 } catch (error) {
                     console.error('Error fetching sub-user data:', error);
@@ -136,7 +135,7 @@ const App = () => {
             };
             fetchSubUserData();
         }
-    }, [setAccesses, user?.departmentId, user?.id, user?.role]);
+    }, [setAccess, user?.departmentId, user?.id, user?.role]);
 
     useEffect(() => {
         const fetchCompanyProductsAndWarehouses = async () => {
