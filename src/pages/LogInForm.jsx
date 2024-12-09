@@ -28,6 +28,7 @@ const LogInForm = ({ isQrRedirect }) => {
     const [alertModalResultMessage, setAlertModalResultMessage] = useState('');
     const [name, setName] = useState('');
     const [resettedPassword, setResettedPassword] = useState('');
+    const [showSuccessReg, setShowSuccessReg] = useState(false);
 
     // Обработка логина
     const handleSubmit = async (e) => {
@@ -67,16 +68,13 @@ const LogInForm = ({ isQrRedirect }) => {
             return;
         }
         try {
-            const response = await axiosInstance.post('/subUsers/create-subuser', {
+            const response = await axiosInstance.post('/auth/create-subuser', {
                 input: { email, password, name },
                 departmentLink: window.location.href,
                 companyId,
             });
-
-            if (response.status === 200) {
-                setAlertOpen(true);
-                // Деактивация кнопки регистрации
-                // Вы можете добавить дополнительную логику, если необходимо
+            if (response.status === 201) {
+                setShowSuccessReg(true);
             }
         } catch (error) {
             if (error.response && error.response.data) {
@@ -219,7 +217,6 @@ const LogInForm = ({ isQrRedirect }) => {
                             }
                             onClose={() => setShowSuccessPass(false)}
                         />
-
                         <div>
                             <button
                                 type="submit"
@@ -333,6 +330,14 @@ const LogInForm = ({ isQrRedirect }) => {
                     </form>
                 )}
             </div>
+            <AlertModal
+                open={showSuccessReg}
+                message={'Вы успешно зарегистрировались. Нажмите на кнопку чтобы зайти в сервис'}
+                onClose={() => {
+                    setShowSuccessReg(false);
+                    window.location.href = '/';
+                }}
+            />
         </div>
     );
 };

@@ -83,7 +83,7 @@ export const StoreAccordion = ({ stores, departments }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post(`/api/departments/create-department/`, {
+            const response = await axiosInstance.post(`/departments/create-department/`, {
                 storeId: activeStoreId,
                 name: departmentName,
             });
