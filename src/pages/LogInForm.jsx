@@ -184,7 +184,9 @@ const LogInForm = ({ isQrRedirect }) => {
                 type="submit"
                 disabled={isLoading || !email || !password}
                 className={`${
-                    !email || !password || !name ? 'opacity-50 cursor-not-allowed' : 'opacity-100'
+                    !email || !password || isLoading
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'opacity-100'
                 } group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white group-hover:text-indigo-400 bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
             >
                 {isLoading ? 'Загрузка...' : 'Войти'}
