@@ -1,6 +1,7 @@
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useState } from 'react';
+import axiosInstance from '../../../api/axiosInstance';
 
 export const SubuserDeleteModal = ({ isVisible, subuserId, onClose, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -8,13 +9,7 @@ export const SubuserDeleteModal = ({ isVisible, subuserId, onClose, onSuccess })
     const onDelete = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(
-                `https://nomalytica-back.onrender.com/api/subUsers//delete-subuser/${subuserId}`,
-                {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                },
-            );
+            const response = await axiosInstance.delete(`/subUsers//delete-subuser/${subuserId}`);
 
             if (!response.ok) {
                 throw new Error('Failed to update store');

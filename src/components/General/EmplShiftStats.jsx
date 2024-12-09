@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Dropdown } from 'primereact/dropdown';
+import axiosInstance from '../../api/axiosInstance';
 
 export const EmpltSiftStats = ({ stores }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,17 +22,11 @@ export const EmpltSiftStats = ({ stores }) => {
         }
         setLoading(true);
         try {
-            const response = await fetch(
+            const response = await axiosInstance.get(
                 `https://nomalytica-back.onrender.com/api/shifts/stats/${selectedStore._id}/${month + 1}/${year}`,
-                {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                },
             );
 
-            if (response.ok) {
-                setStats(response.data);
-            }
+            setStats(response.data);
         } catch {
             setStats(null);
         } finally {

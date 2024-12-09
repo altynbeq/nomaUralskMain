@@ -194,15 +194,11 @@ export const StoreAccordion = ({ stores, departments }) => {
         const privileges = mapPrivilegesToBackend();
         setIsLoading(true);
         try {
-            const response = await fetch(
+            const response = await axiosInstance.post(
                 'https://nomalytica-back.onrender.com/api/access/create-access',
                 {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...privileges,
-                        departmentId: departmentDetailsModal._id,
-                    }),
+                    ...privileges,
+                    departmentId: departmentDetailsModal._id,
                 },
             );
 
