@@ -98,7 +98,7 @@ export const AddWarehouseForm = ({
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Ответственный</label>
                     <InputText
-                        disabled
+                        disabled={!!subUser?.name}
                         value={subUser?.name}
                         onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
