@@ -11,7 +11,6 @@ import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
 import { useAuthStore, useCompanyStructureStore, useSubUserStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
-import { useStateContext } from './contexts/ContextProvider';
 
 // Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
@@ -28,7 +27,6 @@ const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 export const MainContent = ({ urls, activeMenu }) => {
     const stores = useCompanyStructureStore((state) => state.stores);
     const subUserShifts = useSubUserStore((state) => state.shifts);
-    const subUser = useSubUserStore((state) => state.subUser);
     const user = useAuthStore((state) => state.user);
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -37,6 +35,7 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState('');
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
+    const subUser = useSubUserStore((state) => state.subUser);
     const fileInput = useRef(null);
     const hasExecuted = useRef(false);
 
@@ -94,7 +93,7 @@ export const MainContent = ({ urls, activeMenu }) => {
             const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
             const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
             const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
-            const isCurrentSubUser = shift.subUserId === subUser._id;
+            const isCurrentSubUser = shift.subUserId === user.id;
             return isToday && isCurrentSubUser;
         });
 
@@ -141,7 +140,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                 }
             });
         }
-    }, [subUserShifts, subUser, currentLocation, stores, location.search]);
+    }, [subUserShifts, user, currentLocation, stores, location.search]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
@@ -167,10 +166,10 @@ export const MainContent = ({ urls, activeMenu }) => {
     }, [location.pathname, location.search]);
 
     useEffect(() => {
-        if (subUser && !subUser.image) {
+        if (user.role === 'subUser' && subUser && !subUser.image) {
             setShowUploadImageModal(true);
         }
-    }, [subUser]);
+    }, [subUser, user.role]);
 
     const handleModalClose = () => {
         setShowUploadImageModal(false);
@@ -178,13 +177,15 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
-        if (file) {
+        if (file.name) {
             const formData = new FormData();
             formData.append('avatar', file);
             setIsUploading(true);
             try {
-                await axiosInstance.post(`/subusers/subusers/${subUser.id}/avatar`, {
-                    formData,
+                await axiosInstance.post(`/subusers/subusers/${user.id}/avatar`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
                 });
                 setShowUploadImageModal(false);
             } catch (error) {
