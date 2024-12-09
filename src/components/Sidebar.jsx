@@ -5,11 +5,12 @@ import { MdOutlineCancel } from 'react-icons/md';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { links } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
-import { useSubUserStore } from '../store/index';
+import { useAuthStore } from '../store/index';
 
 const Sidebar = () => {
     const { currentColor, activeMenu, setActiveMenu, screenSize, access } = useStateContext();
     const [filteredLinks, setFilteredLinks] = useState([]);
+    const user = useAuthStore((state) => state.user);
 
     const handleCloseSideBar = () => {
         if (activeMenu !== undefined && screenSize <= 900) {
@@ -18,41 +19,28 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        console.log(access);
-        if (access) {
-            const newFilteredLinks = links
-                .map((category) => {
-                    if (category.title === 'Учёт' && !access.DataManagement) {
-                        return null;
-                    }
-
-                    let filteredCategoryLinks = category.links.filter((link) => {
-                        if (access.Analytics) {
-                            if (link.name === 'finance' && !access.Analytics.Finance) return false;
-                            if (link.name === 'sales' && !access.Analytics.Sales) return false;
-                            if (link.name === 'workers' && !access.Analytics.Workers) return false;
-                            if (link.name === 'sklad' && !access.Analytics.Warehouse) return false;
-                        }
-                        return true;
-                    });
-
-                    if (filteredCategoryLinks.length === 0) {
-                        return null;
-                    }
-
-                    return {
-                        ...category,
-                        links: filteredCategoryLinks,
-                    };
-                })
-                .filter((category) => category !== null);
-
-            setFilteredLinks(newFilteredLinks);
+        if (user.role === 'user') {
+            setFilteredLinks(links);
         } else {
-            setFilteredLinks(
-                links
+            if (access) {
+                const newFilteredLinks = links
                     .map((category) => {
-                        let filteredCategoryLinks = category.links;
+                        if (category.title === 'Учёт' && !access.DataManagement) {
+                            return null;
+                        }
+
+                        let filteredCategoryLinks = category.links.filter((link) => {
+                            if (access.Analytics) {
+                                if (link.name === 'finance' && !access.Analytics.Finance)
+                                    return false;
+                                if (link.name === 'sales' && !access.Analytics.Sales) return false;
+                                if (link.name === 'workers' && !access.Analytics.Workers)
+                                    return false;
+                                if (link.name === 'sklad' && !access.Analytics.Warehouse)
+                                    return false;
+                            }
+                            return true;
+                        });
 
                         if (filteredCategoryLinks.length === 0) {
                             return null;
@@ -63,10 +51,29 @@ const Sidebar = () => {
                             links: filteredCategoryLinks,
                         };
                     })
-                    .filter((category) => category !== null),
-            );
+                    .filter((category) => category !== null);
+
+                setFilteredLinks(newFilteredLinks);
+            } else {
+                setFilteredLinks(
+                    links
+                        .map((category) => {
+                            let filteredCategoryLinks = category.links;
+
+                            if (filteredCategoryLinks.length === 0) {
+                                return null;
+                            }
+
+                            return {
+                                ...category,
+                                links: filteredCategoryLinks,
+                            };
+                        })
+                        .filter((category) => category !== null),
+                );
+            }
         }
-    }, []);
+    }, [access, user]);
 
     const activeLink = 'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2';
     const normalLink =

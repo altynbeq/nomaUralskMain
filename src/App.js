@@ -114,28 +114,28 @@ const App = () => {
         user?.id,
     ]);
 
-    useEffect(() => {
-        if (user?.role === 'subUser') {
-            const subUserId = user?.id;
-            const fetchSubUserData = async () => {
-                try {
-                    const response = await axiosInstance.get(
-                        `access/access-and-subusers/${user?.departmentId}`,
-                    );
-                    const currentUserSubUser = response.data.subUsers.find(
-                        (user) => user._id === subUserId,
-                    );
-                    if (currentUserSubUser) {
-                        setAccess(response.data.access);
-                    }
-                } catch (error) {
-                    console.error('Error fetching sub-user data:', error);
-                    setTechProblem(true);
-                }
-            };
-            fetchSubUserData();
-        }
-    }, [setAccess, user?.departmentId, user?.id, user?.role]);
+    // useEffect(() => {
+    //     if (user?.role === 'subUser') {
+    //         const subUserId = user?.id;
+    //         const fetchSubUserData = async () => {
+    //             try {
+    //                 const response = await axiosInstance.get(
+    //                     `access/access-and-subusers/${user?.departmentId}`,
+    //                 );
+    //                 const currentUserSubUser = response.data.subUsers.find(
+    //                     (user) => user._id === subUserId,
+    //                 );
+    //                 if (currentUserSubUser) {
+    //                     setAccess(response.data.access);
+    //                 }
+    //             } catch (error) {
+    //                 console.error('Error fetching sub-user data:', error);
+    //                 setTechProblem(true);
+    //             }
+    //         };
+    //         fetchSubUserData();
+    //     }
+    // }, []);
 
     useEffect(() => {
         const fetchCompanyProductsAndWarehouses = async () => {
