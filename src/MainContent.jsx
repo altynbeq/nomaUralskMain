@@ -9,8 +9,9 @@ import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
-import { useCompanyStructureStore, useSubUserStore } from './store/index';
+import { useAuthStore, useCompanyStructureStore, useSubUserStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
+import { useStateContext } from './contexts/ContextProvider';
 
 // Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
@@ -25,9 +26,11 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
+    const { access } = useStateContext();
     const stores = useCompanyStructureStore((state) => state.stores);
     const subUserShifts = useSubUserStore((state) => state.shifts);
     const subUser = useSubUserStore((state) => state.subUser);
+    const user = useAuthStore((state) => state.user);
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -215,20 +218,105 @@ export const MainContent = ({ urls, activeMenu }) => {
                     }
                 >
                     <Routes>
+                        {/* Общие роуты */}
                         <Route path="/" element={<General urls={urls} />} />
                         <Route path="/general" element={<General urls={urls} />} />
-                        <Route path="/finance" element={<Finance urls={urls} />} />
-                        <Route path="/sales" element={<Sales urls={urls} />} />
-                        <Route path="/workers" element={<Workers urls={urls} />} />
-                        <Route path="/sklad" element={<Sklad urls={urls} />} />
+
+                        {/* DataManagement роуты с проверкой доступа */}
+
+                        {user?.role === 'user' ? (
+                            <>
+                                <Route path="/finance" element={<Finance urls={urls} />} />
+                                <Route path="/sales" element={<Sales urls={urls} />} />
+                                <Route path="/workers" element={<Workers urls={urls} />} />
+                                <Route path="/sklad" element={<Sklad urls={urls} />} />
+
+                                <Route
+                                    path="/calendar"
+                                    element={access?.DataManagement ? <Calendar /> : <NoAccess />}
+                                />
+                                <Route
+                                    path="/accounting-warehouse"
+                                    element={<AccountingWarehouse />}
+                                />
+                                <Route path="/accounting-workers" element={<AccountingWorkers />} />
+                            </>
+                        ) : (
+                            <>
+                                <Route
+                                    path="/finance"
+                                    element={
+                                        access?.Analytics?.Finance ? (
+                                            <Finance urls={urls} />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+                                <Route
+                                    path="/sales"
+                                    element={
+                                        access?.Analytics?.Sales ? (
+                                            <Sales urls={urls} />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+                                <Route
+                                    path="/workers"
+                                    element={
+                                        access?.Analytics?.Workers ? (
+                                            <Workers urls={urls} />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+                                <Route
+                                    path="/sklad"
+                                    element={
+                                        access?.Analytics?.Warehouse ? (
+                                            <Sklad urls={urls} />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+
+                                <Route
+                                    path="/calendar"
+                                    element={access?.DataManagement ? <Calendar /> : <NoAccess />}
+                                />
+                                <Route
+                                    path="/accounting-warehouse"
+                                    element={
+                                        access?.DataManagement ? (
+                                            <AccountingWarehouse />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+                                <Route
+                                    path="/accounting-workers"
+                                    element={
+                                        access?.DataManagement ? (
+                                            <AccountingWorkers />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+                            </>
+                        )}
+
+                        {/* Прочие роуты */}
                         <Route path="/docs" element={<ComingSoon />} />
                         <Route path="/resources" element={<ComingSoon />} />
                         <Route path="/support" element={<ComingSoon />} />
                         <Route path="/Q&A" element={<ComingSoon />} />
                         <Route path="/login" element={<LogInForm />} />
-                        <Route path="/calendar" element={<Calendar />} />
-                        <Route path="/accounting-warehouse" element={<AccountingWarehouse />} />
-                        <Route path="/accounting-workers" element={<AccountingWorkers />} />
                         <Route path="/no-access" element={<NoAccess />} />
                     </Routes>
                 </Suspense>
