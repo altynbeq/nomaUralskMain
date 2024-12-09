@@ -5,13 +5,12 @@ import { MdOutlineCancel } from 'react-icons/md';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { links } from '../data/dummy';
 import { useStateContext } from '../contexts/ContextProvider';
-import { useSubUserStore } from '../store/index';
+import { useAuthStore } from '../store/index';
 
 const Sidebar = () => {
     const { currentColor, activeMenu, setActiveMenu, screenSize } = useStateContext();
     const [filteredLinks, setFilteredLinks] = useState([]);
-    const access = useSubUserStore((state) => state.accesses);
-    const subUser = useSubUserStore((state) => state.subUser);
+    const user = useAuthStore((state) => state.user);
 
     const handleCloseSideBar = () => {
         if (activeMenu !== undefined && screenSize <= 900) {
@@ -20,63 +19,29 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        if (!access && !subUser) {
-            return;
-        }
-        if (access && subUser && Object.keys(subUser).length > 0) {
-            const newFilteredLinks = links
-                .map((category) => {
-                    if (category.title === 'Учёт' && !access.DataManagement) {
-                        return null;
-                    }
-
-                    let filteredCategoryLinks = category.links.filter((link) => {
-                        if (access.Analytics) {
-                            if (link.name === 'finance' && !access.Analytics.Finance) return false;
-                            if (link.name === 'sales' && !access.Analytics.Sales) return false;
-                            if (link.name === 'workers' && !access.Analytics.Workers) return false;
-                            if (link.name === 'sklad' && !access.Analytics.Warehouse) return false;
-                        }
-                        return true;
-                    });
-
-                    // Условие для скрытия "finance" при определенном companyId
-                    if (subUser?.companyId === '6720f0a45801c6007e836aa4') {
-                        filteredCategoryLinks = filteredCategoryLinks.filter(
-                            (link) => link.name !== 'finance',
-                        );
-                    }
-
-                    if (Object.keys(subUser).length > 0) {
-                        filteredCategoryLinks = filteredCategoryLinks.filter(
-                            (link) => link.name !== 'sales',
-                        );
-                    }
-
-                    if (filteredCategoryLinks.length === 0) {
-                        return null;
-                    }
-
-                    return {
-                        ...category,
-                        links: filteredCategoryLinks,
-                    };
-                })
-                .filter((category) => category !== null);
-
-            setFilteredLinks(newFilteredLinks);
+        if (user.role === 'user') {
+            setFilteredLinks(links);
         } else {
-            setFilteredLinks(
-                links
+            if (user?.access) {
+                const newFilteredLinks = links
                     .map((category) => {
-                        let filteredCategoryLinks = category.links;
-
-                        // Условие для скрытия "finance" при определенном companyId
-                        if (subUser?.companyId === '6720f0a45801c6007e836aa4') {
-                            filteredCategoryLinks = filteredCategoryLinks.filter(
-                                (link) => link.name !== 'finance',
-                            );
+                        if (category.title === 'Учёт' && !user?.access.DataManagement) {
+                            return null;
                         }
+
+                        let filteredCategoryLinks = category.links.filter((link) => {
+                            if (user?.access.Analytics) {
+                                if (link.name === 'finance' && !user?.access.Analytics.Finance)
+                                    return false;
+                                if (link.name === 'sales' && !user?.access.Analytics.Sales)
+                                    return false;
+                                if (link.name === 'workers' && !user?.access.Analytics.Workers)
+                                    return false;
+                                if (link.name === 'sklad' && !user?.access.Analytics.Warehouse)
+                                    return false;
+                            }
+                            return true;
+                        });
 
                         if (filteredCategoryLinks.length === 0) {
                             return null;
@@ -87,10 +52,29 @@ const Sidebar = () => {
                             links: filteredCategoryLinks,
                         };
                     })
-                    .filter((category) => category !== null),
-            );
+                    .filter((category) => category !== null);
+
+                setFilteredLinks(newFilteredLinks);
+            } else {
+                setFilteredLinks(
+                    links
+                        .map((category) => {
+                            let filteredCategoryLinks = category.links;
+
+                            if (filteredCategoryLinks.length === 0) {
+                                return null;
+                            }
+
+                            return {
+                                ...category,
+                                links: filteredCategoryLinks,
+                            };
+                        })
+                        .filter((category) => category !== null),
+                );
+            }
         }
-    }, [access, subUser]);
+    }, [user]);
 
     const activeLink = 'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2';
     const normalLink =

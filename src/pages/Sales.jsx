@@ -51,7 +51,7 @@ function convertUrl(apiUrl) {
 
 const Sales = ({ urls }) => {
     const [salesShare, setSalesShare] = useState([]);
-    const { skeletonUp } = useStateContext();
+    const { skeletonUp, access } = useStateContext();
     const kkm = useCompanyStore((state) => state.kkm);
     const receipts = useCompanyStore((state) => state.receipts);
     const leads = useCompanyStore((state) => state.leads);

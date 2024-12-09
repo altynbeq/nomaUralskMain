@@ -63,9 +63,6 @@ const Finance = ({ urls }) => {
         );
     }
 
-    if (localStorage.getItem('companyId') === '6720f0a45801c6007e836aa4') {
-        return <Navigate to="/no-access" replace />;
-    }
     return (
         <div className="mt-12 flex flex-col justify-center align-center gap-8">
             <div className="flex mt-5 w-[100%] align-center gap-4 flex-wrap md:flex-row justify-center">

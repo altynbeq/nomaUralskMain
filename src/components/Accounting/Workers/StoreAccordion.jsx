@@ -59,9 +59,7 @@ export const StoreAccordion = ({ stores, departments }) => {
 
     const handleDeleteDepartment = async (deptId) => {
         try {
-            const response = await axiosInstance.delete(
-                `/api/departments/delete-department/${deptId}`,
-            );
+            const response = await axiosInstance.delete(`/departments/delete-department/${deptId}`);
             if (response.data) {
                 setShowAlertModal(true);
                 setShowAddDepartmentModal(false);
@@ -145,7 +143,7 @@ export const StoreAccordion = ({ stores, departments }) => {
         setDepartmentDetailsModal(dept);
         const fetchAccesses = async (deptId) => {
             try {
-                const response = await axiosInstance.get(`/access/access-and-subusers/${deptId}`);
+                const response = await axiosInstance.get(`/access/access/${deptId}`);
 
                 if (response.data && response.data.access) {
                     setInitialAccess(response.data.access);

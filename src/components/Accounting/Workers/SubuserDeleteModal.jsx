@@ -1,7 +1,7 @@
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useState } from 'react';
-import axiosInstance from '../../../api/axiosInstance';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const SubuserDeleteModal = ({ isVisible, subuserId, onClose, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -9,11 +9,8 @@ export const SubuserDeleteModal = ({ isVisible, subuserId, onClose, onSuccess })
     const onDelete = async () => {
         setIsLoading(true);
         try {
-            const response = await axiosInstance.delete(`/subUsers//delete-subuser/${subuserId}`);
+            await axiosInstance.delete(`/subUsers/delete-subuser/${subuserId}`);
 
-            if (!response.ok) {
-                throw new Error('Failed to update store');
-            }
             onSuccess();
         } catch (error) {
             console.error('Error updating store:', error.message);
