@@ -8,7 +8,7 @@ import { useStateContext } from '../contexts/ContextProvider';
 import { useAuthStore } from '../store/index';
 
 const Sidebar = () => {
-    const { currentColor, activeMenu, setActiveMenu, screenSize, access } = useStateContext();
+    const { currentColor, activeMenu, setActiveMenu, screenSize } = useStateContext();
     const [filteredLinks, setFilteredLinks] = useState([]);
     const user = useAuthStore((state) => state.user);
 
@@ -22,21 +22,22 @@ const Sidebar = () => {
         if (user.role === 'user') {
             setFilteredLinks(links);
         } else {
-            if (access) {
+            if (user?.access) {
                 const newFilteredLinks = links
                     .map((category) => {
-                        if (category.title === 'Учёт' && !access.DataManagement) {
+                        if (category.title === 'Учёт' && !user?.access.DataManagement) {
                             return null;
                         }
 
                         let filteredCategoryLinks = category.links.filter((link) => {
-                            if (access.Analytics) {
-                                if (link.name === 'finance' && !access.Analytics.Finance)
+                            if (user?.access.Analytics) {
+                                if (link.name === 'finance' && !user?.access.Analytics.Finance)
                                     return false;
-                                if (link.name === 'sales' && !access.Analytics.Sales) return false;
-                                if (link.name === 'workers' && !access.Analytics.Workers)
+                                if (link.name === 'sales' && !user?.access.Analytics.Sales)
                                     return false;
-                                if (link.name === 'sklad' && !access.Analytics.Warehouse)
+                                if (link.name === 'workers' && !user?.access.Analytics.Workers)
+                                    return false;
+                                if (link.name === 'sklad' && !user?.access.Analytics.Warehouse)
                                     return false;
                             }
                             return true;
@@ -73,7 +74,7 @@ const Sidebar = () => {
                 );
             }
         }
-    }, [access, user]);
+    }, [user]);
 
     const activeLink = 'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2';
     const normalLink =
