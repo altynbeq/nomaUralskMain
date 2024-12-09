@@ -67,9 +67,9 @@ axiosInstance.interceptors.response.use(
         }
 
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
+            // Если запрос это обновление токена и он неуспешен
             if (originalRequest.url.includes('/auth/refresh-token')) {
                 useAuthStore.getState().setAccessToken(null);
-                useAuthStore.getState().reset();
                 return Promise.reject(error);
             }
 
@@ -100,7 +100,6 @@ axiosInstance.interceptors.response.use(
                 console.error('Ошибка при обновлении токена:', err);
                 processQueue(err, null);
                 useAuthStore.getState().setAccessToken(null);
-                useAuthStore.getState().reset();
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
@@ -110,38 +109,5 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
     },
 );
-
-// Проактивное обновление токена
-// const scheduleTokenRefresh = () => {
-//     const { accessToken } = useAuthStore.getState();
-//     if (accessToken) {
-//         const decoded = jwt.decode(accessToken);
-//         if (decoded && decoded.exp) {
-//             const expiresAt = decoded.exp * 1000;
-//             const now = Date.now();
-//             const timeout = expiresAt - now - 60 * 1000; // Обновить за 1 минуту до истечения
-
-//             if (timeout > 0) {
-//                 setTimeout(async () => {
-//                     try {
-//                         const newToken = await refreshToken();
-//                         useAuthStore.getState().setAccessToken(newToken);
-//                         scheduleTokenRefresh(); // Перепланировать обновление
-//                     } catch (err) {
-//                         console.error('Не удалось обновить токен:', err);
-//                         useAuthStore.getState().setAccessToken(null);
-//                         useAuthStore.getState().reset();
-//                         // Здесь можно показать уведомление пользователю
-//                     }
-//                 }, timeout);
-//             }
-//         }
-//     }
-// };
-
-// // Вызов функции после успешного входа или обновления токена
-// useAuthStore.subscribe((state) => {
-//     scheduleTokenRefresh();
-// });
 
 export default axiosInstance;
