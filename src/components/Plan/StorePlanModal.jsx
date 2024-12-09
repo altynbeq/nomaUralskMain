@@ -5,7 +5,8 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import avatar from '../../data/avatar.jpg';
-import axiosInstance from '../../api/axiosInstance';
+import { axiosInstance } from '../../api/axiosInstance';
+import AlertModal from '../AlertModal';
 
 export const StorePlanModal = ({ isVisible, onHide, store, successSetPlan }) => {
     const categories = ['Розы', 'Шоколадки', 'Боксы'];
@@ -17,6 +18,8 @@ export const StorePlanModal = ({ isVisible, onHide, store, successSetPlan }) => 
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingPlanIndex, setEditingPlanIndex] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertModalMessage, setAlertModalMessage] = useState('');
 
     useEffect(() => {
         if (store?.plans) {
@@ -49,14 +52,16 @@ export const StorePlanModal = ({ isVisible, onHide, store, successSetPlan }) => 
                 plans: sanitizedPlans,
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to update store');
+            if (response.status === 200) {
+                setAlertModalMessage('Вы успешно обновили магазин');
+                setShowAlertModal(true);
             }
             closeSecondModal();
             onHide();
             successSetPlan();
-        } catch (error) {
-            console.error('Error updating store:', error.message);
+        } catch {
+            setAlertModalMessage('Не удалось обновить магазин');
+            setShowAlertModal(true);
         } finally {
             setIsLoading(false);
         }
@@ -239,6 +244,11 @@ export const StorePlanModal = ({ isVisible, onHide, store, successSetPlan }) => 
                             label={isEditMode ? 'Сохранить изменения' : 'Сохранить'}
                         />
                     </div>
+                    <AlertModal
+                        open={showAlertModal}
+                        message={alertModalMessage}
+                        onClose={() => setShowAlertModal(false)}
+                    />
                 </div>
             </Dialog>
         </>

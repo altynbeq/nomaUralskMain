@@ -7,24 +7,24 @@ import { axiosInstance } from '../../../api/axiosInstance';
 export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
     const qrRef = useRef(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleGeoSave = async () => {
         if (!selectedLocation || !selectedStore) {
             return;
         }
+        setIsLoading(true);
         try {
             const response = await axiosInstance.put(`/stores/update-store/${selectedStore?._id}`, {
                 location: selectedLocation, // Передаем координаты в формате lat/lng
             });
-
-            const data = await response.json();
-            if (response.ok) {
-                setShowStoreInfoModal(false);
-            } else {
-                alert('Ошибка обновления локации: ' + data.message);
+            if (response.status === 200) {
+                setShowStoreInfoModal(true);
             }
         } catch (error) {
-            console.error('Ошибка сохранения локации:', error);
+            console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -63,7 +63,10 @@ export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
                     setSelectedLocation={setSelectedLocation}
                 />
                 <Button
-                    className="mx-auto mt-5 bg-blue-500 text-white rounded p-2 max-w-[180px]"
+                    disabled={isLoading}
+                    className={`${
+                        isLoading ? 'opacity-50 cursor-not-allowed' : 'opacity-100'
+                    } mx-auto mt-5 bg-blue-500 text-white rounded p-2 max-w-[180px]`}
                     onClick={() => handleGeoSave()}
                     label="Выбрать локацию"
                 />

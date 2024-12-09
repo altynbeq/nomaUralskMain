@@ -3,11 +3,11 @@ import { Button } from '.';
 import avatar from '../data/avatar.jpg';
 import { useAuthStore, useSubUserStore } from '../store/index';
 import { axiosInstance } from '../api/axiosInstance';
-import AlertModal from './AlertModal';
 
 const UserProfile = () => {
     const reset = useAuthStore((state) => state.reset);
     const user = useAuthStore((state) => state.user);
+    const subUser = useSubUserStore((state) => state.subUser);
     const clearSubUserStore = useSubUserStore((state) => state.clearSubUserStore);
     const clearAuthData = async () => {
         try {
@@ -37,7 +37,11 @@ const UserProfile = () => {
             <div className="flex flex-col md:flex-row gap-5 items-center mt-6 border-color border-b-1 pb-6">
                 <img
                     className="rounded-full h-24 w-24"
-                    src={user?.image ? `https://nomalytica-back.onrender.com${user.image}` : avatar}
+                    src={
+                        subUser?.image
+                            ? `https://nomalytica-back.onrender.com${subUser.image}`
+                            : avatar
+                    }
                     alt="user-profile"
                 />
                 <div className="overflow-hidden text-center md:text-left">
