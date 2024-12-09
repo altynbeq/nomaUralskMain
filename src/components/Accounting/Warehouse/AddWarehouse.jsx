@@ -8,6 +8,7 @@ import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
 import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { axiosInstance } from '../../../api/axiosInstance';
+import { useAuthStore } from '../../../store';
 
 export const AddWarehouse = () => {
     const isSmallScreen = useIsSmallScreen(768);
@@ -25,6 +26,7 @@ export const AddWarehouse = () => {
     const [errors, setErrors] = useState({});
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const user = useAuthStore((state) => state.user);
 
     const removeError = (field) => {
         setErrors((prevErrors) => {
@@ -94,12 +96,7 @@ export const AddWarehouse = () => {
                 submissionData.append('reason', formData.reason);
                 submissionData.append('quantity', formData.quantity);
                 submissionData.append('file', formData.file);
-                const currentUserDepartmentId = localStorage.getItem('departmentId');
-                const subuserCompanyId = localStorage.getItem('companyId');
-                const userId = localStorage.getItem('_id');
-                const companyId = isValidDepartmentId(currentUserDepartmentId)
-                    ? subuserCompanyId
-                    : userId;
+                const companyId = user?.companyId ? user?.companyId : user?.id;
                 setIsLoading(true);
                 try {
                     await axiosInstance.post(
