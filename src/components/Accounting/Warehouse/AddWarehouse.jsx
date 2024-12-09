@@ -6,18 +6,18 @@ import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
-import { isValidDepartmentId } from '../../../methods/isValidDepartmentId';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { useAuthStore } from '../../../store';
 
 export const AddWarehouse = () => {
+    const user = useAuthStore((state) => state.user);
     const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         productName: '',
         date: new Date(),
         organization: '',
-        responsible: '',
+        responsible: user?.name,
         warehouse: '',
         reason: '',
         quantity: '',
@@ -26,7 +26,6 @@ export const AddWarehouse = () => {
     const [errors, setErrors] = useState({});
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const user = useAuthStore((state) => state.user);
 
     const removeError = (field) => {
         setErrors((prevErrors) => {

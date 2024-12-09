@@ -1,7 +1,7 @@
-// AddWarehouseForm.js
 import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
+import { AutoComplete } from 'primereact/autocomplete';
 import { Dropdown } from 'primereact/dropdown';
 import { formatDate } from '../../../methods/dataFormatter';
 import { useCompanyStore, useCompanyStructureStore, useSubUserStore } from '../../../store';
@@ -17,6 +17,7 @@ export const AddWarehouseForm = ({
     errors, // Получаем ошибки из родительского компонента
 }) => {
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const warehouses = useCompanyStore((state) => state.warehouses);
     const products = useCompanyStore((state) => state.products);
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -42,22 +43,32 @@ export const AddWarehouseForm = ({
         handleDropdownChange(subUser, 'responsible');
     }, [handleDateChange, handleDropdownChange, subUser]);
 
+    // Функция для поиска товаров
+    const searchProducts = (event) => {
+        const query = event.query.toLowerCase();
+        const filtered = products?.filter((product) =>
+            product.НоменклатураНаименование.toLowerCase().includes(query),
+        );
+        setFilteredProducts(filtered);
+    };
+
     return (
         <form className="px-4" onSubmit={handleSubmit}>
             <div className={`grid gap-4 grid-cols-1 md:grid-cols-2`}>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Название товара</label>
-                    <Dropdown
+                    <AutoComplete
                         value={formData.productName}
                         onChange={(e) => handleDropdownChange(e.value, 'productName')}
-                        options={products}
-                        optionLabel="НоменклатураНаименование"
-                        placeholder="Товар"
-                        className={`border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
-                        showClear
+                        suggestions={filteredProducts}
+                        completeMethod={searchProducts}
+                        field="НоменклатураНаименование"
+                        placeholder="Поиск товара"
+                        className={`border-blue-500 border-2 rounded-lg p-2 focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
                     />
                     {errors.productName && <small className="p-error">{errors.productName}</small>}
                 </div>
+
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Дата</label>
                     <InputText
@@ -67,6 +78,7 @@ export const AddWarehouseForm = ({
                     />
                     {errors.date && <small className="p-error">{errors.date}</small>}
                 </div>
+
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Организация</label>
                     <Dropdown
@@ -82,9 +94,11 @@ export const AddWarehouseForm = ({
                         <small className="p-error">{errors.organization}</small>
                     )}
                 </div>
+
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Ответственный</label>
                     <InputText
+                        disabled
                         value={subUser?.name}
                         onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
@@ -92,6 +106,7 @@ export const AddWarehouseForm = ({
                     />
                     {errors.responsible && <small className="p-error">{errors.responsible}</small>}
                 </div>
+
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Склад</label>
                     <Dropdown
@@ -100,11 +115,12 @@ export const AddWarehouseForm = ({
                         options={warehouses}
                         optionLabel="warehouseName"
                         placeholder="Склад"
-                        className={`border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
                         showClear
                     />
                     {errors.warehouse && <small className="p-error">{errors.warehouse}</small>}
                 </div>
+
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Причина</label>
                     <InputText
@@ -115,6 +131,7 @@ export const AddWarehouseForm = ({
                     />
                     {errors.reason && <small className="p-error">{errors.reason}</small>}
                 </div>
+
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Количество</label>
                     <InputText
@@ -122,21 +139,18 @@ export const AddWarehouseForm = ({
                         onChange={(e) => {
                             const value = e.target.value;
 
-                            // Проверяем, является ли значение числом
                             if (/^\d*$/.test(value)) {
-                                // Разрешаем только числовые значения
                                 handleInputChange(e, 'quantity');
                             }
                         }}
                         inputMode="numeric"
-                        type="text" // Изменено на "number" для валидации чисел
+                        type="text"
                         placeholder="Количество"
                         className={`border-blue-500 border-2 placeholder-gray rounded-lg p-2 max-w-[250px]  ${errors.quantity ? 'border-red-500' : ''}`}
                     />
                     {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
 
-                {/* Photo Upload */}
                 <div className="space-y-2 flex flex-col max-w-[150px]">
                     <label className="text-sm font-medium">Фото</label>
                     <div className="relative">
@@ -174,6 +188,7 @@ export const AddWarehouseForm = ({
                     {errors.file && <small className="p-error">{errors.file}</small>}
                 </div>
             </div>
+
             <div className="flex justify-center md:col-span-2">
                 <Button
                     label="Добавить"
