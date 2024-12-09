@@ -40,13 +40,6 @@ const Sidebar = () => {
                         return true;
                     });
 
-                    // Условие для скрытия "finance" при определенном companyId
-                    if (subUser?.companyId === '6720f0a45801c6007e836aa4') {
-                        filteredCategoryLinks = filteredCategoryLinks.filter(
-                            (link) => link.name !== 'finance',
-                        );
-                    }
-
                     if (Object.keys(subUser).length > 0) {
                         filteredCategoryLinks = filteredCategoryLinks.filter(
                             (link) => link.name !== 'sales',
@@ -70,13 +63,6 @@ const Sidebar = () => {
                 links
                     .map((category) => {
                         let filteredCategoryLinks = category.links;
-
-                        // Условие для скрытия "finance" при определенном companyId
-                        if (subUser?.companyId === '6720f0a45801c6007e836aa4') {
-                            filteredCategoryLinks = filteredCategoryLinks.filter(
-                                (link) => link.name !== 'finance',
-                            );
-                        }
 
                         if (filteredCategoryLinks.length === 0) {
                             return null;
