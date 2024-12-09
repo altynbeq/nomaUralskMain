@@ -8,10 +8,8 @@ import { useStateContext } from '../contexts/ContextProvider';
 import { useSubUserStore } from '../store/index';
 
 const Sidebar = () => {
-    const { currentColor, activeMenu, setActiveMenu, screenSize } = useStateContext();
+    const { currentColor, activeMenu, setActiveMenu, screenSize, access } = useStateContext();
     const [filteredLinks, setFilteredLinks] = useState([]);
-    const access = useSubUserStore((state) => state.accesses);
-    const subUser = useSubUserStore((state) => state.subUser);
 
     const handleCloseSideBar = () => {
         if (activeMenu !== undefined && screenSize <= 900) {
@@ -20,10 +18,8 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        if (!access && !subUser) {
-            return;
-        }
-        if (access && subUser && Object.keys(subUser).length > 0) {
+        console.log(access);
+        if (access) {
             const newFilteredLinks = links
                 .map((category) => {
                     if (category.title === 'Учёт' && !access.DataManagement) {
@@ -39,12 +35,6 @@ const Sidebar = () => {
                         }
                         return true;
                     });
-
-                    if (Object.keys(subUser).length > 0) {
-                        filteredCategoryLinks = filteredCategoryLinks.filter(
-                            (link) => link.name !== 'sales',
-                        );
-                    }
 
                     if (filteredCategoryLinks.length === 0) {
                         return null;
@@ -76,7 +66,7 @@ const Sidebar = () => {
                     .filter((category) => category !== null),
             );
         }
-    }, [access, subUser]);
+    }, []);
 
     const activeLink = 'flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2';
     const normalLink =
