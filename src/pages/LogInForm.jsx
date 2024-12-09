@@ -15,6 +15,7 @@ const LogInForm = ({ isQrRedirect }) => {
     const setProfileName = useProfileStore((state) => state.setName);
     const setProfileEmail = useProfileStore((state) => state.setEmail);
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
+    const setRefreshToken = useAuthStore((state) => state.setRefreshToken);
     const setUser = useAuthStore((state) => state.setUser);
     const setIsLoggedIn = useAuthStore((state) => state.setIsLoggedIn);
 
@@ -38,9 +39,10 @@ const LogInForm = ({ isQrRedirect }) => {
         setIsLoading(true);
         try {
             const { data } = await axiosInstance.post('/auth/login', { email, password });
-            const { accessToken, user, isSuccess } = data;
+            const { accessToken, user, isSuccess, refreshToken } = data;
             if (isSuccess) {
                 setAccessToken(accessToken);
+                setRefreshToken(refreshToken);
                 setUser(user);
                 setProfileName(user.email);
                 setProfileEmail(user.name);
