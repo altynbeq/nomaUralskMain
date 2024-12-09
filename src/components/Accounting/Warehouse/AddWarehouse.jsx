@@ -124,7 +124,19 @@ export const AddWarehouse = () => {
                 console.log('Validation failed:', errors);
             }
         },
-        [formData, errors, validate],
+        [
+            validate,
+            formData.productName,
+            formData.organization,
+            formData.responsible,
+            formData.warehouse,
+            formData.reason,
+            formData.quantity,
+            formData.file,
+            user?.companyId,
+            user?.id,
+            errors,
+        ],
     );
 
     return (

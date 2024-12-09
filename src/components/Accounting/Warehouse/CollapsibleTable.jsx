@@ -34,7 +34,7 @@ export default function CollapsibleTableWithDetails() {
     }, [clientId]);
 
     useEffect(() => {
-        if (writeOffs.length) {
+        if (writeOffs?.length) {
             let filteredWriteOffs = writeOffs;
 
             if (dateRange && dateRange[0] && dateRange[1]) {

@@ -72,6 +72,7 @@ const App = () => {
                 setUrls(companyData);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                setTechProblem(true);
             } finally {
                 setSkeletonUp(false);
             }
@@ -99,6 +100,7 @@ const App = () => {
                 }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
+                setTechProblem(true);
             }
         };
         fetchUserStructure();
@@ -129,6 +131,7 @@ const App = () => {
                     }
                 } catch (error) {
                     console.error('Error fetching sub-user data:', error);
+                    setTechProblem(true);
                 }
             };
             fetchSubUserData();
@@ -156,6 +159,7 @@ const App = () => {
                 }
             } catch (error) {
                 console.error('Error fetching company data:', error);
+                setTechProblem(true);
             }
         };
         fetchCompanyProductsAndWarehouses();
