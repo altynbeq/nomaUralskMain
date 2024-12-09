@@ -230,11 +230,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route path="/sales" element={<Sales urls={urls} />} />
                                 <Route path="/workers" element={<Workers urls={urls} />} />
                                 <Route path="/sklad" element={<Sklad urls={urls} />} />
-
-                                <Route
-                                    path="/calendar"
-                                    element={access?.DataManagement ? <Calendar /> : <NoAccess />}
-                                />
+                                <Route path="/calendar" element={<Calendar />} />
                                 <Route
                                     path="/accounting-warehouse"
                                     element={<AccountingWarehouse />}
