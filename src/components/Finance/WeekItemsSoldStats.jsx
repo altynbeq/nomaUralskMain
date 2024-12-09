@@ -1,12 +1,9 @@
 import React from 'react';
 import { IoIosMore } from 'react-icons/io';
-import { useStateContext } from '../../contexts/ContextProvider';
 import { FiStar, FiShoppingCart } from 'react-icons/fi';
 import { BsChatLeft } from 'react-icons/bs';
 
 const WeekItemsStats = () => {
-    const { currentColor, currentMode } = useStateContext();
-
     const weeklyStats = [
         {
             icon: <FiShoppingCart />,
