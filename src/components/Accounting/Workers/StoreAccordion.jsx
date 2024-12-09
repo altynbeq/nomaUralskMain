@@ -143,7 +143,7 @@ export const StoreAccordion = ({ stores, departments }) => {
         setDepartmentDetailsModal(dept);
         const fetchAccesses = async (deptId) => {
             try {
-                const response = await axiosInstance.get(`/access/access-and-subusers/${deptId}`);
+                const response = await axiosInstance.get(`/access/access/${deptId}`);
 
                 if (response.data && response.data.access) {
                     setInitialAccess(response.data.access);
