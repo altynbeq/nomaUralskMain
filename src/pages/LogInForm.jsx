@@ -24,6 +24,8 @@ const LogInForm = ({ isQrRedirect }) => {
     const [name, setName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [alertOpen, setAlertOpen] = useState(false);
+    const [showAlertMessage, setShowAlertMessage] = useState('');
+    const [showLoginAlertMessage, setShowLoginAlertMessage] = useState('');
     const [showReset, setShowReset] = useState(false);
     const [showSuccessPass, setShowSuccessPass] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -49,8 +51,11 @@ const LogInForm = ({ isQrRedirect }) => {
                 setIsLoggedIn(true);
                 navigate(isQrRedirect ? '/general?isQrRedirect=true' : '/general');
             }
-        } catch {
-            setAlertOpen(true);
+        } catch (error) {
+            setShowLoginAlertMessage(true);
+            setShowAlertMessage(
+                `${error.response.data.message === 'Invalid email or password' ? 'Неверные данные входа' : 'Не удалось войти. Попробуйте снова'}`,
+            );
         } finally {
             setIsLoading(false);
         }
@@ -270,9 +275,9 @@ const LogInForm = ({ isQrRedirect }) => {
             style={{ backgroundImage: `url(${window.innerWidth >= 768 ? bgDesk : bgMob})` }}
         >
             <AlertModal
-                open={alertOpen.login || alertOpen.signUp}
-                message=""
-                onClose={() => setAlertOpen(false)}
+                open={showLoginAlertMessage}
+                message={showAlertMessage}
+                onClose={() => setShowLoginAlertMessage(false)}
             />
             <div className="max-w-md w-full bg-white p-8 border-8-grey rounded-2xl space-y-8">
                 <div className="flex text-blue-800 mb-10 flex-row text-4xl align-center justify-center gap-1">
