@@ -8,6 +8,7 @@ import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
 import { useCompanyStructureStore } from '../../../store/companyStructureStore';
+import { socket } from '../../../socket'; // путь к вашему socket.js
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -27,6 +28,41 @@ export const EmployeeCalendar = () => {
 
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
+
+    const handleSocketShiftUpdate = useCallback((updatedShift) => {
+        // Обновляем данные в subUsersState
+        setSubUsersState((prevSubUsers) => {
+            return prevSubUsers.map((user) => {
+                if (!user.shifts) return user;
+
+                // Ищем нужную смену по ID
+                const shiftIndex = user.shifts.findIndex((s) => s._id === updatedShift._id);
+                if (shiftIndex !== -1) {
+                    // Клонируем массив, чтобы не мутировать state напрямую
+                    const updatedShifts = [...user.shifts];
+                    updatedShifts[shiftIndex] = updatedShift;
+                    return { ...user, shifts: updatedShifts };
+                }
+                return user;
+            });
+        });
+        setSelectedDayShiftsModal((prevShifts) => {
+            return prevShifts.map((s) => (s._id === updatedShift._id ? updatedShift : s));
+        });
+        toast.success('Смена была обновлена');
+    }, []);
+
+    useEffect(() => {
+        // Слушаем событие 'newMessage' от сервера
+        socket.on('update-shift', (data) => {
+            handleSocketShiftUpdate(data.shift);
+        });
+
+        // Очистка при размонтировании компонента
+        return () => {
+            socket.off('update-shift');
+        };
+    }, [handleSocketShiftUpdate]);
 
     useEffect(() => {
         setSubUsersState(subUsers);
