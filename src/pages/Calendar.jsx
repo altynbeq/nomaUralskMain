@@ -99,7 +99,9 @@ const Calendar = () => {
     return (
         <div className="w-[100%] align-center justify-center">
             <div className=" mt-20 md:mt-0 mb-0 p-4 pb-0 bg-white rounded-3xl subtle-border m-5">
-                <div className="flex justify-between max-h-[40px] mb-16 mt-5">
+                <Header category="Учёт" title="Смены" />
+                <EmployeeCalendar stores={stores} departments={departments} subUsers={subUsers} />
+                {/* <div className="flex justify-between max-h-[40px] mb-16 mt-5">
                     {' '}
                     <Header category="Учёт" title="Смены" />
                     <Dropdown
@@ -111,13 +113,13 @@ const Calendar = () => {
                         className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         showClear
                     />
-                </div>
-                <AlertModal
+                </div> */}
+                {/* <AlertModal
                     open={alertOpen}
                     message="Пожалуйста, выберите магазин перед добавлением смены."
                     onClose={() => setAlertOpen(false)}
-                />
-                <ScheduleWithEdit
+                /> */}
+                {/* <ScheduleWithEdit
                     selectedStoreId={selectedStore ? selectedStore._id : selectedStoreId}
                     open={modal}
                     setOpen={setModal}
@@ -130,9 +132,9 @@ const Calendar = () => {
                     setOpen={setModalAddShift}
                     currentShifts={currentShifts}
                     setCurrentShifts={setCurrentShifts}
-                />
+                /> */}
 
-                <FullCalendar
+                {/* <FullCalendar
                     plugins={[dayGridPlugin]}
                     initialView="dayGridMonth"
                     weekends={true}
@@ -153,11 +155,11 @@ const Calendar = () => {
                             click: openModalAddShift,
                         },
                     }}
-                />
+                /> */}
             </div>
-            <div className="flex bg-transparent justify-center align-center mt-20 w-[90%] md:ml-0 md:w-[100%]">
+            {/* <div className="flex bg-transparent justify-center align-center mt-20 w-[90%] md:ml-0 md:w-[100%]">
                 <EmployeeCalendar stores={stores} departments={departments} subUsers={subUsers} />
-            </div>
+            </div> */}
         </div>
     );
 };

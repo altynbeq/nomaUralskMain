@@ -4,6 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 import { Dialog } from 'primereact/dialog';
 import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
+import { AddShift } from '../../Calendar/AddShift';
 
 export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
@@ -16,6 +17,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [shosModalAddShift, setShowModalAddShift] = useState(false);
 
     // Вспомогательная функция для расчета опоздания
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
@@ -286,10 +288,20 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                 </div>
                 <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
                     <div className="flex flex-row gap-2">
-                        <button className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition">
+                        <button
+                            onClick={() => setShowModalAddShift(true)}
+                            className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
+                        >
                             <p>Добавить смену</p>
                             <FaPlus />
                         </button>
+                        <AddShift
+                            subusers={subUsers}
+                            open={shosModalAddShift}
+                            setOpen={setShowModalAddShift}
+                            stores={stores}
+                            subUsers={subUsers}
+                        />
                     </div>
                     <div className="relative">
                         {/* Filter Button */}
