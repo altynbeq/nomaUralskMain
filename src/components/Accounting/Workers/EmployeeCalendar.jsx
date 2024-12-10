@@ -209,6 +209,25 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
         toast.success('Вы успешно обновили смену');
     }, []);
 
+    const handleShiftsAdded = useCallback((newShifts) => {
+        setSubUsersState((prevSubUsers) => {
+            const updatedSubUsers = [...prevSubUsers];
+
+            newShifts.forEach((shift) => {
+                const userIndex = updatedSubUsers.findIndex((user) => user._id === shift.subUserId);
+                if (userIndex !== -1) {
+                    updatedSubUsers[userIndex] = {
+                        ...updatedSubUsers[userIndex],
+                        shifts: [...(updatedSubUsers[userIndex].shifts || []), shift],
+                    };
+                }
+            });
+            return updatedSubUsers;
+        });
+
+        toast.success('Смены успешно добавлены');
+    }, []);
+
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
             return (
@@ -367,6 +386,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
                                 <FaPlus />
                             </button>
                             <AddShift
+                                onShiftsAdded={handleShiftsAdded}
                                 open={showModalAddShift}
                                 setOpen={setShowModalAddShift}
                                 stores={stores}
