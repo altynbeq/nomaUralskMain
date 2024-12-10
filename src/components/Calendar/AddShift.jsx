@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Calendar } from 'primereact/calendar';
@@ -257,7 +257,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
                         />
                     </div>
-                    ß{/* Выбор времени начала смены */}
+                    {/* Выбор времени начала смены */}
                     <div className="mb-6">
                         <label className="block text-gray-700 mb-2">Время начала смены:</label>
                         <Calendar

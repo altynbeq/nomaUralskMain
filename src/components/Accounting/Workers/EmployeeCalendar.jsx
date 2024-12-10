@@ -6,6 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
+import { toast } from 'react-toastify';
 
 export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
@@ -18,7 +19,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [shosModalAddShift, setShowModalAddShift] = useState(false);
+    const [showModalAddShift, setShowModalAddShift] = useState(false);
 
     // Вспомогательная функция для расчета опоздания
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
@@ -157,6 +158,20 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         [calculateLateMinutes],
     );
 
+    const handleShiftDelete = (shiftId) => {
+        setSelectedDayShiftsModal((prevShifts) =>
+            prevShifts.filter((shift) => shift._id !== shiftId),
+        );
+        toast.success('Вы успешно удалили смену');
+    };
+
+    const handleShiftUpdate = (updatedShift) => {
+        setSelectedDayShiftsModal((prevShifts) =>
+            prevShifts.map((shift) => (shift._id === updatedShift._id ? updatedShift : shift)),
+        );
+        toast.success('Вы успешно обновили смену');
+    };
+
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
             return (
@@ -267,7 +282,8 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                     </li>
                                     <EditShift
                                         shiftId={shift._id}
-                                        selectedStoreId={shift.selectedStore.id}
+                                        onShiftDelete={handleShiftDelete}
+                                        onShiftUpdate={handleShiftUpdate}
                                     />
                                 </div>
                             );
@@ -310,7 +326,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                         </button>
                         <AddShift
                             subusers={subUsers}
-                            open={shosModalAddShift}
+                            open={showModalAddShift}
                             setOpen={setShowModalAddShift}
                             stores={stores}
                             subUsers={subUsers}

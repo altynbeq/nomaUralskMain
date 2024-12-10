@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { formatDate } from '../../methods/dataFormatter';
 import { Calendar } from 'primereact/calendar';
 import { addLocale } from 'primereact/api';
 import { axiosInstance } from '../../api/axiosInstance';
@@ -43,7 +41,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const EditShift = ({ setOpen, shiftId, selectedStoreId }) => {
+export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [shift, setShift] = useState(null);
     const [startTime, setStartTime] = useState('');
@@ -58,12 +56,11 @@ export const EditShift = ({ setOpen, shiftId, selectedStoreId }) => {
                 setStartTime(new Date(response.data.startTime));
                 setEndTime(new Date(response.data.endTime));
             } catch (error) {
-                console.error(error);
+                console.error('Ошибка при получении смены:', error);
             } finally {
                 setIsLoading(false);
             }
         };
-        console.log(open, shiftId);
         if (shiftId) {
             fetchShiftDetails();
         }
@@ -72,17 +69,35 @@ export const EditShift = ({ setOpen, shiftId, selectedStoreId }) => {
     const handleSave = async () => {
         setIsLoading(true);
         try {
+            const updatedShift = {
+                ...shift,
+                startTime: new Date(startTime).toISOString(),
+                endTime: new Date(endTime).toISOString(),
+            };
             const response = await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
                 subUserId: shift.subUserId._id,
                 startTime: new Date(startTime).toISOString(),
                 endTime: new Date(endTime).toISOString(),
-                selectedStore: selectedStoreId,
+                selectedStore: shift.selectedStore,
             });
             if (response.status === 200) {
-                setOpen(false);
+                onShiftUpdate(updatedShift);
+                setShift(updatedShift);
             }
         } catch (error) {
-            console.error(error);
+            console.error('Ошибка при обновлении смены:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setIsLoading(true);
+        try {
+            await axiosInstance.delete(`/shifts/delete-shift/${shiftId}`);
+            onShiftDelete(shiftId); // Вызов функции из родительского компонента для удаления смены из списка
+        } catch (error) {
+            console.error('Ошибка при удалении смены:', error);
         } finally {
             setIsLoading(false);
         }
@@ -91,20 +106,6 @@ export const EditShift = ({ setOpen, shiftId, selectedStoreId }) => {
     if (!shift) {
         return null;
     }
-
-    const handleDelete = async () => {
-        setIsLoading(true);
-        try {
-            const response = await axiosInstance.delete(`/shifts/delete-shift/${shiftId}`);
-            if (response.status === 200) {
-                setOpen(false);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     return (
         <>
