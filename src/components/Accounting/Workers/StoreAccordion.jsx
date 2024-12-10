@@ -13,6 +13,7 @@ import {
 import { StoreDetails } from './StoreDetails';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { useAuthStore } from '../../../store/authStore';
+import { FaMapMarkedAlt, FaQrcode } from 'react-icons/fa';
 
 export const StoreAccordion = ({ stores, departments }) => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -270,7 +271,7 @@ export const StoreAccordion = ({ stores, departments }) => {
     };
 
     return (
-        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md mt-10 bg-white">
+        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md mt-10 bg-white subtle-border">
             <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
                 {stores.map((store, index) => (
                     <AccordionTab
@@ -287,10 +288,15 @@ export const StoreAccordion = ({ stores, departments }) => {
                                     className="p-button-text p-0"
                                     aria-label={`Информация о магазине ${store.storeName}`}
                                 >
-                                    <i
+                                    <div className="flex items-center rounded-2xl space-x-1 bg-blue-500 py-1 px-2">
+                                        <FaMapMarkedAlt className="text-white text-md" />
+                                        <span className="text-sm text-white ">&</span>
+                                        <FaQrcode className="text-white text-md" />
+                                    </div>
+                                    {/* <i
                                         className="pi pi-info-circle"
                                         style={{ fontSize: '1.2rem' }}
-                                    ></i>
+                                    ></i> */}
                                 </button>
                             </div>
                         }
