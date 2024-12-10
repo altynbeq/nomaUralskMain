@@ -7,8 +7,12 @@ import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
+import { useCompanyStructureStore } from '../../../store/companyStructureStore';
 
-export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUsers }) => {
+export const EmployeeCalendar = () => {
+    const stores = useCompanyStructureStore((state) => state.stores);
+    const subUsers = useCompanyStructureStore((state) => state.subUsers);
+    const departments = useCompanyStructureStore((state) => state.departments);
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
@@ -22,11 +26,11 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
     const [showModalAddShift, setShowModalAddShift] = useState(false);
 
     // Локальное состояние для subUsers, чтобы обновлять их динамически
-    const [subUsersState, setSubUsersState] = useState(initialSubUsers);
+    const [subUsersState, setSubUsersState] = useState([]);
 
     useEffect(() => {
-        setSubUsersState(initialSubUsers);
-    }, [initialSubUsers]);
+        setSubUsersState(subUsers);
+    }, [subUsers]);
 
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
         if (!startTime || !scanTime) return 0;
@@ -242,10 +246,11 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
     }, []);
 
     const handleShiftsAdded = useCallback((newShifts) => {
+        console.log(newShifts);
         setSubUsersState((prevSubUsers) => {
             const updatedSubUsers = [...prevSubUsers];
 
-            newShifts.forEach((shift) => {
+            newShifts?.forEach((shift) => {
                 const userIndex = updatedSubUsers.findIndex((user) => user._id === shift.subUserId);
                 if (userIndex !== -1) {
                     updatedSubUsers[userIndex] = {
@@ -418,11 +423,11 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
                                 <FaPlus />
                             </button>
                             <AddShift
-                                onShiftsAdded={handleShiftsAdded}
                                 open={showModalAddShift}
                                 setOpen={setShowModalAddShift}
                                 stores={stores}
                                 subUsers={subUsersState}
+                                onShiftsAdded={handleShiftsAdded}
                             />
                         </div>
                         <div className="relative">
