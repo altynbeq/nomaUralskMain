@@ -439,14 +439,38 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                         const dayColor = getDayColor(shifts);
 
                                         return (
+                                            // <td
+                                            //     key={day}
+                                            //     className="py-1 text-center relative cursor-pointer"
+                                            //     onClick={() => setSelectedDayShiftsModal(shifts)}
+                                            // >
+                                            //     <div
+                                            //         className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
+                                            //     ></div>
+                                            // </td>
                                             <td
                                                 key={day}
                                                 className="py-1 text-center relative cursor-pointer"
                                                 onClick={() => setSelectedDayShiftsModal(shifts)}
                                             >
-                                                <div
-                                                    className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
-                                                ></div>
+                                                <div className="relative w-4 h-4 rounded-full">
+                                                    {/* Left Half */}
+                                                    <div
+                                                        className={`absolute top-0 left-0 w-2 h-4 rounded-l-full ${
+                                                            isFilterOpen
+                                                                ? 'bg-red-500'
+                                                                : 'bg-blue-500'
+                                                        }`}
+                                                    ></div>
+                                                    {/* Right Half */}
+                                                    <div
+                                                        className={`absolute top-0 right-0 w-2 h-4 rounded-r-full ${
+                                                            !isFilterOpen
+                                                                ? 'bg-red-500'
+                                                                : 'bg-blue-500'
+                                                        }`}
+                                                    ></div>
+                                                </div>
                                             </td>
                                         );
                                     })}
