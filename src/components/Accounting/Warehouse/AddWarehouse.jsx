@@ -26,6 +26,7 @@ export const AddWarehouse = () => {
     const [errors, setErrors] = useState({});
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const authStore = useAuthStore?.getState();
 
     const removeError = (field) => {
         setErrors((prevErrors) => {
@@ -98,9 +99,15 @@ export const AddWarehouse = () => {
                 const companyId = user?.companyId ? user?.companyId : user?.id;
                 setIsLoading(true);
                 try {
-                    await axiosInstance.post(
-                        `/clientsSpisanie/${companyId}/write-off`,
-                        submissionData,
+                    const response = await fetch(
+                        `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
+                        {
+                            method: 'POST',
+                            body: submissionData,
+                            headers: {
+                                Authorization: `Bearer ${authStore.accessToken}`,
+                            },
+                        },
                     );
                     setIsModalOpen(false);
                     setShowAlertModal(true);
