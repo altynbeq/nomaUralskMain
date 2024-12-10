@@ -101,6 +101,9 @@ export const AddWarehouse = () => {
                     await axiosInstance.post(
                         `/clientsSpisanie/${companyId}/write-off`,
                         submissionData,
+                        {
+                            'Content-Type': 'multipart/form-data',
+                        },
                     );
                     setIsModalOpen(false);
                     setShowAlertModal(true);
