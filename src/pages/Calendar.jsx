@@ -1,6 +1,5 @@
 import React from 'react';
 import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
-import { useCompanyStructureStore } from '../store/companyStructureStore';
 
 const Calendar = () => {
     return (
