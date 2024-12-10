@@ -141,9 +141,9 @@ const App = () => {
         fetchCompanyProductsAndWarehouses();
     }, [isEmployee, setProducts, setWarehouses, user?.companyId, user?.id]);
 
-    if (techProblem) {
-        return <TechProb />;
-    }
+    // if (techProblem) {
+    //     return <TechProb />;
+    // }
 
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
