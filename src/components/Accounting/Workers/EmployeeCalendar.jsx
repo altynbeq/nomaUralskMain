@@ -160,7 +160,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
     );
 
     // Функция для удаления смены из selectedDayShiftsModal и из subUsersState
-    const handleShiftDelete = (shiftId) => {
+    const handleShiftDelete = useCallback((shiftId) => {
         // Удаляем смену из модалки
         setSelectedDayShiftsModal((prevShifts) =>
             prevShifts.filter((shift) => shift._id !== shiftId),
@@ -183,9 +183,9 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
         });
 
         toast.success('Вы успешно удалили смену');
-    };
+    }, []);
 
-    const handleShiftUpdate = (updatedShift) => {
+    const handleShiftUpdate = useCallback((updatedShift) => {
         // Обновляем смену в selectedDayShiftsModal
         setSelectedDayShiftsModal((prevShifts) =>
             prevShifts.map((shift) => (shift._id === updatedShift._id ? updatedShift : shift)),
@@ -207,7 +207,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
         });
 
         toast.success('Вы успешно обновили смену');
-    };
+    }, []);
 
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
@@ -367,7 +367,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
                                 <FaPlus />
                             </button>
                             <AddShift
-                                subusers={subUsersState}
                                 open={showModalAddShift}
                                 setOpen={setShowModalAddShift}
                                 stores={stores}
