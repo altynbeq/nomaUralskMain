@@ -3,7 +3,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 import { Dialog } from 'primereact/dialog';
-import { FaSearch, FaPlus, FaFilter, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
@@ -151,10 +151,42 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
             if (shifts.length === 0) {
                 return 'bg-gray-200';
             }
-            const hasLate = shifts.some(
-                (shift) => calculateLateMinutes(shift.startTime, shift.scanTime) > 0,
-            );
-            return hasLate ? 'bg-red-500' : 'bg-blue-500';
+
+            // Проверим условия для всех смен в этот день
+            // Если хотя бы одна смена с опозданием/ранним уходом, применим логику
+            let late = false;
+            let early = false;
+
+            for (const shift of shifts) {
+                const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
+                if (lateMinutes > 0) {
+                    late = true;
+                }
+
+                if (shift.endScanTime && shift.endTime) {
+                    const endScan = new Date(shift.endScanTime);
+                    const endPlanned = new Date(shift.endTime);
+                    if (endScan < endPlanned) {
+                        early = true;
+                    }
+                }
+            }
+
+            // Определяем стиль для фона
+            if (late && early) {
+                // Опоздал и ушёл раньше — весь красный
+                return 'bg-red-500';
+            } else if (late && !early) {
+                // Только опоздал — красный слева, синий справа
+                // Переопределим через inline style
+                return 'late-only';
+            } else if (!late && early) {
+                // Только ушёл раньше — синий слева, красный справа
+                return 'early-only';
+            } else {
+                // Ни опоздания, ни раннего ухода — синий
+                return 'bg-blue-500';
+            }
         },
         [calculateLateMinutes],
     );
@@ -404,15 +436,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
 
                             {isFilterOpen && (
                                 <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
-                                    {/* Department Dropdown */}
-                                    <div className="flex justify-end mb-2">
-                                        <button
-                                            className="text-gray-500 hover:text-red-500"
-                                            onClick={() => setIsFilterOpen(false)}
-                                        >
-                                            <FaTimes className="text-xl" />
-                                        </button>
-                                    </div>
                                     <Dropdown
                                         value={selectedDepartment}
                                         onChange={(e) => setSelectedDepartment(e.value)}
@@ -490,41 +513,36 @@ export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUser
                                     </td>
                                     {daysArray.map((day) => {
                                         const shifts = getShiftsForDay(employee.shifts, day);
-                                        const dayColor = getDayColor(shifts);
+                                        const dayClass = getDayColor(shifts);
+
+                                        let style = {};
+                                        if (dayClass === 'late-only') {
+                                            style = {
+                                                background:
+                                                    'linear-gradient(to right, red 50%, #3b82f6 50%)',
+                                            };
+                                        } else if (dayClass === 'early-only') {
+                                            style = {
+                                                background:
+                                                    'linear-gradient(to right, #3b82f6 50%, red 50%)',
+                                            };
+                                        }
+
+                                        const finalClass =
+                                            dayClass === 'late-only' || dayClass === 'early-only'
+                                                ? ''
+                                                : dayClass;
 
                                         return (
-                                            // <td
-                                            //     key={day}
-                                            //     className="py-1 text-center relative cursor-pointer"
-                                            //     onClick={() => setSelectedDayShiftsModal(shifts)}
-                                            // >
-                                            //     <div
-                                            //         className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
-                                            //     ></div>
-                                            // </td>
                                             <td
                                                 key={day}
                                                 className="py-1 text-center relative cursor-pointer"
                                                 onClick={() => setSelectedDayShiftsModal(shifts)}
                                             >
-                                                <div className="relative w-4 h-4 rounded-full">
-                                                    {/* Left Half */}
-                                                    <div
-                                                        className={`absolute top-0 left-0 w-2 h-4 rounded-l-full ${
-                                                            isFilterOpen
-                                                                ? 'bg-red-500'
-                                                                : 'bg-blue-500'
-                                                        }`}
-                                                    ></div>
-                                                    {/* Right Half */}
-                                                    <div
-                                                        className={`absolute top-0 right-0 w-2 h-4 rounded-r-full ${
-                                                            !isFilterOpen
-                                                                ? 'bg-red-500'
-                                                                : 'bg-blue-500'
-                                                        }`}
-                                                    ></div>
-                                                </div>
+                                                <div
+                                                    className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${finalClass}`}
+                                                    style={style}
+                                                ></div>
                                             </td>
                                         );
                                     })}
