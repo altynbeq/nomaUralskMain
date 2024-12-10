@@ -1,12 +1,14 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Calendar } from 'primereact/calendar';
+import { Dropdown } from 'primereact/dropdown';
 import { toast } from 'react-toastify';
 import { addLocale } from 'primereact/api';
 import avatar from '../../data/avatar.jpg';
 import { axiosInstance } from '../../api/axiosInstance';
 import { useCompanyStructureStore } from '../../store';
+import { Dialog } from 'primereact/dialog';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -45,8 +47,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const AddShift = (props) => {
-    const [isModalOpen, setIsModalOpen] = useState(props.open);
+export const AddShift = ({ setOpen, stores, subUsers, open }) => {
     const [selectedSubusers, setSelectedSubusers] = useState([]);
     const [dateRange, setDateRange] = useState(null); // Для выбора периода
     const [startTime, setStartTime] = useState(null); // Для выбора времени начала
@@ -54,10 +55,11 @@ export const AddShift = (props) => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const departments = useCompanyStructureStore((state) => state.departments);
+    const [selectedStore, setSelectedStore] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSubusers.length || !dateRange || !startTime || !endTime) {
+        if (!selectedSubusers.length || !dateRange || !startTime || !endTime || !selectedStore) {
             toast.error('Пожалуйста, выберите сотрудников, период и время смены.');
             return;
         }
@@ -102,15 +104,14 @@ export const AddShift = (props) => {
                         subUserId: user._id,
                         startTime: shiftStart.toISOString(),
                         endTime: shiftEnd.toISOString(),
-                        selectedStore: props.selectedStore._id,
+                        selectedStore: selectedStore._id,
                     });
                 });
             });
-
             // Send the shifts array to the backend
             await axiosInstance.post('/shifts/create-shifts', { shifts });
             toast.success('Смены успешно добавлены');
-            props.setOpen(false);
+            setOpen(false);
         } catch (error) {
             console.error('Error adding shifts:', error);
             toast.error(error.message || 'Произошла ошибка при добавлении смен.');
@@ -119,18 +120,16 @@ export const AddShift = (props) => {
         }
     };
 
-    useEffect(() => {
-        setIsModalOpen(props.open);
-    }, [props.open]);
-
     const searchUsers = (event) => {
         if (!event.query.trim().length) {
             setFilteredUsers([]);
         } else {
-            const filtered = props.subusers.filter((user) =>
-                user.name.toLowerCase().includes(event.query.toLowerCase()),
-            );
-            setFilteredUsers(filtered);
+            if (subUsers) {
+                const filtered = subUsers.filter((user) =>
+                    user.name.toLowerCase().includes(event.query.toLowerCase()),
+                );
+                setFilteredUsers(filtered);
+            }
         }
     };
 
@@ -175,137 +174,128 @@ export const AddShift = (props) => {
 
     return (
         <>
-            {isModalOpen && (
-                <div className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-bold">Добавить новые смены</h2>
-                            <button
-                                onClick={() => props.setOpen(false)}
-                                className="text-gray-500 hover:text-gray-800"
-                            >
-                                <FaTimes />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">Сотрудники:</label>
-                                <AutoComplete
-                                    value={selectedSubusers}
-                                    suggestions={filteredUsers}
-                                    completeMethod={searchUsers}
-                                    onChange={(e) => setSelectedSubusers(e.value)}
-                                    field="name"
-                                    itemTemplate={itemTemplate}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                    inputClassName="focus:outline-none focus:ring-0"
-                                    placeholder="Выберите сотрудников"
-                                    panelStyle={{ width: '295px' }}
-                                    multiple // Для множественного выбора
-                                    dropdown // Для отображения выпадающего списка при клике на иконку
-                                />
-                            </div>
-
-                            {/* Горизонтальный список выбранных сотрудников */}
-                            {selectedSubusers.length > 0 && (
-                                <div className="mb-6">
-                                    <label className="block text-gray-700 mb-2">
-                                        Выбранные сотрудники:
-                                    </label>
-                                    <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
-                                        {selectedSubusers.map((user) => (
-                                            <div
-                                                key={user._id}
-                                                className="flex items-center bg-gray-100 p-2 rounded-lg"
-                                            >
-                                                <img
-                                                    src={
-                                                        user.image
-                                                            ? `https://nomalytica-back.onrender.com${user.image}`
-                                                            : avatar
-                                                    }
-                                                    alt={user.name}
-                                                    className="w-8 h-8 rounded-full mr-2"
-                                                />
-                                                <span className="text-gray-800 mr-2">
-                                                    {user.name}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeSelectedUser(user)}
-                                                    className="text-black hover:text-red-700"
-                                                >
-                                                    <FaTimes />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Выбор периода смены */}
-                            <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">Период смены:</label>
-                                <Calendar
-                                    value={dateRange}
-                                    onChange={(e) => setDateRange(e.value)}
-                                    selectionMode="range"
-                                    showIcon
-                                    locale="ru"
-                                    placeholder="Выберите период"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                />
-                            </div>
-
-                            {/* Выбор времени начала смены */}
-                            <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">
-                                    Время начала смены:
-                                </label>
-                                <Calendar
-                                    value={startTime}
-                                    onChange={(e) => setStartTime(e.value)}
-                                    timeOnly
-                                    hourFormat="24"
-                                    showIcon
-                                    locale="ru"
-                                    placeholder="Выберите время начала"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                />
-                            </div>
-
-                            {/* Выбор времени окончания смены */}
-                            <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">
-                                    Время окончания смены:
-                                </label>
-                                <Calendar
-                                    value={endTime}
-                                    onChange={(e) => setEndTime(e.value)}
-                                    timeOnly
-                                    hourFormat="24"
-                                    showIcon
-                                    locale="ru"
-                                    placeholder="Выберите время окончания"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
-                                    isLoading
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:bg-blue-600'
-                                } transition duration-200`}
-                            >
-                                {isLoading ? 'Добавление...' : 'Добавить'}
-                            </button>
-                        </form>
+            <Dialog
+                header="Добавить новые смены"
+                visible={open}
+                onHide={() => setOpen(false)}
+                className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto"
+                // className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50"
+            >
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Сотрудники:</label>
+                        <AutoComplete
+                            value={selectedSubusers}
+                            suggestions={filteredUsers}
+                            completeMethod={searchUsers}
+                            onChange={(e) => setSelectedSubusers(e.value)}
+                            field="name"
+                            itemTemplate={itemTemplate}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                            inputClassName="focus:outline-none focus:ring-0"
+                            placeholder="Выберите сотрудников"
+                            panelStyle={{ width: '295px' }}
+                            multiple // Для множественного выбора
+                            dropdown // Для отображения выпадающего списка при клике на иконку
+                        />
                     </div>
-                </div>
-            )}
+                    {/* Горизонтальный список выбранных сотрудников */}
+                    {selectedSubusers.length > 0 && (
+                        <div className="mb-6">
+                            <label className="block text-gray-700 mb-2">
+                                Выбранные сотрудники:
+                            </label>
+                            <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
+                                {selectedSubusers.map((user) => (
+                                    <div
+                                        key={user._id}
+                                        className="flex items-center bg-gray-100 p-2 rounded-lg"
+                                    >
+                                        <img
+                                            src={
+                                                user.image
+                                                    ? `https://nomalytica-back.onrender.com${user.image}`
+                                                    : avatar
+                                            }
+                                            alt={user.name}
+                                            className="w-8 h-8 rounded-full mr-2"
+                                        />
+                                        <span className="text-gray-800 mr-2">{user.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeSelectedUser(user)}
+                                            className="text-black hover:text-red-700"
+                                        >
+                                            <FaTimes />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div className="mb-6">
+                        <Dropdown
+                            value={selectedStore}
+                            onChange={(e) => setSelectedStore(e.value)}
+                            options={stores}
+                            optionLabel="storeName"
+                            placeholder="Выберите магазин"
+                            className="w-full border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                            showClear
+                        />
+                    </div>
+                    {/* Выбор периода смены */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Период смены:</label>
+                        <Calendar
+                            value={dateRange}
+                            onChange={(e) => setDateRange(e.value)}
+                            selectionMode="range"
+                            showIcon
+                            locale="ru"
+                            placeholder="Выберите период"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                    </div>
+                    {/* Выбор времени начала смены */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Время начала смены:</label>
+                        <Calendar
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.value)}
+                            timeOnly
+                            hourFormat="24"
+                            showIcon
+                            locale="ru"
+                            placeholder="Выберите время начала"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                    </div>
+                    {/* Выбор времени окончания смены */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Время окончания смены:</label>
+                        <Calendar
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.value)}
+                            timeOnly
+                            hourFormat="24"
+                            showIcon
+                            locale="ru"
+                            placeholder="Выберите время окончания"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+                        } transition duration-200`}
+                    >
+                        {isLoading ? 'Добавление...' : 'Добавить'}
+                    </button>
+                </form>
+            </Dialog>
         </>
     );
 };

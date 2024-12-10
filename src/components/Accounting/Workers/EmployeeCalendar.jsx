@@ -4,6 +4,9 @@ import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 import { Dialog } from 'primereact/dialog';
 import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
+import { AddShift } from '../../Calendar/AddShift';
+import { EditShift } from '../../Calendar/EditShift';
+import { toast } from 'react-toastify';
 
 export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
@@ -16,6 +19,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [showModalAddShift, setShowModalAddShift] = useState(false);
 
     // Вспомогательная функция для расчета опоздания
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
@@ -154,12 +158,26 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         [calculateLateMinutes],
     );
 
+    const handleShiftDelete = (shiftId) => {
+        setSelectedDayShiftsModal((prevShifts) =>
+            prevShifts.filter((shift) => shift._id !== shiftId),
+        );
+        toast.success('Вы успешно удалили смену');
+    };
+
+    const handleShiftUpdate = (updatedShift) => {
+        setSelectedDayShiftsModal((prevShifts) =>
+            prevShifts.map((shift) => (shift._id === updatedShift._id ? updatedShift : shift)),
+        );
+        toast.success('Вы успешно обновили смену');
+    };
+
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
             return (
                 <div>
                     <p>
-                        <span className="font-bold text-lg">Магазин:</span>{' '}
+                        <span className="font-bold text-lg ml-4">Магазин:</span>{' '}
                         {selectedDayShiftsModal[0]?.selectedStore.storeName}
                     </p>
                     <ul className="list-none flex-col gap-6 flex">
@@ -203,58 +221,71 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                     : `${workedTime.minutes} мин`;
 
                             return (
-                                <li key={shift._id} className="flex flex-col gap-4">
-                                    <div className="flex gap-4">
-                                        <p>
-                                            <span className="font-bold text-lg">Начало смены:</span>{' '}
-                                            {formatOnlyTimeDate(shift.startTime)}
-                                        </p>
-                                        <p>
-                                            <span className="font-bold text-lg">Конец смены:</span>{' '}
-                                            {formatOnlyTimeDate(shift.endTime)}
-                                        </p>
-                                        <p>
-                                            <span className="font-bold text-lg">Длительность:</span>{' '}
-                                            {durationText}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        {scanTime && (
+                                <div key={shift._id} className="rounded-lg shadow-lg p-4">
+                                    <li key={shift._id} className="flex flex-col gap-4">
+                                        <div className="flex gap-4">
                                             <p>
                                                 <span className="font-bold text-lg">
-                                                    Фактический приход:
+                                                    Начало смены:
                                                 </span>{' '}
-                                                {formatOnlyTimeDate(shift.scanTime)}
+                                                {formatOnlyTimeDate(shift.startTime)}
                                             </p>
-                                        )}
-                                        {endScanTime && (
                                             <p>
                                                 <span className="font-bold text-lg">
-                                                    Фактический уход:
+                                                    Конец смены:
                                                 </span>{' '}
-                                                {formatOnlyTimeDate(shift.endScanTime)}
+                                                {formatOnlyTimeDate(shift.endTime)}
                                             </p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        {shift.scanTime && (
-                                            <p
-                                                className={
-                                                    lateMinutes > 0
-                                                        ? 'text-red-500 font-bold text-lg'
-                                                        : 'text-green-500 font-bold text-lg'
-                                                }
-                                            >
-                                                {lateText}
+                                            <p>
+                                                <span className="font-bold text-lg">
+                                                    Длительность:
+                                                </span>{' '}
+                                                {durationText}
                                             </p>
-                                        )}
-                                        {scanTime && endScanTime && (
-                                            <p className="text-blue-500 font-bold text-lg">
-                                                Отработано: {workedTimeText}
-                                            </p>
-                                        )}
-                                    </div>
-                                </li>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            {scanTime && (
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Фактический приход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.scanTime)}
+                                                </p>
+                                            )}
+                                            {endScanTime && (
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Фактический уход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.endScanTime)}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            {shift.scanTime && (
+                                                <p
+                                                    className={
+                                                        lateMinutes > 0
+                                                            ? 'text-red-500 font-bold text-lg'
+                                                            : 'text-green-500 font-bold text-lg'
+                                                    }
+                                                >
+                                                    {lateText}
+                                                </p>
+                                            )}
+                                            {scanTime && endScanTime && (
+                                                <p className="text-blue-500 font-bold text-lg">
+                                                    Отработано: {workedTimeText}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </li>
+                                    <EditShift
+                                        shiftId={shift._id}
+                                        onShiftDelete={handleShiftDelete}
+                                        onShiftUpdate={handleShiftUpdate}
+                                    />
+                                </div>
                             );
                         })}
                     </ul>
@@ -286,10 +317,20 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                 </div>
                 <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
                     <div className="flex flex-row gap-2">
-                        <button className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition">
+                        <button
+                            onClick={() => setShowModalAddShift(true)}
+                            className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
+                        >
                             <p>Добавить смену</p>
                             <FaPlus />
                         </button>
+                        <AddShift
+                            subusers={subUsers}
+                            open={showModalAddShift}
+                            setOpen={setShowModalAddShift}
+                            stores={stores}
+                            subUsers={subUsers}
+                        />
                     </div>
                     <div className="relative">
                         {/* Filter Button */}
