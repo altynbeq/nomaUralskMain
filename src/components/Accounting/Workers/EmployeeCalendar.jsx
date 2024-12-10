@@ -5,6 +5,7 @@ import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatt
 import { Dialog } from 'primereact/dialog';
 import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
+import { EditShift } from '../../Calendar/EditShift';
 
 export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
@@ -161,7 +162,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
             return (
                 <div>
                     <p>
-                        <span className="font-bold text-lg">Магазин:</span>{' '}
+                        <span className="font-bold text-lg ml-4">Магазин:</span>{' '}
                         {selectedDayShiftsModal[0]?.selectedStore.storeName}
                     </p>
                     <ul className="list-none flex-col gap-6 flex">
@@ -205,58 +206,70 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                     : `${workedTime.minutes} мин`;
 
                             return (
-                                <li key={shift._id} className="flex flex-col gap-4">
-                                    <div className="flex gap-4">
-                                        <p>
-                                            <span className="font-bold text-lg">Начало смены:</span>{' '}
-                                            {formatOnlyTimeDate(shift.startTime)}
-                                        </p>
-                                        <p>
-                                            <span className="font-bold text-lg">Конец смены:</span>{' '}
-                                            {formatOnlyTimeDate(shift.endTime)}
-                                        </p>
-                                        <p>
-                                            <span className="font-bold text-lg">Длительность:</span>{' '}
-                                            {durationText}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        {scanTime && (
+                                <div key={shift._id} className="rounded-lg shadow-lg p-4">
+                                    <li key={shift._id} className="flex flex-col gap-4">
+                                        <div className="flex gap-4">
                                             <p>
                                                 <span className="font-bold text-lg">
-                                                    Фактический приход:
+                                                    Начало смены:
                                                 </span>{' '}
-                                                {formatOnlyTimeDate(shift.scanTime)}
+                                                {formatOnlyTimeDate(shift.startTime)}
                                             </p>
-                                        )}
-                                        {endScanTime && (
                                             <p>
                                                 <span className="font-bold text-lg">
-                                                    Фактический уход:
+                                                    Конец смены:
                                                 </span>{' '}
-                                                {formatOnlyTimeDate(shift.endScanTime)}
+                                                {formatOnlyTimeDate(shift.endTime)}
                                             </p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        {shift.scanTime && (
-                                            <p
-                                                className={
-                                                    lateMinutes > 0
-                                                        ? 'text-red-500 font-bold text-lg'
-                                                        : 'text-green-500 font-bold text-lg'
-                                                }
-                                            >
-                                                {lateText}
+                                            <p>
+                                                <span className="font-bold text-lg">
+                                                    Длительность:
+                                                </span>{' '}
+                                                {durationText}
                                             </p>
-                                        )}
-                                        {scanTime && endScanTime && (
-                                            <p className="text-blue-500 font-bold text-lg">
-                                                Отработано: {workedTimeText}
-                                            </p>
-                                        )}
-                                    </div>
-                                </li>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            {scanTime && (
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Фактический приход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.scanTime)}
+                                                </p>
+                                            )}
+                                            {endScanTime && (
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Фактический уход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.endScanTime)}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            {shift.scanTime && (
+                                                <p
+                                                    className={
+                                                        lateMinutes > 0
+                                                            ? 'text-red-500 font-bold text-lg'
+                                                            : 'text-green-500 font-bold text-lg'
+                                                    }
+                                                >
+                                                    {lateText}
+                                                </p>
+                                            )}
+                                            {scanTime && endScanTime && (
+                                                <p className="text-blue-500 font-bold text-lg">
+                                                    Отработано: {workedTimeText}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </li>
+                                    <EditShift
+                                        shiftId={shift._id}
+                                        selectedStoreId={shift.selectedStore.id}
+                                    />
+                                </div>
                             );
                         })}
                     </ul>

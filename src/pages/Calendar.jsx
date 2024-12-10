@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Header } from '../components';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { ScheduleWithEdit } from '../components/Calendar/CalendarModal';
+import { ScheduleWithEdit } from '../components/Calendar/EditShift';
 import { AddShift } from '../components/Calendar/AddShift';
 import ruLocale from '@fullcalendar/core/locales/ru';
 import { Dropdown } from 'primereact/dropdown';
