@@ -98,7 +98,7 @@ const Calendar = () => {
 
     return (
         <div className="w-[100%] align-center justify-center">
-            <div className="m-2 mt-20 md:mt-0 mb-0 p-2 pb-0 bg-white rounded-3xl">
+            <div className=" mt-20 md:mt-0 mb-0 p-4 pb-0 bg-white rounded-3xl subtle-border m-5">
                 <div className="flex justify-between max-h-[40px] mb-16 mt-5">
                     {' '}
                     <Header category="Учёт" title="Смены" />
@@ -155,7 +155,7 @@ const Calendar = () => {
                     }}
                 />
             </div>
-            <div className="flex ml-5 mt-10 w-[90%] md:ml-0 md:w-[100%] subtle-border">
+            <div className="flex bg-transparent justify-center align-center mt-20 w-[90%] md:ml-0 md:w-[100%]">
                 <EmployeeCalendar stores={stores} departments={departments} subUsers={subUsers} />
             </div>
         </div>

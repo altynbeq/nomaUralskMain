@@ -266,7 +266,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     }, [selectedDayShiftsModal, calculateLateMinutes, calculateWorkedTime]);
 
     return (
-        <div className="w-[100%] bg-white p-6 mx-16 rounded-lg shadow-md">
+        <div className="w-full m-5 bg-white p-6  rounded-lg shadow-md subtle-border">
             {/* Верхняя панель */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-4">
                 <div className="flex items-center gap-2 ml-4 mt-4">
