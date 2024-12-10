@@ -105,17 +105,19 @@ export const Profile = () => {
             {isMonthView ? (
                 <div className="grid grid-cols-7 gap-2">
                     {/* Месячный вид */}
-                    {[...Array(daysInMonth).keys()].map((day) => {
+                    {[...Array(daysInMonth).keys()].map((dayIndex) => {
+                        // dayIndex начинается с 0, но дни начинаются с 1
+                        const day = dayIndex + 1;
                         const date = new Date(currentYear, currentMonth, day);
                         return (
                             <button
-                                key={day + 1}
+                                key={day}
                                 onClick={() => openModal(date)}
                                 className={`w-12 h-12 flex items-center justify-center rounded-full ${getDayColor(
                                     date,
                                 )} border text-sm`}
                             >
-                                {day + 1}
+                                {day}
                             </button>
                         );
                     })}
