@@ -3,6 +3,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 import { Dialog } from 'primereact/dialog';
+import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
 
 export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
@@ -14,6 +15,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const [selectedStore, setSelectedStore] = useState(null);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     // Вспомогательная функция для расчета опоздания
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
@@ -283,33 +285,57 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                     </button>
                 </div>
                 <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
-                    <div className="flex gap-2 justify-between">
-                        <Dropdown
-                            value={selectedDepartment}
-                            onChange={(e) => setSelectedDepartment(e.value)}
-                            showClear
-                            options={departments || []}
-                            optionLabel="name"
-                            placeholder="Отдел"
-                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                        />
-                        <Dropdown
-                            value={selectedStore}
-                            onChange={(e) => setSelectedStore(e.value)}
-                            options={stores || []}
-                            optionLabel="storeName"
-                            showClear
-                            placeholder="Магазин"
-                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                        />
+                    <div className="flex flex-row gap-2">
+                        <button className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition">
+                            <p>Добавить смену</p>
+                            <FaPlus />
+                        </button>
                     </div>
-                    <div>
+                    <div className="relative">
+                        {/* Filter Button */}
+                        <button
+                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                        >
+                            <FaFilter />
+                            <span>Фильтр</span>
+                        </button>
+
+                        {/* Dropdown Content */}
+                        {isFilterOpen && (
+                            <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
+                                {/* Department Dropdown */}
+                                <Dropdown
+                                    value={selectedDepartment}
+                                    onChange={(e) => setSelectedDepartment(e.value)}
+                                    showClear
+                                    options={departments || []}
+                                    optionLabel="name"
+                                    placeholder="Отдел"
+                                    className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                />
+
+                                {/* Store Dropdown */}
+                                <Dropdown
+                                    value={selectedStore}
+                                    onChange={(e) => setSelectedStore(e.value)}
+                                    options={stores || []}
+                                    optionLabel="storeName"
+                                    showClear
+                                    placeholder="Магазин"
+                                    className="w-full border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <div className="relative">
                         <InputText
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Поиск"
                             className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
                         />
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
                     </div>
                 </div>
             </div>
