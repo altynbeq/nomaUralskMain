@@ -40,8 +40,7 @@ const processQueue = (error, token = null) => {
 
 // Функция для обновления токена
 const refreshToken = async () => {
-    const { refreshToken } = useAuthStore.getState();
-    const setRefreshToken = useAuthStore.getState()?.setRefreshToken;
+    const { refreshToken, setRefreshToken } = useAuthStore.getState();
     const response = await axiosWithoutInterceptors.post('/auth/refresh-token', {
         refreshToken,
     });

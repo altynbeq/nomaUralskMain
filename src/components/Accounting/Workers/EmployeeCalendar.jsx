@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
@@ -7,9 +7,8 @@ import { FaSearch, FaPlus, FaFilter, FaTimes } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
-import { Header } from '../../';
 
-export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
+export const EmployeeCalendar = ({ departments, stores, subUsers: initialSubUsers }) => {
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
@@ -22,7 +21,13 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showModalAddShift, setShowModalAddShift] = useState(false);
 
-    // Вспомогательная функция для расчета опоздания
+    // Локальное состояние для subUsers, чтобы обновлять их динамически
+    const [subUsersState, setSubUsersState] = useState(initialSubUsers);
+
+    useEffect(() => {
+        setSubUsersState(initialSubUsers);
+    }, [initialSubUsers]);
+
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
         if (!startTime || !scanTime) return 0;
         const start = new Date(startTime);
@@ -32,7 +37,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         return diffMinutes > 0 ? diffMinutes : 0;
     }, []);
 
-    // Вспомогательная функция для расчета отработанного времени
     const calculateWorkedTime = useCallback((scanTime, endScanTime) => {
         if (!scanTime || !endScanTime) return { hours: 0, minutes: 0 };
 
@@ -49,7 +53,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         return { hours, minutes };
     }, []);
 
-    // Создаём мапу для быстрого доступа к названию департамента
     const departmentsMap = useMemo(() => {
         const map = new Map();
         departments?.forEach((dept) => {
@@ -65,10 +68,9 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         [departmentsMap],
     );
 
-    // Фильтрация subUsers по критериям
     const filteredSubusers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
-        return subUsers?.filter((subuser) => {
+        return subUsersState?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(lowerSearch);
             const matchesDepartment = selectedDepartment
                 ? subuser.departmentId === selectedDepartment._id
@@ -81,7 +83,7 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
 
             return matchesSearch && matchesDepartment && matchesStore;
         });
-    }, [departments, searchTerm, selectedDepartment, selectedStore, subUsers]);
+    }, [departments, searchTerm, selectedDepartment, selectedStore, subUsersState]);
 
     const daysInMonth = useMemo(() => new Date(year, month + 1, 0).getDate(), [year, month]);
     const daysArray = useMemo(
@@ -131,7 +133,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
     }, [totalPages]);
 
-    // Мемоизация функции получения смен за день
     const getShiftsForDay = useMemo(() => {
         return (shifts, day) => {
             const dayStart = new Date(year, month, day, 0, 0, 0);
@@ -145,7 +146,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         };
     }, [month, year]);
 
-    // Определение цвета дня
     const getDayColor = useCallback(
         (shifts) => {
             if (shifts.length === 0) {
@@ -159,19 +159,74 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         [calculateLateMinutes],
     );
 
-    const handleShiftDelete = (shiftId) => {
+    // Функция для удаления смены из selectedDayShiftsModal и из subUsersState
+    const handleShiftDelete = useCallback((shiftId) => {
+        // Удаляем смену из модалки
         setSelectedDayShiftsModal((prevShifts) =>
             prevShifts.filter((shift) => shift._id !== shiftId),
         );
-        toast.success('Вы успешно удалили смену');
-    };
 
-    const handleShiftUpdate = (updatedShift) => {
+        // Удаляем смену из subUsersState
+        setSubUsersState((prevSubUsers) => {
+            return prevSubUsers.map((user) => {
+                if (user.shifts) {
+                    const hasShift = user.shifts.some((s) => s._id === shiftId);
+                    if (hasShift) {
+                        return {
+                            ...user,
+                            shifts: user.shifts.filter((s) => s._id !== shiftId),
+                        };
+                    }
+                }
+                return user;
+            });
+        });
+
+        toast.success('Вы успешно удалили смену');
+    }, []);
+
+    const handleShiftUpdate = useCallback((updatedShift) => {
+        // Обновляем смену в selectedDayShiftsModal
         setSelectedDayShiftsModal((prevShifts) =>
             prevShifts.map((shift) => (shift._id === updatedShift._id ? updatedShift : shift)),
         );
+
+        // Обновляем смену в subUsersState
+        setSubUsersState((prevSubUsers) => {
+            return prevSubUsers.map((user) => {
+                if (user._id === updatedShift.subUserId) {
+                    return {
+                        ...user,
+                        shifts: user.shifts.map((s) =>
+                            s._id === updatedShift._id ? updatedShift : s,
+                        ),
+                    };
+                }
+                return user;
+            });
+        });
+
         toast.success('Вы успешно обновили смену');
-    };
+    }, []);
+
+    const handleShiftsAdded = useCallback((newShifts) => {
+        setSubUsersState((prevSubUsers) => {
+            const updatedSubUsers = [...prevSubUsers];
+
+            newShifts.forEach((shift) => {
+                const userIndex = updatedSubUsers.findIndex((user) => user._id === shift.subUserId);
+                if (userIndex !== -1) {
+                    updatedSubUsers[userIndex] = {
+                        ...updatedSubUsers[userIndex],
+                        shifts: [...(updatedSubUsers[userIndex].shifts || []), shift],
+                    };
+                }
+            });
+            return updatedSubUsers;
+        });
+
+        toast.success('Смены успешно добавлены');
+    }, []);
 
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
@@ -200,7 +255,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                     ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
                                     : `${minutes} мин`;
 
-                            // Рассчитываем опоздание, если есть startTime и scanTime
                             const lateMinutes =
                                 shift.startTime && shift.scanTime
                                     ? calculateLateMinutes(shift.startTime, shift.scanTime)
@@ -295,13 +349,17 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
         } else {
             return <p>Нет смен</p>;
         }
-    }, [selectedDayShiftsModal, calculateLateMinutes, calculateWorkedTime]);
+    }, [
+        selectedDayShiftsModal,
+        calculateLateMinutes,
+        calculateWorkedTime,
+        handleShiftDelete,
+        handleShiftUpdate,
+    ]);
 
     return (
         <div>
-            <div className="w-[95%] justify-center align-center m-10 mt-5 bg-white p-6  rounded-lg shadow-md subtle-border">
-                {/* Верхняя панель */}
-                {/* <Header category="Учёт" title="Смены" /> */}
+            <div className="w-[95%] justify-center align-center m-10 mt-5 bg-white p-6 rounded-lg shadow-md subtle-border">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-4">
                     <div className="flex items-center gap-2 ml-4 mt-4">
                         <button
@@ -328,15 +386,14 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                 <FaPlus />
                             </button>
                             <AddShift
-                                subusers={subUsers}
+                                onShiftsAdded={handleShiftsAdded}
                                 open={showModalAddShift}
                                 setOpen={setShowModalAddShift}
                                 stores={stores}
-                                subUsers={subUsers}
+                                subUsers={subUsersState}
                             />
                         </div>
                         <div className="relative">
-                            {/* Filter Button */}
                             <button
                                 className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                                 onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -345,7 +402,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                 <span>Фильтр</span>
                             </button>
 
-                            {/* Dropdown Content */}
                             {isFilterOpen && (
                                 <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
                                     {/* Department Dropdown */}
@@ -367,7 +423,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                                         className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
 
-                                    {/* Store Dropdown */}
                                     <Dropdown
                                         value={selectedStore}
                                         onChange={(e) => setSelectedStore(e.value)}
@@ -392,7 +447,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                     </div>
                 </div>
 
-                {/* Таблица */}
                 <div className="overflow-x-auto w-full max-w-full">
                     <table className="table-auto w-full max-w-full border-collapse">
                         <thead>
@@ -492,7 +546,6 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                         {renderDayShiftsModalContent()}
                     </Dialog>
                 )}
-                {/* Пагинация */}
                 <div className="flex justify-between items-center mt-4">
                     <button
                         onClick={handlePrevPage}

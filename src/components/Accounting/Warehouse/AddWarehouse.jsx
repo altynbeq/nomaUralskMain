@@ -6,7 +6,6 @@ import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
 import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
-import { axiosInstance } from '../../../api/axiosInstance';
 import { useAuthStore } from '../../../store';
 
 export const AddWarehouse = () => {
@@ -142,6 +141,7 @@ export const AddWarehouse = () => {
             formData.file,
             user?.companyId,
             user?.id,
+            authStore.accessToken,
             errors,
         ],
     );

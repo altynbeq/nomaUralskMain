@@ -100,18 +100,38 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
                 );
 
                 selectedSubusers.forEach((user) => {
-                    shifts.push({
-                        subUserId: user._id,
-                        startTime: shiftStart.toISOString(),
-                        endTime: shiftEnd.toISOString(),
-                        selectedStore: selectedStore._id,
+                    const existingShifts = user.shifts || [];
+                    const isOverlapping = existingShifts.some((existingShift) => {
+                        const existingStart = new Date(existingShift.startTime);
+                        const existingEnd = new Date(existingShift.endTime);
+                        // Проверяем пересечение интервалов
+                        // newStart < existingEnd && newEnd > existingStart
+                        return shiftStart < existingEnd && shiftEnd > existingStart;
                     });
+                    if (isOverlapping) {
+                        toast.error(
+                            `Невозможно добавить смену для ${user.name} на ${date.toLocaleDateString('ru-RU')} - время пересекается с уже существующей сменой.`,
+                        );
+                        setIsLoading(false);
+                        return; // Прекращаем выполнение, не отправляем на сервер
+                    } else {
+                        shifts.push({
+                            subUserId: user._id,
+                            startTime: shiftStart.toISOString(),
+                            endTime: shiftEnd.toISOString(),
+                            selectedStore: selectedStore._id,
+                        });
+                    }
                 });
             });
             // Send the shifts array to the backend
-            await axiosInstance.post('/shifts/create-shifts', { shifts });
-            toast.success('Смены успешно добавлены');
-            setOpen(false);
+            if (shifts.length > 0) {
+                const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
+                if (response.status === 201) {
+                    toast.success('Смены успешно добавлены');
+                    setOpen(false);
+                }
+            }
         } catch (error) {
             console.error('Error adding shifts:', error);
             toast.error(error.message || 'Произошла ошибка при добавлении смен.');
