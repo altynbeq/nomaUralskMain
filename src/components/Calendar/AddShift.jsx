@@ -47,7 +47,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const AddShift = ({ setOpen, stores, subUsers, open }) => {
+export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => {
     const [selectedSubusers, setSelectedSubusers] = useState([]);
     const [dateRange, setDateRange] = useState(null); // Для выбора периода
     const [startTime, setStartTime] = useState(null); // Для выбора времени начала
@@ -128,7 +128,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
             if (shifts.length > 0) {
                 const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
                 if (response.status === 201) {
-                    toast.success('Смены успешно добавлены');
+                    onShiftsAdded(response.data);
                     setOpen(false);
                 }
             }
