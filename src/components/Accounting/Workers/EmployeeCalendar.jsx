@@ -7,6 +7,7 @@ import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
+import { Header } from '../../';
 
 export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     const currentDate = new Date();
@@ -297,187 +298,190 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
     }, [selectedDayShiftsModal, calculateLateMinutes, calculateWorkedTime]);
 
     return (
-        <div className="w-full m-5 bg-white p-6  rounded-lg shadow-md subtle-border">
-            {/* Верхняя панель */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-                <div className="flex items-center gap-2 ml-4 mt-4">
-                    <button
-                        onClick={handlePrevMonth}
-                        className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
-                    >
-                        ←
-                    </button>
-                    <h2 className="text-lg font-semibold text-black">{`${monthName} ${year} г.`}</h2>
-                    <button
-                        onClick={handleNextMonth}
-                        className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
-                    >
-                        →
-                    </button>
-                </div>
-                <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
-                    <div className="flex flex-row gap-2">
+        <div>
+            <div className="w-[95%] justify-center align-center m-10 mt-5 bg-white p-6  rounded-lg shadow-md subtle-border">
+                {/* Верхняя панель */}
+                {/* <Header category="Учёт" title="Смены" /> */}
+                <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+                    <div className="flex items-center gap-2 ml-4 mt-4">
                         <button
-                            onClick={() => setShowModalAddShift(true)}
-                            className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
+                            onClick={handlePrevMonth}
+                            className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
                         >
-                            <p>Добавить смену</p>
-                            <FaPlus />
+                            ←
                         </button>
-                        <AddShift
-                            subusers={subUsers}
-                            open={showModalAddShift}
-                            setOpen={setShowModalAddShift}
-                            stores={stores}
-                            subUsers={subUsers}
-                        />
-                    </div>
-                    <div className="relative">
-                        {/* Filter Button */}
+                        <h2 className="text-lg font-semibold text-black">{`${monthName} ${year} г.`}</h2>
                         <button
-                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
-                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            onClick={handleNextMonth}
+                            className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
                         >
-                            <FaFilter />
-                            <span>Фильтр</span>
+                            →
                         </button>
-
-                        {/* Dropdown Content */}
-                        {isFilterOpen && (
-                            <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
-                                {/* Department Dropdown */}
-                                <Dropdown
-                                    value={selectedDepartment}
-                                    onChange={(e) => setSelectedDepartment(e.value)}
-                                    showClear
-                                    options={departments || []}
-                                    optionLabel="name"
-                                    placeholder="Отдел"
-                                    className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
-                                />
-
-                                {/* Store Dropdown */}
-                                <Dropdown
-                                    value={selectedStore}
-                                    onChange={(e) => setSelectedStore(e.value)}
-                                    options={stores || []}
-                                    optionLabel="storeName"
-                                    showClear
-                                    placeholder="Магазин"
-                                    className="w-full border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
-                                />
-                            </div>
-                        )}
                     </div>
-                    <div className="relative">
-                        <InputText
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Поиск"
-                            className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
-                        />
-                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                    <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
+                        <div className="flex flex-row gap-2">
+                            <button
+                                onClick={() => setShowModalAddShift(true)}
+                                className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
+                            >
+                                <p>Добавить смену</p>
+                                <FaPlus />
+                            </button>
+                            <AddShift
+                                subusers={subUsers}
+                                open={showModalAddShift}
+                                setOpen={setShowModalAddShift}
+                                stores={stores}
+                                subUsers={subUsers}
+                            />
+                        </div>
+                        <div className="relative">
+                            {/* Filter Button */}
+                            <button
+                                className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            >
+                                <FaFilter />
+                                <span>Фильтр</span>
+                            </button>
+
+                            {/* Dropdown Content */}
+                            {isFilterOpen && (
+                                <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
+                                    {/* Department Dropdown */}
+                                    <Dropdown
+                                        value={selectedDepartment}
+                                        onChange={(e) => setSelectedDepartment(e.value)}
+                                        showClear
+                                        options={departments || []}
+                                        optionLabel="name"
+                                        placeholder="Отдел"
+                                        className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                    />
+
+                                    {/* Store Dropdown */}
+                                    <Dropdown
+                                        value={selectedStore}
+                                        onChange={(e) => setSelectedStore(e.value)}
+                                        options={stores || []}
+                                        optionLabel="storeName"
+                                        showClear
+                                        placeholder="Магазин"
+                                        className="w-full border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div className="relative">
+                            <InputText
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Поиск"
+                                className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
+                            />
+                            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Таблица */}
-            <div className="overflow-x-auto w-full max-w-full">
-                <table className="table-auto w-full max-w-full border-collapse">
-                    <thead>
-                        <tr>
-                            <th className="px-2 py-2 text-left">Сотрудник</th>
-                            {daysArray.map((day) => (
-                                <th key={day} className="px-2 py-1 text-center text-sm">
-                                    {day}
-                                </th>
-                            ))}
-                        </tr>
-                        <tr>
-                            <th className="px-2 py-1 text-left"></th>
-                            {daysArray.map((day) => {
-                                const date = new Date(year, month, day);
-                                const weekDay = new Intl.DateTimeFormat('ru-RU', {
-                                    weekday: 'short',
-                                }).format(date);
-                                return (
-                                    <th
-                                        key={day}
-                                        className="py-1 text-center text-xs text-gray-500"
-                                    >
-                                        {weekDay}
+                {/* Таблица */}
+                <div className="overflow-x-auto w-full max-w-full">
+                    <table className="table-auto w-full max-w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th className="px-2 py-2 text-left">Сотрудник</th>
+                                {daysArray.map((day) => (
+                                    <th key={day} className="px-2 py-1 text-center text-sm">
+                                        {day}
                                     </th>
-                                );
-                            })}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentSubusers?.map((employee, index) => (
-                            <tr key={index}>
-                                <td className="px-4 py-2 inline-flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-                                    <div className="flex flex-col">
-                                        <p className="text-sm">{employee.name}</p>
-                                        <p className="text-sm">
-                                            ({getDepartmentName(employee.departmentId)})
-                                        </p>
-                                    </div>
-                                </td>
+                                ))}
+                            </tr>
+                            <tr>
+                                <th className="px-2 py-1 text-left"></th>
                                 {daysArray.map((day) => {
-                                    const shifts = getShiftsForDay(employee.shifts, day);
-                                    const dayColor = getDayColor(shifts);
-
+                                    const date = new Date(year, month, day);
+                                    const weekDay = new Intl.DateTimeFormat('ru-RU', {
+                                        weekday: 'short',
+                                    }).format(date);
                                     return (
-                                        <td
+                                        <th
                                             key={day}
-                                            className="py-1 text-center relative cursor-pointer"
-                                            onClick={() => setSelectedDayShiftsModal(shifts)}
+                                            className="py-1 text-center text-xs text-gray-500"
                                         >
-                                            <div
-                                                className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
-                                            ></div>
-                                        </td>
+                                            {weekDay}
+                                        </th>
                                     );
                                 })}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            {selectedDayShiftsModal?.length > 0 && (
-                <Dialog
-                    visible={selectedDayShiftsModal?.length > 0}
-                    onHide={() => setSelectedDayShiftsModal([])}
-                    header={`Смена на ${
-                        selectedDayShiftsModal[0]?.startTime
-                            ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime)
-                            : ''
-                    }`}
-                >
-                    {renderDayShiftsModalContent()}
-                </Dialog>
-            )}
-            {/* Пагинация */}
-            <div className="flex justify-between items-center mt-4">
-                <button
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 ml-4 rounded-lg ${
-                        currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'
-                    }`}
-                >
-                    &lt;
-                </button>
-                <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages || 1}`}</span>
-                <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 mr-4 rounded-lg ${
-                        currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'
-                    }`}
-                >
-                    &gt;
-                </button>
+                        </thead>
+                        <tbody>
+                            {currentSubusers?.map((employee, index) => (
+                                <tr key={index}>
+                                    <td className="px-4 py-2 inline-flex items-center gap-2">
+                                        <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
+                                        <div className="flex flex-col">
+                                            <p className="text-sm">{employee.name}</p>
+                                            <p className="text-sm">
+                                                ({getDepartmentName(employee.departmentId)})
+                                            </p>
+                                        </div>
+                                    </td>
+                                    {daysArray.map((day) => {
+                                        const shifts = getShiftsForDay(employee.shifts, day);
+                                        const dayColor = getDayColor(shifts);
+
+                                        return (
+                                            <td
+                                                key={day}
+                                                className="py-1 text-center relative cursor-pointer"
+                                                onClick={() => setSelectedDayShiftsModal(shifts)}
+                                            >
+                                                <div
+                                                    className={`w-4 h-4 flex items-center rounded-full ${dayColor} hover:bg-blue-500`}
+                                                ></div>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                {selectedDayShiftsModal?.length > 0 && (
+                    <Dialog
+                        visible={selectedDayShiftsModal?.length > 0}
+                        onHide={() => setSelectedDayShiftsModal([])}
+                        header={`Смена на ${
+                            selectedDayShiftsModal[0]?.startTime
+                                ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime)
+                                : ''
+                        }`}
+                    >
+                        {renderDayShiftsModalContent()}
+                    </Dialog>
+                )}
+                {/* Пагинация */}
+                <div className="flex justify-between items-center mt-4">
+                    <button
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 ml-4 rounded-lg ${
+                            currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'
+                        }`}
+                    >
+                        &lt;
+                    </button>
+                    <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages || 1}`}</span>
+                    <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 mr-4 rounded-lg ${
+                            currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'
+                        }`}
+                    >
+                        &gt;
+                    </button>
+                </div>
             </div>
         </div>
     );
