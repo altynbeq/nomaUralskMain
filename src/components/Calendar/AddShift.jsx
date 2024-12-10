@@ -129,7 +129,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
                 if (response.status === 201) {
                     onShiftsAdded(response.data);
-                    toast.success('Смены успешно добавлены');
                     setOpen(false);
                 }
             }

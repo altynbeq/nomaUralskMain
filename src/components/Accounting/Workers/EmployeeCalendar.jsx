@@ -246,7 +246,6 @@ export const EmployeeCalendar = () => {
     }, []);
 
     const handleShiftsAdded = useCallback((newShifts) => {
-        console.log(newShifts);
         setSubUsersState((prevSubUsers) => {
             const updatedSubUsers = [...prevSubUsers];
 
