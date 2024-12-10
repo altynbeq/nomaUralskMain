@@ -67,7 +67,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
         try {
             const shifts = [];
 
-            // Generate all dates within the selected date range
+            // Генерируем все даты внутри выбранного диапазона
             const dates = [];
             let currentDate = new Date(dateRange[0]);
             currentDate.setHours(0, 0, 0, 0);
@@ -79,36 +79,56 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
                 currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            // Create shifts for each date and each selected user
-            dates.forEach((date) => {
-                const shiftStart = new Date(
-                    date.getFullYear(),
-                    date.getMonth(),
-                    date.getDate(),
-                    startTime.getHours(),
-                    startTime.getMinutes(),
-                    0,
-                );
+            // Проверка на пересечение смен
+            for (const date of dates) {
+                for (const user of selectedSubusers) {
+                    const shiftStart = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate(),
+                        startTime.getHours(),
+                        startTime.getMinutes(),
+                        0,
+                    );
+                    const shiftEnd = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate(),
+                        endTime.getHours(),
+                        endTime.getMinutes(),
+                        0,
+                    );
 
-                const shiftEnd = new Date(
-                    date.getFullYear(),
-                    date.getMonth(),
-                    date.getDate(),
-                    endTime.getHours(),
-                    endTime.getMinutes(),
-                    0,
-                );
+                    // Проверяем смены у данного пользователя на этот день
+                    const existingShifts = user.shifts || [];
+                    const isOverlapping = existingShifts.some((existingShift) => {
+                        const existingStart = new Date(existingShift.startTime);
+                        const existingEnd = new Date(existingShift.endTime);
 
-                selectedSubusers.forEach((user) => {
+                        // Проверяем пересечение интервалов
+                        // newStart < existingEnd && newEnd > existingStart
+                        return shiftStart < existingEnd && shiftEnd > existingStart;
+                    });
+
+                    if (isOverlapping) {
+                        toast.error(
+                            `Невозможно добавить смену для ${user.name} на ${date.toLocaleDateString('ru-RU')} - время пересекается с уже существующей сменой.`,
+                        );
+                        setIsLoading(false);
+                        return; // Прекращаем выполнение, не отправляем на сервер
+                    }
+
+                    // Если пересечений нет, добавляем смену в массив
                     shifts.push({
                         subUserId: user._id,
                         startTime: shiftStart.toISOString(),
                         endTime: shiftEnd.toISOString(),
                         selectedStore: selectedStore._id,
                     });
-                });
-            });
-            // Send the shifts array to the backend
+                }
+            }
+
+            // Если дошли до этого момента, пересечений нет, можно отправлять на сервер
             await axiosInstance.post('/shifts/create-shifts', { shifts });
             toast.success('Смены успешно добавлены');
             setOpen(false);
@@ -179,7 +199,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
                 visible={open}
                 onHide={() => setOpen(false)}
                 className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto"
-                // className="fixed z-20 inset-0 flex items-center justify-center bg-black bg-opacity-50"
             >
                 <form onSubmit={handleSubmit}>
                     <div className="mb-6">
@@ -240,7 +259,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
                             options={stores}
                             optionLabel="storeName"
                             placeholder="Выберите магазин"
-                            className="w-full border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
+                            className="w-full border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                             showClear
                         />
                     </div>
