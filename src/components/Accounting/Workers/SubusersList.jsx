@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { SubuserEditModal } from './SubuserEditModal';
 import { SubuserDeleteModal } from './SubuserDeleteModal';
 import AlertModal from '../../AlertModal';
+import { FaFilter, FaTimes, FaSearch } from 'react-icons/fa';
 
 export const SubusersList = ({ departments, subUsers, stores }) => {
     const [selectedStore, setSelectedStore] = useState(null);
@@ -16,6 +17,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
     const [showSubuserDeleteModal, setShowSubuserDeleteModal] = useState(false);
     const [editingSubuser, setEditingSubuser] = useState(false);
     const [showAlertModal, setShowAlertModal] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     // Фильтрация отделов на основе выбранного магазина
     const filteredDepartments = useMemo(() => {
@@ -88,7 +90,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         <div className="flex gap-2">
             <Button
                 icon="pi pi-pencil"
-                className="p-button-rounded p-button-secondary"
+                className="p-button-rounded text-blue-500 p-button-secondary"
                 onClick={() => {
                     setShowSubuserEditModal(true);
                     setEditingSubuser(rowData);
@@ -96,7 +98,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
             />
             <Button
                 icon="pi pi-trash"
-                className="p-button-rounded p-button-danger"
+                className="p-button-rounded text-red-500 p-button-danger"
                 onClick={() => {
                     setShowSubuserDeleteModal(true);
                     setEditingSubuser(rowData);
@@ -122,12 +124,57 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
     );
 
     return (
-        <div className="w-[90%] bg-white rounded-lg shadow-md p-4">
+        <div className="w-[90%] bg-white rounded-lg shadow-md p-4 subtle-border">
             {/* Верхние фильтры */}
             <div className="flex flex-col md:flex-row gap-4 justify-between mb-4">
                 <h3 className="flex items-center">Сотрудники</h3>
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex flex-row gap-2">
+                        <div className="relative">
+                            {/* Filter Button */}
+                            <button
+                                className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            >
+                                <FaFilter />
+                                <span>Фильтр</span>
+                            </button>
+
+                            {/* Dropdown Content */}
+                            {isFilterOpen && (
+                                <div className="absolute z-10 bg-white p-4 mt-2 w-fit shadow-lg rounded-lg border border-gray-200">
+                                    {/* Department Dropdown */}
+                                    <div className="flex justify-end mb-2">
+                                        <button
+                                            className="text-gray-500 hover:text-red-500"
+                                            onClick={() => setIsFilterOpen(false)}
+                                        >
+                                            <FaTimes className="text-xl" />
+                                        </button>
+                                    </div>
+                                    <Dropdown
+                                        value={selectedStore}
+                                        onChange={(e) => setSelectedStore(e.value)}
+                                        options={stores || []}
+                                        optionLabel="storeName"
+                                        showClear
+                                        placeholder="Магазин"
+                                        className="w-fit mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                    />
+                                    <Dropdown
+                                        value={selectedDepartment}
+                                        onChange={(e) => setSelectedDepartment(e.value)}
+                                        showClear
+                                        options={filteredDepartments}
+                                        optionLabel="name"
+                                        placeholder="Отдел"
+                                        className="w-fit mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                        disabled={filteredDepartments?.length === 0}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        {/*                         
                         <Dropdown
                             value={selectedStore}
                             onChange={(e) => setSelectedStore(e.value)}
@@ -146,14 +193,17 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                             placeholder="Отдел"
                             className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                             disabled={filteredDepartments?.length === 0}
-                        />
+                        /> */}
                     </div>
-                    <InputText
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Поиск"
-                        className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
-                    />
+                    <div className="relative">
+                        <InputText
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Поиск"
+                            className="flex-1 w-full pl-10 p-2 border-2 border-blue-500 rounded-lg"
+                        />
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                    </div>
                 </div>
             </div>
 

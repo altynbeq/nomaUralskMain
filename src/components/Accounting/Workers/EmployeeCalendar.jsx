@@ -3,7 +3,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
 import { Dialog } from 'primereact/dialog';
-import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaFilter, FaTimes } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
@@ -349,6 +349,14 @@ export const EmployeeCalendar = ({ departments, stores, subUsers }) => {
                             {isFilterOpen && (
                                 <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
                                     {/* Department Dropdown */}
+                                    <div className="flex justify-end mb-2">
+                                        <button
+                                            className="text-gray-500 hover:text-red-500"
+                                            onClick={() => setIsFilterOpen(false)}
+                                        >
+                                            <FaTimes className="text-xl" />
+                                        </button>
+                                    </div>
                                     <Dropdown
                                         value={selectedDepartment}
                                         onChange={(e) => setSelectedDepartment(e.value)}
