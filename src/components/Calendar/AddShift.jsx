@@ -182,14 +182,11 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
      */
     const sendShiftsInChunks = async (shifts) => {
         const chunks = chunkArray(shifts, CHUNK_SIZE);
-        const totalChunks = chunks.length;
         let currentChunk = 0;
         setIsLoading(true);
         try {
             for (const chunk of chunks) {
                 currentChunk += 1;
-                toast.info(`Отправка смен ${currentChunk} из ${totalChunks}...`);
-
                 const response = await axiosInstance.post(
                     '/shifts/create-shifts',
                     { shifts: chunk },

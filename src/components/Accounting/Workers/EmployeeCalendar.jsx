@@ -33,19 +33,33 @@ export const EmployeeCalendar = () => {
 
     useEffect(() => {
         socket.on('new-shift', (newShifts) => {
-            // Обновляем состояние subUsersState для обновления интерфейса
             setSubUsersState((prevSubUsers) => {
+                // Копируем предыдущее состояние
                 const updatedUsers = [...prevSubUsers];
+
                 newShifts.forEach((shift) => {
                     const userIndex = updatedUsers.findIndex(
                         (user) => user._id === shift.subUserId._id,
                     );
+
                     if (userIndex !== -1) {
                         const user = updatedUsers[userIndex];
+
+                        // Если у пользователя нет смен, создаем пустой массив
                         if (!user.shifts) user.shifts = [];
-                        user.shifts.push(shift);
+
+                        // Проверяем, существует ли уже эта смена
+                        const shiftExists = user.shifts.some(
+                            (existingShift) => existingShift._id === shift._id,
+                        );
+
+                        // Добавляем только если смены еще нет
+                        if (!shiftExists) {
+                            user.shifts.push(shift);
+                        }
                     }
                 });
+
                 return updatedUsers;
             });
         });

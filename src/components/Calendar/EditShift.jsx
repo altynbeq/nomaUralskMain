@@ -90,18 +90,18 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
 
             const newEndISO = newEnd.toISOString();
 
-            const checkResponse = await axiosInstance.get(`/shifts/check-conflict/${shiftId}`, {
-                params: {
-                    startTime: newStart,
-                    endTime: newEndISO,
-                },
-            });
+            // const checkResponse = await axiosInstance.get(`/shifts/check-conflict/${shiftId}`, {
+            //     params: {
+            //         startTime: newStart,
+            //         endTime: newEndISO,
+            //     },
+            // });
 
-            if (checkResponse.data.conflict) {
-                toast.error('Смена пересекается по времени с другой сменой.');
-                setIsLoading(false);
-                return;
-            }
+            // if (checkResponse.data.conflict) {
+            //     toast.error('Смена пересекается по времени с другой сменой.');
+            //     setIsLoading(false);
+            //     return;
+            // }
 
             const response = await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
                 subUserId: shift.subUserId._id,
