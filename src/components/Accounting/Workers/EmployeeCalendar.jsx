@@ -11,6 +11,7 @@ import { PaginationControls } from '../PaginationControls';
 import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
+import { Loader } from '../../Loader';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -520,6 +521,13 @@ export const EmployeeCalendar = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* <td
+                                    colSpan={daysArray.length + 1}
+                                    className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70"
+                                >
+                                    <Loader />
+                                </td> */}
 
                 <CalendarTable
                     currentSubusers={currentSubusers}
