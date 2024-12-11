@@ -61,16 +61,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]); // тут храним сгенерированные смены перед отправкой
 
-    const handleEndTimeChange = (e) => {
-        const newEndTime = e.value;
-        if (startTime && newEndTime <= startTime) {
-            toast.error('Время окончания смены должно быть позже времени начала.');
-            setEndTime(null);
-        } else {
-            setEndTime(newEndTime);
-        }
-    };
-
     const generateShifts = () => {
         const shifts = [];
 
@@ -342,7 +332,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                         <label className="block text-gray-700 mb-2">Время окончания смены:</label>
                         <Calendar
                             value={endTime}
-                            onChange={handleEndTimeChange}
+                            onChange={(e) => setEndTime(e.value)}
                             timeOnly
                             hourFormat="24"
                             showIcon
