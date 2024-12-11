@@ -64,24 +64,6 @@ export const CalendarTable = memo(
                                         const shifts = getShiftsForDay(employee.shifts, day);
                                         const dayClass = getDayColor(shifts);
 
-                                        let style = {};
-                                        if (dayClass === 'late-only') {
-                                            style = {
-                                                background:
-                                                    'linear-gradient(to right, red 50%, #3b82f6 50%)',
-                                            };
-                                        } else if (dayClass === 'early-only') {
-                                            style = {
-                                                background:
-                                                    'linear-gradient(to right, #3b82f6 50%, red 50%)',
-                                            };
-                                        }
-
-                                        const finalClass =
-                                            dayClass === 'late-only' || dayClass === 'early-only'
-                                                ? ''
-                                                : dayClass;
-
                                         return (
                                             <td
                                                 key={day}
@@ -89,8 +71,19 @@ export const CalendarTable = memo(
                                                 onClick={() => setSelectedDayShiftsModal(shifts)}
                                             >
                                                 <div
-                                                    className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${finalClass}`}
-                                                    style={style}
+                                                    className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${
+                                                        dayClass === 'late-and-worked'
+                                                            ? ''
+                                                            : dayClass
+                                                    }`}
+                                                    style={
+                                                        dayClass === 'late-and-worked'
+                                                            ? {
+                                                                  background:
+                                                                      'linear-gradient(to right, red 50%, #28a745 50%)',
+                                                              }
+                                                            : {}
+                                                    }
                                                 ></div>
                                             </td>
                                         );
