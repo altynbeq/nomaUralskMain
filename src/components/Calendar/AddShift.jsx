@@ -191,7 +191,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 toast.info(`Отправка смен ${currentChunk} из ${totalChunks}...`);
 
                 const response = await axiosInstance.post(
-                    '/shifts//create-shifts',
+                    '/shifts/create-shifts',
                     { shifts: chunk },
                     {
                         timeout: 90000, // 90 секунд
