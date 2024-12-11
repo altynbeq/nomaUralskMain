@@ -57,12 +57,27 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const departments = useCompanyStructureStore((state) => state.departments);
     const [selectedStore, setSelectedStore] = useState(null);
 
+    const handleEndTimeChange = (e) => {
+        const newEndTime = e.value;
+        if (startTime && newEndTime <= startTime) {
+            toast.error('Время окончания смены должно быть позже времени начала.');
+            setEndTime(null);
+        } else {
+            setEndTime(newEndTime);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedSubusers.length || !dateRange || !startTime || !endTime || !selectedStore) {
             toast.error('Пожалуйста, выберите сотрудников, период и время смены.');
             return;
         }
+        if (endTime <= startTime) {
+            toast.error('Время окончания смены должно быть больше времени начала.');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const shifts = [];
@@ -296,7 +311,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                         <label className="block text-gray-700 mb-2">Время окончания смены:</label>
                         <Calendar
                             value={endTime}
-                            onChange={(e) => setEndTime(e.value)}
+                            onChange={handleEndTimeChange}
                             timeOnly
                             hourFormat="24"
                             showIcon
