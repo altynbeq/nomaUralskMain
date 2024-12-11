@@ -91,30 +91,27 @@ export const MainContent = ({ urls, activeMenu }) => {
 
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
-            const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
-            const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
+            const isToday = shiftStartDate <= todayDateString;
             const isCurrentSubUser = shift.subUserId === user.id;
-            return isToday && isCurrentSubUser;
+            return isCurrentSubUser && isToday;
         });
 
-        if (todaysShifts.length > 0) {
-            todaysShifts.forEach((shift) => {
-                if (hasExecuted.current) {
-                    return; // Если уже выполнилось, выходим
-                }
-                hasExecuted.current = true; // Устанавливаем флаг
+        todaysShifts.forEach((shift) => {
+            if (hasExecuted.current) {
+                return; // Если уже выполнилось, выходим
+            }
+            hasExecuted.current = true; // Устанавливаем флаг
 
-                // Проверяем, была ли уже отметка прихода или ухода
-                if (!shift.scanTime) {
-                    updateShiftScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
-                } else if (!shift.endScanTime) {
-                    updateShiftEndScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
-                } else {
-                    setShowMarkShiftResultModal(true);
-                    setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
-                }
-            });
-        }
+            // Проверяем, была ли уже отметка прихода или ухода
+            if (!shift.scanTime) {
+                updateShiftScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
+            } else if (!shift.endScanTime) {
+                updateShiftEndScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
+            } else {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
+            }
+        });
     }, [subUserShifts, user, location.search]);
 
     // Запрос геолокации при необходимости (через QR)
