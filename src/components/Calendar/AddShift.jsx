@@ -144,7 +144,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             // Сначала проверяем конфликты
             const checkResponse = await axiosInstance.post('/shifts/check-conflicts', { shifts });
             if (checkResponse.status === 200) {
-                const { conflict, conflictsList } = checkResponse.data;
+                const { conflict } = checkResponse.data;
                 if (conflict) {
                     // Если есть конфликт — показать модальное окно подтверждения
                     setPendingShifts(shifts);
@@ -199,7 +199,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 );
 
                 if (response.status === 201 || response.status === 200) {
-                    onShiftsAdded(response.data);
+                    // onShiftsAdded(response.data);
                 } else {
                     throw new Error(`Неизвестный статус ответа: ${response.status}`);
                 }

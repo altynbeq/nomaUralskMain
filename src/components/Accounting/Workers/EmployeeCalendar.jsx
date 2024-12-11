@@ -296,46 +296,6 @@ export const EmployeeCalendar = () => {
         toast.success('Вы успешно обновили смену');
     }, []);
 
-    const handleShiftsAdded = useCallback((addedShifts) => {
-        if (!addedShifts) {
-            return;
-        }
-        setSubUsersState((prevSubUsers) => {
-            const updatedSubUsers = prevSubUsers.map((user) => {
-                // Найти все смены для этого пользователя из добавленных смен
-                const userShifts = addedShifts.filter(
-                    (shift) => (shift) => (shift) =>
-                        shift.subUserId._id.toString() === user._id.toString(),
-                );
-
-                if (userShifts.length === 0) return user;
-
-                // Обновить или добавить смены
-                const updatedShifts = user.shifts ? [...user.shifts] : [];
-
-                userShifts.forEach((newShift) => {
-                    const existingIndex = updatedShifts.findIndex(
-                        (shift) => shift._id === newShift._id,
-                    );
-                    if (existingIndex !== -1) {
-                        // Обновить существующую смену
-                        updatedShifts[existingIndex] = newShift;
-                    } else {
-                        // Добавить новую смену
-                        updatedShifts.push(newShift);
-                    }
-                });
-
-                return {
-                    ...user,
-                    shifts: updatedShifts,
-                };
-            });
-
-            return updatedSubUsers;
-        });
-    }, []);
-
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
             return (
@@ -502,7 +462,6 @@ export const EmployeeCalendar = () => {
                                 setOpen={setShowModalAddShift}
                                 stores={stores}
                                 subUsers={subUsersState}
-                                onShiftsAdded={handleShiftsAdded}
                             />
                         </div>
                         <Filters
