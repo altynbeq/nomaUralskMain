@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
-import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
+import { FaSearch, FaPlus } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
