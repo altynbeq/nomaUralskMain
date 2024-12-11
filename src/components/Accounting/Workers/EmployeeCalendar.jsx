@@ -335,7 +335,7 @@ export const EmployeeCalendar = () => {
             return updatedSubUsers;
         });
 
-        toast.success('Смены успешно добавлены или обновлены');
+        toast.success('Смены успешно добавлены');
     }, []);
 
     const renderDayShiftsModalContent = useCallback(() => {
