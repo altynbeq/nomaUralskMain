@@ -99,7 +99,7 @@ export const CalendarTable = memo(
                                                 onClick={() => setSelectedDayShiftsModal(shifts)}
                                             >
                                                 <div
-                                                    className={`w-6 h-6 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
+                                                    className={`w-5 h-5 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
                                                     style={style}
                                                     title={
                                                         dayColor.type === 'split'
