@@ -339,6 +339,9 @@ export const EmployeeCalendar = () => {
     // }, []);
 
     const handleShiftsAdded = useCallback((addedShifts) => {
+        if (!addedShifts) {
+            return;
+        }
         setSubUsersState((prevSubUsers) => {
             const updatedSubUsers = prevSubUsers.map((user) => {
                 // Найти все смены для этого пользователя из добавленных смен

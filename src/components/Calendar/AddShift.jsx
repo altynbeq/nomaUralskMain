@@ -199,7 +199,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 );
 
                 if (response.status === 201 || response.status === 200) {
-                    toast.success(`Смены ${currentChunk} успешно добавлены.`);
+                    onShiftsAdded(response.data);
                 } else {
                     throw new Error(`Неизвестный статус ответа: ${response.status}`);
                 }
