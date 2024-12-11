@@ -29,6 +29,9 @@ export const EmployeeCalendar = () => {
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
 
+    // Состояние для отфильтрованных отделов на основе выбранного магазина
+    const [filteredDepartments, setFilteredDepartments] = useState([]);
+
     const handleSocketShiftUpdate = useCallback((updatedShift) => {
         // Обновляем данные в subUsersState
         setSubUsersState((prevSubUsers) => {
@@ -112,6 +115,17 @@ export const EmployeeCalendar = () => {
         },
         [departmentsMap],
     );
+
+    // Фильтрация отделов после выбора магазина
+    useEffect(() => {
+        if (selectedStore) {
+            const filtered = departments.filter((dept) => dept.storeId === selectedStore._id);
+            setFilteredDepartments(filtered);
+        } else {
+            setFilteredDepartments([]);
+            setSelectedDepartment(null); // Сбрасываем выбранный отдел при сбросе магазина
+        }
+    }, [selectedStore, departments]);
 
     const filteredSubusers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
@@ -482,22 +496,22 @@ export const EmployeeCalendar = () => {
                             {isFilterOpen && (
                                 <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
                                     <Dropdown
-                                        value={selectedDepartment}
-                                        onChange={(e) => setSelectedDepartment(e.value)}
+                                        value={selectedStore}
+                                        onChange={(e) => setSelectedStore(e.value)}
                                         showClear
-                                        options={departments || []}
-                                        optionLabel="name"
-                                        placeholder="Отдел"
+                                        options={stores || []}
+                                        optionLabel="storeName"
+                                        placeholder="Магазин"
                                         className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
 
                                     <Dropdown
-                                        value={selectedStore}
-                                        onChange={(e) => setSelectedStore(e.value)}
-                                        options={stores || []}
-                                        optionLabel="storeName"
-                                        showClear
-                                        placeholder="Магазин"
+                                        value={selectedDepartment}
+                                        onChange={(e) => setSelectedDepartment(e.value)}
+                                        options={filteredDepartments || []}
+                                        optionLabel="name"
+                                        placeholder="Отдел"
+                                        disabled={!selectedStore}
                                         className="w-full border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
                                 </div>
