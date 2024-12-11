@@ -3,6 +3,7 @@ import { Calendar } from 'primereact/calendar';
 import { addLocale } from 'primereact/api';
 import { axiosInstance } from '../../api/axiosInstance';
 import { Button } from 'primereact/button';
+import { toast } from 'react-toastify';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -69,23 +70,38 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
     const handleSave = async () => {
         setIsLoading(true);
         try {
-            const updatedShift = {
-                ...shift,
-                startTime: new Date(startTime).toISOString(),
-                endTime: new Date(endTime).toISOString(),
-            };
+            const newStart = new Date(startTime).toISOString();
+            const newEnd = new Date(endTime).toISOString();
+
+            // Проверка на пересечение
+            const checkResponse = await axiosInstance.get(`/shifts/check-conflict/${shiftId}`, {
+                params: {
+                    startTime: newStart,
+                    endTime: newEnd,
+                },
+            });
+            if (checkResponse.data.conflict) {
+                // Есть пересечение
+                toast.error('Смена пересекается по времени с другой сменой.');
+                setIsLoading(false);
+                return;
+            }
+
+            // Нет пересечений — обновляем смену
             const response = await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
                 subUserId: shift.subUserId._id,
-                startTime: new Date(startTime).toISOString(),
-                endTime: new Date(endTime).toISOString(),
+                startTime: newStart,
+                endTime: newEnd,
                 selectedStore: shift.selectedStore,
             });
             if (response.status === 200) {
-                onShiftUpdate(updatedShift);
-                setShift(updatedShift);
+                onShiftUpdate(response.data);
+                setShift(response.data);
+                toast.success('Смена успешно обновлена');
             }
         } catch (error) {
             console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось обновить смену.');
         } finally {
             setIsLoading(false);
         }
@@ -96,8 +112,10 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
         try {
             await axiosInstance.delete(`/shifts/delete-shift/${shiftId}`);
             onShiftDelete(shiftId); // Вызов функции из родительского компонента для удаления смены из списка
+            toast.success('Смена успешно удалена');
         } catch (error) {
             console.error('Ошибка при удалении смены:', error);
+            toast.error('Не удалось удалить смену.');
         } finally {
             setIsLoading(false);
         }
