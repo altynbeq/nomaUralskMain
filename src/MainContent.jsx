@@ -98,20 +98,10 @@ export const MainContent = ({ urls, activeMenu }) => {
             0,
             0,
         );
-        const endOfDay = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-            23,
-            59,
-            59,
-            999,
-        );
 
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStart = new Date(shift.startTime);
-            const shiftEnd = new Date(shift.endTime);
-            const isToday = shiftStart >= startOfDay && shiftEnd <= endOfDay;
+            const isToday = shiftStart >= startOfDay;
             const isCurrentSubUser = shift.subUserId === user.id;
             return isCurrentSubUser && isToday;
         });
@@ -119,7 +109,6 @@ export const MainContent = ({ urls, activeMenu }) => {
         todaysShifts.forEach((shift) => {
             if (hasExecuted.current) return;
             hasExecuted.current = true;
-
             if (shift.scanTime && shift.endScanTime) {
                 // Уже отмечен и приход, и уход
                 setShowMarkShiftResultModal(true);
