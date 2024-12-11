@@ -1,9 +1,9 @@
+import { useCallback } from 'react';
 import { formatOnlyTimeDate, formatOnlyDate } from '../methods/dataFormatter';
 import { dailyData } from '../data/dailyData';
+import { Dialog } from 'primereact/dialog';
 
 export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShift }) => {
-    if (!isOpen) return null;
-
     const dayData = dailyData.find((item) => item.date === selectedDay);
 
     const calculateProgress = () => {
@@ -22,63 +22,140 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShift }) =
 
     const { actual, plan, percent } = calculateProgress();
 
+    const getDurationText = (shift) => {
+        const startTime = new Date(shift.startTime);
+        const endTime = new Date(shift.endTime);
+
+        const durationMs = endTime - startTime;
+        const totalMinutes = Math.floor(durationMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        const durationText =
+            hours > 0 ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}` : `${minutes} мин`;
+
+        return durationText;
+    };
+
+    const calculateLateMinutes = useCallback((startTime, scanTime) => {
+        if (!startTime || !scanTime) return 0;
+        const start = new Date(startTime);
+        const scan = new Date(scanTime);
+        const diffMs = scan - start;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        return diffMinutes > 0 ? diffMinutes : 0;
+    }, []);
+
+    const calculateWorkedTime = useCallback((scanTime, endScanTime) => {
+        if (!scanTime || !endScanTime) return { hours: 0, minutes: 0 };
+
+        const start = new Date(scanTime);
+        const end = new Date(endScanTime);
+
+        const diffMs = end - start;
+        if (diffMs < 0) return { hours: 0, minutes: 0 };
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return { hours, minutes };
+    }, []);
+
+    const getLateMinutes = (shift) => {
+        const lateMinutes =
+            shift.startTime && shift.scanTime
+                ? calculateLateMinutes(shift.startTime, shift.scanTime)
+                : 0;
+        return lateMinutes;
+    };
+
+    const getLateText = (shift) => {
+        const lateMinutes = getLateMinutes(shift);
+        return getLateMinutes(shift) > 0 ? `Опоздал на ${lateMinutes} мин` : 'Не опоздал';
+    };
+
+    const getWorkedTimeText = (shift) => {
+        const workedTime = calculateWorkedTime(shift.scanTime, shift.endScanTime);
+        const workedTimeText =
+            workedTime.hours > 0
+                ? `${workedTime.hours} ч ${workedTime.minutes > 0 ? `${workedTime.minutes} мин` : ''}`
+                : `${workedTime.minutes} мин`;
+        return workedTimeText;
+    };
+
     return (
-        <div className="fixed z-10 inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full sm:w-2/5 md:w-1/2 lg:w-2/5 xl:w-1/3 shadow-lg relative">
-                <button
-                    onClick={onClose}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 rounded-md"
-                >
-                    ✕
-                </button>
-                <h2 className="text-lg font-semibold text-center text-black">
-                    {selectedShift
-                        ? `Смена на ${formatOnlyDate(selectedShift.startTime)}`
-                        : 'Смена отсутствует'}
-                </h2>
-
-                {selectedShift ? (
-                    <div className="mt-4 text-sm md:text-base">
-                        <div className="flex items-center gap-2">
-                            <p className="font-semibold text-black">Магазин:</p>
-                            <p className="text-gray-600">
-                                {selectedShift?.selectedStore?.storeName || 'N/A'}
-                            </p>
-                        </div>
-
-                        {/* <div className="mt-4">
-                            <div className="flex items-center gap-2">
-                                <p className="font-semibold text-black">План:</p>
-                                <p className="text-gray-600">{plan.toLocaleString()} тг</p>
-                            </div>
-
-                            <div className="relative w-full bg-gray-200 h-5 rounded-full overflow-hidden">
-                                <div
-                                    className="absolute top-0 left-0 bg-green-500 h-5"
-                                    style={{ width: `${percent}%` }}
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <p className="text-sm font-semibold">
-                                        {actual.toLocaleString()} тг ({percent}%)
-                                    </p>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        <div className="mt-6 flex items-center gap-2">
-                            <p className="font-semibold text-black">Смена:</p>
-                            <p className="text-gray-600 border-2 rounded-lg p-1 inline-flex text-center items-center justify-center">
-                                {formatOnlyTimeDate(selectedShift.startTime)} -{' '}
-                                {formatOnlyTimeDate(selectedShift.endTime)}
-                            </p>
-                        </div>
+        <Dialog
+            visible={isOpen}
+            header={
+                selectedShift
+                    ? `Смена на ${formatOnlyDate(selectedShift.startTime)}`
+                    : 'Смена отсутствует'
+            }
+            onHide={() => onClose()}
+            className="bg-white rounded-lg p-6 w-full sm:w-2/5 md:w-1/2 lg:w-2/5 xl:w-1/3 shadow-lg relative"
+        >
+            {selectedShift ? (
+                <div className="mt-4 text-sm md:text-base flex flex-col gap-4">
+                    <div className="mt-6 flex items-center gap-2">
+                        <p className="font-bold text-lg">Смена:</p>
+                        <p className="text-gray-600 border-2 rounded-lg p-1 inline-flex text-center items-center justify-center">
+                            {formatOnlyTimeDate(selectedShift.startTime)} -{' '}
+                            {formatOnlyTimeDate(selectedShift.endTime)}
+                        </p>
                     </div>
-                ) : (
-                    <p className="text-gray-500 mt-4 text-center">
-                        На выбранный день смен не назначено.
-                    </p>
-                )}
-            </div>
-        </div>
+                    <div className="flex items-center gap-2">
+                        <p className="font-bold text-lg">Магазин:</p>
+                        <p className="text-gray-600">
+                            {selectedShift?.selectedStore?.storeName || 'N/A'}
+                        </p>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <p>
+                            <span className="font-bold text-lg">Длительность:</span>{' '}
+                            {getDurationText(selectedShift)}
+                        </p>
+                    </div>
+                    <div className="flex flex-col">
+                        {selectedShift.scanTime && (
+                            <p>
+                                <span className="font-bold text-lg">Фактический приход:</span>{' '}
+                                {formatOnlyTimeDate(selectedShift.scanTime)}
+                            </p>
+                        )}
+                        {selectedShift.endScanTime && (
+                            <p>
+                                <span className="font-bold text-lg">Фактический уход:</span>{' '}
+                                {formatOnlyTimeDate(selectedShift.endScanTime)}
+                            </p>
+                        )}
+                    </div>
+                    <div>
+                        {selectedShift.scanTime && (
+                            <p
+                                className={
+                                    getLateMinutes(selectedShift) > 0
+                                        ? 'text-red-500 font-bold text-lg'
+                                        : 'text-green-500 font-bold text-lg'
+                                }
+                            >
+                                {getLateText(selectedShift)}
+                            </p>
+                        )}
+                        {selectedShift.scanTime && selectedShift.endScanTime && (
+                            <p className="text-blue-500 font-bold text-lg">
+                                Отработано: {getWorkedTimeText(selectedShift)}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            ) : (
+                <p className="text-gray-500 mt-4 text-center">
+                    На выбранный день смен не назначено.
+                </p>
+            )}
+        </Dialog>
+        // </div>
     );
 };
