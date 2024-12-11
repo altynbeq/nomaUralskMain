@@ -277,6 +277,10 @@ export const EmployeeCalendar = () => {
                 return { type: 'green' };
             }
 
+            if (isLate && !hasScanOut) {
+                return { type: 'split-red-blue' };
+            }
+
             return { type: 'split' };
         },
         [calculateLateMinutes, calculateWorkedTime],
