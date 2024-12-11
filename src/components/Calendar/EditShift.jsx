@@ -111,7 +111,6 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
         try {
             await axiosInstance.delete(`/shifts/delete-shift/${shiftId}`);
             onShiftDelete(shiftId); // Вызов функции из родительского компонента для удаления смены из списка
-            toast.success('Смена успешно удалена');
         } catch (error) {
             console.error('Ошибка при удалении смены:', error);
             toast.error('Не удалось удалить смену.');
