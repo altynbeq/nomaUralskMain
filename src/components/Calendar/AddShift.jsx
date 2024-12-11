@@ -184,7 +184,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         const chunks = chunkArray(shifts, CHUNK_SIZE);
         const totalChunks = chunks.length;
         let currentChunk = 0;
-
+        setIsLoading(true);
         try {
             for (const chunk of chunks) {
                 currentChunk += 1;
@@ -214,6 +214,8 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 error.response?.data?.message ||
                     `Произошла ошибка при добавлении смен на чанке ${currentChunk}.`,
             );
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -407,27 +409,27 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             <Dialog
                 visible={showConfirmModal}
                 onHide={cancelChanges}
+                header="Обнаружены пересекающиеся смены"
                 footer={
                     <div className="flex gap-2 justify-center">
                         <Button
+                            className="flex-1 cursor-pointer bg-black text-white px2 px-4 rounded"
                             label="Отмена"
-                            className="p-button-secondary"
                             onClick={cancelChanges}
+                            disabled={isLoading}
                         />
                         <Button
                             label="Подтвердить"
-                            className={`bg-blue-500 text-white py-2 px-4 rounded ${
+                            className={`flex-1 cursor-pointer bg-blue-500 text-white py-2 px-4 rounded ${
                                 isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
                             } transition duration-200`}
                             onClick={confirmChanges}
+                            disabled={isLoading}
                         />
                     </div>
                 }
             >
-                <p className="font-bold text-center">
-                    Обнаружены пересекающиеся смены. <br />
-                    Подтвердить перезапись?
-                </p>
+                <p className="font-bold text-center">Подтвердить перезапись?</p>
             </Dialog>
         </>
     );
