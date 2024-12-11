@@ -55,13 +55,14 @@ export const EmployeeCalendar = () => {
         if (updatedShift.scanTime && !updatedShift.endScanTime) {
             return toast.success(`Начало смены отметил ${updatedShift.subUserName}`);
         }
-        if (updatedShift.endScanTime && !updatedShift.scanTIme) {
+        if (updatedShift.endScanTime && !updatedShift.scanTime) {
+            // Исправлено с 'scanTIme' на 'scanTime'
             return toast.success(`Конец смены отметил ${updatedShift.subUserName}`);
         }
     }, []);
 
     useEffect(() => {
-        // Слушаем событие 'newMessage' от сервера
+        // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
             handleSocketShiftUpdate(data.shift);
         });
@@ -300,23 +301,41 @@ export const EmployeeCalendar = () => {
         toast.success('Вы успешно обновили смену');
     }, []);
 
-    const handleShiftsAdded = useCallback((newShifts) => {
+    // Функция для обработки добавленных или обновлённых смен
+    const handleShiftsAdded = useCallback((addedShifts) => {
         setSubUsersState((prevSubUsers) => {
-            const updatedSubUsers = [...prevSubUsers];
+            const updatedSubUsers = prevSubUsers.map((user) => {
+                // Найти все смены для этого пользователя из добавленных смен
+                const userShifts = addedShifts.filter((shift) => shift.subUserId === user._id);
 
-            newShifts?.forEach((shift) => {
-                const userIndex = updatedSubUsers.findIndex((user) => user._id === shift.subUserId);
-                if (userIndex !== -1) {
-                    updatedSubUsers[userIndex] = {
-                        ...updatedSubUsers[userIndex],
-                        shifts: [...(updatedSubUsers[userIndex].shifts || []), shift],
-                    };
-                }
+                if (userShifts.length === 0) return user;
+
+                // Обновить или добавить смены
+                const updatedShifts = user.shifts ? [...user.shifts] : [];
+
+                userShifts.forEach((newShift) => {
+                    const existingIndex = updatedShifts.findIndex(
+                        (shift) => shift._id === newShift._id,
+                    );
+                    if (existingIndex !== -1) {
+                        // Обновить существующую смену
+                        updatedShifts[existingIndex] = newShift;
+                    } else {
+                        // Добавить новую смену
+                        updatedShifts.push(newShift);
+                    }
+                });
+
+                return {
+                    ...user,
+                    shifts: updatedShifts,
+                };
             });
+
             return updatedSubUsers;
         });
 
-        toast.success('Смены успешно добавлены');
+        toast.success('Смены успешно добавлены или обновлены');
     }, []);
 
     const renderDayShiftsModalContent = useCallback(() => {
