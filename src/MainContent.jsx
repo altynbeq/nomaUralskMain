@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
 import { MdDescription } from 'react-icons/md';
 import { Navbar, Footer } from './components';
 import './App.css';
-import { getDistanceFromLatLonInMeters } from './methods/getDistance';
 import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
@@ -12,7 +11,6 @@ import { NoAccess } from './pages';
 import { useAuthStore, useCompanyStructureStore, useSubUserStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 
-// Ленивая загрузка страниц
 const General = lazy(() => import('./pages/General'));
 const Sales = lazy(() => import('./pages/Sales'));
 const ComingSoon = lazy(() => import('./pages/ComingSoon'));
@@ -28,14 +26,21 @@ export const MainContent = ({ urls, activeMenu }) => {
     const stores = useCompanyStructureStore((state) => state.stores);
     const subUserShifts = useSubUserStore((state) => state.shifts);
     const user = useAuthStore((state) => state.user);
+    const subUser = useSubUserStore((state) => state.subUser);
+
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
-    const [currentLocation, setCurrentLocation] = useState(null);
-    const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
+    const navigate = useNavigate();
+
     const [markShiftResultMessage, setMarkShiftResultMessage] = useState('');
+    const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
-    const subUser = useSubUserStore((state) => state.subUser);
+
+    const [showActionModal, setShowActionModal] = useState(false); // Модалка с выбором действия, но теперь действие определяется автоматически
+    const [selectedShift, setSelectedShift] = useState(null); // Выбранная смена для действия
+    const [actionText, setActionText] = useState(''); // Текст кнопки (приход/уход)
+
     const fileInput = useRef(null);
     const hasExecuted = useRef(false);
 
@@ -77,13 +82,10 @@ export const MainContent = ({ urls, activeMenu }) => {
         }
     };
 
-    // Проверка смен при загрузке геолокации
     useEffect(() => {
-        // Проверяем наличие параметра isQrRedirect в поисковых параметрах URL
         const searchParams = new URLSearchParams(location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
 
-        // Если переход не по QR (параметр отсутствует или не равен true) – выходим
         if (!isQr) return;
 
         const today = new Date();
@@ -106,51 +108,59 @@ export const MainContent = ({ urls, activeMenu }) => {
             999,
         );
 
-        // Фильтруем только смены для текущего пользователя и те, которые начинаются и заканчиваются сегодня
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStart = new Date(shift.startTime);
             const shiftEnd = new Date(shift.endTime);
-            const isToday = shiftStart >= startOfDay && shiftEnd <= endOfDay; // Смена должна начаться и закончиться в пределах сегодняшнего дня
-            const isCurrentSubUser = shift.subUserId === user.id; // Смена принадлежит текущему пользователю
+            const isToday = shiftStart >= startOfDay && shiftEnd <= endOfDay;
+            const isCurrentSubUser = shift.subUserId === user.id;
             return isCurrentSubUser && isToday;
         });
 
-        // Обработка смен
         todaysShifts.forEach((shift) => {
-            if (hasExecuted.current) return; // Если уже выполнилось, выходим
-            hasExecuted.current = true; // Устанавливаем флаг, чтобы предотвратить повторное выполнение
+            if (hasExecuted.current) return;
+            hasExecuted.current = true;
 
-            if (!shift.scanTime) {
-                updateShiftScan(shift, shift.selectedStore); // Отмечаем приход
-            } else if (!shift.endScanTime) {
-                updateShiftEndScan(shift, shift.selectedStore); // Отмечаем уход
-            } else {
+            if (shift.scanTime && shift.endScanTime) {
+                // Уже отмечен и приход, и уход
                 setShowMarkShiftResultModal(true);
                 setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
+                return;
             }
+
+            setSelectedShift(shift);
+
+            // Определяем текст действия
+            if (!shift.scanTime) {
+                // Нет прихода, значит отмечаем приход
+                setActionText('Отметить');
+            } else if (shift.scanTime && !shift.endScanTime) {
+                // Приход есть, отмечаем уход
+                setActionText('Отметить');
+            }
+
+            setShowActionModal(true);
         });
     }, [subUserShifts, user, location.search]);
 
-    // Запрос геолокации при необходимости (через QR)
+    useEffect(() => {
+        // После закрытия модалки с результатом, если была успешная отметка, перенаправляем на /general
+        if (!showMarkShiftResultModal && markShiftResultMessage.includes('успешно')) {
+            navigate('/general');
+        }
+    }, [showMarkShiftResultModal, markShiftResultMessage, navigate]);
+
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
-        if (isQr) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        setCurrentLocation({ lat: latitude, lng: longitude });
-                    },
-                    (error) => {
-                        console.error('Ошибка при получении геолокации:', error);
-                        // setShowGeoErrorModal(true);
-                    },
-                );
-            } else {
-                console.error('Geolocation не поддерживается этим браузером.');
-                // setShowGeoErrorModal(true);
-            }
+        if (isQr && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Геопозиция получена, но нам она теперь не обязательна
+                },
+                (error) => {
+                    console.error('Ошибка при получении геолокации:', error);
+                },
+            );
         }
     }, [location.pathname, location.search]);
 
@@ -185,6 +195,20 @@ export const MainContent = ({ urls, activeMenu }) => {
         }
     };
 
+    const handleAction = () => {
+        if (!selectedShift) return;
+
+        if (!selectedShift.scanTime) {
+            // Отмечаем приход
+            updateShiftScan(selectedShift);
+        } else if (selectedShift.scanTime && !selectedShift.endScanTime) {
+            // Отмечаем уход
+            updateShiftEndScan(selectedShift);
+        }
+
+        setShowActionModal(false);
+    };
+
     return (
         <>
             <div
@@ -198,7 +222,6 @@ export const MainContent = ({ urls, activeMenu }) => {
                     <Navbar />
                 </div>
 
-                {/* Оборачиваем маршруты в Suspense для лентяйной загрузки страниц */}
                 <Suspense
                     fallback={
                         <div className="flex items-center justify-center h-96">
@@ -207,11 +230,8 @@ export const MainContent = ({ urls, activeMenu }) => {
                     }
                 >
                     <Routes>
-                        {/* Общие роуты */}
                         <Route path="/" element={<General urls={urls} />} />
                         <Route path="/general" element={<General urls={urls} />} />
-
-                        {/* DataManagement роуты с проверкой доступа */}
 
                         {user?.role === 'user' ? (
                             <>
@@ -298,7 +318,6 @@ export const MainContent = ({ urls, activeMenu }) => {
                             </>
                         )}
 
-                        {/* Прочие роуты */}
                         <Route path="/docs" element={<ComingSoon />} />
                         <Route path="/resources" element={<ComingSoon />} />
                         <Route path="/support" element={<ComingSoon />} />
@@ -309,6 +328,32 @@ export const MainContent = ({ urls, activeMenu }) => {
                 </Suspense>
                 <Footer />
             </div>
+
+            {/* Модалка с действием (приход или уход) */}
+            <Dialog visible={showActionModal} onHide={() => setShowActionModal(false)}>
+                <div className="flex flex-col items-center">
+                    <h3 className="text-xl font-semibold mb-4">Отметка смены</h3>
+                    <p className="mb-8 font-bold">
+                        {actionText === 'Отметить приход'
+                            ? 'Вы хотите отметить приход для этой смены?'
+                            : 'Вы хотите отметить уход для этой смены?'}
+                    </p>
+                    <div className="flex gap-4">
+                        <button
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                            onClick={handleAction}
+                        >
+                            {actionText}
+                        </button>
+                        <button
+                            className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
+                            onClick={() => setShowActionModal(false)}
+                        >
+                            Отмена
+                        </button>
+                    </div>
+                </div>
+            </Dialog>
 
             <Dialog
                 visible={showUploadImageModal}
@@ -339,16 +384,19 @@ export const MainContent = ({ urls, activeMenu }) => {
                 </div>
             </Dialog>
 
-            {/* Модальное окно для результата отметки смены */}
             <AlertModal
                 message={markShiftResultMessage}
                 open={showMarkShiftResultModal}
-                onClose={() => setShowMarkShiftResultModal(false)}
+                onClose={() => {
+                    setShowMarkShiftResultModal(false);
+                    if (markShiftResultMessage.includes('успешно')) {
+                        navigate('/general');
+                    }
+                }}
             />
 
-            {/* Модальное окно для ошибки геолокации */}
             <AlertModal
-                message="Для отметки смены необходимо разрешить доступ к геолокации и снова пройти по QR отметку. В противном случае смена не будет засчитана."
+                message="Для отметки смены необходимо разрешить доступ к геолокации."
                 open={showGeoErrorModal}
                 onClose={() => setShowGeoErrorModal(false)}
             />
