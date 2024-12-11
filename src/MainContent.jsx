@@ -143,9 +143,10 @@ export const MainContent = ({ urls, activeMenu }) => {
     }, [subUserShifts, user, location.search]);
 
     useEffect(() => {
-        // После закрытия модалки с результатом, если была успешная отметка, перенаправляем на /general
+        // Проверяем, чтобы редирект происходил только на странице с отметкой
         if (!showMarkShiftResultModal && markShiftResultMessage.includes('успешно')) {
-            navigate('/general');
+            navigate('/general'); // Выполняем редирект только при условии, что страница не изменилась
+            setMarkShiftResultMessage(''); // Очищаем сообщение, чтобы избежать повторного редиректа
         }
     }, [showMarkShiftResultModal, markShiftResultMessage, navigate]);
 
@@ -199,14 +200,15 @@ export const MainContent = ({ urls, activeMenu }) => {
         if (!selectedShift) return;
 
         if (!selectedShift.scanTime) {
-            // Отмечаем приход
             updateShiftScan(selectedShift);
         } else if (selectedShift.scanTime && !selectedShift.endScanTime) {
-            // Отмечаем уход
             updateShiftEndScan(selectedShift);
         }
 
+        // Закрываем модалку и сбрасываем выделение смены
         setShowActionModal(false);
+        setSelectedShift(null);
+        setActionText('');
     };
 
     return (
@@ -336,7 +338,6 @@ export const MainContent = ({ urls, activeMenu }) => {
                 onHide={() => setShowActionModal(false)}
             >
                 <div className="flex flex-col items-center">
-                    {/* <h3 className="text-xl font-semibold mb-4">Отметка смены</h3> */}
                     <p className="mb-8 font-bold">
                         {actionText === 'Отметить приход'
                             ? 'Вы хотите отметить приход для этой смены?'
