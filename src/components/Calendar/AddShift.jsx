@@ -9,6 +9,7 @@ import avatar from '../../data/avatar.jpg';
 import { axiosInstance } from '../../api/axiosInstance';
 import { useCompanyStructureStore } from '../../store';
 import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -57,6 +58,9 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const departments = useCompanyStructureStore((state) => state.departments);
     const [selectedStore, setSelectedStore] = useState(null);
 
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingShifts, setPendingShifts] = useState([]); // тут храним сгенерированные смены перед отправкой
+
     const handleEndTimeChange = (e) => {
         const newEndTime = e.value;
         if (startTime && newEndTime <= startTime) {
@@ -65,6 +69,56 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         } else {
             setEndTime(newEndTime);
         }
+    };
+
+    const generateShifts = () => {
+        const shifts = [];
+
+        // Генерация всех дат в выбранном диапазоне
+        const dates = [];
+        let currentDate = new Date(dateRange[0]);
+        currentDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(dateRange[1]);
+        endDate.setHours(0, 0, 0, 0);
+
+        while (currentDate <= endDate) {
+            dates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        const shiftStartTime = new Date(startTime);
+        const shiftEndTime = new Date(endTime);
+
+        // Создание смен для каждой даты и каждого выбранного пользователя
+        dates.forEach((date) => {
+            const shiftStart = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                shiftStartTime.getHours(),
+                shiftStartTime.getMinutes(),
+                0,
+            );
+
+            const shiftEnd = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                shiftEndTime.getHours(),
+                shiftEndTime.getMinutes(),
+                0,
+            );
+
+            selectedSubusers.forEach((user) => {
+                shifts.push({
+                    subUserId: user._id,
+                    startTime: shiftStart.toISOString(),
+                    endTime: shiftEnd.toISOString(),
+                    selectedStore: selectedStore._id,
+                });
+            });
+        });
+        return shifts;
     };
 
     const handleSubmit = async (e) => {
@@ -78,60 +132,44 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             return;
         }
 
+        const shifts = generateShifts();
+        if (shifts.length === 0) {
+            toast.error('Не удалось сгенерировать смены.');
+            return;
+        }
+
         setIsLoading(true);
         try {
-            const shifts = [];
-
-            // Генерация всех дат в выбранном диапазоне
-            const dates = [];
-            let currentDate = new Date(dateRange[0]);
-            currentDate.setHours(0, 0, 0, 0);
-            const endDate = new Date(dateRange[1]);
-            endDate.setHours(0, 0, 0, 0);
-
-            while (currentDate <= endDate) {
-                dates.push(new Date(currentDate));
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            // Создание смен для каждой даты и каждого выбранного пользователя
-            dates.forEach((date) => {
-                const shiftStart = new Date(
-                    date.getFullYear(),
-                    date.getMonth(),
-                    date.getDate(),
-                    startTime.getHours(),
-                    startTime.getMinutes(),
-                    0,
-                );
-
-                const shiftEnd = new Date(
-                    date.getFullYear(),
-                    date.getMonth(),
-                    date.getDate(),
-                    endTime.getHours(),
-                    endTime.getMinutes(),
-                    0,
-                );
-
-                selectedSubusers.forEach((user) => {
-                    shifts.push({
-                        subUserId: user._id,
-                        startTime: shiftStart.toISOString(),
-                        endTime: shiftEnd.toISOString(),
-                        selectedStore: selectedStore._id,
-                    });
-                });
-            });
-
-            // Отправка смен на бэкенд
-            if (shifts.length > 0) {
-                const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
-                if (response.status === 201) {
-                    onShiftsAdded(response.data); // Передаём созданные и обновлённые смены
-                    setOpen(false);
-                    toast.success('Смены успешно добавлены или обновлены');
+            // Сначала проверяем конфликты
+            const checkResponse = await axiosInstance.post('/shifts/check-conflicts', { shifts });
+            if (checkResponse.status === 200) {
+                const { conflict, conflictsList } = checkResponse.data;
+                if (conflict) {
+                    // Если есть конфликт — показать модальное окно подтверждения
+                    setPendingShifts(shifts);
+                    setShowConfirmModal(true);
+                } else {
+                    // Нет конфликта — сразу отправляем
+                    await sendShifts(shifts);
                 }
+            }
+        } catch (error) {
+            console.error('Error checking conflicts:', error);
+            toast.error(error.response?.data?.message || 'Ошибка при проверке конфликтов смен.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const sendShifts = async (shifts) => {
+        // Отправляем смены на сервер
+        setIsLoading(true);
+        try {
+            const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
+            if (response.status === 201) {
+                onShiftsAdded(response.data);
+                setOpen(false);
+                toast.success('Смены успешно добавлены или обновлены');
             }
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
@@ -142,6 +180,18 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const confirmChanges = async () => {
+        // Пользователь подтвердил перезапись смен
+        setShowConfirmModal(false);
+        await sendShifts(pendingShifts);
+    };
+
+    const cancelChanges = () => {
+        // Отмена — просто закрываем модалку, ничего не отправляем
+        setShowConfirmModal(false);
+        toast.info('Вы отменили добавление смен');
     };
 
     const searchUsers = (event) => {
@@ -156,6 +206,21 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             }
         }
     };
+
+    const departmentsMap = useMemo(() => {
+        const map = new Map();
+        departments?.forEach((dept) => {
+            map.set(dept._id, dept.name);
+        });
+        return map;
+    }, [departments]);
+
+    const getDepartmentName = useCallback(
+        (departmentId) => {
+            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
+        },
+        [departmentsMap],
+    );
 
     const itemTemplate = (item) => {
         return (
@@ -175,146 +240,158 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         );
     };
 
-    const removeSelectedUser = (userToRemove) => {
-        setSelectedSubusers((prevUsers) =>
-            prevUsers.filter((user) => user._id !== userToRemove._id),
-        );
-    };
-
-    const departmentsMap = useMemo(() => {
-        const map = new Map();
-        departments?.forEach((dept) => {
-            map.set(dept._id, dept.name);
-        });
-        return map;
-    }, [departments]);
-
-    const getDepartmentName = useCallback(
-        (departmentId) => {
-            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
-        },
-        [departmentsMap],
-    );
-
     return (
-        <Dialog
-            header="Добавить новые смены"
-            visible={open}
-            onHide={() => setOpen(false)}
-            className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto"
-        >
-            <form onSubmit={handleSubmit}>
-                <div className="mb-6">
-                    <label className="block text-gray-700 mb-2">Сотрудники:</label>
-                    <AutoComplete
-                        value={selectedSubusers}
-                        suggestions={filteredUsers}
-                        completeMethod={searchUsers}
-                        onChange={(e) => setSelectedSubusers(e.value)}
-                        field="name"
-                        itemTemplate={itemTemplate}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                        inputClassName="focus:outline-none focus:ring-0"
-                        placeholder="Выберите сотрудников"
-                        panelStyle={{ width: '295px' }}
-                        multiple
-                        dropdown
-                    />
-                </div>
-                {/* Горизонтальный список выбранных сотрудников */}
-                {selectedSubusers.length > 0 && (
+        <>
+            <Dialog
+                header="Добавить новые смены"
+                visible={open}
+                onHide={() => setOpen(false)}
+                className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto"
+            >
+                <form onSubmit={handleSubmit}>
                     <div className="mb-6">
-                        <label className="block text-gray-700 mb-2">Выбранные сотрудники:</label>
-                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
-                            {selectedSubusers.map((user) => (
-                                <div
-                                    key={user._id}
-                                    className="flex items-center bg-gray-100 p-2 rounded-lg"
-                                >
-                                    <img
-                                        src={
-                                            user.image
-                                                ? `https://nomalytica-back.onrender.com${user.image}`
-                                                : avatar
-                                        }
-                                        alt={user.name}
-                                        className="w-8 h-8 rounded-full mr-2"
-                                    />
-                                    <span className="text-gray-800 mr-2">{user.name}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeSelectedUser(user)}
-                                        className="text-black hover:text-red-700"
-                                    >
-                                        <FaTimes />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                        <label className="block text-gray-700 mb-2">Сотрудники:</label>
+                        <AutoComplete
+                            value={selectedSubusers}
+                            suggestions={filteredUsers}
+                            completeMethod={searchUsers}
+                            onChange={(e) => setSelectedSubusers(e.value)}
+                            field="name"
+                            itemTemplate={itemTemplate}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                            inputClassName="focus:outline-none focus:ring-0"
+                            placeholder="Выберите сотрудников"
+                            panelStyle={{ width: '295px' }}
+                            multiple
+                            dropdown
+                        />
                     </div>
-                )}
-                <div className="mb-6">
-                    <Dropdown
-                        value={selectedStore}
-                        onChange={(e) => setSelectedStore(e.value)}
-                        options={stores}
-                        optionLabel="storeName"
-                        placeholder="Выберите магазин"
-                        className="w-full border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
-                        showClear
-                    />
-                </div>
-                {/* Выбор периода смены */}
-                <div className="mb-6">
-                    <label className="block text-gray-700 mb-2">Период смены:</label>
-                    <Calendar
-                        value={dateRange}
-                        onChange={(e) => setDateRange(e.value)}
-                        selectionMode="range"
-                        showIcon
-                        locale="ru"
-                        placeholder="Выберите период"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    />
-                </div>
-                {/* Выбор времени начала смены */}
-                <div className="mb-6">
-                    <label className="block text-gray-700 mb-2">Время начала смены:</label>
-                    <Calendar
-                        value={startTime}
-                        onChange={(e) => setStartTime(e.value)}
-                        timeOnly
-                        hourFormat="24"
-                        showIcon
-                        locale="ru"
-                        placeholder="Выберите время начала"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    />
-                </div>
-                {/* Выбор времени окончания смены */}
-                <div className="mb-6">
-                    <label className="block text-gray-700 mb-2">Время окончания смены:</label>
-                    <Calendar
-                        value={endTime}
-                        onChange={handleEndTimeChange}
-                        timeOnly
-                        hourFormat="24"
-                        showIcon
-                        locale="ru"
-                        placeholder="Выберите время окончания"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    />
-                </div>
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
-                        isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
-                    } transition duration-200`}
-                >
-                    {isLoading ? 'Добавление...' : 'Добавить'}
-                </button>
-            </form>
-        </Dialog>
+                    {/* Горизонтальный список выбранных сотрудников */}
+                    {selectedSubusers.length > 0 && (
+                        <div className="mb-6">
+                            <label className="block text-gray-700 mb-2">
+                                Выбранные сотрудники:
+                            </label>
+                            <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
+                                {selectedSubusers.map((user) => (
+                                    <div
+                                        key={user._id}
+                                        className="flex items-center bg-gray-100 p-2 rounded-lg"
+                                    >
+                                        <img
+                                            src={
+                                                user.image
+                                                    ? `https://nomalytica-back.onrender.com${user.image}`
+                                                    : avatar
+                                            }
+                                            alt={user.name}
+                                            className="w-8 h-8 rounded-full mr-2"
+                                        />
+                                        <span className="text-gray-800 mr-2">{user.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setSelectedSubusers((prev) =>
+                                                    prev.filter((u) => u._id !== user._id),
+                                                )
+                                            }
+                                            className="text-black hover:text-red-700"
+                                        >
+                                            <FaTimes />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div className="mb-6">
+                        <Dropdown
+                            value={selectedStore}
+                            onChange={(e) => setSelectedStore(e.value)}
+                            options={stores}
+                            optionLabel="storeName"
+                            placeholder="Выберите магазин"
+                            className="w-full border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                            showClear
+                        />
+                    </div>
+                    {/* Выбор периода смены */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Период смены:</label>
+                        <Calendar
+                            value={dateRange}
+                            onChange={(e) => setDateRange(e.value)}
+                            selectionMode="range"
+                            showIcon
+                            locale="ru"
+                            placeholder="Выберите период"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                    </div>
+                    {/* Выбор времени начала смены */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Время начала смены:</label>
+                        <Calendar
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.value)}
+                            timeOnly
+                            hourFormat="24"
+                            showIcon
+                            locale="ru"
+                            placeholder="Выберите время начала"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                    </div>
+                    {/* Выбор времени окончания смены */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 mb-2">Время окончания смены:</label>
+                        <Calendar
+                            value={endTime}
+                            onChange={handleEndTimeChange}
+                            timeOnly
+                            hourFormat="24"
+                            showIcon
+                            locale="ru"
+                            placeholder="Выберите время окончания"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+                        } transition duration-200`}
+                    >
+                        {isLoading ? 'Проверка...' : 'Добавить'}
+                    </button>
+                </form>
+            </Dialog>
+
+            {/* Модальное окно подтверждения при перезаписи смен */}
+            <Dialog
+                visible={showConfirmModal}
+                onHide={cancelChanges}
+                header="Подтверждение перезаписи"
+                footer={
+                    <div className="flex gap-2 justify-center">
+                        <Button
+                            label="Отмена"
+                            className="p-button-secondary"
+                            onClick={cancelChanges}
+                        />
+                        <Button
+                            label="Подтвердить"
+                            className={`bg-blue-500 text-white py-2 px-4 rounded ${
+                                isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+                            } transition duration-200`}
+                            onClick={confirmChanges}
+                        />
+                    </div>
+                }
+            >
+                <p>Обнаружены пересекающиеся смены. Подтвердить перезапись?</p>
+            </Dialog>
+        </>
     );
 };
