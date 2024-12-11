@@ -1,4 +1,5 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
+import { Loader } from '../../Loader';
 
 export const CalendarTable = memo(
     ({
@@ -10,6 +11,7 @@ export const CalendarTable = memo(
         getDayColor,
         setSelectedDayShiftsModal,
         getDepartmentName,
+        loading, // Добавляем проп loading
     }) => {
         return (
             <div className="overflow-x-auto w-full max-w-full">
@@ -60,10 +62,15 @@ export const CalendarTable = memo(
                                     let style = {};
                                     let finalClass = '';
 
-                                    if (dayColor.type === 'split') {
+                                    if (dayColor.type === 'split-red-blue') {
                                         style = {
                                             background:
-                                                'linear-gradient(to right, red 50%, green 50%)',
+                                                'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)', // bg-red-500 и bg-blue-500
+                                        };
+                                    } else if (dayColor.type === 'split') {
+                                        style = {
+                                            background:
+                                                'linear-gradient(to right, #ef4444 50%, green 50%)',
                                         };
                                     } else {
                                         switch (dayColor.type) {
@@ -81,6 +88,27 @@ export const CalendarTable = memo(
                                         }
                                     }
 
+                                    let titleText = '';
+                                    switch (dayColor.type) {
+                                        case 'split-red-blue':
+                                            titleText = 'Опоздание и отсутствие отметки ухода';
+                                            break;
+                                        case 'split':
+                                            titleText = 'Опоздание или неполная смена';
+                                            break;
+                                        case 'gray':
+                                            titleText = 'Нет смены';
+                                            break;
+                                        case 'blue':
+                                            titleText = 'Смена без отметок прихода и ухода';
+                                            break;
+                                        case 'green':
+                                            titleText = 'Отработана полностью';
+                                            break;
+                                        default:
+                                            titleText = '';
+                                    }
+
                                     return (
                                         <td
                                             key={day}
@@ -88,17 +116,9 @@ export const CalendarTable = memo(
                                             onClick={() => setSelectedDayShiftsModal(shifts)}
                                         >
                                             <div
-                                                className={`w-5 h-5 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
+                                                className={`w-6 h-6 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
                                                 style={style}
-                                                title={
-                                                    dayColor.type === 'split'
-                                                        ? 'Опоздание или неполная смена'
-                                                        : dayColor.type === 'blue'
-                                                          ? 'Смена без отметок прихода и ухода'
-                                                          : dayColor.type === 'green'
-                                                            ? 'Отработана полностью'
-                                                            : 'Нет смены'
-                                                }
+                                                title={titleText}
                                             ></div>
                                         </td>
                                     );
