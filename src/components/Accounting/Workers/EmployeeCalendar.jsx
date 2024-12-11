@@ -52,13 +52,6 @@ export const EmployeeCalendar = () => {
         setSelectedDayShiftsModal((prevShifts) => {
             return prevShifts.map((s) => (s._id === updatedShift._id ? updatedShift : s));
         });
-        if (updatedShift.scanTime && !updatedShift.endScanTime) {
-            return toast.success(`Начало смены отметил ${updatedShift.subUserName}`);
-        }
-        if (updatedShift.endScanTime && !updatedShift.scanTime) {
-            // Исправлено с 'scanTIme' на 'scanTime'
-            return toast.success(`Конец смены отметил ${updatedShift.subUserName}`);
-        }
     }, []);
 
     useEffect(() => {
