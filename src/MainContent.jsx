@@ -127,12 +127,12 @@ export const MainContent = ({ urls, activeMenu }) => {
                     },
                     (error) => {
                         console.error('Ошибка при получении геолокации:', error);
-                        setShowGeoErrorModal(true);
+                        // setShowGeoErrorModal(true);
                     },
                 );
             } else {
                 console.error('Geolocation не поддерживается этим браузером.');
-                setShowGeoErrorModal(true);
+                // setShowGeoErrorModal(true);
             }
         }
     }, [location.pathname, location.search]);
