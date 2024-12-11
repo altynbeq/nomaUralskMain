@@ -33,8 +33,6 @@ export const EmployeeCalendar = () => {
 
     useEffect(() => {
         socket.on('new-shift', (newShifts) => {
-            console.log('Получены новые смены:', newShifts);
-
             // Обновляем состояние subUsersState для обновления интерфейса
             setSubUsersState((prevSubUsers) => {
                 const updatedUsers = [...prevSubUsers];
