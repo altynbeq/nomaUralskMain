@@ -1,4 +1,6 @@
-import { useState } from 'react';
+// Profile.js
+
+import React, { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import { useSubUserStore } from '../../store/index';
@@ -32,8 +34,9 @@ export const Profile = () => {
         const formattedDate = formatDate(date);
 
         const hasShift = subUsersShifts?.some((shift) => {
-            const startDate = shift.startTime.slice(0, 10);
-            return startDate === formattedDate;
+            // Преобразуем startTime в локальную дату
+            const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
+            return shiftDate === formattedDate;
         });
 
         return hasShift ? 'bg-blue-500 text-white' : 'bg-gray-300';
@@ -43,9 +46,19 @@ export const Profile = () => {
         setSelectedDay(date);
         const formattedDate = formatDate(date);
 
-        const shift = subUsersShifts?.find((shift) => {
-            const startDate = shift.startTime.slice(0, 10);
-            return startDate === formattedDate;
+        // Фильтруем смены, у которых endTime >= startTime и startTime совпадает с выбранным днем
+        const validShifts =
+            subUsersShifts?.filter((shift) => {
+                const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
+                const endTime = new Date(shift.endTime);
+                const startTime = new Date(shift.startTime);
+                return shiftDate === formattedDate && endTime >= startTime;
+            }) || [];
+
+        // Находим первую смену для модального окна
+        const shift = validShifts.find((shift) => {
+            const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
+            return shiftDate === formattedDate;
         });
 
         setSelectedShift(shift || null);
