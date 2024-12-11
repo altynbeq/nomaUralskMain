@@ -87,26 +87,43 @@ export const MainContent = ({ urls, activeMenu }) => {
         if (!isQr) return;
 
         const today = new Date();
-        const todayDateString = today.toISOString().split('T')[0];
+        const startOfDay = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            0,
+            0,
+            0,
+            0,
+        );
+        const endOfDay = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            23,
+            59,
+            59,
+            999,
+        );
 
+        // Фильтруем только смены для текущего пользователя и те, которые начинаются и заканчиваются сегодня
         const todaysShifts = subUserShifts.filter((shift) => {
-            const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
-            const isToday = shiftStartDate <= todayDateString;
-            const isCurrentSubUser = shift.subUserId === user.id;
+            const shiftStart = new Date(shift.startTime);
+            const shiftEnd = new Date(shift.endTime);
+            const isToday = shiftStart >= startOfDay && shiftEnd <= endOfDay; // Смена должна начаться и закончиться в пределах сегодняшнего дня
+            const isCurrentSubUser = shift.subUserId === user.id; // Смена принадлежит текущему пользователю
             return isCurrentSubUser && isToday;
         });
 
+        // Обработка смен
         todaysShifts.forEach((shift) => {
-            if (hasExecuted.current) {
-                return; // Если уже выполнилось, выходим
-            }
-            hasExecuted.current = true; // Устанавливаем флаг
+            if (hasExecuted.current) return; // Если уже выполнилось, выходим
+            hasExecuted.current = true; // Устанавливаем флаг, чтобы предотвратить повторное выполнение
 
-            // Проверяем, была ли уже отметка прихода или ухода
             if (!shift.scanTime) {
-                updateShiftScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
+                updateShiftScan(shift, shift.selectedStore); // Отмечаем приход
             } else if (!shift.endScanTime) {
-                updateShiftEndScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
+                updateShiftEndScan(shift, shift.selectedStore); // Отмечаем уход
             } else {
                 setShowMarkShiftResultModal(true);
                 setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
