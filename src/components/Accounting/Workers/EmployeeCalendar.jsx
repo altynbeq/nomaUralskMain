@@ -9,6 +9,8 @@ import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
 import { useCompanyStructureStore } from '../../../store/companyStructureStore';
 import { socket } from '../../../socket'; // путь к вашему socket.js
+import { PaginationControls } from '../PaginationControls';
+import { ShiftModal } from './ShiftModal';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -629,40 +631,17 @@ export const EmployeeCalendar = () => {
                         </tbody>
                     </table>
                 </div>
-                {selectedDayShiftsModal?.length > 0 && (
-                    <Dialog
-                        visible={selectedDayShiftsModal?.length > 0}
-                        onHide={() => setSelectedDayShiftsModal([])}
-                        header={`Смена на ${
-                            selectedDayShiftsModal[0]?.startTime
-                                ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime)
-                                : ''
-                        }`}
-                    >
-                        {renderDayShiftsModalContent()}
-                    </Dialog>
-                )}
-                <div className="flex justify-between items-center mt-4">
-                    <button
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 ml-4 rounded-lg ${
-                            currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'
-                        }`}
-                    >
-                        &lt;
-                    </button>
-                    <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages || 1}`}</span>
-                    <button
-                        onClick={handleNextPage}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 mr-4 rounded-lg ${
-                            currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'
-                        }`}
-                    >
-                        &gt;
-                    </button>
-                </div>
+                <ShiftModal
+                    selectedDayShiftsModal={selectedDayShiftsModal}
+                    setSelectedDayShiftsModal={setSelectedDayShiftsModal}
+                    renderDayShiftsModalContent={renderDayShiftsModalContent}
+                />
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    handlePrevPage={handlePrevPage}
+                    handleNextPage={handleNextPage}
+                />
             </div>
         </div>
     );
