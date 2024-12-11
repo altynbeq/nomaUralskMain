@@ -248,46 +248,37 @@ export const EmployeeCalendar = () => {
     const getDayColor = useCallback(
         (shifts) => {
             if (shifts.length === 0) {
-                return 'bg-gray-200';
+                return { type: 'gray' };
             }
 
-            // Проверим условия для всех смен в этот день
-            // Если хотя бы одна смена с опозданием/ранним уходом, применим логику
-            let late = false;
-            let early = false;
+            // Предполагаем, что на день может быть только одна смена.
+            // Если их несколько, можно адаптировать логику.
+            const shift = shifts[0];
 
-            for (const shift of shifts) {
-                const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
-                if (lateMinutes > 0) {
-                    late = true;
-                }
+            const hasScanIn = !!shift.scanTime;
+            const hasScanOut = !!shift.endScanTime;
 
-                if (shift.endScanTime && shift.endTime) {
-                    const endScan = new Date(shift.endScanTime);
-                    const endPlanned = new Date(shift.endTime);
-                    if (endScan < endPlanned) {
-                        early = true;
-                    }
-                }
+            if (!hasScanIn && !hasScanOut) {
+                return { type: 'blue' };
             }
 
-            // Определяем стиль для фона
-            if (late && early) {
-                // Опоздал и ушёл раньше — весь красный
-                return 'bg-red-500';
-            } else if (late && !early) {
-                // Только опоздал — красный слева, синий справа
-                // Переопределим через inline style
-                return 'late-only';
-            } else if (!late && early) {
-                // Только ушёл раньше — синий слева, красный справа
-                return 'early-only';
-            } else {
-                // Ни опоздания, ни раннего ухода — синий
-                return 'bg-blue-500';
+            const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
+            const workedTime = calculateWorkedTime(shift.scanTime, shift.endScanTime);
+
+            const isLate = lateMinutes > 0;
+            const isIncomplete =
+                !hasScanOut ||
+                (shift.endTime &&
+                    shift.endScanTime &&
+                    new Date(shift.endScanTime) < new Date(shift.endTime));
+
+            if (!isLate && !isIncomplete) {
+                return { type: 'green' };
             }
+
+            return { type: 'split' };
         },
-        [calculateLateMinutes],
+        [calculateLateMinutes, calculateWorkedTime],
     );
 
     // Функция для удаления смены из selectedDayShiftsModal и из subUsersState

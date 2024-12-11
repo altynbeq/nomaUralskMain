@@ -1,5 +1,4 @@
-// components/EmployeeCalendar/CalendarTable.jsx
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Loader } from '../../Loader';
 
 export const CalendarTable = memo(
@@ -45,9 +44,14 @@ export const CalendarTable = memo(
                     </thead>
                     <tbody className="relative">
                         {currentSubusers.length === 0 ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
-                                <Loader />
-                            </div>
+                            <tr>
+                                <td
+                                    colSpan={daysArray.length + 1}
+                                    className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70"
+                                >
+                                    <Loader />
+                                </td>
+                            </tr>
                         ) : (
                             currentSubusers.map((employee) => (
                                 <tr key={employee._id}>
@@ -62,25 +66,31 @@ export const CalendarTable = memo(
                                     </td>
                                     {daysArray.map((day) => {
                                         const shifts = getShiftsForDay(employee.shifts, day);
-                                        const dayClass = getDayColor(shifts);
+                                        const dayColor = getDayColor(shifts);
 
                                         let style = {};
-                                        if (dayClass === 'late-only') {
-                                            style = {
-                                                background:
-                                                    'linear-gradient(to right, red 50%, #3b82f6 50%)',
-                                            };
-                                        } else if (dayClass === 'early-only') {
-                                            style = {
-                                                background:
-                                                    'linear-gradient(to right, #3b82f6 50%, red 50%)',
-                                            };
-                                        }
+                                        let finalClass = '';
 
-                                        const finalClass =
-                                            dayClass === 'late-only' || dayClass === 'early-only'
-                                                ? ''
-                                                : dayClass;
+                                        if (dayColor.type === 'split') {
+                                            style = {
+                                                background:
+                                                    'linear-gradient(to right, red 50%, green 50%)',
+                                            };
+                                        } else {
+                                            switch (dayColor.type) {
+                                                case 'gray':
+                                                    finalClass = 'bg-gray-200';
+                                                    break;
+                                                case 'blue':
+                                                    finalClass = 'bg-blue-500';
+                                                    break;
+                                                case 'green':
+                                                    finalClass = 'bg-green-500';
+                                                    break;
+                                                default:
+                                                    finalClass = '';
+                                            }
+                                        }
 
                                         return (
                                             <td
@@ -89,8 +99,17 @@ export const CalendarTable = memo(
                                                 onClick={() => setSelectedDayShiftsModal(shifts)}
                                             >
                                                 <div
-                                                    className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${finalClass}`}
+                                                    className={`w-6 h-6 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
                                                     style={style}
+                                                    title={
+                                                        dayColor.type === 'split'
+                                                            ? 'Опоздание или неполная смена'
+                                                            : dayColor.type === 'blue'
+                                                              ? 'Смена без отметок прихода и ухода'
+                                                              : dayColor.type === 'green'
+                                                                ? 'Отработана полностью'
+                                                                : 'Нет смены'
+                                                    }
                                                 ></div>
                                             </td>
                                         );
