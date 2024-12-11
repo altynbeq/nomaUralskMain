@@ -1,6 +1,6 @@
 // Profile.js
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import { useSubUserStore } from '../../store/index';
@@ -30,23 +30,61 @@ export const Profile = () => {
 
     const formatDate = (date) => format(date, 'yyyy-MM-dd', { locale: ru });
 
+    /**
+     * Функция для определения цвета дня в календаре.
+     *
+     * Возвращает:
+     * - 'bg-gray-300' если нет смен
+     * - 'bg-blue-500 text-white' если есть смена и сотрудник не опоздал
+     * - 'bg-gradient-to-r from-blue-500 to-red-500 text-white' если сотрудник опоздал
+     * - 'bg-red-500 text-white' если сотрудник опоздал и отработал больше времени
+     */
     const getDayColor = (date) => {
         const formattedDate = formatDate(date);
 
-        const hasShift = subUsersShifts?.some((shift) => {
-            // Преобразуем startTime в локальную дату
-            const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
-            return shiftDate === formattedDate;
+        // Получаем все смены на выбранный день
+        const shifts =
+            subUsersShifts?.filter((shift) => {
+                const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
+                return shiftDate === formattedDate;
+            }) || [];
+
+        if (shifts.length === 0) {
+            return 'bg-gray-300';
+        }
+
+        let isLate = false;
+        let isExtra = false;
+
+        shifts.forEach((shift) => {
+            if (
+                shift.latenessTime &&
+                (shift.latenessTime.hours > 0 || shift.latenessTime.minutes > 0)
+            ) {
+                isLate = true;
+            }
+            if (shift.timeWorked && (shift.timeWorked.hours > 0 || shift.timeWorked.minutes > 0)) {
+                isExtra = true;
+            }
         });
 
-        return hasShift ? 'bg-blue-500 text-white' : 'bg-gray-300';
+        if (isLate && isExtra) {
+            // Обе половины красные
+            return 'bg-red-500 text-white';
+        } else if (isLate) {
+            // Левая половина синяя, правая красная
+            return 'bg-gradient-to-r from-blue-500 to-red-500 text-white';
+        } else {
+            // Только синяя
+            return 'bg-blue-500 text-white';
+        }
     };
 
     const openModal = (date) => {
         setSelectedDay(date);
         const formattedDate = formatDate(date);
 
-        // Фильтруем смены, у которых endTime >= startTime и startTime совпадает с выбранным днем
+        // Фильтруем только корректные смены (endTime >= startTime)
         const validShifts =
             subUsersShifts?.filter((shift) => {
                 const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
