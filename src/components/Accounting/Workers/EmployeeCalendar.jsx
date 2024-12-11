@@ -11,6 +11,7 @@ import { PaginationControls } from '../PaginationControls';
 import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
+import { Loader } from '../../Loader';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -245,31 +246,41 @@ export const EmployeeCalendar = () => {
         };
     }, [month, year]);
 
-    const getDayColor = useCallback((shifts) => {
-        if (shifts.length === 0) {
-            return 'bg-gray-200';
-        }
+    const getDayColor = useCallback(
+        (shifts) => {
+            if (shifts.length === 0) {
+                return { type: 'gray' };
+            }
 
-        const shift = shifts[0]; // Допустим, одна смена на день
-        const { scanTime, endScanTime, startTime, endTime, latenessTime, timeWorked } = shift;
+            // Предполагаем, что на день может быть только одна смена.
+            // Если их несколько, можно адаптировать логику.
+            const shift = shifts[0];
 
-        // Условие 2: Смена без отметки прихода и ухода
-        if (!scanTime && !endScanTime) {
-            return 'bg-blue-500';
-        }
+            const hasScanIn = !!shift.scanTime;
+            const hasScanOut = !!shift.endScanTime;
 
-        // Условие 3: Сотрудник отработал всю смену без опозданий
-        if (timeWorked && timeWorked.hours > 0 && timeWorked.minutes >= 0 && !latenessTime) {
-            return 'bg-green-300';
-        }
+            if (!hasScanIn && !hasScanOut) {
+                return { type: 'blue' };
+            }
 
-        // Условие 4: Сотрудник опоздал, но отработал всю смену
-        if (latenessTime && timeWorked && timeWorked.hours > 0 && timeWorked.minutes >= 0) {
-            return 'late-and-worked';
-        }
+            const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
+            const workedTime = calculateWorkedTime(shift.scanTime, shift.endScanTime);
 
-        return 'bg-gray-200'; // Цвет по умолчанию, если ничего не подходит
-    }, []);
+            const isLate = lateMinutes > 0;
+            const isIncomplete =
+                !hasScanOut ||
+                (shift.endTime &&
+                    shift.endScanTime &&
+                    new Date(shift.endScanTime) < new Date(shift.endTime));
+
+            if (!isLate && !isIncomplete) {
+                return { type: 'green' };
+            }
+
+            return { type: 'split' };
+        },
+        [calculateLateMinutes, calculateWorkedTime],
+    );
 
     // Функция для удаления смены из selectedDayShiftsModal и из subUsersState
     const handleShiftDelete = useCallback((shiftId) => {
@@ -510,6 +521,13 @@ export const EmployeeCalendar = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* <td
+                                    colSpan={daysArray.length + 1}
+                                    className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70"
+                                >
+                                    <Loader />
+                                </td> */}
 
                 <CalendarTable
                     currentSubusers={currentSubusers}
