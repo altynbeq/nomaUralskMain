@@ -164,7 +164,13 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         // Отправляем смены на сервер
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
+            const response = await axiosInstance.post(
+                '/shifts/create-shifts',
+                { shifts },
+                {
+                    timeout: 30000,
+                },
+            );
             if (response.status === 201) {
                 onShiftsAdded(response.data);
                 setOpen(false);
