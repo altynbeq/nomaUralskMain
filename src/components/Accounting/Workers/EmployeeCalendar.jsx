@@ -1,14 +1,16 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { formatOnlyTimeDate, formatOnlyDate } from '../../../methods/dataFormatter';
-import { Dialog } from 'primereact/dialog';
-import { FaSearch, FaPlus, FaFilter } from 'react-icons/fa';
+import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
+import { FaSearch, FaPlus } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
 import { useCompanyStructureStore } from '../../../store/companyStructureStore';
 import { socket } from '../../../socket'; // путь к вашему socket.js
+import { PaginationControls } from '../PaginationControls';
+import { ShiftModal } from './ShiftModal';
+import { CalendarTable } from './CalendarTable';
+import { Filters } from './Filters';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -28,6 +30,31 @@ export const EmployeeCalendar = () => {
 
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
+
+    useEffect(() => {
+        socket.on('new-shift', (newShifts) => {
+            // Обновляем состояние subUsersState для обновления интерфейса
+            setSubUsersState((prevSubUsers) => {
+                const updatedUsers = [...prevSubUsers];
+                newShifts.forEach((shift) => {
+                    const userIndex = updatedUsers.findIndex(
+                        (user) => user._id === shift.subUserId._id,
+                    );
+                    if (userIndex !== -1) {
+                        const user = updatedUsers[userIndex];
+                        if (!user.shifts) user.shifts = [];
+                        user.shifts.push(shift);
+                    }
+                });
+                return updatedUsers;
+            });
+        });
+
+        // Очистка подписки при размонтировании компонента
+        return () => {
+            socket.off('new-shift');
+        };
+    }, []);
 
     // Состояние для отфильтрованных отделов на основе выбранного магазина
     const [filteredDepartments, setFilteredDepartments] = useState([]);
@@ -52,13 +79,6 @@ export const EmployeeCalendar = () => {
         setSelectedDayShiftsModal((prevShifts) => {
             return prevShifts.map((s) => (s._id === updatedShift._id ? updatedShift : s));
         });
-        if (updatedShift.scanTime && !updatedShift.endScanTime) {
-            return toast.success(`Начало смены отметил ${updatedShift.subUserName}`);
-        }
-        if (updatedShift.endScanTime && !updatedShift.scanTime) {
-            // Исправлено с 'scanTIme' на 'scanTime'
-            return toast.success(`Конец смены отметил ${updatedShift.subUserName}`);
-        }
     }, []);
 
     useEffect(() => {
@@ -92,12 +112,17 @@ export const EmployeeCalendar = () => {
         const start = new Date(scanTime);
         const end = new Date(endScanTime);
 
-        const diffMs = end - start;
-        if (diffMs < 0) return { hours: 0, minutes: 0 };
+        // Если время окончания меньше времени начала (пересечение полуночи)
+        if (end < start) {
+            end.setDate(end.getDate() + 1);
+        }
 
-        const totalMinutes = Math.floor(diffMs / (1000 * 60));
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
+        const diffMs = end - start; // Разница в миллисекундах
+        const totalMinutes = diffMs / (1000 * 60); // Общее время в минутах
+
+        const roundedMinutes = Math.ceil(totalMinutes); // Используем Math.ceil для учета долей минут
+        const hours = Math.floor(roundedMinutes / 60);
+        const minutes = roundedMinutes % 60;
 
         return { hours, minutes };
     }, []);
@@ -301,46 +326,6 @@ export const EmployeeCalendar = () => {
         toast.success('Вы успешно обновили смену');
     }, []);
 
-    const handleShiftsAdded = useCallback((addedShifts) => {
-        if (!addedShifts) {
-            return;
-        }
-        setSubUsersState((prevSubUsers) => {
-            const updatedSubUsers = prevSubUsers.map((user) => {
-                // Найти все смены для этого пользователя из добавленных смен
-                const userShifts = addedShifts.filter(
-                    (shift) => (shift) => (shift) =>
-                        shift.subUserId._id.toString() === user._id.toString(),
-                );
-
-                if (userShifts.length === 0) return user;
-
-                // Обновить или добавить смены
-                const updatedShifts = user.shifts ? [...user.shifts] : [];
-
-                userShifts.forEach((newShift) => {
-                    const existingIndex = updatedShifts.findIndex(
-                        (shift) => shift._id === newShift._id,
-                    );
-                    if (existingIndex !== -1) {
-                        // Обновить существующую смену
-                        updatedShifts[existingIndex] = newShift;
-                    } else {
-                        // Добавить новую смену
-                        updatedShifts.push(newShift);
-                    }
-                });
-
-                return {
-                    ...user,
-                    shifts: updatedShifts,
-                };
-            });
-
-            return updatedSubUsers;
-        });
-    }, []);
-
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
             return (
@@ -507,42 +492,18 @@ export const EmployeeCalendar = () => {
                                 setOpen={setShowModalAddShift}
                                 stores={stores}
                                 subUsers={subUsersState}
-                                onShiftsAdded={handleShiftsAdded}
                             />
                         </div>
-                        <div className="relative">
-                            <button
-                                className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
-                                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            >
-                                <FaFilter />
-                                <span>Фильтр</span>
-                            </button>
-
-                            {isFilterOpen && (
-                                <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
-                                    <Dropdown
-                                        value={selectedStore}
-                                        onChange={(e) => setSelectedStore(e.value)}
-                                        showClear
-                                        options={stores || []}
-                                        optionLabel="storeName"
-                                        placeholder="Магазин"
-                                        className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
-                                    />
-
-                                    <Dropdown
-                                        value={selectedDepartment}
-                                        onChange={(e) => setSelectedDepartment(e.value)}
-                                        options={filteredDepartments || []}
-                                        optionLabel="name"
-                                        placeholder="Отдел"
-                                        disabled={!selectedStore}
-                                        className="w-full border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
-                                    />
-                                </div>
-                            )}
-                        </div>
+                        <Filters
+                            isFilterOpen={isFilterOpen}
+                            setIsFilterOpen={setIsFilterOpen}
+                            selectedStore={selectedStore}
+                            setSelectedStore={setSelectedStore}
+                            selectedDepartment={selectedDepartment}
+                            setSelectedDepartment={setSelectedDepartment}
+                            stores={stores}
+                            filteredDepartments={filteredDepartments}
+                        />
                         <div className="relative">
                             <InputText
                                 value={searchTerm}
@@ -555,121 +516,27 @@ export const EmployeeCalendar = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto w-full max-w-full">
-                    <table className="table-auto w-full max-w-full border-collapse">
-                        <thead>
-                            <tr>
-                                <th className="px-2 py-2 text-left">Сотрудник</th>
-                                {daysArray.map((day) => (
-                                    <th key={day} className="px-2 py-1 text-center text-sm">
-                                        {day}
-                                    </th>
-                                ))}
-                            </tr>
-                            <tr>
-                                <th className="px-2 py-1 text-left"></th>
-                                {daysArray.map((day) => {
-                                    const date = new Date(year, month, day);
-                                    const weekDay = new Intl.DateTimeFormat('ru-RU', {
-                                        weekday: 'short',
-                                    }).format(date);
-                                    return (
-                                        <th
-                                            key={day}
-                                            className="py-1 text-center text-xs text-gray-500"
-                                        >
-                                            {weekDay}
-                                        </th>
-                                    );
-                                })}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentSubusers?.map((employee, index) => (
-                                <tr key={index}>
-                                    <td className="px-4 py-2 inline-flex items-center gap-2">
-                                        <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-                                        <div className="flex flex-col">
-                                            <p className="text-sm">{employee.name}</p>
-                                            <p className="text-sm">
-                                                ({getDepartmentName(employee.departmentId)})
-                                            </p>
-                                        </div>
-                                    </td>
-                                    {daysArray.map((day) => {
-                                        const shifts = getShiftsForDay(employee.shifts, day);
-                                        const dayClass = getDayColor(shifts);
-
-                                        let style = {};
-                                        if (dayClass === 'late-only') {
-                                            style = {
-                                                background:
-                                                    'linear-gradient(to right, red 50%, #3b82f6 50%)',
-                                            };
-                                        } else if (dayClass === 'early-only') {
-                                            style = {
-                                                background:
-                                                    'linear-gradient(to right, #3b82f6 50%, red 50%)',
-                                            };
-                                        }
-
-                                        const finalClass =
-                                            dayClass === 'late-only' || dayClass === 'early-only'
-                                                ? ''
-                                                : dayClass;
-
-                                        return (
-                                            <td
-                                                key={day}
-                                                className="py-1 text-center relative cursor-pointer"
-                                                onClick={() => setSelectedDayShiftsModal(shifts)}
-                                            >
-                                                <div
-                                                    className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${finalClass}`}
-                                                    style={style}
-                                                ></div>
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                {selectedDayShiftsModal?.length > 0 && (
-                    <Dialog
-                        visible={selectedDayShiftsModal?.length > 0}
-                        onHide={() => setSelectedDayShiftsModal([])}
-                        header={`Смена на ${
-                            selectedDayShiftsModal[0]?.startTime
-                                ? formatOnlyDate(selectedDayShiftsModal[0]?.startTime)
-                                : ''
-                        }`}
-                    >
-                        {renderDayShiftsModalContent()}
-                    </Dialog>
-                )}
-                <div className="flex justify-between items-center mt-4">
-                    <button
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 ml-4 rounded-lg ${
-                            currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'
-                        }`}
-                    >
-                        &lt;
-                    </button>
-                    <span className="text-gray-700">{`Страница ${currentPage} из ${totalPages || 1}`}</span>
-                    <button
-                        onClick={handleNextPage}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 mr-4 rounded-lg ${
-                            currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'
-                        }`}
-                    >
-                        &gt;
-                    </button>
-                </div>
+                <CalendarTable
+                    currentSubusers={currentSubusers}
+                    daysArray={daysArray}
+                    year={year}
+                    month={month}
+                    getShiftsForDay={getShiftsForDay}
+                    getDayColor={getDayColor}
+                    setSelectedDayShiftsModal={setSelectedDayShiftsModal}
+                    getDepartmentName={getDepartmentName}
+                />
+                <ShiftModal
+                    selectedDayShiftsModal={selectedDayShiftsModal}
+                    setSelectedDayShiftsModal={setSelectedDayShiftsModal}
+                    renderDayShiftsModalContent={renderDayShiftsModalContent}
+                />
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    handlePrevPage={handlePrevPage}
+                    handleNextPage={handleNextPage}
+                />
             </div>
         </div>
     );
