@@ -97,7 +97,6 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
             if (response.status === 200) {
                 onShiftUpdate(response.data);
                 setShift(response.data);
-                toast.success('Смена успешно обновлена');
             }
         } catch (error) {
             console.error('Ошибка при обновлении смены:', error);

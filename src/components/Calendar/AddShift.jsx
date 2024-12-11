@@ -169,7 +169,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             if (response.status === 201) {
                 onShiftsAdded(response.data);
                 setOpen(false);
-                toast.success('Смены успешно добавлены или обновлены');
             }
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
@@ -372,7 +371,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             <Dialog
                 visible={showConfirmModal}
                 onHide={cancelChanges}
-                header="Подтверждение перезаписи"
                 footer={
                     <div className="flex gap-2 justify-center">
                         <Button
@@ -390,7 +388,10 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     </div>
                 }
             >
-                <p>Обнаружены пересекающиеся смены. Подтвердить перезапись?</p>
+                <p className="font-bold text-center">
+                    Обнаружены пересекающиеся смены. <br />
+                    Подтвердить перезапись?
+                </p>
             </Dialog>
         </>
     );
