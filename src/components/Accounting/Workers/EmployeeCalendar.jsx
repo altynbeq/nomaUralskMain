@@ -302,11 +302,50 @@ export const EmployeeCalendar = () => {
     }, []);
 
     // Функция для обработки добавленных или обновлённых смен
+    // const handleShiftsAdded = useCallback((addedShifts) => {
+    //     setSubUsersState((prevSubUsers) => {
+    //         const updatedSubUsers = prevSubUsers.map((user) => {
+    //             // Найти все смены для этого пользователя из добавленных смен
+    //             const userShifts = addedShifts.filter((shift) => shift.subUserId === user._id);
+
+    //             if (userShifts.length === 0) return user;
+
+    //             // Обновить или добавить смены
+    //             const updatedShifts = user.shifts ? [...user.shifts] : [];
+
+    //             userShifts.forEach((newShift) => {
+    //                 const existingIndex = updatedShifts.findIndex(
+    //                     (shift) => shift._id === newShift._id,
+    //                 );
+    //                 if (existingIndex !== -1) {
+    //                     // Обновить существующую смену
+    //                     updatedShifts[existingIndex] = newShift;
+    //                 } else {
+    //                     // Добавить новую смену
+    //                     updatedShifts.push(newShift);
+    //                 }
+    //             });
+
+    //             return {
+    //                 ...user,
+    //                 shifts: updatedShifts,
+    //             };
+    //         });
+
+    //         return updatedSubUsers;
+    //     });
+
+    //     toast.success('Смены успешно добавлены');
+    // }, []);
+
     const handleShiftsAdded = useCallback((addedShifts) => {
         setSubUsersState((prevSubUsers) => {
             const updatedSubUsers = prevSubUsers.map((user) => {
                 // Найти все смены для этого пользователя из добавленных смен
-                const userShifts = addedShifts.filter((shift) => shift.subUserId === user._id);
+                const userShifts = addedShifts.filter(
+                    (shift) => (shift) => (shift) =>
+                        shift.subUserId._id.toString() === user._id.toString(),
+                );
 
                 if (userShifts.length === 0) return user;
 
