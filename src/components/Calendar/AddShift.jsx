@@ -127,10 +127,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             toast.error('Пожалуйста, заполните все обязательные поля.');
             return;
         }
-        if (endTime <= startTime) {
-            toast.error('Время окончания смены должно быть больше времени начала.');
-            return;
-        }
 
         const shifts = generateShifts();
         if (shifts.length === 0) {
