@@ -31,6 +31,33 @@ export const EmployeeCalendar = () => {
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
 
+    useEffect(() => {
+        socket.on('new-shift', (newShifts) => {
+            console.log('Получены новые смены:', newShifts);
+
+            // Обновляем состояние subUsersState для обновления интерфейса
+            setSubUsersState((prevSubUsers) => {
+                const updatedUsers = [...prevSubUsers];
+                newShifts.forEach((shift) => {
+                    const userIndex = updatedUsers.findIndex(
+                        (user) => user._id === shift.subUserId._id,
+                    );
+                    if (userIndex !== -1) {
+                        const user = updatedUsers[userIndex];
+                        if (!user.shifts) user.shifts = [];
+                        user.shifts.push(shift);
+                    }
+                });
+                return updatedUsers;
+            });
+        });
+
+        // Очистка подписки при размонтировании компонента
+        return () => {
+            socket.off('new-shift');
+        };
+    }, []);
+
     // Состояние для отфильтрованных отделов на основе выбранного магазина
     const [filteredDepartments, setFilteredDepartments] = useState([]);
 
