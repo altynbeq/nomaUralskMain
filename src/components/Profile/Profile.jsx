@@ -85,8 +85,8 @@ export const Profile = () => {
         const formattedDate = formatDate(date);
 
         const shift = subUsersShifts?.find((shift) => {
-            const startDate = shift.startTime.slice(0, 10);
-            return startDate === formattedDate;
+            const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
+            return shiftDate === formattedDate;
         });
 
         setSelectedShift(shift || null);

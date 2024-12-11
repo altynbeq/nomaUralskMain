@@ -134,7 +134,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         }
 
         const shifts = generateShifts();
-        console.log(shifts);
         if (shifts.length === 0) {
             toast.error('Не удалось сгенерировать смены.');
             return;
