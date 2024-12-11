@@ -98,10 +98,20 @@ export const MainContent = ({ urls, activeMenu }) => {
             0,
             0,
         );
+        const endOfDay = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            23,
+            59,
+            59,
+            999,
+        );
 
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStart = new Date(shift.startTime);
-            const isToday = shiftStart >= startOfDay;
+            const shiftEnd = new Date(shift.endTime);
+            const isToday = shiftStart >= startOfDay && shiftEnd <= endOfDay;
             const isCurrentSubUser = shift.subUserId === user.id;
             return isCurrentSubUser && isToday;
         });
@@ -109,6 +119,7 @@ export const MainContent = ({ urls, activeMenu }) => {
         todaysShifts.forEach((shift) => {
             if (hasExecuted.current) return;
             hasExecuted.current = true;
+
             if (shift.scanTime && shift.endScanTime) {
                 // Уже отмечен и приход, и уход
                 setShowMarkShiftResultModal(true);
@@ -120,11 +131,11 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             // Определяем текст действия
             if (!shift.scanTime) {
-                // Нет прихода, значит отмечаем приход
-                setActionText('Отметить');
+                // Нет прихода — отмечаем приход
+                setActionText('Отметить приход');
             } else if (shift.scanTime && !shift.endScanTime) {
                 // Приход есть, отмечаем уход
-                setActionText('Отметить');
+                setActionText('Отметить уход');
             }
 
             setShowActionModal(true);
@@ -319,9 +330,13 @@ export const MainContent = ({ urls, activeMenu }) => {
             </div>
 
             {/* Модалка с действием (приход или уход) */}
-            <Dialog visible={showActionModal} onHide={() => setShowActionModal(false)}>
+            <Dialog
+                header="Отметка смены"
+                visible={showActionModal}
+                onHide={() => setShowActionModal(false)}
+            >
                 <div className="flex flex-col items-center">
-                    <h3 className="text-xl font-semibold mb-4">Отметка смены</h3>
+                    {/* <h3 className="text-xl font-semibold mb-4">Отметка смены</h3> */}
                     <p className="mb-8 font-bold">
                         {actionText === 'Отметить приход'
                             ? 'Вы хотите отметить приход для этой смены?'
