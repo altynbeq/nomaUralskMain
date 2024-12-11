@@ -4,7 +4,7 @@ import React, { memo } from 'react';
 export const PaginationControls = memo(
     ({ currentPage, totalPages, handlePrevPage, handleNextPage }) => {
         return (
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex justify-between items-center mt-8">
                 <button
                     onClick={handlePrevPage}
                     disabled={currentPage === 1}

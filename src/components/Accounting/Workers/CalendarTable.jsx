@@ -1,5 +1,6 @@
 // components/EmployeeCalendar/CalendarTable.jsx
 import React, { memo } from 'react';
+import { Loader } from '../../Loader';
 
 export const CalendarTable = memo(
     ({
@@ -42,55 +43,61 @@ export const CalendarTable = memo(
                             })}
                         </tr>
                     </thead>
-                    <tbody>
-                        {currentSubusers.map((employee) => (
-                            <tr key={employee._id}>
-                                <td className="px-4 py-2 inline-flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-                                    <div className="flex flex-col">
-                                        <p className="text-sm">{employee.name}</p>
-                                        <p className="text-sm">
-                                            ({getDepartmentName(employee.departmentId)})
-                                        </p>
-                                    </div>
-                                </td>
-                                {daysArray.map((day) => {
-                                    const shifts = getShiftsForDay(employee.shifts, day);
-                                    const dayClass = getDayColor(shifts);
+                    <tbody className="relative">
+                        {currentSubusers.length === 0 ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
+                                <Loader />
+                            </div>
+                        ) : (
+                            currentSubusers.map((employee) => (
+                                <tr key={employee._id}>
+                                    <td className="px-4 py-2 inline-flex items-center gap-2">
+                                        <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
+                                        <div className="flex flex-col">
+                                            <p className="text-sm">{employee.name}</p>
+                                            <p className="text-sm">
+                                                ({getDepartmentName(employee.departmentId)})
+                                            </p>
+                                        </div>
+                                    </td>
+                                    {daysArray.map((day) => {
+                                        const shifts = getShiftsForDay(employee.shifts, day);
+                                        const dayClass = getDayColor(shifts);
 
-                                    let style = {};
-                                    if (dayClass === 'late-only') {
-                                        style = {
-                                            background:
-                                                'linear-gradient(to right, red 50%, #3b82f6 50%)',
-                                        };
-                                    } else if (dayClass === 'early-only') {
-                                        style = {
-                                            background:
-                                                'linear-gradient(to right, #3b82f6 50%, red 50%)',
-                                        };
-                                    }
+                                        let style = {};
+                                        if (dayClass === 'late-only') {
+                                            style = {
+                                                background:
+                                                    'linear-gradient(to right, red 50%, #3b82f6 50%)',
+                                            };
+                                        } else if (dayClass === 'early-only') {
+                                            style = {
+                                                background:
+                                                    'linear-gradient(to right, #3b82f6 50%, red 50%)',
+                                            };
+                                        }
 
-                                    const finalClass =
-                                        dayClass === 'late-only' || dayClass === 'early-only'
-                                            ? ''
-                                            : dayClass;
+                                        const finalClass =
+                                            dayClass === 'late-only' || dayClass === 'early-only'
+                                                ? ''
+                                                : dayClass;
 
-                                    return (
-                                        <td
-                                            key={day}
-                                            className="py-1 text-center relative cursor-pointer"
-                                            onClick={() => setSelectedDayShiftsModal(shifts)}
-                                        >
-                                            <div
-                                                className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${finalClass}`}
-                                                style={style}
-                                            ></div>
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))}
+                                        return (
+                                            <td
+                                                key={day}
+                                                className="py-1 text-center relative cursor-pointer"
+                                                onClick={() => setSelectedDayShiftsModal(shifts)}
+                                            >
+                                                <div
+                                                    className={`w-4 h-4 flex items-center rounded-full hover:bg-blue-500 ${finalClass}`}
+                                                    style={style}
+                                                ></div>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
