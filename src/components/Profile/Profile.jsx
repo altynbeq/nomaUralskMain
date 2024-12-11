@@ -84,19 +84,9 @@ export const Profile = () => {
         setSelectedDay(date);
         const formattedDate = formatDate(date);
 
-        // Фильтруем только корректные смены (endTime >= startTime)
-        const validShifts =
-            subUsersShifts?.filter((shift) => {
-                const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
-                const endTime = new Date(shift.endTime);
-                const startTime = new Date(shift.startTime);
-                return shiftDate === formattedDate && endTime >= startTime;
-            }) || [];
-
-        // Находим первую смену для модального окна
-        const shift = validShifts.find((shift) => {
-            const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
-            return shiftDate === formattedDate;
+        const shift = subUsersShifts?.find((shift) => {
+            const startDate = shift.startTime.slice(0, 10);
+            return startDate === formattedDate;
         });
 
         setSelectedShift(shift || null);
