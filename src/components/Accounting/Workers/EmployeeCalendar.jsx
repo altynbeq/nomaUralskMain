@@ -245,50 +245,31 @@ export const EmployeeCalendar = () => {
         };
     }, [month, year]);
 
-    const getDayColor = useCallback(
-        (shifts) => {
-            if (shifts.length === 0) {
-                return 'bg-gray-200';
-            }
+    const getDayColor = useCallback((shifts) => {
+        if (shifts.length === 0) {
+            return 'bg-gray-200';
+        }
 
-            // Проверим условия для всех смен в этот день
-            // Если хотя бы одна смена с опозданием/ранним уходом, применим логику
-            let late = false;
-            let early = false;
+        const shift = shifts[0]; // Допустим, одна смена на день
+        const { scanTime, endScanTime, startTime, endTime, latenessTime, timeWorked } = shift;
 
-            for (const shift of shifts) {
-                const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
-                if (lateMinutes > 0) {
-                    late = true;
-                }
+        // Условие 2: Смена без отметки прихода и ухода
+        if (!scanTime && !endScanTime) {
+            return 'bg-blue-500';
+        }
 
-                if (shift.endScanTime && shift.endTime) {
-                    const endScan = new Date(shift.endScanTime);
-                    const endPlanned = new Date(shift.endTime);
-                    if (endScan < endPlanned) {
-                        early = true;
-                    }
-                }
-            }
+        // Условие 3: Сотрудник отработал всю смену без опозданий
+        if (timeWorked && timeWorked.hours > 0 && timeWorked.minutes >= 0 && !latenessTime) {
+            return 'bg-green-300';
+        }
 
-            // Определяем стиль для фона
-            if (late && early) {
-                // Опоздал и ушёл раньше — весь красный
-                return 'bg-red-500';
-            } else if (late && !early) {
-                // Только опоздал — красный слева, синий справа
-                // Переопределим через inline style
-                return 'late-only';
-            } else if (!late && early) {
-                // Только ушёл раньше — синий слева, красный справа
-                return 'early-only';
-            } else {
-                // Ни опоздания, ни раннего ухода — синий
-                return 'bg-blue-500';
-            }
-        },
-        [calculateLateMinutes],
-    );
+        // Условие 4: Сотрудник опоздал, но отработал всю смену
+        if (latenessTime && timeWorked && timeWorked.hours > 0 && timeWorked.minutes >= 0) {
+            return 'late-and-worked';
+        }
+
+        return 'bg-gray-200'; // Цвет по умолчанию, если ничего не подходит
+    }, []);
 
     // Функция для удаления смены из selectedDayShiftsModal и из subUsersState
     const handleShiftDelete = useCallback((shiftId) => {
