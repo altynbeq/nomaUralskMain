@@ -29,6 +29,9 @@ export const EmployeeCalendar = () => {
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
 
+    // Состояние для отфильтрованных отделов на основе выбранного магазина
+    const [filteredDepartments, setFilteredDepartments] = useState([]);
+
     const handleSocketShiftUpdate = useCallback((updatedShift) => {
         // Обновляем данные в subUsersState
         setSubUsersState((prevSubUsers) => {
@@ -52,13 +55,14 @@ export const EmployeeCalendar = () => {
         if (updatedShift.scanTime && !updatedShift.endScanTime) {
             return toast.success(`Начало смены отметил ${updatedShift.subUserName}`);
         }
-        if (updatedShift.endScanTime && !updatedShift.scanTIme) {
+        if (updatedShift.endScanTime && !updatedShift.scanTime) {
+            // Исправлено с 'scanTIme' на 'scanTime'
             return toast.success(`Конец смены отметил ${updatedShift.subUserName}`);
         }
     }, []);
 
     useEffect(() => {
-        // Слушаем событие 'newMessage' от сервера
+        // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
             handleSocketShiftUpdate(data.shift);
         });
@@ -112,6 +116,17 @@ export const EmployeeCalendar = () => {
         },
         [departmentsMap],
     );
+
+    // Фильтрация отделов после выбора магазина
+    useEffect(() => {
+        if (selectedStore) {
+            const filtered = departments.filter((dept) => dept.storeId === selectedStore._id);
+            setFilteredDepartments(filtered);
+        } else {
+            setFilteredDepartments([]);
+            setSelectedDepartment(null); // Сбрасываем выбранный отдел при сбросе магазина
+        }
+    }, [selectedStore, departments]);
 
     const filteredSubusers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
@@ -286,19 +301,37 @@ export const EmployeeCalendar = () => {
         toast.success('Вы успешно обновили смену');
     }, []);
 
-    const handleShiftsAdded = useCallback((newShifts) => {
+    // Функция для обработки добавленных или обновлённых смен
+    const handleShiftsAdded = useCallback((addedShifts) => {
         setSubUsersState((prevSubUsers) => {
-            const updatedSubUsers = [...prevSubUsers];
+            const updatedSubUsers = prevSubUsers.map((user) => {
+                // Найти все смены для этого пользователя из добавленных смен
+                const userShifts = addedShifts.filter((shift) => shift.subUserId === user._id);
 
-            newShifts?.forEach((shift) => {
-                const userIndex = updatedSubUsers.findIndex((user) => user._id === shift.subUserId);
-                if (userIndex !== -1) {
-                    updatedSubUsers[userIndex] = {
-                        ...updatedSubUsers[userIndex],
-                        shifts: [...(updatedSubUsers[userIndex].shifts || []), shift],
-                    };
-                }
+                if (userShifts.length === 0) return user;
+
+                // Обновить или добавить смены
+                const updatedShifts = user.shifts ? [...user.shifts] : [];
+
+                userShifts.forEach((newShift) => {
+                    const existingIndex = updatedShifts.findIndex(
+                        (shift) => shift._id === newShift._id,
+                    );
+                    if (existingIndex !== -1) {
+                        // Обновить существующую смену
+                        updatedShifts[existingIndex] = newShift;
+                    } else {
+                        // Добавить новую смену
+                        updatedShifts.push(newShift);
+                    }
+                });
+
+                return {
+                    ...user,
+                    shifts: updatedShifts,
+                };
             });
+
             return updatedSubUsers;
         });
 
@@ -482,22 +515,22 @@ export const EmployeeCalendar = () => {
                             {isFilterOpen && (
                                 <div className="absolute z-10 bg-white p-4 mt-2 w-72 shadow-lg rounded-lg border border-gray-200">
                                     <Dropdown
-                                        value={selectedDepartment}
-                                        onChange={(e) => setSelectedDepartment(e.value)}
+                                        value={selectedStore}
+                                        onChange={(e) => setSelectedStore(e.value)}
                                         showClear
-                                        options={departments || []}
-                                        optionLabel="name"
-                                        placeholder="Отдел"
+                                        options={stores || []}
+                                        optionLabel="storeName"
+                                        placeholder="Магазин"
                                         className="w-full mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
 
                                     <Dropdown
-                                        value={selectedStore}
-                                        onChange={(e) => setSelectedStore(e.value)}
-                                        options={stores || []}
-                                        optionLabel="storeName"
-                                        showClear
-                                        placeholder="Магазин"
+                                        value={selectedDepartment}
+                                        onChange={(e) => setSelectedDepartment(e.value)}
+                                        options={filteredDepartments || []}
+                                        optionLabel="name"
+                                        placeholder="Отдел"
+                                        disabled={!selectedStore}
                                         className="w-full border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
                                 </div>
