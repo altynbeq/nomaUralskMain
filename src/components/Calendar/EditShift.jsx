@@ -136,7 +136,7 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
     };
 
     return (
-        <div className="relative bg-white mt-4 min-h-[200px]">
+        <div className="relative bg-white mt-4 min-h-[150px]">
             {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
                     <Loader />
