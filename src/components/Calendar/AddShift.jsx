@@ -1,3 +1,5 @@
+// AddShift.js
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
@@ -61,6 +63,9 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]); // тут храним сгенерированные смены перед отправкой
 
+    // Размер чанка для отправки смен
+    const CHUNK_SIZE = 50;
+
     const generateShifts = useCallback(() => {
         const shifts = [];
         if (!dateRange || !startTime || !endTime || !selectedSubusers.length || !selectedStore) {
@@ -108,9 +113,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 0,
             );
 
-            // Если мы добавили 1 день к времени окончания, а дата совпадает, значит сдвигаем ещё на 1 день
-            // Однако выше мы уже учли это, так как `adjustedEnd` уже смещён на нужный день.
-
             selectedSubusers.forEach((user) => {
                 shifts.push({
                     subUserId: user._id,
@@ -149,7 +151,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     setShowConfirmModal(true);
                 } else {
                     // Нет конфликта — сразу отправляем
-                    await sendShifts(shifts);
+                    await sendShiftsInChunks(shifts);
                 }
             }
         } catch (error) {
@@ -160,36 +162,66 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         }
     };
 
-    const sendShifts = async (shifts) => {
-        // Отправляем смены на сервер
-        setIsLoading(true);
+    /**
+     * Функция для разбиения массива на чанки
+     * @param {Array} array - исходный массив
+     * @param {number} size - размер чанка
+     * @returns {Array[]} - массив чанков
+     */
+    const chunkArray = (array, size) => {
+        const result = [];
+        for (let i = 0; i < array.length; i += size) {
+            result.push(array.slice(i, i + size));
+        }
+        return result;
+    };
+
+    /**
+     * Функция для отправки смен чанками
+     * @param {Array} shifts - массив смен
+     */
+    const sendShiftsInChunks = async (shifts) => {
+        const chunks = chunkArray(shifts, CHUNK_SIZE);
+        const totalChunks = chunks.length;
+        let currentChunk = 0;
+
         try {
-            const response = await axiosInstance.post(
-                '/shifts/create-shifts',
-                { shifts },
-                {
-                    timeout: 30000,
-                },
-            );
-            if (response.status === 201) {
-                onShiftsAdded(response.data);
-                setOpen(false);
+            for (const chunk of chunks) {
+                currentChunk += 1;
+                toast.info(`Отправка смен ${currentChunk} из ${totalChunks}...`);
+
+                const response = await axiosInstance.post(
+                    '/shifts/create-shifts',
+                    { shifts: chunk },
+                    {
+                        timeout: 90000, // 90 секунд
+                    },
+                );
+
+                if (response.status === 201 || response.status === 200) {
+                    toast.success(`Смены ${currentChunk} успешно добавлены.`);
+                } else {
+                    throw new Error(`Неизвестный статус ответа: ${response.status}`);
+                }
             }
+
+            // После успешной отправки всех чанков
+            onShiftsAdded(); // Предполагается, что onShiftsAdded обновляет данные в родительском компоненте
+            setOpen(false);
+            toast.success('Все смены успешно добавлены.');
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
             toast.error(
                 error.response?.data?.message ||
-                    'Произошла ошибка при добавлении или обновлении смен.',
+                    `Произошла ошибка при добавлении смен на чанке ${currentChunk}.`,
             );
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const confirmChanges = async () => {
         // Пользователь подтвердил перезапись смен
         setShowConfirmModal(false);
-        await sendShifts(pendingShifts);
+        await sendShiftsInChunks(pendingShifts);
     };
 
     const cancelChanges = () => {
