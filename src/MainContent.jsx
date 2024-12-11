@@ -91,56 +91,28 @@ export const MainContent = ({ urls, activeMenu }) => {
 
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStartDate = new Date(shift.startTime).toISOString().split('T')[0];
-            const shiftEndDate = new Date(shift.endTime).toISOString().split('T')[0];
-            const isToday = shiftStartDate <= todayDateString && shiftEndDate >= todayDateString;
+            const isToday = shiftStartDate <= todayDateString;
             const isCurrentSubUser = shift.subUserId === user.id;
-            return isToday && isCurrentSubUser;
+            return isCurrentSubUser && isToday;
         });
 
-        if (todaysShifts.length > 0 && currentLocation && stores?.length > 0) {
-            todaysShifts.forEach((shift) => {
-                let isWithinAnyStore = false;
-                let matchedStoreId = null;
+        todaysShifts.forEach((shift) => {
+            if (hasExecuted.current) {
+                return; // Если уже выполнилось, выходим
+            }
+            hasExecuted.current = true; // Устанавливаем флаг
 
-                // Проверяем расстояние до всех магазинов
-                stores.forEach((store) => {
-                    const storeLocation = store.location;
-                    if (storeLocation) {
-                        const distance = getDistanceFromLatLonInMeters(
-                            storeLocation.lat,
-                            storeLocation.lng,
-                            currentLocation.lat,
-                            currentLocation.lng,
-                        );
-
-                        if (distance <= 50) {
-                            isWithinAnyStore = true;
-                            matchedStoreId = store._id;
-                        }
-                    }
-                });
-
-                if (isWithinAnyStore && matchedStoreId) {
-                    if (hasExecuted.current) {
-                        return; // Если уже выполнилось, выходим
-                    }
-                    hasExecuted.current = true; // Устанавливаем флаг
-                    // Проверяем, была ли уже отметка
-                    if (!shift.scanTime) {
-                        updateShiftScan(shift, matchedStoreId);
-                    } else if (!shift.endScanTime) {
-                        updateShiftEndScan(shift, matchedStoreId);
-                    } else {
-                        setShowMarkShiftResultModal(true);
-                        setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
-                    }
-                } else {
-                    setShowMarkShiftResultModal(true);
-                    setMarkShiftResultMessage('Вы находитесь слишком далеко от любого магазина.');
-                }
-            });
-        }
-    }, [subUserShifts, user, currentLocation, stores, location.search]);
+            // Проверяем, была ли уже отметка прихода или ухода
+            if (!shift.scanTime) {
+                updateShiftScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
+            } else if (!shift.endScanTime) {
+                updateShiftEndScan(shift, shift.selectedStore); // Передаём storeId напрямую из shift
+            } else {
+                setShowMarkShiftResultModal(true);
+                setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
+            }
+        });
+    }, [subUserShifts, user, location.search]);
 
     // Запрос геолокации при необходимости (через QR)
     useEffect(() => {
@@ -155,12 +127,12 @@ export const MainContent = ({ urls, activeMenu }) => {
                     },
                     (error) => {
                         console.error('Ошибка при получении геолокации:', error);
-                        setShowGeoErrorModal(true);
+                        // setShowGeoErrorModal(true);
                     },
                 );
             } else {
                 console.error('Geolocation не поддерживается этим браузером.');
-                setShowGeoErrorModal(true);
+                // setShowGeoErrorModal(true);
             }
         }
     }, [location.pathname, location.search]);
