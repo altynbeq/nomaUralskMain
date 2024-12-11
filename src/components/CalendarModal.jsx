@@ -24,7 +24,11 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShift }) =
 
     const getDurationText = (shift) => {
         const startTime = new Date(shift.startTime);
-        const endTime = new Date(shift.endTime);
+        let endTime = new Date(shift.endTime);
+
+        if (endTime <= startTime) {
+            endTime.setDate(endTime.getDate() + 1);
+        }
 
         const durationMs = endTime - startTime;
         const totalMinutes = Math.floor(durationMs / (1000 * 60));

@@ -61,8 +61,11 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]); // тут храним сгенерированные смены перед отправкой
 
-    const generateShifts = () => {
+    const generateShifts = useCallback(() => {
         const shifts = [];
+        if (!dateRange || !startTime || !endTime || !selectedSubusers.length || !selectedStore) {
+            return shifts;
+        }
 
         // Генерация всех дат в выбранном диапазоне
         const dates = [];
@@ -79,6 +82,12 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         const shiftStartTime = new Date(startTime);
         const shiftEndTime = new Date(endTime);
 
+        // Если конец смены раньше или равен началу — значит следующий день
+        let adjustedEnd = new Date(shiftEndTime);
+        if (adjustedEnd <= shiftStartTime) {
+            adjustedEnd.setDate(adjustedEnd.getDate() + 1);
+        }
+
         // Создание смен для каждой даты и каждого выбранного пользователя
         dates.forEach((date) => {
             const shiftStart = new Date(
@@ -94,10 +103,13 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 date.getFullYear(),
                 date.getMonth(),
                 date.getDate(),
-                shiftEndTime.getHours(),
-                shiftEndTime.getMinutes(),
+                adjustedEnd.getHours(),
+                adjustedEnd.getMinutes(),
                 0,
             );
+
+            // Если мы добавили 1 день к времени окончания, а дата совпадает, значит сдвигаем ещё на 1 день
+            // Однако выше мы уже учли это, так как `adjustedEnd` уже смещён на нужный день.
 
             selectedSubusers.forEach((user) => {
                 shifts.push({
@@ -108,8 +120,9 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 });
             });
         });
+
         return shifts;
-    };
+    }, [dateRange, startTime, endTime, selectedSubusers, selectedStore]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

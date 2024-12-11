@@ -349,7 +349,11 @@ export const EmployeeCalendar = () => {
                     <ul className="list-none flex-col gap-6 flex">
                         {selectedDayShiftsModal.map((shift) => {
                             const startTime = new Date(shift.startTime);
-                            const endTime = new Date(shift.endTime);
+                            let endTime = new Date(shift.endTime);
+
+                            if (endTime <= startTime) {
+                                endTime.setDate(endTime.getDate() + 1);
+                            }
                             const scanTime = shift.scanTime ? new Date(shift.scanTime) : null;
                             const endScanTime = shift.endScanTime
                                 ? new Date(shift.endScanTime)
