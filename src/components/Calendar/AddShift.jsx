@@ -206,7 +206,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
             }
 
             // После успешной отправки всех чанков
-            onShiftsAdded(); // Предполагается, что onShiftsAdded обновляет данные в родительском компоненте
             setOpen(false);
             toast.success('Все смены успешно добавлены.');
         } catch (error) {
