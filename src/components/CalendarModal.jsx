@@ -56,12 +56,17 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShift }) =
         const start = new Date(scanTime);
         const end = new Date(endScanTime);
 
-        const diffMs = end - start;
-        if (diffMs < 0) return { hours: 0, minutes: 0 };
+        // Если время окончания меньше времени начала (пересечение полуночи)
+        if (end < start) {
+            end.setDate(end.getDate() + 1);
+        }
 
-        const totalMinutes = Math.floor(diffMs / (1000 * 60));
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
+        const diffMs = end - start; // Разница в миллисекундах
+        const totalMinutes = diffMs / (1000 * 60); // Общее время в минутах
+
+        const roundedMinutes = Math.ceil(totalMinutes); // Используем Math.ceil для учета долей минут
+        const hours = Math.floor(roundedMinutes / 60);
+        const minutes = roundedMinutes % 60;
 
         return { hours, minutes };
     }, []);
