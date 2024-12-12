@@ -5,20 +5,21 @@ import { FaSearch, FaPlus } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
-import { useCompanyStructureStore } from '../../../store/companyStructureStore';
+import { useCompanyStructureStore, useAuthStore } from '../../../store/index';
 import { socket } from '../../../socket'; // путь к вашему socket.js
 import { PaginationControls } from '../PaginationControls';
 import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
-import { Loader } from '../../Loader';
 import { Button } from 'primereact/button';
 import { CheckInCheckOutModal } from './CheckInCheckOutModal';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
-    const subUsers = useCompanyStructureStore((state) => state.subUsers);
     const departments = useCompanyStructureStore((state) => state.departments);
+    const [subUsersState, setSubUsersState] = useState([]);
+    const user = useAuthStore((state) => state.user);
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
@@ -35,9 +36,26 @@ export const EmployeeCalendar = () => {
         visible: false,
         time: null,
     });
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Локальное состояние для subUsers, чтобы обновлять их динамически
-    const [subUsersState, setSubUsersState] = useState([]);
+    useEffect(() => {
+        const companyId = user?.companyId ? user.companyId : user?.id;
+        if (!companyId) {
+            return;
+        }
+        const fetchCompanySubUsers = async () => {
+            setIsLoading(true);
+            try {
+                const response = await axiosInstance.get(`/subusers/company/${companyId}`);
+                setSubUsersState(response.data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchCompanySubUsers();
+    }, [user.companyId, user?.id]);
 
     useEffect(() => {
         socket.on('new-shift', (newShifts) => {
@@ -106,7 +124,8 @@ export const EmployeeCalendar = () => {
     useEffect(() => {
         // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
-            // handleSocketShiftUpdate(data.shift);
+            console.log(data.shift);
+            handleSocketShiftUpdate(data.shift);
         });
 
         // Очистка при размонтировании компонента
@@ -114,11 +133,6 @@ export const EmployeeCalendar = () => {
             socket.off('update-shift');
         };
     }, [handleSocketShiftUpdate]);
-
-    useEffect(() => {
-        setSubUsersState(subUsers);
-    }, [subUsers]);
-
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
         if (!startTime || !scanTime) return 0;
         const start = new Date(startTime);
@@ -148,21 +162,6 @@ export const EmployeeCalendar = () => {
 
         return { hours, minutes };
     }, []);
-
-    const departmentsMap = useMemo(() => {
-        const map = new Map();
-        departments?.forEach((dept) => {
-            map.set(dept._id, dept.name);
-        });
-        return map;
-    }, [departments]);
-
-    const getDepartmentName = useCallback(
-        (departmentId) => {
-            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
-        },
-        [departmentsMap],
-    );
 
     // Фильтрация отделов после выбора магазина
     useEffect(() => {
@@ -319,30 +318,6 @@ export const EmployeeCalendar = () => {
         toast.success('Вы успешно удалили смену');
     }, []);
 
-    const handleShiftUpdate = useCallback((updatedShift) => {
-        // Обновляем смену в selectedDayShiftsModal
-        setSelectedDayShiftsModal((prevShifts) =>
-            prevShifts.map((shift) => (shift._id === updatedShift._id ? updatedShift : shift)),
-        );
-
-        // Обновляем смену в subUsersState
-        setSubUsersState((prevSubUsers) => {
-            return prevSubUsers.map((user) => {
-                if (user._id === updatedShift.subUserId) {
-                    return {
-                        ...user,
-                        shifts: user.shifts.map((s) =>
-                            s._id === updatedShift._id ? updatedShift.id : s,
-                        ),
-                    };
-                }
-                return user;
-            });
-        });
-
-        toast.success('Вы успешно обновили смену');
-    }, []);
-
     const showEditCheckinCheckOutModalHandler = (type, visible, time) => {
         setCheckinCheckoutProps({ type, visible, time });
     };
@@ -497,10 +472,8 @@ export const EmployeeCalendar = () => {
                                     <EditShift
                                         shiftId={shift._id}
                                         onShiftDelete={handleShiftDelete}
-                                        onShiftUpdate={handleShiftUpdate}
                                     />
                                     <CheckInCheckOutModal
-                                        handleShiftUpdate={handleShiftUpdate}
                                         {...checkInCheckoutProps}
                                         shift={shift}
                                         clearCheckInCheckoutProps={clearCheckInCheckoutProps}
@@ -519,7 +492,6 @@ export const EmployeeCalendar = () => {
         calculateLateMinutes,
         calculateWorkedTime,
         handleShiftDelete,
-        handleShiftUpdate,
         checkInCheckoutProps,
     ]);
 
@@ -579,23 +551,15 @@ export const EmployeeCalendar = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* <td
-                                    colSpan={daysArray.length + 1}
-                                    className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70"
-                                >
-                                    <Loader />
-                                </td> */}
-
                 <CalendarTable
-                    currentSubusers={currentSubusers}
+                    currentSubusers={currentSubusers || []}
                     daysArray={daysArray}
                     year={year}
                     month={month}
+                    isLoading={isLoading}
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
                     setSelectedDayShiftsModal={setSelectedDayShiftsModal}
-                    getDepartmentName={getDepartmentName}
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}

@@ -9,7 +9,7 @@ export const axiosInstance = axios.create({
         'Content-Type': 'application/json',
     },
     withCredentials: true,
-    timeout: 10000, // 10 секунд
+    timeout: 90000,
 });
 
 // Отдельный экземпляр axios без интерсепторов для refresh-token запросов
@@ -19,7 +19,7 @@ const axiosWithoutInterceptors = axios.create({
         'Content-Type': 'application/json',
     },
     withCredentials: true,
-    timeout: 10000,
+    timeout: 30000,
 });
 
 // Переменные для управления состоянием обновления токена

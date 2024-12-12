@@ -21,7 +21,10 @@ export const CheckInCheckOutModal = memo(
                     `/shifts/update-shift/${shift._id}`,
                     type === 'checkIn'
                         ? {
-                              subUserId: shift.subUserId,
+                              subUserId:
+                                  typeof shift.subUserId === 'string'
+                                      ? shift.subUserId
+                                      : shift.subUserId._id,
                               startTime: shift.startTime,
                               endTime: shift.endTime,
                               selectedStore: shift.selectedStore._id,
@@ -29,7 +32,10 @@ export const CheckInCheckOutModal = memo(
                               endScanTime: shift.endScanTime,
                           }
                         : {
-                              subUserId: shift.subUserId,
+                              subUserId:
+                                  typeof shift.subUserId === 'string'
+                                      ? shift.subUserId
+                                      : shift.subUserId._id,
                               endScanTime: date,
                               startTime: shift.startTime,
                               endTime: shift.endTime,
@@ -37,8 +43,8 @@ export const CheckInCheckOutModal = memo(
                               scanTime: shift.scanTime,
                           },
                 );
-                toast.success(`Вы успешно изменили ${type === 'checkIn' ? 'приход' : 'уход'}`);
                 clearCheckInCheckoutProps();
+                toast.success(`Вы успешно обновили ${type === 'checkIn' ? 'приход' : 'уход'}`);
             } catch {
                 toast.error(`Не удалось изменить ${type === 'checkIn' ? 'приход' : 'уход'}`);
             } finally {
