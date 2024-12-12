@@ -6,7 +6,7 @@ import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
 import { useCompanyStructureStore, useAuthStore } from '../../../store/index';
-import { socket } from '../../../socket'; // путь к вашему socket.js
+import { socket } from '../../../socket';
 import { PaginationControls } from '../PaginationControls';
 import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
@@ -15,7 +15,7 @@ import { Button } from 'primereact/button';
 import { CheckInCheckOutModal } from './CheckInCheckOutModal';
 import { axiosInstance } from '../../../api/axiosInstance';
 
-export const EmployeeCalendar = () => {
+export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
     const departments = useCompanyStructureStore((state) => state.departments);
     const [subUsersState, setSubUsersState] = useState([]);
@@ -270,7 +270,6 @@ export const EmployeeCalendar = () => {
             }
 
             const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
-            const workedTime = calculateWorkedTime(shift.scanTime, shift.endScanTime);
 
             const isLate = lateMinutes > 0;
             const isIncomplete =
@@ -289,7 +288,7 @@ export const EmployeeCalendar = () => {
 
             return { type: 'split' };
         },
-        [calculateLateMinutes, calculateWorkedTime],
+        [calculateLateMinutes],
     );
 
     // Функция для удаления смены из selectedDayShiftsModal и из subUsersState

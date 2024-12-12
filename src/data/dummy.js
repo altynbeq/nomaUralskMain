@@ -54,7 +54,7 @@ export const links = [
         title: 'Учёт',
         links: [
             {
-                name: 'calendar',
+                name: 'shifts',
                 text: 'Смены',
                 icon: <FaCalendar />,
             },

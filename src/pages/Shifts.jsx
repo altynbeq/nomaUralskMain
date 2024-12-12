@@ -1,10 +1,10 @@
 import React from 'react';
-import { EmployeeCalendar } from '../components/Accounting/Workers/EmployeeCalendar';
+import { EmployeesCalendar } from '../components/Accounting/Workers/EmployeesCalendar';
 
 const Calendar = () => {
     return (
         <div className="w-[100%] align-center justify-center">
-            <EmployeeCalendar />
+            <EmployeesCalendar />
         </div>
     );
 };
