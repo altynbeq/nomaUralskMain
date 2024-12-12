@@ -49,12 +49,7 @@ export const EmployeeCalendar = () => {
         const fetchCompanySubUsers = async () => {
             setIsLoading(true);
             try {
-                const response = await axiosInstance.get(
-                    `/structure/get-structure-by-userId/${companyId}`,
-                    {
-                        timeout: 90000,
-                    },
-                );
+                const response = await axiosInstance.get(`/subusers/company/${companyId}`);
                 setSubUsersState(response.data.subUsers);
             } catch (error) {
                 console.log(error);
