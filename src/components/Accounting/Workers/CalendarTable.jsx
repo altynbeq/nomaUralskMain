@@ -11,11 +11,18 @@ export const CalendarTable = memo(
         getDayColor,
         setSelectedDayShiftsModal,
         getDepartmentName,
-        loading, // Добавляем проп loading
+        isLoading,
     }) => {
         return (
-            <div className="overflow-x-auto w-full max-w-full">
-                <table className="table-auto w-full max-w-full border-collapse">
+            <div className="relative overflow-x-auto w-full max-w-full mt-10">
+                {isLoading && (
+                    <div className="absolute py-8 inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
+                        <Loader />
+                    </div>
+                )}
+                <table
+                    className={`table-auto w-full max-w-full border-collapse ${isLoading ? 'opacity-50' : ''}`}
+                >
                     <thead>
                         <tr>
                             <th className="px-2 py-2 text-left">Сотрудник</th>
@@ -43,7 +50,7 @@ export const CalendarTable = memo(
                             })}
                         </tr>
                     </thead>
-                    <tbody className="relative">
+                    <tbody>
                         {currentSubusers.map((employee) => (
                             <tr key={employee._id}>
                                 <td className="px-4 py-2 inline-flex items-center gap-2">

@@ -5,20 +5,21 @@ import { FaSearch, FaPlus } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
 import { toast } from 'react-toastify';
-import { useCompanyStructureStore } from '../../../store/companyStructureStore';
+import { useCompanyStructureStore, useAuthStore } from '../../../store/index';
 import { socket } from '../../../socket'; // путь к вашему socket.js
 import { PaginationControls } from '../PaginationControls';
 import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
-import { Loader } from '../../Loader';
 import { Button } from 'primereact/button';
 import { CheckInCheckOutModal } from './CheckInCheckOutModal';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
-    const subUsers = useCompanyStructureStore((state) => state.subUsers);
+    // const subUsers = useCompanyStructureStore((state) => state.subUsers);
     const departments = useCompanyStructureStore((state) => state.departments);
+    const user = useAuthStore((state) => state.user);
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth());
     const [year, setYear] = useState(currentDate.getFullYear());
@@ -35,9 +36,34 @@ export const EmployeeCalendar = () => {
         visible: false,
         time: null,
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
+
+    useEffect(() => {
+        const companyId = user?.companyId ? user.companyId : user?.id;
+        if (!companyId) {
+            return;
+        }
+        const fetchCompanySubUsers = async () => {
+            setIsLoading(true);
+            try {
+                const response = await axiosInstance.get(
+                    `/structure/get-structure-by-userId/${companyId}`,
+                    {
+                        timeout: 90000,
+                    },
+                );
+                setSubUsersState(response.data.subUsers);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchCompanySubUsers();
+    }, [user.companyId, user?.id]);
 
     useEffect(() => {
         socket.on('new-shift', (newShifts) => {
@@ -115,9 +141,9 @@ export const EmployeeCalendar = () => {
         };
     }, [handleSocketShiftUpdate]);
 
-    useEffect(() => {
-        setSubUsersState(subUsers);
-    }, [subUsers]);
+    // useEffect(() => {
+    //     setSubUsersState(subUsers);
+    // }, [subUsers]);
 
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
         if (!startTime || !scanTime) return 0;
@@ -588,10 +614,11 @@ export const EmployeeCalendar = () => {
                                 </td> */}
 
                 <CalendarTable
-                    currentSubusers={currentSubusers}
+                    currentSubusers={currentSubusers || []}
                     daysArray={daysArray}
                     year={year}
                     month={month}
+                    isLoading={isLoading}
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
                     setSelectedDayShiftsModal={setSelectedDayShiftsModal}
