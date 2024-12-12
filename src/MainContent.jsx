@@ -10,6 +10,7 @@ import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
 import { useAuthStore, useCompanyStructureStore, useSubUserStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
+import { startOfDay, endOfDay, parseISO } from 'date-fns';
 
 const General = lazy(() => import('./pages/General'));
 const Sales = lazy(() => import('./pages/Sales'));
@@ -88,40 +89,15 @@ export const MainContent = ({ urls, activeMenu }) => {
 
         if (!isQr) return;
 
-        const today = new Date();
-        const startOfDay = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-            0,
-            0,
-            0,
-            0,
-        );
-        const endOfDay = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-            23,
-            59,
-            59,
-            999,
-        );
-
         const todaysShifts = subUserShifts.filter((shift) => {
-            const shiftStart = new Date(shift.startTime);
-            const shiftEnd = new Date(shift.endTime);
-
-            // Проверяем корректность данных
-            if (shiftStart > shiftEnd) {
-                console.warn(
-                    `Некорректная смена: startTime ${shift.startTime} позже endTime ${shift.endTime}`,
-                );
-                return false;
-            }
-
+            const shiftStart = parseISO(shift.startTime);
+            const shiftEnd = parseISO(shift.endTime);
             const isCurrentSubUser = shift.subUserId === user.id;
-            const isToday = shiftStart <= endOfDay && shiftEnd >= startOfDay;
+
+            const todayStart = startOfDay(new Date());
+            const todayEnd = endOfDay(new Date());
+
+            const isToday = shiftStart <= todayEnd && shiftEnd >= todayStart;
 
             return isCurrentSubUser && isToday;
         });
