@@ -55,8 +55,8 @@ export const CalendarTable = memo(
                                 <td className="px-4 py-2 inline-flex items-center gap-2">
                                     <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                                     <div className="flex flex-col">
-                                        <p className="text-sm">{employee.name}</p>
-                                        <p className="text-sm">{employee.departmentId.name}</p>
+                                        <p className="text-sm">{employee?.name}</p>
+                                        <p className="text-sm">{employee?.departmentId?.name}</p>
                                     </div>
                                 </td>
                                 {daysArray.map((day) => {
