@@ -67,7 +67,7 @@ export const CheckInCheckOutModal = memo(
                         onClick={() => updateShiftScan(shift, type)}
                         disabled={isLoading}
                         className="w-full text-white bg-blue-400 rounded-lg border p-1 mt-4"
-                        label="Изменить"
+                        label={`Изменить ${type === 'checkIn' ? 'приход' : 'уход'}`}
                     />
                 </div>
             </Dialog>
