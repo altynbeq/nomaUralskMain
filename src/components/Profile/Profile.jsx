@@ -1,6 +1,6 @@
 // Profile.js
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import { useSubUserStore } from '../../store/index';
