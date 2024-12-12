@@ -24,7 +24,6 @@ const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu }) => {
-    const stores = useCompanyStructureStore((state) => state.stores);
     const subUserShifts = useSubUserStore((state) => state.shifts);
     const user = useAuthStore((state) => state.user);
     const subUser = useSubUserStore((state) => state.subUser);
