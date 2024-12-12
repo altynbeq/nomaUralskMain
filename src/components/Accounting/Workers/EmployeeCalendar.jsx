@@ -106,7 +106,7 @@ export const EmployeeCalendar = () => {
     useEffect(() => {
         // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
-            handleSocketShiftUpdate(data.shift);
+            // handleSocketShiftUpdate(data.shift);
         });
 
         // Очистка при размонтировании компонента
@@ -332,7 +332,7 @@ export const EmployeeCalendar = () => {
                     return {
                         ...user,
                         shifts: user.shifts.map((s) =>
-                            s._id === updatedShift._id ? updatedShift : s,
+                            s._id === updatedShift._id ? updatedShift.id : s,
                         ),
                     };
                 }
@@ -500,6 +500,7 @@ export const EmployeeCalendar = () => {
                                         onShiftUpdate={handleShiftUpdate}
                                     />
                                     <CheckInCheckOutModal
+                                        handleShiftUpdate={handleShiftUpdate}
                                         {...checkInCheckoutProps}
                                         shift={shift}
                                         clearCheckInCheckoutProps={clearCheckInCheckoutProps}
