@@ -17,8 +17,8 @@ import { axiosInstance } from '../../../api/axiosInstance';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
-    // const subUsers = useCompanyStructureStore((state) => state.subUsers);
     const departments = useCompanyStructureStore((state) => state.departments);
+    const [subUsersState, setSubUsersState] = useState([]);
     const user = useAuthStore((state) => state.user);
     const currentDate = new Date();
     const [month, setMonth] = useState(currentDate.getMonth());
@@ -37,9 +37,6 @@ export const EmployeeCalendar = () => {
         time: null,
     });
     const [isLoading, setIsLoading] = useState(false);
-
-    // Локальное состояние для subUsers, чтобы обновлять их динамически
-    const [subUsersState, setSubUsersState] = useState([]);
 
     useEffect(() => {
         const companyId = user?.companyId ? user.companyId : user?.id;
