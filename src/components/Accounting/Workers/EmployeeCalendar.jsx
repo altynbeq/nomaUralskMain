@@ -50,7 +50,7 @@ export const EmployeeCalendar = () => {
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/subusers/company/${companyId}`);
-                setSubUsersState(response.data.subUsers);
+                setSubUsersState(response.data);
             } catch (error) {
                 console.log(error);
             } finally {
@@ -169,21 +169,6 @@ export const EmployeeCalendar = () => {
 
         return { hours, minutes };
     }, []);
-
-    const departmentsMap = useMemo(() => {
-        const map = new Map();
-        departments?.forEach((dept) => {
-            map.set(dept._id, dept.name);
-        });
-        return map;
-    }, [departments]);
-
-    const getDepartmentName = useCallback(
-        (departmentId) => {
-            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
-        },
-        [departmentsMap],
-    );
 
     // Фильтрация отделов после выбора магазина
     useEffect(() => {
@@ -617,7 +602,6 @@ export const EmployeeCalendar = () => {
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
                     setSelectedDayShiftsModal={setSelectedDayShiftsModal}
-                    getDepartmentName={getDepartmentName}
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}

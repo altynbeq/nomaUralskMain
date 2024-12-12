@@ -10,7 +10,6 @@ export const CalendarTable = memo(
         getShiftsForDay,
         getDayColor,
         setSelectedDayShiftsModal,
-        getDepartmentName,
         isLoading,
     }) => {
         return (
@@ -57,9 +56,7 @@ export const CalendarTable = memo(
                                     <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                                     <div className="flex flex-col">
                                         <p className="text-sm">{employee.name}</p>
-                                        <p className="text-sm">
-                                            ({getDepartmentName(employee.departmentId)})
-                                        </p>
+                                        <p className="text-sm">{employee.departmentId.name}</p>
                                     </div>
                                 </td>
                                 {daysArray.map((day) => {

@@ -1,6 +1,6 @@
 // AddShift.js
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Calendar } from 'primereact/calendar';
@@ -241,21 +241,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         }
     };
 
-    const departmentsMap = useMemo(() => {
-        const map = new Map();
-        departments?.forEach((dept) => {
-            map.set(dept._id, dept.name);
-        });
-        return map;
-    }, [departments]);
-
-    const getDepartmentName = useCallback(
-        (departmentId) => {
-            return departmentsMap.get(departmentId) ?? 'Неизвестный департамент';
-        },
-        [departmentsMap],
-    );
-
     const itemTemplate = (item) => {
         return (
             <div className="flex items-center">
@@ -266,9 +251,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                 />
                 <div>
                     <div>{item.name}</div>
-                    <div className="text-gray-500 text-sm">
-                        {getDepartmentName(item.departmentId)}
-                    </div>
+                    <div className="text-gray-500 text-sm">{item.departmentId.name}</div>
                 </div>
             </div>
         );
