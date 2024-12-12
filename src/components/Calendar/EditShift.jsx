@@ -43,7 +43,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
+export const EditShift = ({ shiftId, onShiftDelete }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [shift, setShift] = useState(null);
     const [startTime, setStartTime] = useState('');
@@ -89,20 +89,6 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
             }
 
             const newEndISO = newEnd.toISOString();
-
-            // const checkResponse = await axiosInstance.get(`/shifts/check-conflict/${shiftId}`, {
-            //     params: {
-            //         startTime: newStart,
-            //         endTime: newEndISO,
-            //     },
-            // });
-
-            // if (checkResponse.data.conflict) {
-            //     toast.error('Смена пересекается по времени с другой сменой.');
-            //     setIsLoading(false);
-            //     return;
-            // }
-
             const response = await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
                 subUserId: shift.subUserId._id,
                 startTime: newStart,
@@ -111,8 +97,8 @@ export const EditShift = ({ shiftId, onShiftDelete, onShiftUpdate }) => {
             });
 
             if (response.status === 200) {
-                onShiftUpdate(response.data);
                 setShift(response.data);
+                toast.success('Вы успешно обновили смену');
             }
         } catch (error) {
             console.error('Ошибка при обновлении смены:', error);

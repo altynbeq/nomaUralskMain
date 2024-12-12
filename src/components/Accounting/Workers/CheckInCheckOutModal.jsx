@@ -6,7 +6,7 @@ import { axiosInstance } from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
 
 export const CheckInCheckOutModal = memo(
-    ({ visible, type, time, clearCheckInCheckoutProps, shift, handleShiftUpdate }) => {
+    ({ visible, type, time, clearCheckInCheckoutProps, shift }) => {
         const [date, setDate] = useState(null);
         const [isLoading, setIsLoading] = useState(false);
 
@@ -17,7 +17,7 @@ export const CheckInCheckOutModal = memo(
         const updateShiftScan = async (shift) => {
             setIsLoading(true);
             try {
-                const response = await axiosInstance.put(
+                await axiosInstance.put(
                     `/shifts/update-shift/${shift._id}`,
                     type === 'checkIn'
                         ? {
@@ -37,7 +37,6 @@ export const CheckInCheckOutModal = memo(
                               scanTime: shift.scanTime,
                           },
                 );
-                handleShiftUpdate(response.data);
                 clearCheckInCheckoutProps();
             } catch {
                 toast.error(`Не удалось изменить ${type === 'checkIn' ? 'приход' : 'уход'}`);

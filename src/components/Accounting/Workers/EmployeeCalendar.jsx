@@ -124,7 +124,8 @@ export const EmployeeCalendar = () => {
     useEffect(() => {
         // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
-            // handleSocketShiftUpdate(data.shift);
+            console.log(data.shift);
+            handleSocketShiftUpdate(data.shift);
         });
 
         // Очистка при размонтировании компонента
@@ -317,30 +318,6 @@ export const EmployeeCalendar = () => {
         toast.success('Вы успешно удалили смену');
     }, []);
 
-    const handleShiftUpdate = useCallback((updatedShift) => {
-        // Обновляем смену в selectedDayShiftsModal
-        setSelectedDayShiftsModal((prevShifts) =>
-            prevShifts.map((shift) => (shift._id === updatedShift._id ? updatedShift : shift)),
-        );
-
-        // Обновляем смену в subUsersState
-        setSubUsersState((prevSubUsers) => {
-            return prevSubUsers.map((user) => {
-                if (user._id === updatedShift.subUserId) {
-                    return {
-                        ...user,
-                        shifts: user.shifts.map((s) =>
-                            s._id === updatedShift._id ? updatedShift.id : s,
-                        ),
-                    };
-                }
-                return user;
-            });
-        });
-
-        toast.success('Вы успешно обновили смену');
-    }, []);
-
     const showEditCheckinCheckOutModalHandler = (type, visible, time) => {
         setCheckinCheckoutProps({ type, visible, time });
     };
@@ -495,10 +472,8 @@ export const EmployeeCalendar = () => {
                                     <EditShift
                                         shiftId={shift._id}
                                         onShiftDelete={handleShiftDelete}
-                                        onShiftUpdate={handleShiftUpdate}
                                     />
                                     <CheckInCheckOutModal
-                                        handleShiftUpdate={handleShiftUpdate}
                                         {...checkInCheckoutProps}
                                         shift={shift}
                                         clearCheckInCheckoutProps={clearCheckInCheckoutProps}
@@ -517,7 +492,6 @@ export const EmployeeCalendar = () => {
         calculateLateMinutes,
         calculateWorkedTime,
         handleShiftDelete,
-        handleShiftUpdate,
         checkInCheckoutProps,
     ]);
 
