@@ -12,6 +12,8 @@ import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
 import { Loader } from '../../Loader';
+import { Button } from 'primereact/button';
+import { CheckInCheckOutModal } from './CheckInCheckOutModal';
 
 export const EmployeeCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -28,6 +30,11 @@ export const EmployeeCalendar = () => {
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showModalAddShift, setShowModalAddShift] = useState(false);
+    const [checkInCheckoutProps, setCheckinCheckoutProps] = useState({
+        type: '',
+        visible: false,
+        time: null,
+    });
 
     // Локальное состояние для subUsers, чтобы обновлять их динамически
     const [subUsersState, setSubUsersState] = useState([]);
@@ -99,7 +106,7 @@ export const EmployeeCalendar = () => {
     useEffect(() => {
         // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
-            handleSocketShiftUpdate(data.shift);
+            // handleSocketShiftUpdate(data.shift);
         });
 
         // Очистка при размонтировании компонента
@@ -325,7 +332,7 @@ export const EmployeeCalendar = () => {
                     return {
                         ...user,
                         shifts: user.shifts.map((s) =>
-                            s._id === updatedShift._id ? updatedShift : s,
+                            s._id === updatedShift._id ? updatedShift.id : s,
                         ),
                     };
                 }
@@ -335,6 +342,18 @@ export const EmployeeCalendar = () => {
 
         toast.success('Вы успешно обновили смену');
     }, []);
+
+    const showEditCheckinCheckOutModalHandler = (type, visible, time) => {
+        setCheckinCheckoutProps({ type, visible, time });
+    };
+
+    const clearCheckInCheckoutProps = () => {
+        setCheckinCheckoutProps({
+            type: '',
+            visible: false,
+            time: null,
+        });
+    };
 
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
@@ -412,20 +431,48 @@ export const EmployeeCalendar = () => {
                                         </div>
                                         <div className="flex flex-col">
                                             {scanTime && (
-                                                <p>
-                                                    <span className="font-bold text-lg">
-                                                        Фактический приход:
-                                                    </span>{' '}
-                                                    {formatOnlyTimeDate(shift.scanTime)}
-                                                </p>
+                                                <div className="flex gap-4 items-center justify-between">
+                                                    <p>
+                                                        <span className="font-bold text-lg">
+                                                            Фактический приход:
+                                                        </span>{' '}
+                                                        {formatOnlyTimeDate(shift.scanTime)}
+                                                    </p>
+                                                    <Button
+                                                        onClick={() => {
+                                                            showEditCheckinCheckOutModalHandler(
+                                                                'checkIn',
+                                                                true,
+                                                                scanTime,
+                                                            );
+                                                        }}
+                                                        className="text-white bg-blue-400 rounded-lg border p-1"
+                                                        label="Изменить"
+                                                        icon="pi pi-user-edit"
+                                                    />
+                                                </div>
                                             )}
                                             {endScanTime && (
-                                                <p>
-                                                    <span className="font-bold text-lg">
-                                                        Фактический уход:
-                                                    </span>{' '}
-                                                    {formatOnlyTimeDate(shift.endScanTime)}
-                                                </p>
+                                                <div className="flex gap-4 items-center justify-between mt-5">
+                                                    <p>
+                                                        <span className="font-bold text-lg">
+                                                            Фактический уход:
+                                                        </span>{' '}
+                                                        {formatOnlyTimeDate(shift.endScanTime)}
+                                                    </p>
+                                                    <Button
+                                                        onClick={() => {
+                                                            showEditCheckinCheckOutModalHandler(
+                                                                'checkOut',
+                                                                true,
+                                                                scanTime,
+                                                            );
+                                                        }}
+                                                        className="text-white bg-blue-400 rounded-lg border p-1"
+                                                        label="Изменить"
+                                                        icon="pi pi-user-edit"
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                         <div>
@@ -452,6 +499,12 @@ export const EmployeeCalendar = () => {
                                         onShiftDelete={handleShiftDelete}
                                         onShiftUpdate={handleShiftUpdate}
                                     />
+                                    <CheckInCheckOutModal
+                                        handleShiftUpdate={handleShiftUpdate}
+                                        {...checkInCheckoutProps}
+                                        shift={shift}
+                                        clearCheckInCheckoutProps={clearCheckInCheckoutProps}
+                                    />
                                 </div>
                             );
                         })}
@@ -467,6 +520,7 @@ export const EmployeeCalendar = () => {
         calculateWorkedTime,
         handleShiftDelete,
         handleShiftUpdate,
+        checkInCheckoutProps,
     ]);
 
     return (
