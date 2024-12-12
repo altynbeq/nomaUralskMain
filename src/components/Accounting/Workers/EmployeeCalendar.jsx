@@ -132,11 +132,6 @@ export const EmployeeCalendar = () => {
             socket.off('update-shift');
         };
     }, [handleSocketShiftUpdate]);
-
-    // useEffect(() => {
-    //     setSubUsersState(subUsers);
-    // }, [subUsers]);
-
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
         if (!startTime || !scanTime) return 0;
         const start = new Date(startTime);
