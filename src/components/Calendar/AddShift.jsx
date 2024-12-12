@@ -204,7 +204,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
 
             // После успешной отправки всех чанков
             setOpen(false);
-            toast.success('Все смены успешно добавлены.');
+            toast.success('Все смены успешно добавлены');
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
             toast.error(
