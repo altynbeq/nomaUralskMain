@@ -38,6 +38,7 @@ export const CheckInCheckOutModal = memo(
                           },
                 );
                 clearCheckInCheckoutProps();
+                toast.success(`Вы успешно обновили ${type === 'checkIn' ? 'приход' : 'уход'}`);
             } catch {
                 toast.error(`Не удалось изменить ${type === 'checkIn' ? 'приход' : 'уход'}`);
             } finally {
