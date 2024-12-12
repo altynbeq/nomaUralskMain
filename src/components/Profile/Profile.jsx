@@ -30,15 +30,6 @@ export const Profile = () => {
 
     const formatDate = (date) => format(date, 'yyyy-MM-dd', { locale: ru });
 
-    /**
-     * Функция для определения цвета дня в календаре.
-     *
-     * Возвращает:
-     * - 'bg-gray-300' если нет смен
-     * - 'bg-blue-500 text-white' если есть смена и сотрудник не опоздал
-     * - 'bg-gradient-to-r from-blue-500 to-red-500 text-white' если сотрудник опоздал
-     * - 'bg-red-500 text-white' если сотрудник опоздал и отработал больше времени
-     */
     const getDayColor = (date) => {
         const formattedDate = formatDate(date);
 
@@ -50,33 +41,46 @@ export const Profile = () => {
             }) || [];
 
         if (shifts.length === 0) {
-            return 'bg-gray-300';
+            return 'bg-gray-300'; // Нет смены
         }
 
+        let hasScanIn = false;
+        let hasScanOut = false;
         let isLate = false;
-        let isExtra = false;
+        let isIncomplete = false;
 
         shifts.forEach((shift) => {
+            if (shift.scanTime) hasScanIn = true;
+            if (shift.endScanTime) hasScanOut = true;
+
+            const lateMinutes = shift.scanTime
+                ? Math.max(0, (new Date(shift.scanTime) - new Date(shift.startTime)) / 60000)
+                : 0;
+            if (lateMinutes > 0) isLate = true;
+
             if (
-                shift.latenessTime &&
-                (shift.latenessTime.hours > 0 || shift.latenessTime.minutes > 0)
+                !shift.endScanTime ||
+                (shift.endTime && new Date(shift.endScanTime) < new Date(shift.endTime))
             ) {
-                isLate = true;
-            }
-            if (shift.timeWorked && (shift.timeWorked.hours > 0 || shift.timeWorked.minutes > 0)) {
-                isExtra = true;
+                isIncomplete = true;
             }
         });
 
-        if (isLate && isExtra) {
-            // Обе половины красные
-            return 'bg-red-500 text-white';
+        if (isLate && !hasScanOut) {
+            // Красная и синяя половины
+            return 'bg-gradient-to-r from-red-500 to-blue-500 text-white';
+        } else if (isLate && isIncomplete) {
+            // Красная и зелёная половины
+            return 'bg-gradient-to-r from-red-500 to-green-500 text-white';
         } else if (isLate) {
-            // Левая половина синяя, правая красная
-            return 'bg-gradient-to-r from-blue-500 to-red-500 text-white';
-        } else {
-            // Только синяя
+            // Полностью красный
+            return 'bg-red-500 text-white';
+        } else if (!hasScanIn && !hasScanOut) {
+            // Полностью синий
             return 'bg-blue-500 text-white';
+        } else {
+            // Полностью зелёный
+            return 'bg-green-500 text-white';
         }
     };
 
@@ -147,7 +151,6 @@ export const Profile = () => {
                 <div className="grid grid-cols-7 gap-2">
                     {/* Месячный вид */}
                     {[...Array(daysInMonth).keys()].map((dayIndex) => {
-                        // dayIndex начинается с 0, но дни начинаются с 1
                         const day = dayIndex + 1;
                         const date = new Date(currentYear, currentMonth, day);
                         return (

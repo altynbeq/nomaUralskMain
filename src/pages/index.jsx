@@ -1,7 +1,7 @@
 export { default as General } from './General';
 export { default as Finance } from './Finance';
 export { default as ColorPicker } from './ColorPicker';
-export { default as Calendar } from './Calendar';
+export { default as Shifts } from './Shifts';
 export { default as Workers } from './Workers';
 export { default as Sales } from './Sales';
 export { default as Sklad } from './Sklad';

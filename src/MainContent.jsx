@@ -18,7 +18,7 @@ const Sklad = lazy(() => import('./pages/Sklad'));
 const Finance = lazy(() => import('./pages/Finance'));
 const Workers = lazy(() => import('./pages/Workers'));
 const LogInForm = lazy(() => import('./pages/LogInForm'));
-const Calendar = lazy(() => import('./pages/Calendar'));
+const Shifts = lazy(() => import('./pages/Shifts'));
 const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
@@ -111,8 +111,18 @@ export const MainContent = ({ urls, activeMenu }) => {
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStart = new Date(shift.startTime);
             const shiftEnd = new Date(shift.endTime);
-            const isToday = shiftStart >= startOfDay && shiftEnd <= endOfDay;
+
+            // Проверяем корректность данных
+            if (shiftStart > shiftEnd) {
+                console.warn(
+                    `Некорректная смена: startTime ${shift.startTime} позже endTime ${shift.endTime}`,
+                );
+                return false;
+            }
+
             const isCurrentSubUser = shift.subUserId === user.id;
+            const isToday = shiftStart <= endOfDay && shiftEnd >= startOfDay;
+
             return isCurrentSubUser && isToday;
         });
 
@@ -241,7 +251,7 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 <Route path="/sales" element={<Sales urls={urls} />} />
                                 <Route path="/workers" element={<Workers urls={urls} />} />
                                 <Route path="/sklad" element={<Sklad urls={urls} />} />
-                                <Route path="/calendar" element={<Calendar />} />
+                                <Route path="/shifts" element={<Shifts />} />
                                 <Route
                                     path="/accounting-warehouse"
                                     element={<AccountingWarehouse />}
@@ -292,9 +302,9 @@ export const MainContent = ({ urls, activeMenu }) => {
                                 />
 
                                 <Route
-                                    path="/calendar"
+                                    path="/shifts"
                                     element={
-                                        user?.access?.DataManagement ? <Calendar /> : <NoAccess />
+                                        user?.access?.DataManagement ? <Shifts /> : <NoAccess />
                                     }
                                 />
                                 <Route
