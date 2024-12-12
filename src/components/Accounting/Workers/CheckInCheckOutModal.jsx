@@ -21,7 +21,10 @@ export const CheckInCheckOutModal = memo(
                     `/shifts/update-shift/${shift._id}`,
                     type === 'checkIn'
                         ? {
-                              subUserId: shift.subUserId,
+                              subUserId:
+                                  typeof shift.subUserId === 'string'
+                                      ? shift.subUserId
+                                      : shift.subUserId._id,
                               startTime: shift.startTime,
                               endTime: shift.endTime,
                               selectedStore: shift.selectedStore._id,
@@ -29,7 +32,10 @@ export const CheckInCheckOutModal = memo(
                               endScanTime: shift.endScanTime,
                           }
                         : {
-                              subUserId: shift.subUserId,
+                              subUserId:
+                                  typeof shift.subUserId === 'string'
+                                      ? shift.subUserId
+                                      : shift.subUserId._id,
                               endScanTime: date,
                               startTime: shift.startTime,
                               endTime: shift.endTime,
