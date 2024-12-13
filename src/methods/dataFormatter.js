@@ -1,15 +1,44 @@
-import { format } from 'date-fns';
+// utils/formatDate.js
+
+import { DateTime } from 'luxon';
 import { ru } from 'date-fns/locale';
 
-export const formatDate = (date) => {
-    return format(new Date(date), 'dd MMMM yyyy, HH:mm', { locale: ru });
+/**
+ * Форматирует дату в заданной временной зоне.
+ * @param {string|Date} date - Дата в формате ISO или объект Date.
+ * @param {string} timeZone - Временная зона для форматирования (например, "Asia/Almaty").
+ * @param {string} pattern - Формат даты (например, 'dd MMMM yyyy, HH:mm').
+ * @returns {string} - Отформатированная дата.
+ */
+export const formatDate = (date, timeZone, pattern = 'dd MMMM yyyy, HH:mm') => {
+    if (!date) return '';
+    return DateTime.fromISO(date, { zone: 'utc' })
+        .setZone('Asia/Almaty')
+        .toFormat(pattern, { locale: 'ru' });
 };
 
-export const formatOnlyTimeDate = (date) => {
-    if (!date) return;
-    return format(new Date(date), 'HH:mm', { locale: ru });
+/**
+ * Форматирует только время в заданной временной зоне.
+ * @param {string|Date} date - Дата в формате ISO или объект Date.
+ * @param {string} timeZone - Временная зона для форматирования.
+ * @returns {string} - Отформатированное время.
+ */
+export const formatOnlyTimeDate = (date, timeZone) => {
+    if (!date) return '';
+    return DateTime.fromISO(date, { zone: 'utc' })
+        .setZone('Asia/Almaty')
+        .toFormat('HH:mm', { locale: 'ru' });
 };
 
-export const formatOnlyDate = (date) => {
-    return format(new Date(date), 'dd MMMM yyyy', { locale: ru });
+/**
+ * Форматирует только дату в заданной временной зоне.
+ * @param {string|Date} date - Дата в формате ISO или объект Date.
+ * @param {string} timeZone - Временная зона для форматирования.
+ * @returns {string} - Отформатированная дата.
+ */
+export const formatOnlyDate = (date, timeZone) => {
+    if (!date) return '';
+    return DateTime.fromISO(date, { zone: 'utc' })
+        .setZone('Asia/Almaty')
+        .toFormat('dd MMMM yyyy', { locale: 'ru' });
 };

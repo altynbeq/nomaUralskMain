@@ -8,7 +8,7 @@ import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
-import { useAuthStore, useCompanyStructureStore, useSubUserStore } from './store/index';
+import { useAuthStore, useSubUserStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
 
@@ -37,9 +37,9 @@ export const MainContent = ({ urls, activeMenu }) => {
     const [showMarkShiftResultModal, setShowMarkShiftResultModal] = useState(false);
     const [showGeoErrorModal, setShowGeoErrorModal] = useState(false);
 
-    const [showActionModal, setShowActionModal] = useState(false); // Модалка с выбором действия, но теперь действие определяется автоматически
-    const [selectedShift, setSelectedShift] = useState(null); // Выбранная смена для действия
-    const [actionText, setActionText] = useState(''); // Текст кнопки (приход/уход)
+    const [showActionModal, setShowActionModal] = useState(false);
+    const [selectedShift, setSelectedShift] = useState(null);
+    const [actionText, setActionText] = useState('');
 
     const fileInput = useRef(null);
     const hasExecuted = useRef(false);
@@ -57,7 +57,8 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Вы успешно отметили начало смены.');
-        } catch {
+        } catch (error) {
+            console.error('Ошибка при отметке начала смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
         }
@@ -76,7 +77,8 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
-        } catch {
+        } catch (error) {
+            console.error('Ошибка при отметке окончания смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
         }
@@ -111,7 +113,6 @@ export const MainContent = ({ urls, activeMenu }) => {
             hasExecuted.current = true;
 
             if (shift.scanTime && shift.endScanTime) {
-                // Уже отмечен и приход, и уход
                 setShowMarkShiftResultModal(true);
                 setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
                 return;
@@ -119,12 +120,9 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             setSelectedShift(shift);
 
-            // Определяем текст действия
             if (!shift.scanTime) {
-                // Нет прихода — отмечаем приход
                 setActionText('Отметить приход');
             } else if (shift.scanTime && !shift.endScanTime) {
-                // Приход есть, отмечаем уход
                 setActionText('Отметить уход');
             }
 
@@ -133,10 +131,9 @@ export const MainContent = ({ urls, activeMenu }) => {
     }, [subUserShifts, user, location.search]);
 
     useEffect(() => {
-        // Проверяем, чтобы редирект происходил только на странице с отметкой
         if (!showMarkShiftResultModal && markShiftResultMessage.includes('успешно')) {
-            navigate('/general'); // Выполняем редирект только при условии, что страница не изменилась
-            setMarkShiftResultMessage(''); // Очищаем сообщение, чтобы избежать повторного редиректа
+            navigate('/general');
+            setMarkShiftResultMessage('');
         }
     }, [showMarkShiftResultModal, markShiftResultMessage, navigate]);
 
@@ -195,7 +192,6 @@ export const MainContent = ({ urls, activeMenu }) => {
             updateShiftEndScan(selectedShift);
         }
 
-        // Закрываем модалку и сбрасываем выделение смены
         setShowActionModal(false);
         setSelectedShift(null);
         setActionText('');
