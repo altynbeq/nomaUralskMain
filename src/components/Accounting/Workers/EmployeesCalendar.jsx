@@ -18,6 +18,7 @@ import { axiosInstance } from '../../../api/axiosInstance';
 export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
     const departments = useCompanyStructureStore((state) => state.departments);
+    const [filteredDepartments, setFilteredDepartments] = useState([]);
     const [subUsersState, setSubUsersState] = useState([]);
     const user = useAuthStore((state) => state.user);
     const currentDate = new Date();
@@ -36,6 +37,9 @@ export const EmployeesCalendar = () => {
         visible: false,
         time: null,
     });
+    const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null); // Новое состояние для выбранной смены
+    const [editAction, setEditAction] = useState(''); // 'checkIn' или 'checkOut'
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -96,9 +100,6 @@ export const EmployeesCalendar = () => {
         };
     }, []);
 
-    // Состояние для отфильтрованных отделов на основе выбранного магазина
-    const [filteredDepartments, setFilteredDepartments] = useState([]);
-
     const handleSocketShiftUpdate = useCallback((updatedShift) => {
         // Обновляем данные в subUsersState
         setSubUsersState((prevSubUsers) => {
@@ -124,7 +125,6 @@ export const EmployeesCalendar = () => {
     useEffect(() => {
         // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
-            console.log(data.shift);
             handleSocketShiftUpdate(data.shift);
         });
 
@@ -133,6 +133,7 @@ export const EmployeesCalendar = () => {
             socket.off('update-shift');
         };
     }, [handleSocketShiftUpdate]);
+
     const calculateLateMinutes = useCallback((startTime, scanTime) => {
         if (!startTime || !scanTime) return 0;
         const start = new Date(startTime);
@@ -317,17 +318,23 @@ export const EmployeesCalendar = () => {
         toast.success('Вы успешно удалили смену');
     }, []);
 
-    const showEditCheckinCheckOutModalHandler = (type, visible, time) => {
-        setCheckinCheckoutProps({ type, visible, time });
-    };
+    const handleOpenEditModal = useCallback((shift, action) => {
+        const shiftWithDates = {
+            ...shift,
+            scanTime: shift.scanTime ? new Date(shift.scanTime) : null,
+            endScanTime: shift.endScanTime ? new Date(shift.endScanTime) : null,
+        };
+        setSelectedShiftForEdit(shiftWithDates);
+        setEditAction(action);
+        setIsEditModalVisible(true);
+    }, []);
 
-    const clearCheckInCheckoutProps = () => {
-        setCheckinCheckoutProps({
-            type: '',
-            visible: false,
-            time: null,
-        });
-    };
+    // Обработчик для закрытия модалки редактирования
+    const handleCloseEditModal = useCallback(() => {
+        setSelectedShiftForEdit(null);
+        setEditAction('');
+        setIsEditModalVisible(false);
+    }, []);
 
     const renderDayShiftsModalContent = useCallback(() => {
         if (selectedDayShiftsModal.length > 0) {
@@ -413,11 +420,7 @@ export const EmployeesCalendar = () => {
                                                 </p>
                                                 <Button
                                                     onClick={() => {
-                                                        showEditCheckinCheckOutModalHandler(
-                                                            'checkIn',
-                                                            true,
-                                                            scanTime,
-                                                        );
+                                                        handleOpenEditModal(shift, 'checkIn');
                                                     }}
                                                     className="text-white bg-blue-400 rounded-lg border p-1"
                                                     label="Изменить"
@@ -433,11 +436,7 @@ export const EmployeesCalendar = () => {
                                                 </p>
                                                 <Button
                                                     onClick={() => {
-                                                        showEditCheckinCheckOutModalHandler(
-                                                            'checkOut',
-                                                            true,
-                                                            scanTime,
-                                                        );
+                                                        handleOpenEditModal(shift, 'checkOut');
                                                     }}
                                                     className="text-white bg-blue-400 rounded-lg border p-1"
                                                     label="Изменить"
@@ -468,11 +467,6 @@ export const EmployeesCalendar = () => {
                                         shiftId={shift._id}
                                         onShiftDelete={handleShiftDelete}
                                     />
-                                    <CheckInCheckOutModal
-                                        {...checkInCheckoutProps}
-                                        shift={shift}
-                                        clearCheckInCheckoutProps={clearCheckInCheckoutProps}
-                                    />
                                 </div>
                             );
                         })}
@@ -487,7 +481,7 @@ export const EmployeesCalendar = () => {
         calculateLateMinutes,
         calculateWorkedTime,
         handleShiftDelete,
-        checkInCheckoutProps,
+        handleOpenEditModal, // Добавлено
     ]);
 
     return (
@@ -567,6 +561,20 @@ export const EmployeesCalendar = () => {
                     handlePrevPage={handlePrevPage}
                     handleNextPage={handleNextPage}
                 />
+
+                {selectedShiftForEdit && (
+                    <CheckInCheckOutModal
+                        visible={isEditModalVisible}
+                        type={editAction}
+                        time={
+                            editAction === 'checkIn'
+                                ? selectedShiftForEdit.scanTime
+                                : selectedShiftForEdit.endScanTime
+                        }
+                        clearCheckInCheckoutProps={handleCloseEditModal}
+                        shift={selectedShiftForEdit}
+                    />
+                )}
             </div>
         </div>
     );
