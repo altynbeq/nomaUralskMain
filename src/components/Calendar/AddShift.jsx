@@ -11,6 +11,7 @@ import avatar from '../../data/avatar.jpg';
 import { axiosInstance } from '../../api/axiosInstance';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
+import { DateTime } from 'luxon'; // Импортируем DateTime из Luxon
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -72,50 +73,52 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
 
         // Генерация всех дат в выбранном диапазоне
         const dates = [];
-        let currentDate = new Date(dateRange[0]);
-        currentDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(dateRange[1]);
-        endDate.setHours(0, 0, 0, 0);
+        let currentDate = DateTime.fromJSDate(dateRange[0]).startOf('day');
+        const endDate = DateTime.fromJSDate(dateRange[1]).startOf('day');
 
         while (currentDate <= endDate) {
-            dates.push(new Date(currentDate));
-            currentDate.setDate(currentDate.getDate() + 1);
+            dates.push(currentDate);
+            currentDate = currentDate.plus({ days: 1 });
         }
 
-        const shiftStartTime = new Date(startTime);
-        const shiftEndTime = new Date(endTime);
+        const shiftStartTime = DateTime.fromJSDate(startTime);
+        const shiftEndTime = DateTime.fromJSDate(endTime);
 
         // Если конец смены раньше или равен началу — значит следующий день
-        let adjustedEnd = new Date(shiftEndTime);
+        let adjustedEnd = shiftEndTime;
         if (adjustedEnd <= shiftStartTime) {
-            adjustedEnd.setDate(adjustedEnd.getDate() + 1);
+            adjustedEnd = adjustedEnd.plus({ days: 1 });
         }
 
-        // Создание смен для каждой даты и каждого выбранного пользователя
         dates.forEach((date) => {
-            const shiftStart = new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate(),
-                shiftStartTime.getHours(),
-                shiftStartTime.getMinutes(),
-                0,
-            );
+            // Создаём DateTime в временной зоне магазина
+            const shiftStartLocal = date
+                .set({
+                    hour: shiftStartTime.hour,
+                    minute: shiftStartTime.minute,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .setZone('Asia/Almaty', { keepLocalTime: true });
 
-            const shiftEnd = new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate(),
-                adjustedEnd.getHours(),
-                adjustedEnd.getMinutes(),
-                0,
-            );
+            const shiftEndLocal = date
+                .set({
+                    hour: adjustedEnd.hour,
+                    minute: adjustedEnd.minute,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .setZone('Asia/Almaty', { keepLocalTime: true });
+
+            // Конвертируем локальное время магазина в UTC
+            const shiftStartUtc = shiftStartLocal.toUTC();
+            const shiftEndUtc = shiftEndLocal.toUTC();
 
             selectedSubusers.forEach((user) => {
                 shifts.push({
                     subUserId: user._id,
-                    startTime: shiftStart.toISOString(),
-                    endTime: shiftEnd.toISOString(),
+                    startTime: shiftStartUtc.toISO(),
+                    endTime: shiftEndUtc.toISO(),
                     selectedStore: selectedStore._id,
                 });
             });
