@@ -101,6 +101,11 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isCurrentSubUser && isToday;
         });
 
+        if (todaysShifts.length === 0) {
+            setShowMarkShiftResultModal(true);
+            setMarkShiftResultMessage('У вас на сегодня нет смены');
+        }
+
         todaysShifts.forEach((shift) => {
             if (hasExecuted.current) return;
             hasExecuted.current = true;
