@@ -6,6 +6,7 @@ export const formatDate = (date) => {
 };
 
 export const formatOnlyTimeDate = (date) => {
+    if (!date) return;
     return format(new Date(date), 'HH:mm', { locale: ru });
 };
 
