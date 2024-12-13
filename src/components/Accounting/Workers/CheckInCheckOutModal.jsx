@@ -1,6 +1,8 @@
+// src/components/CheckInCheckOutModal.jsx
+
 import { memo, useEffect, useState } from 'react';
-import { Calendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
+import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
@@ -14,11 +16,10 @@ export const CheckInCheckOutModal = memo(
             setDate(time);
         }, [time]);
 
-        const updateShiftScan = async (shift) => {
+        const updateShiftScan = async () => {
             setIsLoading(true);
             try {
-                await axiosInstance.put(
-                    `/shifts/update-shift/${shift._id}`,
+                const payload =
                     type === 'checkIn'
                         ? {
                               subUserId:
@@ -41,11 +42,16 @@ export const CheckInCheckOutModal = memo(
                               endTime: shift.endTime,
                               selectedStore: shift.selectedStore._id,
                               scanTime: shift.scanTime,
-                          },
-                );
+                          };
+
+                console.log('Payload:', payload);
+
+                await axiosInstance.put(`/shifts/update-shift/${shift._id}`, payload);
+
                 clearCheckInCheckoutProps();
                 toast.success(`Вы успешно обновили ${type === 'checkIn' ? 'приход' : 'уход'}`);
-            } catch {
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
                 toast.error(`Не удалось изменить ${type === 'checkIn' ? 'приход' : 'уход'}`);
             } finally {
                 setIsLoading(false);
@@ -70,8 +76,8 @@ export const CheckInCheckOutModal = memo(
                 />
                 <div className="flex justify-center">
                     <Button
-                        onClick={() => updateShiftScan(shift, type)}
-                        disabled={isLoading}
+                        onClick={updateShiftScan}
+                        disabled={isLoading || !date}
                         className="w-full text-white bg-blue-400 rounded-lg border p-1 mt-4"
                         label={`Изменить ${type === 'checkIn' ? 'приход' : 'уход'}`}
                     />
