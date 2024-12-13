@@ -57,7 +57,8 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Вы успешно отметили начало смены.');
-        } catch {
+        } catch (error) {
+            console.error('Ошибка при отметке начала смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
         }
@@ -76,7 +77,8 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
-        } catch {
+        } catch (error) {
+            console.error('Ошибка при отметке окончания смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
         }

@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 import { addLocale } from 'primereact/api';
 import avatar from '../../data/avatar.jpg';
 import { axiosInstance } from '../../api/axiosInstance';
-import { useCompanyStructureStore } from '../../store';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 
@@ -57,7 +56,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const [endTime, setEndTime] = useState(null);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const departments = useCompanyStructureStore((state) => state.departments);
     const [selectedStore, setSelectedStore] = useState(null);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
