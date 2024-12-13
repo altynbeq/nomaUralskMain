@@ -103,7 +103,7 @@ export const MainContent = ({ urls, activeMenu }) => {
 
         if (todaysShifts.length === 0) {
             setShowMarkShiftResultModal(true);
-            setMarkShiftResultMessage('У вас на сегодня нет смены');
+            setMarkShiftResultMessage('У вас сегодня смен нет.');
         }
 
         todaysShifts.forEach((shift) => {

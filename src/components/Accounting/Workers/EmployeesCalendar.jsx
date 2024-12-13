@@ -404,50 +404,46 @@ export const EmployeesCalendar = () => {
                                             </p>
                                         </div>
                                         <div className="flex flex-col">
-                                            {scanTime && (
-                                                <div className="flex gap-4 items-center justify-between">
-                                                    <p>
-                                                        <span className="font-bold text-lg">
-                                                            Фактический приход:
-                                                        </span>{' '}
-                                                        {formatOnlyTimeDate(shift.scanTime)}
-                                                    </p>
-                                                    <Button
-                                                        onClick={() => {
-                                                            showEditCheckinCheckOutModalHandler(
-                                                                'checkIn',
-                                                                true,
-                                                                scanTime,
-                                                            );
-                                                        }}
-                                                        className="text-white bg-blue-400 rounded-lg border p-1"
-                                                        label="Изменить"
-                                                        icon="pi pi-user-edit"
-                                                    />
-                                                </div>
-                                            )}
-                                            {endScanTime && (
-                                                <div className="flex gap-4 items-center justify-between mt-5">
-                                                    <p>
-                                                        <span className="font-bold text-lg">
-                                                            Фактический уход:
-                                                        </span>{' '}
-                                                        {formatOnlyTimeDate(shift.endScanTime)}
-                                                    </p>
-                                                    <Button
-                                                        onClick={() => {
-                                                            showEditCheckinCheckOutModalHandler(
-                                                                'checkOut',
-                                                                true,
-                                                                scanTime,
-                                                            );
-                                                        }}
-                                                        className="text-white bg-blue-400 rounded-lg border p-1"
-                                                        label="Изменить"
-                                                        icon="pi pi-user-edit"
-                                                    />
-                                                </div>
-                                            )}
+                                            <div className="flex gap-4 items-center justify-between">
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Фактический приход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.scanTime)}
+                                                </p>
+                                                <Button
+                                                    onClick={() => {
+                                                        showEditCheckinCheckOutModalHandler(
+                                                            'checkIn',
+                                                            true,
+                                                            scanTime,
+                                                        );
+                                                    }}
+                                                    className="text-white bg-blue-400 rounded-lg border p-1"
+                                                    label="Изменить"
+                                                    icon="pi pi-user-edit"
+                                                />
+                                            </div>
+                                            <div className="flex gap-4 items-center justify-between mt-5">
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Фактический уход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.endScanTime)}
+                                                </p>
+                                                <Button
+                                                    onClick={() => {
+                                                        showEditCheckinCheckOutModalHandler(
+                                                            'checkOut',
+                                                            true,
+                                                            scanTime,
+                                                        );
+                                                    }}
+                                                    className="text-white bg-blue-400 rounded-lg border p-1"
+                                                    label="Изменить"
+                                                    icon="pi pi-user-edit"
+                                                />
+                                            </div>
                                         </div>
                                         <div>
                                             {shift.scanTime && (
