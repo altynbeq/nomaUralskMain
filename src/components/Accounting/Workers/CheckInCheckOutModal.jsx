@@ -44,8 +44,6 @@ export const CheckInCheckOutModal = memo(
                               scanTime: shift.scanTime,
                           };
 
-                console.log('Payload:', payload);
-
                 await axiosInstance.put(`/shifts/update-shift/${shift._id}`, payload);
 
                 clearCheckInCheckoutProps();

@@ -319,7 +319,12 @@ export const EmployeesCalendar = () => {
     }, []);
 
     const handleOpenEditModal = useCallback((shift, action) => {
-        setSelectedShiftForEdit(shift);
+        const shiftWithDates = {
+            ...shift,
+            scanTime: shift.scanTime ? new Date(shift.scanTime) : null,
+            endScanTime: shift.endScanTime ? new Date(shift.endScanTime) : null,
+        };
+        setSelectedShiftForEdit(shiftWithDates);
         setEditAction(action);
         setIsEditModalVisible(true);
     }, []);
