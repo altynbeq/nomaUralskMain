@@ -99,7 +99,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     second: 0,
                     millisecond: 0,
                 })
-                .setZone('Asia/Almaty', { keepLocalTime: true });
+                .setZone('UTC+5', { keepLocalTime: true });
 
             const shiftEndLocal = date
                 .set({
@@ -108,7 +108,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     second: 0,
                     millisecond: 0,
                 })
-                .setZone('Asia/Almaty', { keepLocalTime: true });
+                .setZone('UTC+5', { keepLocalTime: true });
 
             // Конвертируем локальное время магазина в UTC
             const shiftStartUtc = shiftStartLocal.toUTC();

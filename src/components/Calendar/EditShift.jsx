@@ -5,6 +5,7 @@ import { axiosInstance } from '../../api/axiosInstance';
 import { Button } from 'primereact/button';
 import { toast } from 'react-toastify';
 import { Loader } from '../../components/Loader';
+import { DateTime } from 'luxon';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -56,11 +57,18 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
                 const response = await axiosInstance.get(`shifts/shift/${shiftId}`);
                 const shiftData = response.data;
 
-                const shiftStartTime = new Date(shiftData.startTime);
-                let shiftEndTime = new Date(shiftData.endTime);
+                // Парсим время с использованием Luxon, предполагая, что время в UTC
+                const shiftStartTime = DateTime.fromISO(shiftData.startTime, { zone: 'utc' })
+                    .setZone('UTC+5') // Конвертируем в UTC+5
+                    .toJSDate();
 
+                let shiftEndTime = DateTime.fromISO(shiftData.endTime, { zone: 'utc' })
+                    .setZone('UTC+5')
+                    .toJSDate();
+
+                // Если конец смены раньше или равен началу — значит следующий день
                 if (shiftEndTime <= shiftStartTime) {
-                    shiftEndTime.setDate(shiftEndTime.getDate() + 1);
+                    shiftEndTime = DateTime.fromJSDate(shiftEndTime).plus({ days: 1 }).toJSDate();
                 }
 
                 setShift(shiftData);
@@ -81,18 +89,21 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
     const handleSave = async () => {
         setIsLoading(true);
         try {
-            const newStart = new Date(startTime).toISOString();
-            const newEnd = new Date(endTime);
+            let newStart = DateTime.fromJSDate(startTime).setZone('UTC+5').toUTC().toISO();
 
-            if (newEnd <= new Date(startTime)) {
-                newEnd.setDate(newEnd.getDate() + 1);
+            let newEnd = DateTime.fromJSDate(endTime).setZone('UTC+5').toUTC().toISO();
+
+            // Если конец смены раньше или равен началу — значит следующий день
+            const endDateTime = DateTime.fromISO(newEnd, { zone: 'utc' });
+            const startDateTime = DateTime.fromISO(newStart, { zone: 'utc' });
+
+            if (endDateTime <= startDateTime) {
+                newEnd = endDateTime.plus({ days: 1 }).toISO();
             }
-
-            const newEndISO = newEnd.toISOString();
             const response = await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
                 subUserId: shift.subUserId._id,
                 startTime: newStart,
-                endTime: newEndISO,
+                endTime: newEnd,
                 selectedStore: shift.selectedStore,
             });
 
