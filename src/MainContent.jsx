@@ -11,6 +11,7 @@ import { NoAccess } from './pages';
 import { useAuthStore, useSubUserStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
+import { DateTime } from 'luxon';
 
 const General = lazy(() => import('./pages/General'));
 const Sales = lazy(() => import('./pages/Sales'));
@@ -46,12 +47,13 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const updateShiftScan = async (shift) => {
         try {
+            const scanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
                 subUserId: shift.subUserId,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
                 selectedStore: shift.selectedStore._id,
-                scanTime: new Date(),
+                scanTime: scanTimeUTC,
                 endScanTime: shift.endScanTime,
             });
 
@@ -66,13 +68,14 @@ export const MainContent = ({ urls, activeMenu }) => {
 
     const updateShiftEndScan = async (shift) => {
         try {
+            const endScanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/update-shift/${shift._id}`, {
                 subUserId: shift.subUserId,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
                 selectedStore: shift.selectedStore._id,
                 scanTime: shift.scanTime,
-                endScanTime: new Date(),
+                endScanTime: endScanTimeUTC,
             });
 
             setShowMarkShiftResultModal(true);
@@ -91,28 +94,30 @@ export const MainContent = ({ urls, activeMenu }) => {
         if (!isQr) return;
 
         const todaysShifts = subUserShifts.filter((shift) => {
-            const shiftStart = parseISO(shift.startTime);
-            const shiftEnd = parseISO(shift.endTime);
+            const shiftStart = DateTime.fromISO(shift.startTime, { zone: 'utc' }).setZone('UTC+5');
+            const shiftEnd = DateTime.fromISO(shift.endTime, { zone: 'utc' }).setZone('UTC+5');
             const isCurrentSubUser = shift.subUserId === user.id;
 
-            const todayStart = startOfDay(new Date());
-            const todayEnd = endOfDay(new Date());
+            const todayStart = DateTime.local().setZone('UTC+5').startOf('day');
+            const todayEnd = DateTime.local().setZone('UTC+5').endOf('day');
 
             const isToday = shiftStart <= todayEnd && shiftEnd >= todayStart;
 
             return isCurrentSubUser && isToday;
         });
 
-        if (todaysShifts.length === 0) {
-            setShowMarkShiftResultModal(true);
-            setMarkShiftResultMessage('У вас сегодня смен нет.');
-        }
-
         todaysShifts.forEach((shift) => {
             if (hasExecuted.current) return;
             hasExecuted.current = true;
 
-            if (shift.scanTime && shift.endScanTime) {
+            const scanTime = shift.scanTime
+                ? DateTime.fromISO(shift.scanTime, { zone: 'utc' }).setZone('UTC+5')
+                : null;
+            const endScanTime = shift.endScanTime
+                ? DateTime.fromISO(shift.endScanTime, { zone: 'utc' }).setZone('UTC+5')
+                : null;
+
+            if (scanTime && endScanTime) {
                 setShowMarkShiftResultModal(true);
                 setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
                 return;

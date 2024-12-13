@@ -50,7 +50,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => {
+export const AddShift = ({ setOpen, stores, subUsers, open }) => {
     const [selectedSubusers, setSelectedSubusers] = useState([]);
     const [dateRange, setDateRange] = useState(null);
     const [startTime, setStartTime] = useState(null);
@@ -58,7 +58,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedStore, setSelectedStore] = useState(null);
-
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]); // тут храним сгенерированные смены перед отправкой
 
@@ -99,7 +98,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     second: 0,
                     millisecond: 0,
                 })
-                .setZone('Asia/Almaty', { keepLocalTime: true });
+                .setZone('UTC+5', { keepLocalTime: true });
 
             const shiftEndLocal = date
                 .set({
@@ -108,7 +107,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     second: 0,
                     millisecond: 0,
                 })
-                .setZone('Asia/Almaty', { keepLocalTime: true });
+                .setZone('UTC+5', { keepLocalTime: true });
 
             // Конвертируем локальное время магазина в UTC
             const shiftStartUtc = shiftStartLocal.toUTC();
@@ -163,12 +162,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         }
     };
 
-    /**
-     * Функция для разбиения массива на чанки
-     * @param {Array} array - исходный массив
-     * @param {number} size - размер чанка
-     * @returns {Array[]} - массив чанков
-     */
     const chunkArray = (array, size) => {
         const result = [];
         for (let i = 0; i < array.length; i += size) {
@@ -177,10 +170,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
         return result;
     };
 
-    /**
-     * Функция для отправки смен чанками
-     * @param {Array} shifts - массив смен
-     */
     const sendShiftsInChunks = async (shifts) => {
         const chunks = chunkArray(shifts, CHUNK_SIZE);
         let currentChunk = 0;
@@ -196,16 +185,11 @@ export const AddShift = ({ setOpen, stores, subUsers, open, onShiftsAdded }) => 
                     },
                 );
 
-                if (response.status === 201 || response.status === 200) {
-                    // onShiftsAdded(response.data);
-                } else {
-                    throw new Error(`Неизвестный статус ответа: ${response.status}`);
+                if (response.status === 201 || response.status === 201) {
+                    setOpen(false);
+                    toast.success('Все смены успешно добавлены');
                 }
             }
-
-            // После успешной отправки всех чанков
-            setOpen(false);
-            toast.success('Все смены успешно добавлены');
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
             toast.error(
