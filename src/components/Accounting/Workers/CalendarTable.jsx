@@ -11,7 +11,11 @@ export const CalendarTable = memo(
         getDayColor,
         setSelectedDayShiftsModal,
         isLoading,
+        onDayClick,
     }) => {
+        const handleDayClick = (employee, day, shifts) => {
+            onDayClick(employee, day, shifts);
+        };
         return (
             <div className="relative overflow-x-auto w-full max-w-full mt-10">
                 {isLoading && (
@@ -117,7 +121,7 @@ export const CalendarTable = memo(
                                         <td
                                             key={day}
                                             className="py-1 text-center relative cursor-pointer"
-                                            onClick={() => setSelectedDayShiftsModal(shifts)}
+                                            onClick={() => handleDayClick(employee, day, shifts)}
                                         >
                                             <div
                                                 className={`w-6 h-6 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}

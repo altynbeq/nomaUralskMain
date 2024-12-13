@@ -14,6 +14,8 @@ import { Filters } from './Filters';
 import { Button } from 'primereact/button';
 import { CheckInCheckOutModal } from './CheckInCheckOutModal';
 import { axiosInstance } from '../../../api/axiosInstance';
+import { DateTime } from 'luxon';
+import { AddSingleShift } from '../../Calendar/AddSingleShift';
 
 export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -35,6 +37,9 @@ export const EmployeesCalendar = () => {
     const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null);
     const [editAction, setEditAction] = useState('');
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [selectedDateForNewShift, setSelectedDateForNewShift] = useState(null);
+    const [selectedEmployeeForNewShift, setSelectedEmployeeForNewShift] = useState(null);
+    const [showAddShiftModal, setShowAddShiftModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -322,15 +327,25 @@ export const EmployeesCalendar = () => {
                     </p>
                     <ul className="list-none flex-col gap-6 flex">
                         {selectedDayShiftsModal.map((shift) => {
-                            const startTime = new Date(shift.startTime);
-                            let endTime = new Date(shift.endTime);
+                            const startTime = DateTime.fromISO(shift.startTime, { zone: 'utc' })
+                                .setZone('UTC+5')
+                                .toJSDate();
+                            let endTime = DateTime.fromISO(shift.endTime, { zone: 'utc' })
+                                .setZone('UTC+5')
+                                .toJSDate();
 
                             if (endTime <= startTime) {
-                                endTime.setDate(endTime.getDate() + 1);
+                                endTime = DateTime.fromJSDate(endTime).plus({ days: 1 }).toJSDate();
                             }
-                            const scanTime = shift.scanTime ? new Date(shift.scanTime) : null;
+                            const scanTime = shift.scanTime
+                                ? DateTime.fromISO(shift.scanTime, { zone: 'utc' })
+                                      .setZone('UTC+5')
+                                      .toJSDate()
+                                : null;
                             const endScanTime = shift.endScanTime
-                                ? new Date(shift.endScanTime)
+                                ? DateTime.fromISO(shift.endScanTime, { zone: 'utc' })
+                                      .setZone('UTC+5')
+                                      .toJSDate()
                                 : null;
 
                             const durationMs = endTime - startTime;
@@ -460,6 +475,25 @@ export const EmployeesCalendar = () => {
         handleOpenEditModal,
     ]);
 
+    const onDayClick = useCallback(
+        (employee, day, shifts) => {
+            if (shifts.length === 0) {
+                // День без смен, открываем модалку для добавления смены с автоматически выбранным сотрудником
+                setSelectedEmployeeForNewShift(employee);
+                setSelectedDateForNewShift({
+                    day,
+                    month: month + 1, // Luxon использует 1-12 для месяцев
+                    year,
+                });
+                setShowAddShiftModal(true);
+            } else {
+                // День со сменами, открываем модалку с деталями смен
+                setSelectedDayShiftsModal(shifts);
+            }
+        },
+        [month, year],
+    );
+
     return (
         <div>
             <div className="w-[95%] justify-center align-center m-10 mt-5 bg-white p-6 rounded-lg shadow-md subtle-border">
@@ -524,7 +558,7 @@ export const EmployeesCalendar = () => {
                     isLoading={isLoading}
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
-                    setSelectedDayShiftsModal={setSelectedDayShiftsModal}
+                    onDayClick={onDayClick}
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}
@@ -549,6 +583,16 @@ export const EmployeesCalendar = () => {
                         }
                         clearCheckInCheckoutProps={handleCloseEditModal}
                         shift={selectedShiftForEdit}
+                    />
+                )}
+
+                {selectedDateForNewShift && selectedEmployeeForNewShift && (
+                    <AddSingleShift
+                        stores={stores || []}
+                        selectedDateForNewShift={selectedDateForNewShift}
+                        employee={selectedEmployeeForNewShift}
+                        visible={showAddShiftModal}
+                        onHide={setShowAddShiftModal}
                     />
                 )}
             </div>
