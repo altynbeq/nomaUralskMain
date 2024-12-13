@@ -32,13 +32,8 @@ export const EmployeesCalendar = () => {
     const [selectedDayShiftsModal, setSelectedDayShiftsModal] = useState([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showModalAddShift, setShowModalAddShift] = useState(false);
-    const [checkInCheckoutProps, setCheckinCheckoutProps] = useState({
-        type: '',
-        visible: false,
-        time: null,
-    });
-    const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null); // Новое состояние для выбранной смены
-    const [editAction, setEditAction] = useState(''); // 'checkIn' или 'checkOut'
+    const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null);
+    const [editAction, setEditAction] = useState('');
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -64,7 +59,6 @@ export const EmployeesCalendar = () => {
     useEffect(() => {
         socket.on('new-shift', (newShifts) => {
             setSubUsersState((prevSubUsers) => {
-                // Копируем предыдущее состояние
                 const updatedUsers = [...prevSubUsers];
 
                 newShifts.forEach((shift) => {
@@ -75,15 +69,12 @@ export const EmployeesCalendar = () => {
                     if (userIndex !== -1) {
                         const user = updatedUsers[userIndex];
 
-                        // Если у пользователя нет смен, создаем пустой массив
                         if (!user.shifts) user.shifts = [];
 
-                        // Проверяем, существует ли уже эта смена
                         const shiftExists = user.shifts.some(
                             (existingShift) => existingShift._id === shift._id,
                         );
 
-                        // Добавляем только если смены еще нет
                         if (!shiftExists) {
                             user.shifts.push(shift);
                         }
@@ -94,22 +85,18 @@ export const EmployeesCalendar = () => {
             });
         });
 
-        // Очистка подписки при размонтировании компонента
         return () => {
             socket.off('new-shift');
         };
     }, []);
 
     const handleSocketShiftUpdate = useCallback((updatedShift) => {
-        // Обновляем данные в subUsersState
         setSubUsersState((prevSubUsers) => {
             return prevSubUsers.map((user) => {
                 if (!user.shifts) return user;
 
-                // Ищем нужную смену по ID
                 const shiftIndex = user.shifts.findIndex((s) => s._id === updatedShift._id);
                 if (shiftIndex !== -1) {
-                    // Клонируем массив, чтобы не мутировать state напрямую
                     const updatedShifts = [...user.shifts];
                     updatedShifts[shiftIndex] = updatedShift;
                     return { ...user, shifts: updatedShifts };
@@ -123,12 +110,10 @@ export const EmployeesCalendar = () => {
     }, []);
 
     useEffect(() => {
-        // Слушаем событие 'update-shift' от сервера
         socket.on('update-shift', (data) => {
             handleSocketShiftUpdate(data.shift);
         });
 
-        // Очистка при размонтировании компонента
         return () => {
             socket.off('update-shift');
         };
@@ -149,29 +134,26 @@ export const EmployeesCalendar = () => {
         const start = new Date(scanTime);
         const end = new Date(endScanTime);
 
-        // Если время окончания меньше времени начала (пересечение полуночи)
         if (end < start) {
             end.setDate(end.getDate() + 1);
         }
 
-        const diffMs = end - start; // Разница в миллисекундах
-        const totalMinutes = diffMs / (1000 * 60); // Общее время в минутах
-
-        const roundedMinutes = Math.ceil(totalMinutes); // Используем Math.ceil для учета долей минут
+        const diffMs = end - start;
+        const totalMinutes = diffMs / (1000 * 60);
+        const roundedMinutes = Math.ceil(totalMinutes);
         const hours = Math.floor(roundedMinutes / 60);
         const minutes = roundedMinutes % 60;
 
         return { hours, minutes };
     }, []);
 
-    // Фильтрация отделов после выбора магазина
     useEffect(() => {
         if (selectedStore) {
             const filtered = departments.filter((dept) => dept.storeId === selectedStore._id);
             setFilteredDepartments(filtered);
         } else {
             setFilteredDepartments([]);
-            setSelectedDepartment(null); // Сбрасываем выбранный отдел при сбросе магазина
+            setSelectedDepartment(null);
         }
     }, [selectedStore, departments]);
 
@@ -259,8 +241,6 @@ export const EmployeesCalendar = () => {
                 return { type: 'gray' };
             }
 
-            // Предполагаем, что на день может быть только одна смена.
-            // Если их несколько, можно адаптировать логику.
             const shift = shifts[0];
 
             const hasScanIn = !!shift.scanTime;
@@ -292,14 +272,11 @@ export const EmployeesCalendar = () => {
         [calculateLateMinutes],
     );
 
-    // Функция для удаления смены из selectedDayShiftsModal и из subUsersState
     const handleShiftDelete = useCallback((shiftId) => {
-        // Удаляем смену из модалки
         setSelectedDayShiftsModal((prevShifts) =>
             prevShifts.filter((shift) => shift._id !== shiftId),
         );
 
-        // Удаляем смену из subUsersState
         setSubUsersState((prevSubUsers) => {
             return prevSubUsers.map((user) => {
                 if (user.shifts) {
@@ -329,7 +306,6 @@ export const EmployeesCalendar = () => {
         setIsEditModalVisible(true);
     }, []);
 
-    // Обработчик для закрытия модалки редактирования
     const handleCloseEditModal = useCallback(() => {
         setSelectedShiftForEdit(null);
         setEditAction('');
@@ -481,7 +457,7 @@ export const EmployeesCalendar = () => {
         calculateLateMinutes,
         calculateWorkedTime,
         handleShiftDelete,
-        handleOpenEditModal, // Добавлено
+        handleOpenEditModal,
     ]);
 
     return (
