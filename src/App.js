@@ -95,7 +95,6 @@ const App = () => {
                 if (isEmployee()) {
                     const subUser = response.data.subUsers.find((s) => s._id === user?.id);
                     setSubUser(subUser);
-                    setSubUserShifts(subUser.shifts);
                 }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
@@ -113,6 +112,24 @@ const App = () => {
         user?.companyId,
         user?.id,
     ]);
+
+    useEffect(() => {
+        const fetchSubUserShifts = async () => {
+            const subuserId = user?.id;
+            if (!subuserId && user.role !== 'subUser') return;
+
+            try {
+                const response = await axiosInstance.get(`/shifts/subUser/${subuserId}`);
+                console.log(response.data.allShifts);
+                setSubUserShifts(response.data.allShifts);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        if (user) {
+            fetchSubUserShifts();
+        }
+    }, [setSubUserShifts, user, user?.id, user.role]);
 
     useEffect(() => {
         const fetchCompanyProductsAndWarehouses = async () => {

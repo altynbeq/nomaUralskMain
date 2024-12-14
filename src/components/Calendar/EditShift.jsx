@@ -122,7 +122,7 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
     const handleDelete = async () => {
         setIsLoading(true);
         try {
-            await axiosInstance.delete(`/shifts/delete-shift/${shiftId}`);
+            await axiosInstance.delete(`/shifts/${shiftId}`);
             onShiftDelete(shiftId);
         } catch (error) {
             console.error('Ошибка при удалении смены:', error);

@@ -105,6 +105,8 @@ export const MainContent = ({ urls, activeMenu }) => {
             return isCurrentSubUser && isToday;
         });
 
+        console.log(todaysShifts);
+
         todaysShifts.forEach((shift) => {
             if (hasExecuted.current) return;
             hasExecuted.current = true;
