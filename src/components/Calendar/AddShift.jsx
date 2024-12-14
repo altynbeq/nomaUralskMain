@@ -178,7 +178,7 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
             for (const chunk of chunks) {
                 currentChunk += 1;
                 const response = await axiosInstance.post(
-                    '/shifts/create-shifts',
+                    '/shifts',
                     { shifts: chunk },
                     {
                         timeout: 90000, // 90 секунд

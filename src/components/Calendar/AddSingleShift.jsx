@@ -119,7 +119,7 @@ export const AddSingleShift = ({ visible, stores, employee, onHide, selectedDate
 
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post('/shifts/create-shifts', { shifts });
+            const response = await axiosInstance.post('/shifts', { shifts });
 
             console.log(response.status);
 

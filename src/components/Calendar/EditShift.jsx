@@ -54,7 +54,7 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
         const fetchShiftDetails = async () => {
             setIsLoading(true);
             try {
-                const response = await axiosInstance.get(`shifts/shift/${shiftId}`);
+                const response = await axiosInstance.get(`shifts/${shiftId}`);
                 const shiftData = response.data;
 
                 // Парсим время с использованием Luxon, предполагая, что время в UTC
@@ -100,7 +100,7 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
             if (endDateTime <= startDateTime) {
                 newEnd = endDateTime.plus({ days: 1 }).toISO();
             }
-            const response = await axiosInstance.put(`/shifts/update-shift/${shiftId}`, {
+            const response = await axiosInstance.put(`/shifts/${shiftId}`, {
                 subUserId: shift.subUserId._id,
                 startTime: newStart,
                 endTime: newEnd,
@@ -122,7 +122,7 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
     const handleDelete = async () => {
         setIsLoading(true);
         try {
-            await axiosInstance.delete(`/shifts/delete-shift/${shiftId}`);
+            await axiosInstance.delete(`/shifts/${shiftId}`);
             onShiftDelete(shiftId);
         } catch (error) {
             console.error('Ошибка при удалении смены:', error);
