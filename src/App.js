@@ -120,7 +120,6 @@ const App = () => {
 
             try {
                 const response = await axiosInstance.get(`/shifts/subUser/${subuserId}`);
-                console.log(response.data.allShifts);
                 setSubUserShifts(response.data.allShifts);
             } catch (error) {
                 console.error(error);
