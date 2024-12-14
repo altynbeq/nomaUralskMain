@@ -95,7 +95,9 @@ export const MainContent = ({ urls, activeMenu }) => {
         const todaysShifts = subUserShifts.filter((shift) => {
             const shiftStart = DateTime.fromISO(shift.startTime, { zone: 'utc' }).setZone('UTC+5');
             const shiftEnd = DateTime.fromISO(shift.endTime, { zone: 'utc' }).setZone('UTC+5');
-            const isCurrentSubUser = shift.subUserId === user.id;
+
+            // Исправленное сравнение идентификатора пользователя
+            const isCurrentSubUser = shift.subUserId._id === user.id;
 
             const todayStart = DateTime.local().setZone('UTC+5').startOf('day');
             const todayEnd = DateTime.local().setZone('UTC+5').endOf('day');
@@ -104,8 +106,6 @@ export const MainContent = ({ urls, activeMenu }) => {
 
             return isCurrentSubUser && isToday;
         });
-
-        console.log(todaysShifts);
 
         todaysShifts.forEach((shift) => {
             if (hasExecuted.current) return;
