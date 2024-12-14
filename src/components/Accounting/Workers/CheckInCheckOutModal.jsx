@@ -44,7 +44,7 @@ export const CheckInCheckOutModal = memo(
                               scanTime: shift.scanTime,
                           };
 
-                await axiosInstance.put(`/shifts/update-shift/${shift._id}`, payload);
+                await axiosInstance.put(`/shifts/${shift._id}`, payload);
 
                 clearCheckInCheckoutProps();
                 toast.success(`Вы успешно обновили ${type === 'checkIn' ? 'приход' : 'уход'}`);
