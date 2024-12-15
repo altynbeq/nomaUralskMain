@@ -1,10 +1,10 @@
 // App.js
+import './App.css';
 import React, { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import { Sidebar } from './components';
-import { TechProb, LogInForm } from './pages';
-import './App.css';
+import { LogInForm } from './pages';
 import { useStateContext } from './contexts/ContextProvider';
 import { getCompanyData } from './methods/getCompanyData';
 import 'primeicons/primeicons.css';
@@ -36,7 +36,6 @@ const App = () => {
     const setSubUserShifts = useSubUserStore((state) => state.setShifts);
     const [subUserTodayShifts, setSubUserTodayShifts] = useState([]);
     const setSubUser = useSubUserStore((state) => state.setSubUser);
-    const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
     const [isQrRedirect, setIsQrRedirect] = useState(false);
 
@@ -72,7 +71,6 @@ const App = () => {
                 setUrls(companyData);
             } catch (error) {
                 console.error('Error fetching data:', error);
-                setTechProblem(true);
             } finally {
                 setSkeletonUp(false);
             }
@@ -99,7 +97,6 @@ const App = () => {
                 }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
-                setTechProblem(true);
             }
         };
         fetchUserStructure();
@@ -149,15 +146,10 @@ const App = () => {
                 }
             } catch (error) {
                 console.error('Error fetching company data:', error);
-                setTechProblem(true);
             }
         };
         fetchCompanyProductsAndWarehouses();
     }, [isEmployee, setProducts, setWarehouses, user?.companyId, user?.id]);
-
-    // if (techProblem) {
-    //     return <TechProb />;
-    // }
 
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
