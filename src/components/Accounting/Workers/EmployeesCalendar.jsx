@@ -124,34 +124,6 @@ export const EmployeesCalendar = () => {
         };
     }, [handleSocketShiftUpdate]);
 
-    const calculateLateMinutes = useCallback((startTime, scanTime) => {
-        if (!startTime || !scanTime) return 0;
-        const start = new Date(startTime);
-        const scan = new Date(scanTime);
-        const diffMs = scan - start;
-        const diffMinutes = Math.floor(diffMs / (1000 * 60));
-        return diffMinutes > 0 ? diffMinutes : 0;
-    }, []);
-
-    const calculateWorkedTime = useCallback((scanTime, endScanTime) => {
-        if (!scanTime || !endScanTime) return { hours: 0, minutes: 0 };
-
-        const start = new Date(scanTime);
-        const end = new Date(endScanTime);
-
-        if (end < start) {
-            end.setDate(end.getDate() + 1);
-        }
-
-        const diffMs = end - start;
-        const totalMinutes = diffMs / (1000 * 60);
-        const roundedMinutes = Math.ceil(totalMinutes);
-        const hours = Math.floor(roundedMinutes / 60);
-        const minutes = roundedMinutes % 60;
-
-        return { hours, minutes };
-    }, []);
-
     useEffect(() => {
         if (selectedStore) {
             const filtered = departments.filter((dept) => dept.storeId === selectedStore._id);
@@ -240,42 +212,37 @@ export const EmployeesCalendar = () => {
         };
     }, [month, year]);
 
-    const getDayColor = useCallback(
-        (shifts) => {
-            if (shifts.length === 0) {
-                return { type: 'gray' };
-            }
+    const getDayColor = useCallback((shifts) => {
+        if (shifts.length === 0) {
+            return { type: 'gray' };
+        }
 
-            const shift = shifts[0];
+        const shift = shifts[0];
 
-            const hasScanIn = !!shift.scanTime;
-            const hasScanOut = !!shift.endScanTime;
+        const hasScanIn = !!shift.scanTime;
+        const hasScanOut = !!shift.endScanTime;
 
-            if (!hasScanIn && !hasScanOut) {
-                return { type: 'blue' };
-            }
+        if (!hasScanIn && !hasScanOut) {
+            return { type: 'blue' };
+        }
 
-            const lateMinutes = calculateLateMinutes(shift.startTime, shift.scanTime);
+        const isLate = shift.lateMinutes > 0;
+        const isIncomplete =
+            !hasScanOut ||
+            (shift.endTime &&
+                shift.endScanTime &&
+                new Date(shift.endScanTime) < new Date(shift.endTime));
 
-            const isLate = lateMinutes > 0;
-            const isIncomplete =
-                !hasScanOut ||
-                (shift.endTime &&
-                    shift.endScanTime &&
-                    new Date(shift.endScanTime) < new Date(shift.endTime));
+        if (!isLate && !isIncomplete) {
+            return { type: 'green' };
+        }
 
-            if (!isLate && !isIncomplete) {
-                return { type: 'green' };
-            }
+        if (isLate && !hasScanOut) {
+            return { type: 'split-red-blue' };
+        }
 
-            if (isLate && !hasScanOut) {
-                return { type: 'split-red-blue' };
-            }
-
-            return { type: 'split' };
-        },
-        [calculateLateMinutes],
-    );
+        return { type: 'split' };
+    }, []);
 
     const handleShiftDelete = useCallback((shiftId) => {
         setSelectedDayShiftsModal((prevShifts) =>
@@ -348,35 +315,20 @@ export const EmployeesCalendar = () => {
                                       .toJSDate()
                                 : null;
 
-                            const durationMs = endTime - startTime;
-                            const totalMinutes = Math.floor(durationMs / (1000 * 60));
-                            const hours = Math.floor(totalMinutes / 60);
-                            const minutes = totalMinutes % 60;
-
                             const durationText =
-                                hours > 0
-                                    ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}`
-                                    : `${minutes} мин`;
+                                shift.shiftDuration.hours > 0
+                                    ? `${shift.shiftDuration.hours} ч ${shift.shiftDuration.minutes > 0 ? `${shift.shiftDuration.minutes} мин` : ''}`
+                                    : `${shift.shiftDuration.minutes} мин`;
 
-                            const lateMinutes =
-                                shift.startTime && shift.scanTime
-                                    ? calculateLateMinutes(shift.startTime, shift.scanTime)
-                                    : 0;
+                            const lateMinutes = shift.lateMinutes || 0;
                             const lateText =
-                                shift.startTime && shift.scanTime
-                                    ? lateMinutes > 0
-                                        ? `Опоздал на ${lateMinutes} мин`
-                                        : 'Не опоздал'
-                                    : '';
-
-                            const workedTime = calculateWorkedTime(
-                                shift.scanTime,
-                                shift.endScanTime,
-                            );
+                                shift.lateMinutes > 0
+                                    ? `Опоздал на ${shift.lateMinutes} мин`
+                                    : 'Не опоздал';
                             const workedTimeText =
-                                workedTime.hours > 0
-                                    ? `${workedTime.hours} ч ${workedTime.minutes > 0 ? `${workedTime.minutes} мин` : ''}`
-                                    : `${workedTime.minutes} мин`;
+                                shift.workedTime?.hours > 0
+                                    ? `${shift.workedTime?.hours} ч ${shift?.workedTime.minutes > 0 ? `${shift.workedTime.minutes} мин` : ''}`
+                                    : `${shift.workedTime?.minutes} мин`;
 
                             return (
                                 <div key={shift._id} className="rounded-lg shadow-lg p-4">
@@ -467,13 +419,7 @@ export const EmployeesCalendar = () => {
         } else {
             return <p>Нет смен</p>;
         }
-    }, [
-        selectedDayShiftsModal,
-        calculateLateMinutes,
-        calculateWorkedTime,
-        handleShiftDelete,
-        handleOpenEditModal,
-    ]);
+    }, [selectedDayShiftsModal, handleShiftDelete, handleOpenEditModal]);
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {

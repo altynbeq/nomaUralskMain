@@ -9,7 +9,6 @@ export const CalendarTable = memo(
         month,
         getShiftsForDay,
         getDayColor,
-        setSelectedDayShiftsModal,
         isLoading,
         onDayClick,
     }) => {
