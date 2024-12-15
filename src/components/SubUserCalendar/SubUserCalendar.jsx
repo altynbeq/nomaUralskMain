@@ -8,7 +8,7 @@ import avatar from '../../data/avatar.jpg';
 import { startOfWeek, addDays, format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
-export const Profile = () => {
+export const SubUserCalendar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
