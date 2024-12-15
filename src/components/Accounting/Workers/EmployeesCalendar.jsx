@@ -214,34 +214,69 @@ export const EmployeesCalendar = () => {
 
     const getDayColor = useCallback((shifts) => {
         if (shifts.length === 0) {
+            // No shifts in the day
             return { type: 'gray' };
         }
 
-        const shift = shifts[0];
+        let hasFullWorkedShifts = true;
+        let hasAnyIncompleteShifts = false;
+        let hasAnyLateShifts = false;
+        let hasShiftsWithoutCheckInOrOut = true;
 
-        const hasScanIn = !!shift.scanTime;
-        const hasScanOut = !!shift.endScanTime;
+        shifts.forEach((shift) => {
+            const hasScanIn = !!shift.scanTime;
+            const hasScanOut = !!shift.endScanTime;
+            const isLate = shift.lateMinutes > 0;
+            const workedMinutes =
+                (shift.workedTime?.hours || 0) * 60 + (shift.workedTime?.minutes || 0);
+            const shiftDurationMinutes =
+                (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
+            const isFullyWorked = workedMinutes >= shiftDurationMinutes;
 
-        if (!hasScanIn && !hasScanOut) {
+            // If the shift has no scan in and scan out, mark it as shift without any attendance
+            if (!hasScanIn && !hasScanOut) {
+                hasShiftsWithoutCheckInOrOut = true;
+            } else {
+                hasShiftsWithoutCheckInOrOut = false;
+            }
+
+            // Check if any shift in the day is not fully worked
+            if (!isFullyWorked) {
+                hasAnyIncompleteShifts = true;
+            }
+
+            // Check if any shift has lateness
+            if (isLate) {
+                hasAnyLateShifts = true;
+            }
+
+            // If there's any shift that wasn't fully worked, then it's not a fully worked day
+            if (!hasScanIn || !hasScanOut || !isFullyWorked) {
+                hasFullWorkedShifts = false;
+            }
+        });
+
+        if (hasShiftsWithoutCheckInOrOut) {
             return { type: 'blue' };
         }
 
-        const isLate = shift.lateMinutes > 0;
-        const isIncomplete =
-            !hasScanOut ||
-            (shift.endTime &&
-                shift.endScanTime &&
-                new Date(shift.endScanTime) < new Date(shift.endTime));
-
-        if (!isLate && !isIncomplete) {
+        if (hasFullWorkedShifts) {
             return { type: 'green' };
         }
 
-        if (isLate && !hasScanOut) {
+        if (hasAnyLateShifts && hasShiftsWithoutCheckInOrOut) {
             return { type: 'split-red-blue' };
         }
 
-        return { type: 'split' };
+        if (!hasAnyLateShifts && hasAnyIncompleteShifts) {
+            return { type: 'split-green-red' };
+        }
+
+        if (hasAnyLateShifts) {
+            return { type: 'split-red-blue' };
+        }
+
+        return { type: 'gray' };
     }, []);
 
     const handleShiftDelete = useCallback((shiftId) => {
