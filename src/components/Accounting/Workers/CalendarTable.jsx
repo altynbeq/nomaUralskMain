@@ -72,9 +72,14 @@ export const CalendarTable = memo(
                                     if (dayColor.type === 'split-red-blue') {
                                         style = {
                                             background:
-                                                'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)', // bg-red-500 и bg-blue-500
+                                                'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)',
                                         };
                                     } else if (dayColor.type === 'split') {
+                                        style = {
+                                            background:
+                                                'linear-gradient(to right, #ef4444 50%, green 50%)',
+                                        };
+                                    } else if (dayColor.type === 'split-green-red') {
                                         style = {
                                             background:
                                                 'linear-gradient(to right, #ef4444 50%, green 50%)',
