@@ -1,4 +1,4 @@
-// Profile.js
+// SubUserCalendar.jsx
 
 import React, { useState } from 'react';
 import { CalendarModal } from '../CalendarModal';
@@ -12,7 +12,7 @@ export const SubUserCalendar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isMonthView, setIsMonthView] = useState(true);
-    const [selectedShift, setSelectedShift] = useState(null);
+    const [selectedShifts, setSelectedShifts] = useState([]); // Изменено на массив
     const subUsersShifts = useSubUserStore((state) => state.shifts);
     const subUserImage = useSubUserStore((state) => state.subUser?.image);
 
@@ -41,45 +41,38 @@ export const SubUserCalendar = () => {
             }) || [];
 
         if (shifts.length === 0) {
-            return 'bg-gray-300'; // Нет смены
+            return 'bg-gray-300 text-black'; // Нет смены
         }
 
-        let hasScanIn = false;
-        let hasScanOut = false;
-        let isLate = false;
-        let isIncomplete = false;
+        // Логика определения цвета на основе нескольких смен
+        let hasLate = false;
+        let hasIncomplete = false;
+        let hasNoScans = true; // Предполагаем, что нет сканов
 
         shifts.forEach((shift) => {
-            if (shift.scanTime) hasScanIn = true;
-            if (shift.endScanTime) hasScanOut = true;
-
-            const lateMinutes = shift.scanTime
-                ? Math.max(0, (new Date(shift.scanTime) - new Date(shift.startTime)) / 60000)
-                : 0;
-            if (lateMinutes > 0) isLate = true;
-
+            if (shift.scanTime) {
+                hasNoScans = false;
+                const lateMinutes = shift.lateMinutes || 0;
+                if (lateMinutes > 0) hasLate = true;
+            }
             if (
                 !shift.endScanTime ||
                 (shift.endTime && new Date(shift.endScanTime) < new Date(shift.endTime))
             ) {
-                isIncomplete = true;
+                hasIncomplete = true;
             }
         });
 
-        if (isLate && !hasScanOut) {
-            // Красная и синяя половины
+        // Определяем цвет в зависимости от условий
+        if (hasLate && hasIncomplete) {
             return 'bg-gradient-to-r from-red-500 to-blue-500 text-white';
-        } else if (isLate && isIncomplete) {
-            // Красная и зелёная половины
-            return 'bg-gradient-to-r from-red-500 to-green-500 text-white';
-        } else if (isLate) {
-            // Полностью красный
+        } else if (hasLate) {
             return 'bg-red-500 text-white';
-        } else if (!hasScanIn && !hasScanOut) {
-            // Полностью синий
+        } else if (hasIncomplete) {
+            return 'bg-blue-500 text-white';
+        } else if (hasNoScans) {
             return 'bg-blue-500 text-white';
         } else {
-            // Полностью зелёный
             return 'bg-green-500 text-white';
         }
     };
@@ -88,12 +81,12 @@ export const SubUserCalendar = () => {
         setSelectedDay(date);
         const formattedDate = formatDate(date);
 
-        const shift = subUsersShifts?.find((shift) => {
+        const shifts = subUsersShifts?.filter((shift) => {
             const shiftDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
             return shiftDate === formattedDate;
         });
 
-        setSelectedShift(shift || null);
+        setSelectedShifts(shifts || []);
         setIsModalOpen(true);
     };
 
@@ -157,9 +150,9 @@ export const SubUserCalendar = () => {
                             <button
                                 key={day}
                                 onClick={() => openModal(date)}
-                                className={`w-12 h-12 flex items-center justify-center rounded-full ${getDayColor(
+                                className={`w-12 h-12 flex items-center justify-center rounded-full border text-sm ${getDayColor(
                                     date,
-                                )} border text-sm`}
+                                )}`}
                             >
                                 {day}
                             </button>
@@ -173,9 +166,9 @@ export const SubUserCalendar = () => {
                         <button
                             key={index}
                             onClick={() => openModal(date)}
-                            className={`w-12 h-12 flex flex-col items-center justify-center rounded-full ${getDayColor(
+                            className={`w-12 h-12 flex flex-col items-center justify-center rounded-full border text-sm ${getDayColor(
                                 date,
-                            )} border text-sm`}
+                            )}`}
                         >
                             <span>{weekDays[index]}</span>
                             <span>{date.getDate()}</span>
@@ -187,7 +180,7 @@ export const SubUserCalendar = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 selectedDay={selectedDay}
-                selectedShift={selectedShift}
+                selectedShifts={selectedShifts} // Передаём массив смен
             />
         </div>
     );
