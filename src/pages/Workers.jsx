@@ -42,6 +42,10 @@ const InternalTabs = () => {
             id: 'sales',
             label: 'Продажи',
         },
+        {
+            id: 'finance',
+            label: 'Финансы',
+        },
     ];
 
     const tabContents = {
@@ -56,14 +60,14 @@ const InternalTabs = () => {
             </div>
         ),
         shifts: (
-            <div className=" flex flex-col gap-3 w-[100%]  justify-center ">
-                <div className="flex w-[100%] flex-wrap  gap-5 justify-center">
+            <div className=" flex flex-col gap-3 max-w-screen justify-center ">
+                <div className="flex max-w-screen flex-wrap  gap-5 justify-center">
                     <WorkersShiftsStats />
                 </div>
-                <div className="flex w-[100%] flex-wrap  gap-5 justify-center">
+                <div className="flex max-w-screen flex-wrap  gap-5 justify-center">
                     <WorkersList />
                 </div>
-                <div className="flex w-[100%] flex-wrap  gap-5 justify-center   ">
+                <div className="flex max-w-screen flex-wrap  gap-5 justify-center   ">
                     <WorkerStats mainTitle="Показатели флористов" />
                 </div>
             </div>
@@ -71,6 +75,12 @@ const InternalTabs = () => {
         sales: (
             <div>
                 <h2 className="text-2xl font-bold mb-4">Продажи</h2>
+                <p className="text-gray-700">Здесь будет отображаться информация о продажах.</p>
+            </div>
+        ),
+        finance: (
+            <div>
+                <h2 className="text-2xl font-bold mb-4">Финансы</h2>
                 <p className="text-gray-700">Здесь будет отображаться информация о продажах.</p>
             </div>
         ),
@@ -109,7 +119,7 @@ const InternalTabs = () => {
 const Workers = () => {
     return (
         <div className="min-h-screen flex justify-center align-center bg-gray-100 p-6 w-[100%]">
-            <div className="w-[90%]">
+            <div className="w-[95%]">
                 <InternalTabs />
             </div>
         </div>

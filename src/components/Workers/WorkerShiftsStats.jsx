@@ -78,7 +78,7 @@ const WorkersShiftsStats = () => {
     });
 
     return (
-        <div className="bg-white w-[90%] mx-auto md:w-[100%] mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
+        <div className="bg-white w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
             {/* Top Bar */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                 <div className="flex items-center gap-4">
