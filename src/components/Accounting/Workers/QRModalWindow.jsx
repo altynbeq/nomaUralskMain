@@ -1,9 +1,8 @@
-import React from 'react'
+import { useRef } from 'react';
 import QRCode from 'react-qr-code';
 import { Button } from 'primereact/button';
 
-const QRModalWindow = ({ selectedStore, setShowStoreInfoModal }) => {
-
+const QRModalWindow = () => {
     const qrRef = useRef(null);
 
     const handleQRDownload = () => {
@@ -48,7 +47,7 @@ const QRModalWindow = ({ selectedStore, setShowStoreInfoModal }) => {
                 />
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default QRModalWindow
+export default QRModalWindow;

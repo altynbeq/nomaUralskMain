@@ -67,6 +67,7 @@ export const CheckInCheckOutModal = memo(
                     onChange={(e) => setDate(e.value)}
                     showIcon
                     showTime
+                    timeOnly
                     locale="ru"
                     hourFormat="24"
                     placeholder={`Время ${type === 'checkIn' ? 'прихода' : 'ухода'}`}
