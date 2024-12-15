@@ -34,6 +34,7 @@ const App = () => {
     const setStores = useCompanyStructureStore((state) => state.setStores);
     const setSubUsers = useCompanyStructureStore((state) => state.setSubUsers);
     const setSubUserShifts = useSubUserStore((state) => state.setShifts);
+    const [subUserTodayShifts, setSubUserTodayShifts] = useState([]);
     const setSubUser = useSubUserStore((state) => state.setSubUser);
     const [techProblem, setTechProblem] = useState(false);
     const [urls, setUrls] = useState('');
@@ -114,21 +115,18 @@ const App = () => {
     ]);
 
     useEffect(() => {
-        const fetchSubUserShifts = async () => {
-            const subuserId = user?.id;
-            if (!subuserId && user.role !== 'subUser') return;
+        (async () => {
+            if (!user && user?.role !== 'subUser') return;
 
             try {
-                const response = await axiosInstance.get(`/shifts/subUser/${subuserId}`);
+                const response = await axiosInstance.get(`/shifts/subUser/${user?.id}`);
                 setSubUserShifts(response.data.allShifts);
+                setSubUserTodayShifts(response.data.todayShifts);
             } catch (error) {
                 console.error(error);
             }
-        };
-        if (user) {
-            fetchSubUserShifts();
-        }
-    }, [setSubUserShifts, user, user?.id, user.role]);
+        })();
+    }, [setSubUserShifts, setSubUserTodayShifts, user, user?.id, user?.role]);
 
     useEffect(() => {
         const fetchCompanyProductsAndWarehouses = async () => {
@@ -179,7 +177,11 @@ const App = () => {
                             </div>
                         )}
                         <ToastContainer position="top-center" autoClose={5000} />
-                        <MainContent urls={urls} activeMenu={activeMenu} />
+                        <MainContent
+                            subUserTodayShifts={subUserTodayShifts}
+                            urls={urls}
+                            activeMenu={activeMenu}
+                        />
                     </div>
                 ) : (
                     <LogInForm isQrRedirect={isQrRedirect} />

@@ -23,11 +23,9 @@ const Shifts = lazy(() => import('./pages/Shifts'));
 const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
-export const MainContent = ({ urls, activeMenu }) => {
-    const subUserShifts = useSubUserStore((state) => state.shifts);
+export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const user = useAuthStore((state) => state.user);
     const subUser = useSubUserStore((state) => state.subUser);
-
     const [showUploadImageModal, setShowUploadImageModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
@@ -48,7 +46,7 @@ export const MainContent = ({ urls, activeMenu }) => {
         try {
             const scanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/${shift._id}`, {
-                subUserId: shift.subUserId,
+                subUserId: shift.subUserId._id,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
                 selectedStore: shift.selectedStore._id,
@@ -69,7 +67,7 @@ export const MainContent = ({ urls, activeMenu }) => {
         try {
             const endScanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/${shift._id}`, {
-                subUserId: shift.subUserId,
+                subUserId: shift.subUserId._id,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
                 selectedStore: shift.selectedStore._id,
@@ -90,27 +88,10 @@ export const MainContent = ({ urls, activeMenu }) => {
         const searchParams = new URLSearchParams(location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
 
-        if (!isQr) return;
+        if (!isQr || hasExecuted.current) return;
 
-        const todaysShifts = subUserShifts.filter((shift) => {
-            const shiftStart = DateTime.fromISO(shift.startTime, { zone: 'utc' }).setZone('UTC+5');
-            const shiftEnd = DateTime.fromISO(shift.endTime, { zone: 'utc' }).setZone('UTC+5');
-
-            // Исправленное сравнение идентификатора пользователя
-            const isCurrentSubUser = shift.subUserId._id === user.id;
-
-            const todayStart = DateTime.local().setZone('UTC+5').startOf('day');
-            const todayEnd = DateTime.local().setZone('UTC+5').endOf('day');
-
-            const isToday = shiftStart <= todayEnd && shiftEnd >= todayStart;
-
-            return isCurrentSubUser && isToday;
-        });
-
-        todaysShifts.forEach((shift) => {
-            if (hasExecuted.current) return;
-            hasExecuted.current = true;
-
+        // Ищем первую неотмеченную смену
+        const firstUnmarkedShift = subUserTodayShifts.find((shift) => {
             const scanTime = shift.scanTime
                 ? DateTime.fromISO(shift.scanTime, { zone: 'utc' }).setZone('UTC+5')
                 : null;
@@ -118,23 +99,34 @@ export const MainContent = ({ urls, activeMenu }) => {
                 ? DateTime.fromISO(shift.endScanTime, { zone: 'utc' }).setZone('UTC+5')
                 : null;
 
-            if (scanTime && endScanTime) {
-                setShowMarkShiftResultModal(true);
-                setMarkShiftResultMessage('Вы уже отметили приход и уход для этой смены.');
-                return;
-            }
-
-            setSelectedShift(shift);
-
-            if (!shift.scanTime) {
-                setActionText('Отметить приход');
-            } else if (shift.scanTime && !shift.endScanTime) {
-                setActionText('Отметить уход');
-            }
-
-            setShowActionModal(true);
+            // Условие для поиска первой неотмеченной смены
+            return !scanTime || !endScanTime;
         });
-    }, [subUserShifts, user, location.search]);
+
+        if (!firstUnmarkedShift) return;
+
+        hasExecuted.current = true;
+
+        const scanTime = firstUnmarkedShift.scanTime
+            ? DateTime.fromISO(firstUnmarkedShift.scanTime, { zone: 'utc' }).setZone('UTC+5')
+            : null;
+        const endScanTime = firstUnmarkedShift.endScanTime
+            ? DateTime.fromISO(firstUnmarkedShift.endScanTime, { zone: 'utc' }).setZone('UTC+5')
+            : null;
+
+        setSelectedShift(firstUnmarkedShift);
+
+        if (!scanTime) {
+            setActionText('Отметить приход');
+        } else if (scanTime && !endScanTime) {
+            setActionText('Отметить уход');
+        } else if (scanTime && endScanTime) {
+            setShowMarkShiftResultModal(true);
+            setMarkShiftResultMessage('Вы уже отметили приход и уход для всех смен.');
+        }
+
+        setShowActionModal(true);
+    }, [user, location.search, subUserTodayShifts]);
 
     useEffect(() => {
         if (!showMarkShiftResultModal && markShiftResultMessage.includes('успешно')) {
