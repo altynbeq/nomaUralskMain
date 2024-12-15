@@ -119,12 +119,8 @@ export const AddSingleShift = ({ visible, stores, employee, onHide, selectedDate
 
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post('/shifts', { shifts });
-
-            console.log(response.status);
-
-            // // После успешной отправки всех чанков
-            // setOpen(false);
+            await axiosInstance.post('/shifts', { shifts });
+            onHide();
             toast.success('Все смены успешно добавлены');
         } catch (error) {
             console.error('Error adding/updating shifts:', error);

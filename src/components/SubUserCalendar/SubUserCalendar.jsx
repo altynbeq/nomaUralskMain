@@ -41,40 +41,75 @@ export const SubUserCalendar = () => {
             }) || [];
 
         if (shifts.length === 0) {
-            return 'bg-gray-300 text-black'; // Нет смены
+            // 5. Если в дне смены нет, то день серый
+            return 'bg-gray-300';
         }
 
-        // Логика определения цвета на основе нескольких смен
-        let hasLate = false;
-        let hasIncomplete = false;
-        let hasNoScans = true; // Предполагаем, что нет сканов
+        let hasFullWorkedShifts = true;
+        let hasAnyIncompleteShifts = false;
+        let hasAnyLateShifts = false;
+        let hasShiftsWithoutCheckInOrOut = true;
 
         shifts.forEach((shift) => {
-            if (shift.scanTime) {
-                hasNoScans = false;
-                const lateMinutes = shift.lateMinutes || 0;
-                if (lateMinutes > 0) hasLate = true;
+            const hasScanIn = !!shift.scanTime;
+            const hasScanOut = !!shift.endScanTime;
+            const isLate = shift.lateMinutes > 0;
+            const workedMinutes =
+                (shift.workedTime?.hours || 0) * 60 + (shift.workedTime?.minutes || 0);
+            const shiftDurationMinutes =
+                (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
+            const isFullyWorked = workedMinutes >= shiftDurationMinutes;
+
+            // 4. Если в дне есть смены, но нет ни прихода, ни ухода, то цвет только синий
+            if (!hasScanIn && !hasScanOut) {
+                hasShiftsWithoutCheckInOrOut = true;
+            } else {
+                hasShiftsWithoutCheckInOrOut = false;
             }
-            if (
-                !shift.endScanTime ||
-                (shift.endTime && new Date(shift.endScanTime) < new Date(shift.endTime))
-            ) {
-                hasIncomplete = true;
+
+            // Проверяем, если смена не полностью отработана
+            if (!isFullyWorked) {
+                hasAnyIncompleteShifts = true;
+            }
+
+            // Проверяем, если была задержка на смену
+            if (isLate) {
+                hasAnyLateShifts = true;
+            }
+
+            // Если нет прихода или ухода или смена не полностью отработана, то она не считается "полностью отработанной"
+            if (!hasScanIn || !hasScanOut || !isFullyWorked) {
+                hasFullWorkedShifts = false;
             }
         });
 
-        // Определяем цвет в зависимости от условий
-        if (hasLate && hasIncomplete) {
-            return 'bg-gradient-to-r from-red-500 to-blue-500 text-white';
-        } else if (hasLate) {
-            return 'bg-red-500 text-white';
-        } else if (hasIncomplete) {
+        // 4. Если ни одна из смен не имеет прихода и ухода
+        if (hasShiftsWithoutCheckInOrOut) {
             return 'bg-blue-500 text-white';
-        } else if (hasNoScans) {
-            return 'bg-blue-500 text-white';
-        } else {
+        }
+
+        // 1. Если не опоздал и отработал все свои смены на день, то цвет дня зеленый
+        if (hasFullWorkedShifts) {
             return 'bg-green-500 text-white';
         }
+
+        // 2. Если опоздал и не отметил в одной из смен на день, то одна часть красная, другая синяя
+        if (hasAnyLateShifts && hasShiftsWithoutCheckInOrOut) {
+            return 'bg-red-500 bg-right-1/2 bg-blue-500 bg-left-1/2 text-white';
+        }
+
+        // 3. Если не опоздал и отработал не всю смену в одной из смен на день, то одна зеленая, другая красная
+        if (!hasAnyLateShifts && hasAnyIncompleteShifts) {
+            return 'bg-green-500 bg-right-1/2 bg-red-500 bg-left-1/2 text-white';
+        }
+
+        // 2. Если опоздал и отработал частично или есть другие нарушения, то цвет одна часть красная, другая синяя
+        if (hasAnyLateShifts) {
+            return 'bg-red-500 bg-right-1/2 bg-blue-500 bg-left-1/2 text-white';
+        }
+
+        // Если ничего не сработало, по умолчанию день серый
+        return 'bg-gray-300';
     };
 
     const openModal = (date) => {
