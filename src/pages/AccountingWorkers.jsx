@@ -23,7 +23,7 @@ const InternalTabs = () => {
 
     const tabContents = {
         stores: (
-            <div className="flex flex-col gap-3  justify-center ">
+            <div className="flex flex-col gap-3 justify-center ">
                 <div className="max-w-[100%] mb-10">
                     <StoreAccordion stores={stores || []} departments={departments || []} />
                 </div>
@@ -70,7 +70,7 @@ const InternalTabs = () => {
 const AccountingWorkers = () => {
     return (
         <div className="min-h-screen flex justify-center align-center bg-gray-100 p-6 w-[100%]">
-            <div className="w-[90%]">
+            <div className="w-[100%]">
                 <InternalTabs />
             </div>
         </div>
