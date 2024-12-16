@@ -477,7 +477,7 @@ export const EmployeesCalendar = () => {
 
     return (
         <div>
-            <div className="w-[95%] justify-center align-center m-10 mt-5 bg-white p-6 rounded-lg shadow-md subtle-border">
+            <div className="w-[95%] justify-center align-center m-6 mt-5 bg-white p-3 rounded-lg shadow-md subtle-border">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-4">
                     <div className="flex items-center gap-2 ml-4 mt-4">
                         <button

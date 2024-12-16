@@ -3,7 +3,7 @@ import { EmployeesCalendar } from '../components/Accounting/Workers/EmployeesCal
 
 const Calendar = () => {
     return (
-        <div className="w-[100%] align-center justify-center">
+        <div className="max-w-screen align-center justify-center">
             <EmployeesCalendar />
         </div>
     );
