@@ -73,8 +73,7 @@ const Slider = ({ title, data, userKkmUrl }) => {
 
     return (
         <div
-            style={{ alignSelf: '' }}
-            className={`bg-white dark:text-gray-200 justify-center p-6 dark:bg-secondary-dark-bg w-[90%] md:w-[42%] rounded-2xl subtle-border`}
+            className={`bg-white dark:text-gray-200 justify-center p-6 dark:bg-secondary-dark-bg w-[90%] md:w-[45%] rounded-2xl subtle-border`}
         >
             <div className="flex flex-row justify-between gap-4 ">
                 <h2 className="text-black font-bold text-1xl">{title}</h2>

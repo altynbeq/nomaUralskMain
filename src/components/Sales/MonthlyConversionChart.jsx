@@ -48,7 +48,7 @@ const MonthlyConversionChart = ({ title, leadsSeries }) => {
         updateDimensions();
     }, []);
     return (
-        <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 md:w-[85%] w-[90%] rounded-2xl subtle-border">
+        <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 md:w-[90%] w-[90%] rounded-2xl subtle-border">
             <div className="flex justify-between items-center gap-2 mb-10">
                 <p className="text-xl font-semibold">{title}</p>
                 <div className="flex items-center gap-4">

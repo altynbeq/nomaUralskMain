@@ -1,5 +1,5 @@
 import React from 'react';
-import { GeneralCompany } from '../components/General/GeneralCompany';
+import GeneralCompany from '../components/General/GeneralCompany';
 import { GeneralSubuser } from '../components/General/GeneralSubuser';
 import { useAuthStore } from '../store/authStore';
 

@@ -232,7 +232,7 @@ const TableSort = ({
     };
 
     return (
-        <div className={`bg-white w-[85%] p-5 subtle-border dark:bg-gray-900 overflow-auto`}>
+        <div className={`bg-white w-[90%] p-5 subtle-border dark:bg-gray-900 overflow-auto`}>
             <div className="flex flex-row justify-between mb-4 ">
                 <div className="">
                     <p className="text-[1rem] font-semibold ">{title}</p>
@@ -341,7 +341,7 @@ const TableSort = ({
                         </div>
                     )}
 
-                    <div className="mb-4 flex justify-center align-center items-center w-[100%] ">
+                    <div className="mb-4 flex justify-center align-center items-center w-full ">
                         <DataGridMaterial rows={listRows} columns={columns} />
                     </div>
                 </div>
