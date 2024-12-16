@@ -98,11 +98,13 @@ export const WorkersShiftsStats = () => {
     };
 
     return (
-        <div className="bg-white w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
+        <div className="relative bg-white w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
             <h1 className="text-xl font-semibold mb-4">Аналитика смен</h1>
 
             {isLoading ? (
-                <Loader />
+                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
+                    <Loader />
+                </div>
             ) : (
                 <>
                     <div className="flex justify-end mb-4 gap-4">
