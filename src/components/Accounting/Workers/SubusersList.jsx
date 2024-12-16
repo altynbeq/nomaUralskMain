@@ -142,7 +142,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
 
                             {/* Dropdown Content */}
                             {isFilterOpen && (
-                                <div className="absolute z-10 min-w-[15vw] bg-white p-4 mt-2 w-fit shadow-lg rounded-lg border border-gray-200">
+                                <div className="absolute z-10 min-w-[20vw] bg-white p-4 mt-2 w-fit shadow-lg rounded-lg border border-gray-200">
                                     {/* Department Dropdown */}
                                     <div className="flex justify-end mb-2">
                                         <button
