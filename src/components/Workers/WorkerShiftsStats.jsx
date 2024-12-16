@@ -180,7 +180,7 @@ export const WorkersShiftsStats = () => {
                             />
                         </div>
 
-                        <div className="field mt-4 text-white">
+                        <div className="field mt-4">
                             <label htmlFor="departmentFilter" className="block mb-2">
                                 Отдел
                             </label>

@@ -96,6 +96,12 @@ body {
     color: white;
 }
 
+.p-paginator-page.p-highlight {
+    background-color: rgb(30, 64, 175) !important; /* Цвет фона активной страницы */
+    color: white !important; /* Цвет текста */
+    border-radius: 4px; 
+}
+
 input[type="file"] {
     display: none;
 }
