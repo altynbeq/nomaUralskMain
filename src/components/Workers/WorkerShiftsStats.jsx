@@ -211,7 +211,7 @@ export const WorkersShiftsStats = () => {
                                 options={storeOptions}
                                 onChange={(e) => setStoreFilter(e.value)}
                                 placeholder="Выберите магазин"
-                                className="w-full bg-blue-500 rounded-lg text-white"
+                                className="w-full border-blue-500 border-2 rounded-lg text-white"
                             />
                         </div>
 
@@ -225,7 +225,7 @@ export const WorkersShiftsStats = () => {
                                 options={departmentOptions}
                                 onChange={(e) => setDepartmentFilter(e.value)}
                                 placeholder="Выберите отдел"
-                                className="w-full bg-blue-500 rounded-lg text-white"
+                                className="w-full border-blue-500 border-2 rounded-lg text-white"
                             />
                         </div>
 
