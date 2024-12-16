@@ -64,7 +64,7 @@ export const AddWarehouseForm = ({
                         completeMethod={searchProducts}
                         field="НоменклатураНаименование"
                         placeholder="Поиск товара"
-                        className={`border-blue-500 border-2 outline-none rounded-lg p-2   max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 min-w-[100%] outline-none rounded-lg p-2   max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
                     />
                     {errors.productName && <small className="p-error">{errors.productName}</small>}
                 </div>
@@ -74,7 +74,7 @@ export const AddWarehouseForm = ({
                     <InputText
                         value={formatDate(new Date())}
                         placeholder="Дата"
-                        className={`border-blue-500 border-2 rounded p-2 max-w-[250px] ${errors.date ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 min-w-[100%] border-2 rounded p-2 max-w-[250px] ${errors.date ? 'border-red-500' : ''}`}
                     />
                     {errors.date && <small className="p-error">{errors.date}</small>}
                 </div>
@@ -87,7 +87,7 @@ export const AddWarehouseForm = ({
                         options={stores || []}
                         optionLabel="storeName"
                         placeholder="Магазин"
-                        className={`border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 min-w-[100%] rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
                         showClear
                     />
                     {errors.organization && (
@@ -102,7 +102,7 @@ export const AddWarehouseForm = ({
                         value={subUser?.name}
                         onChange={(e) => handleInputChange(e, 'responsible')}
                         placeholder="Ответственный"
-                        className={`border-blue-500 border-2 rounded p-2 max-w-[250px] ${errors.responsible ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 min-w-[100%] border-2 rounded p-2 max-w-[250px] ${errors.responsible ? 'border-red-500' : ''}`}
                     />
                     {errors.responsible && <small className="p-error">{errors.responsible}</small>}
                 </div>
@@ -115,7 +115,7 @@ export const AddWarehouseForm = ({
                         options={warehouses}
                         optionLabel="warehouseName"
                         placeholder="Склад"
-                        className={`border-blue-500 border-2 rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 min-w-[100%] rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
                         showClear
                     />
                     {errors.warehouse && <small className="p-error">{errors.warehouse}</small>}
@@ -127,7 +127,7 @@ export const AddWarehouseForm = ({
                         value={formData.reason}
                         onChange={(e) => handleInputChange(e, 'reason')}
                         placeholder="Причина"
-                        className={`border-blue-500 border-2 placeholder-gray rounded p-2 max-w-[250px] ${errors.reason ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 min-w-[100%] placeholder-gray rounded p-2 max-w-[250px] ${errors.reason ? 'border-red-500' : ''}`}
                     />
                     {errors.reason && <small className="p-error">{errors.reason}</small>}
                 </div>
@@ -146,7 +146,7 @@ export const AddWarehouseForm = ({
                         inputMode="numeric"
                         type="text"
                         placeholder="Количество"
-                        className={`border-blue-500 border-2 placeholder-gray rounded-lg p-2 max-w-[250px]  ${errors.quantity ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 min-w-[100%] placeholder-gray rounded-lg p-2 max-w-[250px]  ${errors.quantity ? 'border-red-500' : ''}`}
                     />
                     {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>

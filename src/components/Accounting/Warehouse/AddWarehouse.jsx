@@ -175,7 +175,7 @@ export const AddWarehouse = () => {
                 position="center" // ensure dialog is centered
                 modal // ensures that background is dimmed and dialog is on top
                 breakpoints={{ '960px': '90vw' }} // on screens < 960px width: 90vw
-                style={{ width: '40vw' }} // default width for larger screens
+                style={{ width: '40vw', top: '2rem' }} // default width for larger screens
             >
                 <AddWarehouseForm
                     formData={formData}
