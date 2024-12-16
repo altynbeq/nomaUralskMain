@@ -131,7 +131,7 @@ export const WorkersShiftsStats = () => {
                         onPage={onPageChange} // Обновляем текущую страницу
                         className="p-datatable-sm p-datatable-striped"
                         globalFilter={globalFilter}
-                        emptyMessage="Данные отсутствуют."
+                        emptyMessage="Данные отсутствуют"
                     >
                         <Column
                             field="name"
