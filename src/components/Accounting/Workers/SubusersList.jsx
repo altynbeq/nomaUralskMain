@@ -159,7 +159,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                                         optionLabel="storeName"
                                         showClear
                                         placeholder="Магазин"
-                                        className="w-full mb-3 bg-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                        className="w-full mb-3 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
                                     <Dropdown
                                         value={selectedDepartment}
@@ -168,7 +168,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                                         options={filteredDepartments}
                                         optionLabel="name"
                                         placeholder="Отдел"
-                                        className="w-full mb-3 bg-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                        className="w-full mb-3  border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                         disabled={filteredDepartments?.length === 0}
                                     />
                                 </div>
