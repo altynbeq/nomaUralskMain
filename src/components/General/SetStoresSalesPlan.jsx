@@ -7,6 +7,7 @@ import avatar from '../../data/avatar.jpg';
 import { dailyData } from '../../data/dailyData';
 import { StorePlanModal } from '../Plan/StorePlanModal';
 import AlertModal from '../AlertModal';
+import { FiFilter, FiSearch } from 'react-icons/fi';
 
 export const SetStoresSalesPlan = () => {
     const { companyStructure } = useStateContext();
@@ -58,7 +59,7 @@ export const SetStoresSalesPlan = () => {
     };
 
     return (
-        <div className="w-[90%] bg-white rounded-lg shadow-md p-4 cursor-pointer">
+        <div className="w-[45%] bg-white rounded-lg shadow-md p-4 cursor-pointer">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
@@ -69,14 +70,19 @@ export const SetStoresSalesPlan = () => {
             <hr className="bg-red w-full mx-auto my-4" />
             <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div className="flex flex-row gap-2 w-full">
+                    <div className="relative flex flex-row gap-2">
+                        <button className="flex items-center gap-2 bg-blue-600 text-white py-1 px-3 rounded-2xl hover:bg-blue-700 transition-colors">
+                            <FiFilter />
+                            Filter
+                        </button>
+                    </div>
                     <div className="w-full relative">
                         <input
                             type="text"
-                            placeholder="Поиск"
-                            className="w-full pl-10 p-2 border border-gray-300 rounded-md"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Поиск..."
+                            className="border rounded pl-1 py-1  focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
+                        <FiSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
                     </div>
                     <div className="w-fit relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                         <button
@@ -97,7 +103,7 @@ export const SetStoresSalesPlan = () => {
                         </button>
                     </div>
                 </div>
-                <div className="flex flex-row justify-between gap-2">
+                {/* <div className="flex flex-row justify-between gap-2">
                     <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
                         <Dropdown
                             value={selectedStore}
@@ -120,7 +126,7 @@ export const SetStoresSalesPlan = () => {
                             className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
                         />
                     </div>
-                </div>
+                </div> */}
             </div>
             <div className="flex flex-col gap-4 justify-between mb-4">
                 <div>

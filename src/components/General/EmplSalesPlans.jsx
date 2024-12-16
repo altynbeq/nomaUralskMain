@@ -7,6 +7,7 @@ import avatar from '../../data/avatar.jpg';
 import { dailyData } from '../../data/dailyData';
 import { SubuserPlanModal } from '../../components/Plan/SubuserPlanModal';
 import AlertModal from '../AlertModal';
+import { FiFilter, FiSearch } from 'react-icons/fi';
 
 export const EmplSalesPlans = () => {
     const { companyStructure } = useStateContext();
@@ -75,7 +76,13 @@ export const EmplSalesPlans = () => {
             </div>
             <hr className="bg-red w-full mx-auto my-4" />
             <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <div className="flex flex-row gap-2">
+                <div className="flex flex-row gap-2 w-full">
+                    <div className="relative flex flex-row gap-2">
+                        <button className="flex items-center gap-2 bg-blue-600 text-white py-1 px-3 rounded-2xl hover:bg-blue-700 transition-colors">
+                            <FiFilter />
+                            Filter
+                        </button>
+                    </div>
                     <div className="w-full relative">
                         <input
                             type="text"
@@ -84,6 +91,7 @@ export const EmplSalesPlans = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                        <FiSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
                     </div>
                     <div className="w-fit relative gap-1 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center p-1">
                         <button
@@ -102,30 +110,6 @@ export const EmplSalesPlans = () => {
                         >
                             Нету
                         </button>
-                    </div>
-                </div>
-                <div className="flex flex-row gap-2 justify-between">
-                    <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
-                        <Dropdown
-                            value={selectedStore}
-                            onChange={(e) => setSelectedStore(e.value)}
-                            options={companyStructure?.stores || []}
-                            optionLabel="storeName"
-                            placeholder="Магазин"
-                            showClear
-                            className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                        />
-                    </div>
-                    <div className="flex flex-wrap z-10 gap-1 border-solid border-gray-500">
-                        <Dropdown
-                            value={selectedDepartment}
-                            onChange={(e) => setSelectedDepartment(e.value)}
-                            options={companyStructure?.departments || []}
-                            optionLabel="name"
-                            showClear
-                            placeholder="Отдел"
-                            className="border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                        />
                     </div>
                 </div>
             </div>

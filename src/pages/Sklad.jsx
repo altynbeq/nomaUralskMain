@@ -19,7 +19,7 @@ function convertUrl(apiUrl) {
     return apiUrl.replace(/^http:\/\/\d{1,3}(\.\d{1,3}){3}:\d+\//, '/api/');
 }
 
-const Sklad = ({ urls }) => {
+const InternalTabs = ({ urls }) => {
     const kkm = useCompanyStore((state) => state.kkm);
     const writeOffs = useCompanyStore((state) => state.writeOffs);
     const { skeletonUp } = useStateContext();
@@ -31,6 +31,7 @@ const Sklad = ({ urls }) => {
 
     const [userKkmUrl, setUserKkmUrl] = useState('');
     const [userSpisanieUrl, setUserSpisanieUrl] = useState('');
+    const [activeTab, setActiveTab] = useState('general');
 
     useEffect(() => {
         if (kkm?.monthFormedKKM && writeOffs?.monthSpisanie) {
@@ -67,36 +68,155 @@ const Sklad = ({ urls }) => {
             </div>
         );
     }
+
+    const tabs = [
+        {
+            id: 'general',
+            label: 'Общая',
+        },
+        {
+            id: 'spisanie',
+            label: 'Списания',
+        },
+        {
+            id: 'products',
+            label: 'Товар',
+        },
+    ];
+
+    const tabContents = {
+        general: (
+            <div className="flex flex-col gap-3  justify-center ">
+                <div className="flex mt-5 w-[100%] flex-wrap xs:flex-col  gap-4 justify-center ">
+                    <SpisanieMonthChart
+                        short={true}
+                        userSpisanieUrl={userSpisanieUrl}
+                        title="Списания за месяц"
+                        series={spisanieBarSeries}
+                    />
+                </div>
+                <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center align-center  items-center">
+                    <TableSort
+                        displayStats={true}
+                        width="25%"
+                        userKkmUrl={userKkmUrl}
+                        spisanieStats={productStats}
+                        rows={productsGridRows}
+                        columns={GridProductListCols}
+                        title="Продано товаров"
+                    />
+                </div>
+                <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center align-center  items-center">
+                    <TableSort
+                        title="Списания"
+                        width="25%"
+                        spisanieStats={spisanieStats}
+                        userSpisanieUrl={userSpisanieUrl}
+                        userKkmUrl={userKkmUrl}
+                        rows={tableRows}
+                        columns={GridSpisanieListCols}
+                    />
+                </div>
+            </div>
+        ),
+        spisanie: (
+            <div className="flex flex-col gap-3  justify-center ">
+                <div className="flex mt-5 w-[100%] flex-wrap xs:flex-col  gap-4 justify-center ">
+                    <SpisanieMonthChart
+                        short={true}
+                        userSpisanieUrl={userSpisanieUrl}
+                        title="Списания за месяц"
+                        series={spisanieBarSeries}
+                    />
+                </div>
+                <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center ">
+                    <TableSort
+                        title="Списания"
+                        spisanieStats={spisanieStats}
+                        userSpisanieUrl={userSpisanieUrl}
+                        userKkmUrl={userKkmUrl}
+                        rows={tableRows}
+                        columns={GridSpisanieListCols}
+                    />
+                </div>
+            </div>
+        ),
+        products: (
+            <div className="flex flex-col gap-3  justify-center ">
+                <h2 className="text-2xl font-bold mb-4">Продажи</h2>
+                <p className="text-gray-700">Здесь будет отображаться информация о продажах.</p>
+            </div>
+        ),
+    };
+
     return (
-        <div className="mt-12 flex w-[100%] flex-col justify-center  align-center gap-8">
-            <div className="flex mt-5 w-[100%] flex-wrap xs:flex-col  gap-4 justify-center ">
-                <SpisanieMonthChart
-                    short={true}
-                    userSpisanieUrl={userSpisanieUrl}
-                    title="Списания за месяц"
-                    series={spisanieBarSeries}
-                />
+        <div className="bg-white border-2 max-w-screen border-gray-300 rounded-2xl overflow-hidden">
+            {/* Internal Tab Navigation */}
+            <div className="border-b border-gray-300">
+                <nav className="flex">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`
+                            flex-1 py-3 px-3 text-center transition-colors duration-300
+                            ${
+                                activeTab === tab.id
+                                    ? 'bg-blue-800 text-white font-semibold'
+                                    : 'hover:bg-gray-100 text-gray-600'
+                            }
+                            ${activeTab === tab.id ? 'first:rounded-tl-2xl last:rounded-tr-2xl' : ''}
+                        `}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </nav>
             </div>
-            <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center align-center  items-center">
-                <TableSort
-                    displayStats={true}
-                    width="25%"
-                    userKkmUrl={userKkmUrl}
-                    spisanieStats={productStats}
-                    rows={productsGridRows}
-                    columns={GridProductListCols}
-                    title="Продано товаров"
-                />
-            </div>
-            <div className="flex flex-col  md:flex-row gap-2 justify-center align-center  items-center">
-                <TableSort
-                    title="Списания"
-                    spisanieStats={spisanieStats}
-                    userSpisanieUrl={userSpisanieUrl}
-                    userKkmUrl={userKkmUrl}
-                    rows={tableRows}
-                    columns={GridSpisanieListCols}
-                />
+            <div className="p-2">{tabContents[activeTab]}</div>
+        </div>
+    );
+
+    // return (
+    //     <div className="mt-12 flex w-[100%] flex-col justify-center  align-center gap-8">
+    //         <div className="flex mt-5 w-[100%] flex-wrap xs:flex-col  gap-4 justify-center ">
+    //             <SpisanieMonthChart
+    //                 short={true}
+    //                 userSpisanieUrl={userSpisanieUrl}
+    //                 title="Списания за месяц"
+    //                 series={spisanieBarSeries}
+    //             />
+    //         </div>
+    //         <div className="flex flex-col  md:w-[100%]  md:flex-row gap-2 justify-center align-center  items-center">
+    //             <TableSort
+    //                 displayStats={true}
+    //                 width="25%"
+    //                 userKkmUrl={userKkmUrl}
+    //                 spisanieStats={productStats}
+    //                 rows={productsGridRows}
+    //                 columns={GridProductListCols}
+    //                 title="Продано товаров"
+    //             />
+    //         </div>
+    //         <div className="flex flex-col  md:flex-row gap-2 justify-center align-center  items-center">
+    //             <TableSort
+    //                 title="Списания"
+    //                 spisanieStats={spisanieStats}
+    //                 userSpisanieUrl={userSpisanieUrl}
+    //                 userKkmUrl={userKkmUrl}
+    //                 rows={tableRows}
+    //                 columns={GridSpisanieListCols}
+    //             />
+    //         </div>
+    //     </div>
+    // );
+};
+
+const Sklad = ({ urls }) => {
+    return (
+        <div className="min-h-screen flex justify-center align-center bg-gray-100 p-6 w-[100%]">
+            <div className="w-[90%]">
+                <InternalTabs urls={urls} />
             </div>
         </div>
     );
