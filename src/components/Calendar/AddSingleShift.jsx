@@ -145,7 +145,7 @@ export const AddSingleShift = ({ visible, stores, employee, onHide, selectedDate
                             options={stores}
                             optionLabel="storeName"
                             placeholder="Выберите магазин"
-                            className="w-full border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                            className="w-full z-10 border-2 rounded-lg focus:ring-2 "
                             showClear
                         />
                     </div>
