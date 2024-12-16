@@ -3,6 +3,8 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
 import { axiosInstance } from '../../api/axiosInstance';
 import { useAuthStore } from '../../store';
 import { Loader } from '../Loader';
@@ -14,6 +16,7 @@ export const WorkersShiftsStats = () => {
     const [storeFilter, setStoreFilter] = useState(null);
     const [departmentFilter, setDepartmentFilter] = useState(null);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [isFilterDialogVisible, setIsFilterDialogVisible] = useState(false);
     const user = useAuthStore((state) => state.user);
 
     // Получаем данные из API
@@ -75,6 +78,19 @@ export const WorkersShiftsStats = () => {
         value: department,
     }));
 
+    const openFilterDialog = () => {
+        setIsFilterDialogVisible(true);
+    };
+
+    const applyFilters = () => {
+        setIsFilterDialogVisible(false);
+    };
+
+    const clearFilters = () => {
+        setStoreFilter(null);
+        setDepartmentFilter(null);
+    };
+
     return (
         <div className="bg-white w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
             <h1 className="text-xl font-semibold mb-4">Аналитика смен</h1>
@@ -83,23 +99,13 @@ export const WorkersShiftsStats = () => {
                 <Loader />
             ) : (
                 <>
-                    <div className="flex justify-between mb-4">
-                        <div className="flex gap-4">
-                            <Dropdown
-                                value={storeFilter}
-                                options={storeOptions}
-                                onChange={(e) => setStoreFilter(e.value)}
-                                placeholder="Фильтр по магазину"
-                                className="p-inputtext-sm"
-                            />
-                            <Dropdown
-                                value={departmentFilter}
-                                options={departmentOptions}
-                                onChange={(e) => setDepartmentFilter(e.value)}
-                                placeholder="Фильтр по отделу"
-                                className="p-inputtext-sm"
-                            />
-                        </div>
+                    <div className="flex justify-end mb-4 gap-4">
+                        <Button
+                            label="Фильтры"
+                            icon="pi pi-filter"
+                            onClick={openFilterDialog}
+                            className="p-button-outlined p-button-primary rounded-lg bg-blue-500 text-white px-2"
+                        />
 
                         <InputText
                             value={globalFilter}
@@ -143,6 +149,54 @@ export const WorkersShiftsStats = () => {
                             sortable
                         />
                     </DataTable>
+
+                    <Dialog
+                        header="Фильтры"
+                        visible={isFilterDialogVisible}
+                        style={{ width: '30vw' }}
+                        onHide={() => setIsFilterDialogVisible(false)}
+                    >
+                        <div className="field">
+                            <label htmlFor="storeFilter" className="block mb-2">
+                                Магазин
+                            </label>
+                            <Dropdown
+                                id="storeFilter"
+                                value={storeFilter}
+                                options={storeOptions}
+                                onChange={(e) => setStoreFilter(e.value)}
+                                placeholder="Выберите магазин"
+                                className="w-full bg-blue-500 rounded-lg text-white"
+                            />
+                        </div>
+
+                        <div className="field mt-4">
+                            <label htmlFor="departmentFilter" className="block mb-2">
+                                Отдел
+                            </label>
+                            <Dropdown
+                                id="departmentFilter"
+                                value={departmentFilter}
+                                options={departmentOptions}
+                                onChange={(e) => setDepartmentFilter(e.value)}
+                                placeholder="Выберите отдел"
+                                className="w-full bg-blue-500 rounded-lg text-white"
+                            />
+                        </div>
+
+                        <div className="mt-4 flex justify-end gap-3">
+                            <Button
+                                label="Очистить"
+                                onClick={clearFilters}
+                                className="p-button-text"
+                            />
+                            <Button
+                                label="Применить"
+                                onClick={applyFilters}
+                                className="bg-blue-500 rounded-lg text-white p-2"
+                            />
+                        </div>
+                    </Dialog>
                 </>
             )}
         </div>
