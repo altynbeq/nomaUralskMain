@@ -1,7 +1,10 @@
 import React from 'react';
 import { FiFilter, FiSearch } from 'react-icons/fi';
+import { useCompanyStructureStore } from '../../store/companyStructureStore';
 
 export const WorkersShiftsStats = () => {
+    const subUsers = useCompanyStructureStore((state) => state.subUsers);
+
     const data = [
         {
             title: 'Foundation',
@@ -88,11 +91,11 @@ export const WorkersShiftsStats = () => {
                 <div className="relative flex flex-row gap-2">
                     <button className="flex items-center gap-2 bg-blue-600 text-white py-1 px-3 rounded-2xl hover:bg-blue-700 transition-colors">
                         <FiFilter />
-                        Filter
+                        Фильтр
                     </button>
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder="Поиск..."
                         className="border rounded w-64 py-1 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <FiSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
