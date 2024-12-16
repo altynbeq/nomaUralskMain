@@ -19,7 +19,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    // Фильтрация отделов на основе выбранного магазина
     const filteredDepartments = useMemo(() => {
         if (selectedStore) {
             return departments.filter((dept) => dept.storeId === selectedStore._id);
@@ -27,7 +26,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         return departments;
     }, [selectedStore, departments]);
 
-    // Сброс выбранного отдела, если он не принадлежит выбранному магазину
     useEffect(() => {
         if (selectedDepartment) {
             const departmentBelongsToStore = filteredDepartments.some(
@@ -39,7 +37,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         }
     }, [selectedStore, filteredDepartments, selectedDepartment]);
 
-    // Логика фильтрации сотрудников
     const filteredSubusers = useMemo(() => {
         return subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -107,7 +104,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         </div>
     );
 
-    // Создаём мапу для быстрого доступа к названию департамента
     const departmentsMap = useMemo(() => {
         const map = new Map();
         departments?.forEach((dept) => {
