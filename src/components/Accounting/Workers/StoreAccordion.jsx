@@ -14,6 +14,7 @@ import { StoreDetails } from './StoreDetails';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { useAuthStore } from '../../../store/authStore';
 import { FaMapMarkedAlt, FaQrcode } from 'react-icons/fa';
+import { Loader } from '../../Loader';
 
 export const StoreAccordion = ({ stores, departments }) => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -44,13 +45,15 @@ export const StoreAccordion = ({ stores, departments }) => {
 
     // Фильтрация департаментов при изменении activeStoreId
     useEffect(() => {
-        if (activeStoreId) {
-            const filtered = departments.filter((dept) => dept.storeId === activeStoreId);
+        const newStoreId = activeIndex !== null ? stores[activeIndex]?._id : null;
+        setActiveStoreId(newStoreId);
+        if (newStoreId) {
+            const filtered = departments.filter((dept) => dept.storeId === newStoreId);
             setFilteredDepartments(filtered);
         } else {
             setFilteredDepartments([]);
         }
-    }, [activeStoreId, departments]);
+    }, [activeIndex, stores, departments]);
 
     // Обработчики событий
     const handleEditDepartment = (deptName) => {
@@ -271,82 +274,95 @@ export const StoreAccordion = ({ stores, departments }) => {
     };
 
     return (
-        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md mt-10 bg-white subtle-border">
-            <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
-                {stores.map((store, index) => (
-                    <AccordionTab
-                        className="bg-white"
-                        key={store._id}
-                        header={
-                            <div className="flex justify-between items-center w-full">
-                                <span>{store.storeName}</span>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Предотвращаем переключение аккордеона
-                                        handleStoreInfo(store);
-                                    }}
-                                    className="p-button-text p-0"
-                                    aria-label={`Информация о магазине ${store.storeName}`}
-                                >
-                                    <div className="flex items-center rounded-2xl space-x-1 bg-blue-500 py-1 px-2">
-                                        <FaMapMarkedAlt className="text-white text-md" />
-                                        <span className="text-sm text-white ">&</span>
-                                        <FaQrcode className="text-white text-md" />
-                                    </div>
-                                </button>
-                            </div>
-                        }
-                    >
-                        {activeIndex === index && (
-                            <div className="p-4">
-                                <ul className="list-none p-0 flex flex-col gap-4">
-                                    {filteredDepartments.length > 0 ? (
-                                        filteredDepartments.map((dept) => (
-                                            <li
-                                                onClick={() => handleDepartmentDetailsClick(dept)}
-                                                key={dept._id}
-                                                className="flex justify-between items-center mb-2 cursor-pointer"
-                                            >
-                                                <span className="text-black">{dept.name}</span>
-                                                <div>
-                                                    <Button
-                                                        icon="pi pi-pencil"
-                                                        className="p-button-text text-blue-500 mr-2"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); // Предотвращаем открытие деталей департамента
-                                                            handleEditDepartment(dept.name);
-                                                            setSelectedEditingDepartment(dept);
-                                                        }}
-                                                        aria-label={`Редактировать департамент ${dept.name}`}
-                                                    />
-                                                    <Button
-                                                        disabled={isLoading}
-                                                        icon="pi pi-trash"
-                                                        className="p-button-text text-red-500"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); // Предотвращаем открытие деталей департамента
-                                                            handleDeleteDepartment(dept._id);
-                                                        }}
-                                                        aria-label={`Удалить департамент ${dept.name}`}
-                                                    />
-                                                </div>
+        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md mt-10 bg-white subtle-border relative">
+            {!Array.isArray(stores) ||
+            stores.length === 0 ||
+            !Array.isArray(departments) ||
+            departments.length === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
+                    <Loader />
+                </div>
+            ) : (
+                <Accordion activeIndex={activeIndex} onTabChange={onTabChange}>
+                    {stores.map((store, index) => (
+                        <AccordionTab
+                            className="bg-white"
+                            key={store._id}
+                            header={
+                                <div className="flex justify-between items-center w-full">
+                                    <span>{store.storeName}</span>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Предотвращаем переключение аккордеона
+                                            handleStoreInfo(store);
+                                        }}
+                                        className="p-button-text p-0"
+                                        aria-label={`Информация о магазине ${store.storeName}`}
+                                    >
+                                        <div className="flex items-center rounded-2xl space-x-1 bg-blue-500 py-1 px-2">
+                                            <FaMapMarkedAlt className="text-white text-md" />
+                                            <span className="text-sm text-white ">&</span>
+                                            <FaQrcode className="text-white text-md" />
+                                        </div>
+                                    </button>
+                                </div>
+                            }
+                        >
+                            {activeIndex === index && (
+                                <div className="p-4">
+                                    <ul className="list-none p-0 flex flex-col gap-4">
+                                        {filteredDepartments.length > 0 ? (
+                                            filteredDepartments.map((dept) => (
+                                                <li
+                                                    onClick={() =>
+                                                        handleDepartmentDetailsClick(dept)
+                                                    }
+                                                    key={dept._id}
+                                                    className="flex justify-between items-center mb-2 cursor-pointer"
+                                                >
+                                                    <span className="text-black">{dept.name}</span>
+                                                    <div>
+                                                        <Button
+                                                            icon="pi pi-pencil"
+                                                            className="p-button-text text-blue-500 mr-2"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // Предотвращаем открытие деталей департамента
+                                                                handleEditDepartment(dept.name);
+                                                                setSelectedEditingDepartment(dept);
+                                                            }}
+                                                            aria-label={`Редактировать департамент ${dept.name}`}
+                                                        />
+                                                        <Button
+                                                            disabled={isLoading}
+                                                            icon="pi pi-trash"
+                                                            className="p-button-text text-red-500"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // Предотвращаем открытие деталей департамента
+                                                                handleDeleteDepartment(dept._id);
+                                                            }}
+                                                            aria-label={`Удалить департамент ${dept.name}`}
+                                                        />
+                                                    </div>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="text-gray-500">
+                                                Департаменты отсутствуют.
                                             </li>
-                                        ))
-                                    ) : (
-                                        <li className="text-gray-500">Департаменты отсутствуют.</li>
-                                    )}
-                                </ul>
-                                <Button
-                                    label="Добавить департамент"
-                                    icon="pi pi-plus"
-                                    className="mt-4 p-button-success"
-                                    onClick={() => handleAddDepartment(activeStoreId)}
-                                />
-                            </div>
-                        )}
-                    </AccordionTab>
-                ))}
-            </Accordion>
+                                        )}
+                                    </ul>
+                                    <Button
+                                        label="Добавить департамент"
+                                        icon="pi pi-plus"
+                                        className="mt-4 p-button-success"
+                                        onClick={() => handleAddDepartment(activeStoreId)}
+                                    />
+                                </div>
+                            )}
+                        </AccordionTab>
+                    ))}
+                </Accordion>
+            )}
 
             {/* Модальное окно для добавления департамента */}
             <Dialog
