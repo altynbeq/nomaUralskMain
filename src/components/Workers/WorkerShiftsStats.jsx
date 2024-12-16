@@ -103,7 +103,7 @@ export const WorkersShiftsStats = () => {
     };
 
     return (
-        <div className="relative bg-white w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
+        <div className="relative bg-white w-[100%] md:w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
             <h1 className="text-xl font-semibold mb-4">Аналитика смен</h1>
 
             {isLoading ? (
@@ -124,7 +124,7 @@ export const WorkersShiftsStats = () => {
                             value={globalFilter}
                             onChange={(e) => setGlobalFilter(e.target.value)}
                             placeholder="Поиск..."
-                            className="border rounded w-64 py-1 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="border rounded w-36 md:w-64  py-1 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
                     </div>
 

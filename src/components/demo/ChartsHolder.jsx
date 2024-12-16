@@ -74,7 +74,7 @@ const CardWithStats = ({ userKkmUrl, userReceiptsUrl }) => {
             <Card
                 withBorder
                 padding="lg"
-                className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border"
+                className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[100%] md:w-[90%]  rounded-2xl subtle-border"
             >
                 <div className="flex flex-row justify-between mb-2 gap-4 w-[100%]">
                     <div className="flex flex-row gap-2 text-center">

@@ -70,7 +70,7 @@ const InternalTabs = ({ urls }) => {
     const tabContents = {
         finance: (
             <div>
-                <div className="flex mt-5 gap-4  w-[100%] flex-col md:flex-row  justify-center align-top      items-center">
+                <div className="flex md:mt-5 gap-4  w-[100%] flex-col md:flex-row  justify-center align-top      items-center">
                     <CardWithStats userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
                 </div>
 
@@ -88,7 +88,7 @@ const InternalTabs = ({ urls }) => {
         ),
         plans: (
             <div className="flex flex-col gap-3  justify-center ">
-                <div className="flex mt-5 gap-10  w-[100%]  flex-row md:flex-row align-center items-center  justify-center align-top">
+                <div className="flex mt-5 gap-10  w-[100%]  flex-col md:flex-row align-center items-center  justify-center align-top">
                     <StoreSalesPlan stores={stores} />
                     <SetStoresSalesPlan />
                 </div>
@@ -141,7 +141,7 @@ const InternalTabs = ({ urls }) => {
 
 const GeneralCompany = ({ urls }) => {
     return (
-        <div className="min-h-screen flex  justify-center align-center bg-gray-100 p-6 w-[100%]">
+        <div className="min-h-screen flex mt-10 md:px-6 md:mt-0 justify-center align-center bg-gray-100 pt-6 w-[100%]">
             <div className="w-[100%]">
                 <InternalTabs urls={urls} />
             </div>

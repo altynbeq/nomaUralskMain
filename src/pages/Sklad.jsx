@@ -214,8 +214,8 @@ const InternalTabs = ({ urls }) => {
 
 const Sklad = ({ urls }) => {
     return (
-        <div className="min-h-screen flex justify-center align-center bg-gray-100 p-6 w-[100%]">
-            <div className="w-[90%]">
+        <div className="min-h-screen flex mt-10 md:px-6 md:mt-0 justify-center align-center bg-gray-100 pt-6 w-[100%]">
+            <div className="w-[100%] md:w-[95%]">
                 <InternalTabs urls={urls} />
             </div>
         </div>

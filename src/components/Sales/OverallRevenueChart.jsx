@@ -10,7 +10,7 @@ import BarChartRe from '../demo/BarChart';
 
 const OverallRevenueChart = ({ series }) => {
     return (
-        <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6  w-[90%] md:w-[53%]  rounded-2xl  subtle-border">
+        <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6  w-[100%] md:w-[53%]  rounded-2xl  subtle-border">
             <div className="flex justify-between items-center gap-2 mb-10">
                 <p className="md:text-xl font-semibold">Продажи за год</p>
                 <div className="flex items-center gap-4">

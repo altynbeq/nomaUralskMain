@@ -22,14 +22,14 @@ const InternalTabs = () => {
     const tabContents = {
         stores: (
             <div className="flex flex-col gap-3 justify-center">
-                <div className="max-w-[100%] mb-10">
+                <div className=" mb-10 p-2">
                     <StoreAccordion stores={stores || []} departments={departments || []} />
                 </div>
             </div>
         ),
         workers: (
             <div className="flex flex-col gap-3 justify-center">
-                <div className="w-[100%] mt-10 flex items-center justify-center">
+                <div className=" mt-10 flex items-center justify-center">
                     <SubusersList subUsers={subUsers} departments={departments} stores={stores} />
                 </div>
             </div>
@@ -81,7 +81,7 @@ const InternalTabs = () => {
 
 const AccountingWorkers = () => {
     return (
-        <div className="min-h-screen flex justify-center align-center bg-gray-100 p-6 w-[100%]">
+        <div className="min-h-screen flex mt-10 md:px-6 md:mt-0 justify-center align-center bg-gray-100 pt-6 w-[100%]">
             <div className="w-[100%]">
                 <InternalTabs />
             </div>

@@ -482,44 +482,46 @@ export const EmployeesCalendar = () => {
                     <div className="flex items-center gap-2 ml-4 mt-4">
                         <button
                             onClick={handlePrevMonth}
-                            className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
+                            className="md:p-2 w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full text-gray-600"
                         >
                             ←
                         </button>
                         <h2 className="text-lg font-semibold text-black">{`${monthName} ${year} г.`}</h2>
                         <button
                             onClick={handleNextMonth}
-                            className="p-2 w-10 h-10 bg-gray-200 rounded-full text-gray-600"
+                            className="md:p-2 w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full text-gray-600"
                         >
                             →
                         </button>
                     </div>
                     <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
                         <div className="flex flex-row gap-2">
-                            <button
-                                onClick={() => setShowModalAddShift(true)}
-                                className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
-                            >
-                                <p>Добавить смену</p>
-                                <FaPlus />
-                            </button>
-                            <AddShift
-                                open={showModalAddShift}
-                                setOpen={setShowModalAddShift}
+                            <div className="flex flex-row gap-2">
+                                <button
+                                    onClick={() => setShowModalAddShift(true)}
+                                    className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
+                                >
+                                    <p>Добавить</p>
+                                    <FaPlus />
+                                </button>
+                                <AddShift
+                                    open={showModalAddShift}
+                                    setOpen={setShowModalAddShift}
+                                    stores={stores}
+                                    subUsers={subUsersState}
+                                />
+                            </div>
+                            <Filters
+                                isFilterOpen={isFilterOpen}
+                                setIsFilterOpen={setIsFilterOpen}
+                                selectedStore={selectedStore}
+                                setSelectedStore={setSelectedStore}
+                                selectedDepartment={selectedDepartment}
+                                setSelectedDepartment={setSelectedDepartment}
                                 stores={stores}
-                                subUsers={subUsersState}
+                                filteredDepartments={filteredDepartments}
                             />
                         </div>
-                        <Filters
-                            isFilterOpen={isFilterOpen}
-                            setIsFilterOpen={setIsFilterOpen}
-                            selectedStore={selectedStore}
-                            setSelectedStore={setSelectedStore}
-                            selectedDepartment={selectedDepartment}
-                            setSelectedDepartment={setSelectedDepartment}
-                            stores={stores}
-                            filteredDepartments={filteredDepartments}
-                        />
                         <div className="relative">
                             <InputText
                                 value={searchTerm}

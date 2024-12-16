@@ -59,7 +59,7 @@ export const SetStoresSalesPlan = () => {
     };
 
     return (
-        <div className="w-[45%] bg-white rounded-lg shadow-md p-4 cursor-pointer">
+        <div className="w-[100%] md:w-[45%] bg-white rounded-lg shadow-md subtle-border p-4 cursor-pointer">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
@@ -69,7 +69,7 @@ export const SetStoresSalesPlan = () => {
             </div>
             <hr className="bg-red w-full mx-auto my-4" />
             <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <div className="flex flex-row gap-2 w-full">
+                <div className="flex flex-col md:flex-row gap-2 w-full">
                     <div className="relative flex flex-row gap-2">
                         <button className="flex items-center gap-2 bg-blue-600 text-white py-1 px-3 rounded-2xl hover:bg-blue-700 transition-colors">
                             <FiFilter />

@@ -71,7 +71,7 @@ const InternalTabs = ({ urls }) => {
 
     const tabContents = {
         general: (
-            <div className="flex   flex-col gap-3  justify-center ">
+            <div className="flex flex-col gap-3  justify-center ">
                 <div className="flex  align-center gap-4 flex-wrap md:flex-row justify-center">
                     <DailyRevenue userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
                     <PaidToAmount
@@ -87,7 +87,7 @@ const InternalTabs = ({ urls }) => {
                     <CardWithStats userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
                 </div>
                 <div className="flex  gap-4   flex-col md:flex-row justify-center">
-                    <div className=" flex justify-center gap-4 align-center flex-col  md:w-[35%]">
+                    <div className=" flex justify-center gap-4 w-[100%] align-center flex-col  md:w-[35%]">
                         <WeaklyRevenueOverviewStacked deals={deals} />
                         <TotalRevenuePie deals={deals} />
                     </div>
@@ -104,7 +104,7 @@ const InternalTabs = ({ urls }) => {
             </div>
         ),
         income: (
-            <div className="flex   flex-col gap-3  justify-center ">
+            <div className="flex flex-col gap-3  justify-center ">
                 <div className="flex  align-center gap-4 flex-wrap md:flex-row justify-center">
                     <DailyRevenue userKkmUrl={userKkmUrl} userReceiptsUrl={userReceiptsUrl} />
                     <PaidToAmount
@@ -217,7 +217,7 @@ const InternalTabs = ({ urls }) => {
 
 const Finance = ({ urls }) => {
     return (
-        <div className="min-h-screen flex  justify-center align-center bg-gray-100 p-6 w-[100%]">
+        <div className="min-h-screen flex mt-10 md:px-6 md:mt-0 justify-center align-center bg-gray-100 pt-6 w-[100%]">
             <div className="w-[100%]">
                 <InternalTabs urls={urls} />
             </div>

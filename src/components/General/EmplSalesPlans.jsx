@@ -66,7 +66,7 @@ export const EmplSalesPlans = () => {
     };
 
     return (
-        <div className="w-[90%] bg-white rounded-lg shadow-md p-4">
+        <div className="w-[100%] md:w-[90%] bg-white subtle-border rounded-lg shadow-md p-4">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>

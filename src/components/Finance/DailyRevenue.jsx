@@ -30,7 +30,7 @@ const DailyRevenue = ({ userKkmUrl }) => {
 
     return (
         <>
-            <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[50%]  rounded-2xl subtle-border">
+            <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg md:my-3 p-4 text-center justify-center align-center w-[100%] md:w-[50%]  rounded-2xl subtle-border">
                 <div className="flex justify-between">
                     <p className="font-semibold text-1xl">Доходы за день</p>
                     <div className="flex items-center gap-4">

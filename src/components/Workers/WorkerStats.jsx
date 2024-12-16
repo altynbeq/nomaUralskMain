@@ -141,7 +141,7 @@ export const WorkerStats = ({ workersList = WorkersInfo, mainTitle }) => {
     };
 
     return (
-        <div className="flex w-[90%] md:max-w-screen-lg flex-col   z-1 mt-10 gap-5 justify-center rounded-2xl subtle-border ">
+        <div className="flex w-[100%] md:w-[90%] md:max-w-screen-lg flex-col   z-1 mt-10 gap-5 justify-center rounded-2xl subtle-border ">
             <div className="flex flex-row justify-between  p-5">
                 <h2 className="flex justify-center mt-5 text-2xl xs:text-base">{mainTitle}</h2>
                 <div className=" border-solid	 ">

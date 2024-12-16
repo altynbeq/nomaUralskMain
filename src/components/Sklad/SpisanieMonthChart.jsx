@@ -57,7 +57,7 @@ const SpisanieMonthChart = ({ title, series, short, userSpisanieUrl }) => {
 
     return (
         <div
-            className={`bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 w-[90%] md:w-[${short ? 65 : 53}%] rounded-2xl subtle-border`}
+            className={`bg-white dark:text-gray-200 dark:bg-secondary-dark-bg p-6 w-[100%] md:w-[${short ? 65 : 53}%] rounded-2xl subtle-border`}
         >
             <div className="flex justify-between items-center gap-2 mb-10">
                 <p className="text-xl font-semibold">{title}</p>

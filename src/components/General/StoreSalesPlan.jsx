@@ -51,7 +51,7 @@ export const StoreSalesPlan = ({ stores }) => {
     }, [stores, selectedStore]);
 
     return (
-        <div className="w-[90%] md:w-[43%] mt-10 md:mt-0 subtle-border  bg-white rounded-lg shadow-md p-4 ">
+        <div className="w-[100%] md:w-[43%] md:mt-10  subtle-border  bg-white rounded-lg shadow-md p-4 ">
             <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>

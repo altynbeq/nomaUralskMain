@@ -232,7 +232,7 @@ const TableSort = ({
     };
 
     return (
-        <div className={`bg-white w-[90%] p-5 subtle-border dark:bg-gray-900 `}>
+        <div className={`bg-white w-[100%] md:w-[90%] p-5 subtle-border dark:bg-gray-900 `}>
             <div className="flex flex-row justify-between mb-4 ">
                 <div className="">
                     <p className="text-[1rem] font-semibold ">{title}</p>

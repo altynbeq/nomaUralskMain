@@ -35,7 +35,7 @@ const YearBarChart = () => {
         new Date(dateRanges[1].endDate.replace('%20', ' ')),
     ]);
     return (
-        <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[87%]  rounded-2xl subtle-border">
+        <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[100%] md:w-[87%]  rounded-2xl subtle-border">
             <div className="flex flex-row justify-between mb-4 ">
                 <div className="">
                     <p className="text-[1rem] font-semibold ">Финансы за год</p>

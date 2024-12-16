@@ -21,7 +21,7 @@ const StatsBoxes = () => {
         const DiffIcon = stat.diff > 0 ? FaArrowUp : FaArrowDown;
 
         return (
-            <div className="border rounded-xl p-4 shadow-md bg-white" key={stat.title}>
+            <div className="border  rounded-xl p-4 shadow-md bg-white" key={stat.title}>
                 <div className="flex justify-between">
                     <p className="text-xs uppercase font-semibold text-gray-500">Demo</p>
                     <Icon className="text-gray-400" size={22} stroke={1.5} />

@@ -274,7 +274,7 @@ export const StoreAccordion = ({ stores, departments }) => {
     };
 
     return (
-        <div className="mx-auto w-full sm:w-[90%] p-4 rounded-lg shadow-md mt-10 bg-white subtle-border relative">
+        <div className="w-[90%] md:w-full p-4 rounded-lg shadow-md mt-10 bg-white subtle-border relative">
             {!Array.isArray(stores) ||
             stores.length === 0 ||
             !Array.isArray(departments) ||

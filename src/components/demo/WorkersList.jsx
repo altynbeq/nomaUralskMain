@@ -174,7 +174,7 @@ const WorkersList = () => {
     };
 
     return (
-        <div className="bg-white w-[90%]  mx-auto md:max-w-screen  p-5 subtle-border dark:bg-gray-900 overflow-auto">
+        <div className="bg-white w-[100%]  mx-auto md:max-w-screen  p-5 subtle-border dark:bg-gray-900 overflow-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                 <div className="flex items-center gap-4">
                     <h1 className="text-xl font-semibold">Топ сотрудников</h1>
@@ -188,7 +188,7 @@ const WorkersList = () => {
                     <input
                         type="text"
                         placeholder="Search..."
-                        className="border rounded w-64 py-1 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="border rounded w-36 md:w-64 py-1 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <FiSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
                 </div>
