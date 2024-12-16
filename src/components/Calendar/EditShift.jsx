@@ -57,16 +57,14 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
                 const response = await axiosInstance.get(`shifts/${shiftId}`);
                 const shiftData = response.data;
 
-                // Парсим время с использованием Luxon, предполагая, что время в UTC
                 const shiftStartTime = DateTime.fromISO(shiftData.startTime, { zone: 'utc' })
-                    .setZone('UTC+5') // Конвертируем в UTC+5
+                    .setZone('UTC+5')
                     .toJSDate();
 
                 let shiftEndTime = DateTime.fromISO(shiftData.endTime, { zone: 'utc' })
                     .setZone('UTC+5')
                     .toJSDate();
 
-                // Если конец смены раньше или равен началу — значит следующий день
                 if (shiftEndTime <= shiftStartTime) {
                     shiftEndTime = DateTime.fromJSDate(shiftEndTime).plus({ days: 1 }).toJSDate();
                 }
@@ -90,16 +88,15 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
         setIsLoading(true);
         try {
             let newStart = DateTime.fromJSDate(startTime).setZone('UTC+5').toUTC().toISO();
-
             let newEnd = DateTime.fromJSDate(endTime).setZone('UTC+5').toUTC().toISO();
 
-            // Если конец смены раньше или равен началу — значит следующий день
             const endDateTime = DateTime.fromISO(newEnd, { zone: 'utc' });
             const startDateTime = DateTime.fromISO(newStart, { zone: 'utc' });
 
             if (endDateTime <= startDateTime) {
                 newEnd = endDateTime.plus({ days: 1 }).toISO();
             }
+
             const response = await axiosInstance.put(`/shifts/${shiftId}`, {
                 subUserId: shift.subUserId._id,
                 startTime: newStart,
@@ -108,7 +105,6 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
             });
 
             if (response.status === 200) {
-                setShift(response.data);
                 toast.success('Вы успешно обновили смену');
             }
         } catch (error) {
@@ -132,6 +128,13 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
         }
     };
 
+    const handleTimeChange = (e, type) => {
+        const newTime = e.value;
+        const updatedDate = type === 'startTime' ? new Date(startTime) : new Date(endTime);
+        updatedDate.setHours(newTime.getHours(), newTime.getMinutes(), 0, 0);
+        type === 'startTime' ? setStartTime(updatedDate) : setEndTime(updatedDate);
+    };
+
     return (
         <div className="relative bg-white mt-4 min-h-[150px]">
             {isLoading && (
@@ -145,8 +148,11 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
                     <div className="mb-4">
                         <Calendar
                             value={startTime}
-                            onChange={(e) => setStartTime(e.value)}
+                            onChange={(e) => handleTimeChange(e, 'startTime')}
                             showTime
+                            timeOnly
+                            mask="99:99"
+                            showIcon
                             locale="ru"
                             hourFormat="24"
                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
@@ -156,8 +162,11 @@ export const EditShift = ({ shiftId, onShiftDelete }) => {
                     <div className="mb-4">
                         <Calendar
                             value={endTime}
-                            onChange={(e) => setEndTime(e.value)}
+                            onChange={(e) => handleTimeChange(e, 'endTime')}
                             showTime
+                            timeOnly
+                            mask="99:99"
+                            showIcon
                             locale="ru"
                             hourFormat="24"
                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
