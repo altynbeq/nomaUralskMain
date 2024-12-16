@@ -92,6 +92,10 @@ body {
     width: 100%;
 }
 
+.p-dropdown-label {
+    color: white;
+}
+
 input[type="file"] {
     display: none;
 }

@@ -17,6 +17,7 @@ export const WorkersShiftsStats = () => {
     const [departmentFilter, setDepartmentFilter] = useState(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [isFilterDialogVisible, setIsFilterDialogVisible] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0); // Стейт для текущей страницы
     const user = useAuthStore((state) => state.user);
 
     // Получаем данные из API
@@ -91,6 +92,11 @@ export const WorkersShiftsStats = () => {
         setDepartmentFilter(null);
     };
 
+    // Обновление текущей страницы
+    const onPageChange = (event) => {
+        setCurrentPage(event.page); // Устанавливаем текущую страницу
+    };
+
     return (
         <div className="bg-white w-[90%] mx-auto md:max-w-screen mt-10 p-5 subtle-border dark:bg-gray-900 overflow-auto">
             <h1 className="text-xl font-semibold mb-4">Аналитика смен</h1>
@@ -119,6 +125,8 @@ export const WorkersShiftsStats = () => {
                         value={filteredStats}
                         paginator
                         rows={10}
+                        first={currentPage * 10} // Устанавливаем с какой записи начинать
+                        onPage={onPageChange} // Обновляем текущую страницу
                         className="p-datatable-sm p-datatable-striped"
                         globalFilter={globalFilter}
                         emptyMessage="Данные отсутствуют."
@@ -170,7 +178,7 @@ export const WorkersShiftsStats = () => {
                             />
                         </div>
 
-                        <div className="field mt-4">
+                        <div className="field mt-4 text-white">
                             <label htmlFor="departmentFilter" className="block mb-2">
                                 Отдел
                             </label>
