@@ -5,6 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
+import { ProgressBar } from 'primereact/progressbar';
 import { axiosInstance } from '../../api/axiosInstance';
 import { useAuthStore } from '../../store';
 import { Loader } from '../Loader';
@@ -20,7 +21,6 @@ export const WorkersShiftsStats = () => {
     const [currentPage, setCurrentPage] = useState(0); // Стейт для текущей страницы
     const user = useAuthStore((state) => state.user);
 
-    // Получаем данные из API
     useEffect(() => {
         (async () => {
             const companyId = user?.companyId ? user.companyId : user?.id;
@@ -29,8 +29,14 @@ export const WorkersShiftsStats = () => {
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/shifts/stats/company/${companyId}`);
-                setSubUserShiftsStats(response.data);
-                setFilteredStats(response.data);
+                const dataWithTotalHours = response.data.map((item) => ({
+                    ...item,
+                    totalHours:
+                        (item.totalWorkedHours.hours || 0) +
+                        (item.totalWorkedHours.minutes || 0) / 60, // переводим минуты в часы
+                }));
+                setSubUserShiftsStats(dataWithTotalHours);
+                setFilteredStats(dataWithTotalHours);
             } catch (error) {
                 console.error('Ошибка при загрузке данных: ', error);
             } finally {
@@ -39,7 +45,6 @@ export const WorkersShiftsStats = () => {
         })();
     }, [user?.companyId, user?.id]);
 
-    // Фильтруем по магазину и отделу
     useEffect(() => {
         let filteredData = [...subUserShiftsStats];
 
@@ -145,18 +150,48 @@ export const WorkersShiftsStats = () => {
                             sortable
                             filterPlaceholder="Поиск по отделу"
                         />
-                        <Column field="totalShifts" header="Количество смен" sortable />
+                        <Column field="totalShifts" header="Смены" sortable />
                         <Column
-                            header="Количество часов"
+                            field="totalHours"
+                            header="Часы"
                             body={(rowData) =>
-                                `${rowData.totalWorkedHours.hours} ч. ${rowData.totalWorkedHours.minutes} м.`
+                                `${Math.floor(rowData.totalHours)} ч. ${Math.round((rowData.totalHours % 1) * 60)} м.`
                             }
                             sortable
                         />
                         <Column
                             header="Отработано смен"
-                            body={(rowData) => `${rowData.workedTimePercentage}%`}
-                            sortable
+                            body={(rowData) => {
+                                const workedPercentage = rowData.workedTimePercentage;
+                                const latePercentage = 100 - workedPercentage;
+
+                                return (
+                                    <div className="flex flex-col items-start gap-1">
+                                        <div className="flex justify-between w-full text-sm font-semibold">
+                                            <span
+                                                style={{ color: '#2E8B57' }}
+                                            >{`${workedPercentage}%`}</span>
+                                            <span
+                                                style={{ color: '#DC143C' }}
+                                            >{`${latePercentage}%`}</span>
+                                        </div>
+                                        <div className="progress-container">
+                                            <div
+                                                className="progress-success"
+                                                style={{ width: `${workedPercentage}%` }}
+                                            ></div>
+                                            <div
+                                                className="progress-danger"
+                                                style={{ width: `${latePercentage}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                );
+                            }}
+                        />
+                        <Column
+                            header="Опоздания"
+                            body={(rowData) => `${rowData.latePercentage}%`}
                         />
                     </DataTable>
 
