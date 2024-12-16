@@ -174,26 +174,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                                 </div>
                             )}
                         </div>
-                        {/*                         
-                        <Dropdown
-                            value={selectedStore}
-                            onChange={(e) => setSelectedStore(e.value)}
-                            options={stores || []}
-                            optionLabel="storeName"
-                            showClear
-                            placeholder="Магазин"
-                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                        />
-                        <Dropdown
-                            value={selectedDepartment}
-                            onChange={(e) => setSelectedDepartment(e.value)}
-                            showClear
-                            options={filteredDepartments}
-                            optionLabel="name"
-                            placeholder="Отдел"
-                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                            disabled={filteredDepartments?.length === 0}
-                        /> */}
                     </div>
                     <div className="relative">
                         <InputText
