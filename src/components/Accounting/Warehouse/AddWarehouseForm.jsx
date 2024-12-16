@@ -72,7 +72,7 @@ export const AddWarehouseForm = ({
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Дата</label>
                     <InputText
-                        value={formatDate(new Date())}
+                        value={formatDate(new Date().toISOString())}
                         placeholder="Дата"
                         className={`border-blue-500 min-w-[100%] border-2 rounded p-2 max-w-[250px] ${errors.date ? 'border-red-500' : ''}`}
                     />
