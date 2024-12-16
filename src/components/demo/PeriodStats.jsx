@@ -108,7 +108,7 @@ const PeriodStats = ({ title, userKkmUrl }) => {
     return (
         <div
             style={{ alignSelf: 'flex-start', minHeight: 520 }}
-            className={`bg-white dark:text-gray-200 overflow-hidden  dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[43%] p-6 flex flex-col subtle-border`}
+            className={`bg-white dark:text-gray-200 overflow-hidden  dark:bg-secondary-dark-bg rounded-2xl w-[90%] md:w-[45%] p-6 flex flex-col subtle-border`}
         >
             <div className="flex flex-row justify-between mb-4">
                 <p className="text-[1rem] font-semibold">{title}</p>
