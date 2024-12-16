@@ -53,7 +53,7 @@ export const AddWarehouseForm = ({
     };
 
     return (
-        <form className="px-4" onSubmit={handleSubmit}>
+        <form className="px-4 rounded-2xl" onSubmit={handleSubmit}>
             <div className={`grid gap-4 grid-cols-1 md:grid-cols-2`}>
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Название товара</label>
@@ -64,7 +64,7 @@ export const AddWarehouseForm = ({
                         completeMethod={searchProducts}
                         field="НоменклатураНаименование"
                         placeholder="Поиск товара"
-                        className={`border-blue-500 border-2 rounded-lg p-2 focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 outline-none rounded-lg p-2   max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
                     />
                     {errors.productName && <small className="p-error">{errors.productName}</small>}
                 </div>
@@ -193,7 +193,7 @@ export const AddWarehouseForm = ({
                 <Button
                     label="Добавить"
                     type="submit"
-                    className={`bg-blue-500 text-white max-w-[250px] rounded p-2 w-full mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-blue-500 text-white  rounded-2xl p-2 px-3  mt-10 ${Object.keys(errors).length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={Object.keys(errors).length > 0 || isLoading}
                 />
             </div>
