@@ -146,7 +146,14 @@ export const WorkersShiftsStats = () => {
                             sortable
                             filterPlaceholder="Поиск по отделу"
                         />
-                        <Column field="totalShifts" header="Количество смен" sortable />
+                        <Column field="totalShifts" header="Смены" sortable />
+                        <Column
+                            header="Часы"
+                            body={(rowData) =>
+                                `${rowData.totalWorkedHours.hours} ч. ${rowData.totalWorkedHours.minutes} м.`
+                            }
+                            sortable
+                        />
                         <Column
                             header="Отработано смен"
                             body={(rowData) => {
