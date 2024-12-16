@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiFilter, FiSearch } from 'react-icons/fi';
 
-const WorkersShiftsStats = () => {
+export const WorkersShiftsStats = () => {
     const data = [
         {
             title: 'Foundation',
@@ -115,5 +115,3 @@ const WorkersShiftsStats = () => {
         </div>
     );
 };
-
-export default WorkersShiftsStats;

@@ -293,10 +293,6 @@ export const StoreAccordion = ({ stores, departments }) => {
                                         <span className="text-sm text-white ">&</span>
                                         <FaQrcode className="text-white text-md" />
                                     </div>
-                                    {/* <i
-                                        className="pi pi-info-circle"
-                                        style={{ fontSize: '1.2rem' }}
-                                    ></i> */}
                                 </button>
                             </div>
                         }

@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import Slider from 'react-slick';
 import WorkerStatsComp from '../../components/demo/workersComponents/WorkerStats';
-import {
-    FaSortAmountDown,
-    FaTrophy,
-    FaSortAmountUpAlt,
-    FaChartLine,
-    FaRegTimesCircle,
-} from 'react-icons/fa';
+import { FaSortAmountDown, FaTrophy, FaSortAmountUpAlt } from 'react-icons/fa';
 import {
     TbRosetteNumber1,
     TbRosetteNumber2,
@@ -16,7 +10,6 @@ import {
     TbRosetteNumber5,
 } from 'react-icons/tb';
 import { Dropdown } from 'primereact/dropdown';
-
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -108,7 +101,7 @@ const WorkersInfo = [
 ];
 const stores = ['Все магазины', 'Алматы', 'Сатпаева', 'Панфилова'];
 
-const WorkerStats = ({ workersList = WorkersInfo, mainTitle }) => {
+export const WorkerStats = ({ workersList = WorkersInfo, mainTitle }) => {
     const [selectedStore, setSelectedStore] = useState('Все магазины');
     const settings = {
         dots: true,
@@ -175,5 +168,3 @@ const WorkerStats = ({ workersList = WorkersInfo, mainTitle }) => {
         </div>
     );
 };
-
-export default WorkerStats;
