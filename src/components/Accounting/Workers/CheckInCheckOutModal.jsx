@@ -1,5 +1,3 @@
-// src/components/CheckInCheckOutModal.jsx
-
 import { memo, useEffect, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Calendar } from 'primereact/calendar';
@@ -13,8 +11,37 @@ export const CheckInCheckOutModal = memo(
         const [isLoading, setIsLoading] = useState(false);
 
         useEffect(() => {
-            setDate(time);
-        }, [time]);
+            if (time) {
+                setDate(new Date(time));
+            } else {
+                const baseDate = new Date(type === 'checkIn' ? shift.startTime : shift.endTime);
+                const startTimeDate = new Date(shift.startTime);
+                const endTimeDate = new Date(shift.endTime);
+
+                // Учитываем, если endTime — это следующий день после startTime
+                if (type === 'checkOut' && endTimeDate < startTimeDate) {
+                    endTimeDate.setDate(endTimeDate.getDate() + 1);
+                }
+
+                const hours = baseDate.getHours();
+                const minutes = baseDate.getMinutes();
+
+                const now = new Date();
+                now.setFullYear(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+
+                // Для checkOut с переходом на следующий день увеличиваем дату на 1 день
+                if (
+                    type === 'checkOut' &&
+                    endTimeDate > startTimeDate &&
+                    endTimeDate.getDate() !== startTimeDate.getDate()
+                ) {
+                    now.setDate(now.getDate() + 1);
+                }
+
+                now.setHours(hours, minutes, 0, 0);
+                setDate(now);
+            }
+        }, [time, shift, type]);
 
         const updateShiftScan = async () => {
             setIsLoading(true);
@@ -56,6 +83,13 @@ export const CheckInCheckOutModal = memo(
             }
         };
 
+        const handleTimeChange = (e) => {
+            const newTime = e.value;
+            const updatedDate = new Date(date);
+            updatedDate.setHours(newTime.getHours(), newTime.getMinutes(), 0, 0);
+            setDate(updatedDate);
+        };
+
         return (
             <Dialog
                 onHide={() => clearCheckInCheckoutProps()}
@@ -64,9 +98,11 @@ export const CheckInCheckOutModal = memo(
             >
                 <Calendar
                     value={date}
-                    onChange={(e) => setDate(e.value)}
+                    onChange={handleTimeChange}
                     showIcon
                     showTime
+                    timeOnly
+                    mask="99:99"
                     locale="ru"
                     hourFormat="24"
                     placeholder={`Время ${type === 'checkIn' ? 'прихода' : 'ухода'}`}
