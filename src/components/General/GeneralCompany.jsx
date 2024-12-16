@@ -87,12 +87,13 @@ const InternalTabs = ({ urls }) => {
             </div>
         ),
         plans: (
-            <div>
-                <div className="flex mt-5 gap-10  w-[100%]  flex-col md:flex-row align-center items-center  justify-center align-top">
+            <div className="flex flex-col gap-3  justify-center ">
+                <div className="flex mt-5 gap-10  w-[100%]  flex-row md:flex-row align-center items-center  justify-center align-top">
                     <StoreSalesPlan stores={stores} />
+                    <SetStoresSalesPlan />
                 </div>
                 <div className="flex mt-5 gap-10 w-[100%] flex-col md:flex-col justify-center align-top items-center">
-                    <SetStoresSalesPlan />
+                    {/* <SetStoresSalesPlan /> */}
                     <EmplSalesPlans />
                 </div>
             </div>
