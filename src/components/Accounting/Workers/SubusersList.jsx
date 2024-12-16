@@ -19,7 +19,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    // Фильтрация отделов на основе выбранного магазина
     const filteredDepartments = useMemo(() => {
         if (selectedStore) {
             return departments.filter((dept) => dept.storeId === selectedStore._id);
@@ -27,7 +26,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         return departments;
     }, [selectedStore, departments]);
 
-    // Сброс выбранного отдела, если он не принадлежит выбранному магазину
     useEffect(() => {
         if (selectedDepartment) {
             const departmentBelongsToStore = filteredDepartments.some(
@@ -39,7 +37,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         }
     }, [selectedStore, filteredDepartments, selectedDepartment]);
 
-    // Логика фильтрации сотрудников
     const filteredSubusers = useMemo(() => {
         return subUsers?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -107,7 +104,6 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
         </div>
     );
 
-    // Создаём мапу для быстрого доступа к названию департамента
     const departmentsMap = useMemo(() => {
         const map = new Map();
         departments?.forEach((dept) => {
@@ -142,7 +138,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
 
                             {/* Dropdown Content */}
                             {isFilterOpen && (
-                                <div className="absolute z-10 bg-white p-4 mt-2 w-fit shadow-lg rounded-lg border border-gray-200">
+                                <div className="absolute z-10 min-w-[20vw] bg-white p-4 mt-2 w-fit shadow-lg rounded-lg border border-gray-200">
                                     {/* Department Dropdown */}
                                     <div className="flex justify-end mb-2">
                                         <button
@@ -159,7 +155,7 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                                         optionLabel="storeName"
                                         showClear
                                         placeholder="Магазин"
-                                        className="w-fit mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                        className="w-full mb-3 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                     />
                                     <Dropdown
                                         value={selectedDepartment}
@@ -168,32 +164,12 @@ export const SubusersList = ({ departments, subUsers, stores }) => {
                                         options={filteredDepartments}
                                         optionLabel="name"
                                         placeholder="Отдел"
-                                        className="w-fit mb-3 border-blue-500 border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                        className="w-full mb-3  border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
                                         disabled={filteredDepartments?.length === 0}
                                     />
                                 </div>
                             )}
                         </div>
-                        {/*                         
-                        <Dropdown
-                            value={selectedStore}
-                            onChange={(e) => setSelectedStore(e.value)}
-                            options={stores || []}
-                            optionLabel="storeName"
-                            showClear
-                            placeholder="Магазин"
-                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                        />
-                        <Dropdown
-                            value={selectedDepartment}
-                            onChange={(e) => setSelectedDepartment(e.value)}
-                            showClear
-                            options={filteredDepartments}
-                            optionLabel="name"
-                            placeholder="Отдел"
-                            className="flex-1 border-blue-500 border-2 text-white rounded-lg focus:ring-2 focus:ring-blue-300"
-                            disabled={filteredDepartments?.length === 0}
-                        /> */}
                     </div>
                     <div className="relative">
                         <InputText

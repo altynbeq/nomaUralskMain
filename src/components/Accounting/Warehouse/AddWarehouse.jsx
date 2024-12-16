@@ -171,7 +171,11 @@ export const AddWarehouse = () => {
                 header="Добавить списание"
                 visible={isModalOpen}
                 onHide={() => setIsModalOpen(false)}
-                style={{ width: isSmallScreen ? '150vw' : '40vw' }}
+                className="rounded-2xl"
+                position="center" // ensure dialog is centered
+                modal // ensures that background is dimmed and dialog is on top
+                breakpoints={{ '960px': '90vw' }} // on screens < 960px width: 90vw
+                style={{ width: '40vw', top: '2rem' }} // default width for larger screens
             >
                 <AddWarehouseForm
                     formData={formData}

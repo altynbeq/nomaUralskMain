@@ -21,7 +21,6 @@ export const WorkersShiftsStats = () => {
     const [currentPage, setCurrentPage] = useState(0); // Стейт для текущей страницы
     const user = useAuthStore((state) => state.user);
 
-    // Получаем данные из API
     useEffect(() => {
         (async () => {
             const companyId = user?.companyId ? user.companyId : user?.id;
@@ -30,8 +29,14 @@ export const WorkersShiftsStats = () => {
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/shifts/stats/company/${companyId}`);
-                setSubUserShiftsStats(response.data);
-                setFilteredStats(response.data);
+                const dataWithTotalHours = response.data.map((item) => ({
+                    ...item,
+                    totalHours:
+                        (item.totalWorkedHours.hours || 0) +
+                        (item.totalWorkedHours.minutes || 0) / 60, // переводим минуты в часы
+                }));
+                setSubUserShiftsStats(dataWithTotalHours);
+                setFilteredStats(dataWithTotalHours);
             } catch (error) {
                 console.error('Ошибка при загрузке данных: ', error);
             } finally {
@@ -40,7 +45,6 @@ export const WorkersShiftsStats = () => {
         })();
     }, [user?.companyId, user?.id]);
 
-    // Фильтруем по магазину и отделу
     useEffect(() => {
         let filteredData = [...subUserShiftsStats];
 
@@ -146,7 +150,15 @@ export const WorkersShiftsStats = () => {
                             sortable
                             filterPlaceholder="Поиск по отделу"
                         />
-                        <Column field="totalShifts" header="Количество смен" sortable />
+                        <Column field="totalShifts" header="Смены" sortable />
+                        <Column
+                            field="totalHours"
+                            header="Часы"
+                            body={(rowData) =>
+                                `${Math.floor(rowData.totalHours)} ч. ${Math.round((rowData.totalHours % 1) * 60)} м.`
+                            }
+                            sortable
+                        />
                         <Column
                             header="Отработано смен"
                             body={(rowData) => {
@@ -199,7 +211,7 @@ export const WorkersShiftsStats = () => {
                                 options={storeOptions}
                                 onChange={(e) => setStoreFilter(e.value)}
                                 placeholder="Выберите магазин"
-                                className="w-full bg-blue-500 rounded-lg text-white"
+                                className="w-full border-blue-500 border-2 rounded-lg text-white"
                             />
                         </div>
 
@@ -213,7 +225,7 @@ export const WorkersShiftsStats = () => {
                                 options={departmentOptions}
                                 onChange={(e) => setDepartmentFilter(e.value)}
                                 placeholder="Выберите отдел"
-                                className="w-full bg-blue-500 rounded-lg text-white"
+                                className="w-full border-blue-500 border-2 rounded-lg text-white"
                             />
                         </div>
 
