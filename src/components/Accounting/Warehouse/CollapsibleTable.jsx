@@ -8,7 +8,7 @@ import { formatDate } from '../../../methods/dataFormatter';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { useAuthStore } from '../../../store/authStore';
 
-export default function CollapsibleTableWithDetails() {
+export default function CollapsibleTableWithDetails({ title }) {
     const clientId = useAuthStore((state) => state.user.id);
     const [writeOffs, setWriteOffs] = useState([]);
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
@@ -149,9 +149,9 @@ export default function CollapsibleTableWithDetails() {
     };
 
     return (
-        <div className="mx-auto w-full sm:w-[90%] flex flex-col subtle-border p-4">
+        <div className="mx-auto w-[100%] mt-5 sm:w-[90%] flex flex-col subtle-border p-4">
             <div className="flex flex-col sm:flex-row justify-between items-center">
-                <h3 className="text-md mb-4 sm:mb-0">Список списаний</h3>
+                <h3 className="text-md mb-4 sm:mb-0">{title ? title : 'Список списаний'}</h3>
                 <div className="flex flex-col sm:flex-row justify-end gap-6 mb-3 w-full sm:w-auto">
                     <Calendar
                         value={dateRange}

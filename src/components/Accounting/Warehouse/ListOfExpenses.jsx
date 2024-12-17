@@ -7,7 +7,7 @@ import { InputText } from 'primereact/inputtext';
 import { EditProductModal } from '../../../components/EditProductModal';
 import { useCompanyStore } from '../../../store';
 
-export default function ListOfExpenses() {
+export default function ListOfExpenses({ title }) {
     const warehouses = useCompanyStore((state) => state.warehouses);
     const products = useCompanyStore((state) => state.products);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
@@ -64,7 +64,9 @@ export default function ListOfExpenses() {
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4 ">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
-                    <p className="flex text-[1rem] font-semibold align-left">Список товаров</p>
+                    <p className="flex text-[1rem] font-semibold align-left">
+                        {title ? title : 'Список товаров'}
+                    </p>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <div className="flex flex-row gap-2">
                             <Button
