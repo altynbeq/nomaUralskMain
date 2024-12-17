@@ -484,17 +484,18 @@ export const EmployeesCalendar = () => {
 
                 setSelectedDays((prevSelectedDays) => {
                     const exists = prevSelectedDays.some(
-                        (selected) => selected.employeeId === employee._id && selected.day === day,
+                        (selected) =>
+                            selected.employee._id === employee._id && selected.day === day,
                     );
                     if (exists) {
                         // Удаляем отметку
                         return prevSelectedDays.filter(
                             (selected) =>
-                                !(selected.employeeId === employee._id && selected.day === day),
+                                !(selected.employee._id === employee._id && selected.day === day),
                         );
                     } else {
-                        // Добавляем отметку
-                        return [...prevSelectedDays, { employee, day }];
+                        // Добавляем отметку с включением shifts
+                        return [...prevSelectedDays, { employee, day, shifts }];
                     }
                 });
             } else {

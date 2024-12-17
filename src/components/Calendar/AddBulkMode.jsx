@@ -1,5 +1,3 @@
-// AddShift.js
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Calendar } from 'primereact/calendar';
