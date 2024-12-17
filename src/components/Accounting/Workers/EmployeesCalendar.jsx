@@ -587,11 +587,7 @@ export const EmployeesCalendar = () => {
                                 stores={stores}
                                 setOpen={setShowBulkdModeModal}
                                 open={showBulkModeModal === 'add'}
-                                subUsers={Array.from(
-                                    new Map(
-                                        selectedDays.map((d) => [d.employee._id, d.employee]),
-                                    ).values(),
-                                )}
+                                subUsers={selectedDays}
                             />
                             <div className="flex flex-row gap-2">
                                 <button
