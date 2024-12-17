@@ -127,7 +127,7 @@ export const CalendarTable = memo(
                                     // Проверяем, выбран ли этот день для данного сотрудника в bulkMode
                                     const isSelected = selectedDays.some(
                                         (selected) =>
-                                            selected.employeeId === employee._id &&
+                                            selected.employee._id === employee._id &&
                                             selected.day === day,
                                     );
 

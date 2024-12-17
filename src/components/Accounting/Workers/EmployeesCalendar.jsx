@@ -17,6 +17,7 @@ import { CheckInCheckOutModal } from './CheckInCheckOutModal';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { DateTime } from 'luxon';
 import { AddSingleShift } from '../../Calendar/AddSingleShift';
+import { AddBulkMode } from '../../Calendar/AddBulkMode';
 
 export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -491,7 +492,7 @@ export const EmployeesCalendar = () => {
                         );
                     } else {
                         // Добавляем отметку
-                        return [...prevSelectedDays, { employeeId: employee._id, day }];
+                        return [...prevSelectedDays, { employee, day }];
                     }
                 });
             } else {
@@ -574,6 +575,7 @@ export const EmployeesCalendar = () => {
                                     showClear
                                 />
                             )}
+                            {/* <AddBulkMode stores={stores}  /> */}
                             <div className="flex flex-row gap-2">
                                 <button
                                     onClick={() => setShowModalAddShift(true)}
