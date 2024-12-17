@@ -164,7 +164,7 @@ export const CalendarTable = memo(
                                             )}
                                             {isSelected && isSelectable && (
                                                 <FaCheck
-                                                    className="text-center absolute top-1/2 left-[40%] transform -translate-x-1/2 -translate-y-1/2 text-black text-xs"
+                                                    className="text-center absolute top-1/2 left-[41%] transform -translate-x-1/2 -translate-y-1/2 text-black text-xs"
                                                     title="Выбранный день"
                                                 />
                                             )}
