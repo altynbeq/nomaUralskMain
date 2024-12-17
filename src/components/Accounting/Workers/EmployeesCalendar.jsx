@@ -12,10 +12,13 @@ import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
 import { CheckInCheckOutModal } from './CheckInCheckOutModal';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { DateTime } from 'luxon';
 import { AddSingleShift } from '../../Calendar/AddSingleShift';
+import { AddBulkMode } from '../../Calendar/AddBulkMode';
+import { EditBulkMode } from '../../Calendar/EditBulkMode';
 
 export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -41,6 +44,13 @@ export const EmployeesCalendar = () => {
     const [selectedEmployeeForNewShift, setSelectedEmployeeForNewShift] = useState(null);
     const [showAddShiftModal, setShowAddShiftModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const modeOptions = [
+        { label: 'Добавить', value: 'add' },
+        { label: 'Редактировать', value: 'edit' },
+    ];
+    const [bulkMode, setBulkMode] = useState(null);
+    const [selectedDays, setSelectedDays] = useState([]);
+    const [showBulkModeModal, setShowBulkdModeModal] = useState('');
 
     useEffect(() => {
         const companyId = user?.companyId ? user.companyId : user?.id;
@@ -54,6 +64,7 @@ export const EmployeesCalendar = () => {
                 setSubUsersState(response.data);
             } catch (error) {
                 console.log(error);
+                toast.error('Ошибка при загрузке сотрудников.');
             } finally {
                 setIsLoading(false);
             }
@@ -458,22 +469,86 @@ export const EmployeesCalendar = () => {
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {
-            if (shifts.length === 0) {
-                // День без смен, открываем модалку для добавления смены с автоматически выбранным сотрудником
-                setSelectedEmployeeForNewShift(employee);
-                setSelectedDateForNewShift({
-                    day,
-                    month: month + 1, // Luxon использует 1-12 для месяцев
-                    year,
+            const date = new Date(year, month, day); // Создаем полноценную дату
+
+            if (bulkMode) {
+                if (bulkMode === 'add') {
+                    if (shifts.length > 0) {
+                        toast.warn(
+                            `У сотрудника ${employee.name} уже есть смена на ${date.toLocaleDateString('ru-RU')}.`,
+                        );
+                        return;
+                    }
+                } else if (bulkMode === 'edit') {
+                    if (shifts.length === 0) {
+                        toast.warn(
+                            `У сотрудника ${employee.name} нет смены на ${date.toLocaleDateString('ru-RU')}.`,
+                        );
+                        return;
+                    }
+                }
+
+                setSelectedDays((prevSelectedDays) => {
+                    const exists = prevSelectedDays.some(
+                        (selected) =>
+                            selected.employee._id === employee._id &&
+                            selected.date.getTime() === date.getTime(),
+                    );
+                    if (exists) {
+                        // Если запись уже есть, удаляем ее
+                        return prevSelectedDays.filter(
+                            (selected) =>
+                                !(
+                                    selected.employee._id === employee._id &&
+                                    selected.date.getTime() === date.getTime()
+                                ),
+                        );
+                    } else {
+                        // Добавляем новую запись с полноценной датой
+                        return [...prevSelectedDays, { employee, date, day, shifts }];
+                    }
                 });
-                setShowAddShiftModal(true);
             } else {
-                // День со сменами, открываем модалку с деталями смен
-                setSelectedDayShiftsModal(shifts);
+                if (shifts.length === 0) {
+                    // День без смен
+                    setSelectedEmployeeForNewShift(employee);
+                    setSelectedDateForNewShift({
+                        day: date.getDate(),
+                        month: date.getMonth() + 1,
+                        year: date.getFullYear(),
+                    });
+                    setShowAddShiftModal(true);
+                } else {
+                    // День со сменами
+                    setSelectedDayShiftsModal(shifts);
+                }
             }
         },
-        [month, year],
+        [bulkMode, month, year],
     );
+
+    const getBulkButtonLabel = () => {
+        const selectedMode = modeOptions.find((o) => o.value === bulkMode);
+        return selectedMode ? selectedMode.label : 'Режим';
+    };
+
+    const handleBulkAction = () => {
+        if (bulkMode === 'add') {
+            setShowBulkdModeModal('add');
+        } else if (bulkMode === 'edit') {
+            setShowBulkdModeModal('edit');
+        }
+    };
+
+    const handleBulkModeChange = (e) => {
+        setBulkMode(e.value);
+        setSelectedDays([]);
+    };
+
+    const handleClearBulkMode = () => {
+        setBulkMode(null);
+        setSelectedDays([]);
+    };
 
     return (
         <div>
@@ -496,6 +571,51 @@ export const EmployeesCalendar = () => {
                     </div>
                     <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
                         <div className="flex flex-row gap-2">
+                            {bulkMode ? (
+                                <div>
+                                    <Button
+                                        disabled={selectedDays.length === 0}
+                                        onClick={handleBulkAction}
+                                        className={`px-4 py-2 rounded-2xl transition 
+                                        ${
+                                            selectedDays.length === 0
+                                                ? 'bg-gray-400 text-gray-800 cursor-not-allowed'
+                                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                        }`}
+                                        label={getBulkButtonLabel()}
+                                    />
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-times"
+                                        className="p-button-rounded p-button-danger"
+                                        onClick={handleClearBulkMode}
+                                        disabled={!bulkMode}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex gap-2 min-w-[170px] ">
+                                    <Dropdown
+                                        value={bulkMode}
+                                        onChange={handleBulkModeChange}
+                                        options={modeOptions}
+                                        placeholder="Режим"
+                                        showClear
+                                        className="w-full border-blue-500 border-2 rounded-lg"
+                                    />
+                                </div>
+                            )}
+                            <AddBulkMode
+                                stores={stores}
+                                setOpen={setShowBulkdModeModal}
+                                open={showBulkModeModal === 'add'}
+                                subUsers={selectedDays}
+                            />
+                            <EditBulkMode
+                                stores={stores}
+                                setOpen={setShowBulkdModeModal}
+                                open={showBulkModeModal === 'edit'}
+                                subUsers={selectedDays}
+                            />
                             <div className="flex flex-row gap-2">
                                 <button
                                     onClick={() => setShowModalAddShift(true)}
@@ -542,6 +662,8 @@ export const EmployeesCalendar = () => {
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
                     onDayClick={onDayClick}
+                    selectedDays={selectedDays} // Передаем selectedDays
+                    bulkMode={bulkMode} // Передаем bulkMode
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}

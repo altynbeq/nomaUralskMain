@@ -5,7 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import avatar from '../../data/avatar.jpg';
-import axiosInstance from '../../api/axiosInstance';
+import { axiosInstance } from '../../api/axiosInstance';
 
 export const SubuserPlanModal = ({ isVisible, onHide, subuser, successSetPlan }) => {
     const categories = ['Розы', 'Шоколадки', 'Боксы'];
