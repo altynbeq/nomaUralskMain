@@ -18,6 +18,7 @@ import { axiosInstance } from '../../../api/axiosInstance';
 import { DateTime } from 'luxon';
 import { AddSingleShift } from '../../Calendar/AddSingleShift';
 import { AddBulkMode } from '../../Calendar/AddBulkMode';
+import { EditBulkMode } from '../../Calendar/EditBulkMode';
 
 export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -587,6 +588,12 @@ export const EmployeesCalendar = () => {
                                 stores={stores}
                                 setOpen={setShowBulkdModeModal}
                                 open={showBulkModeModal === 'add'}
+                                subUsers={selectedDays}
+                            />
+                            <EditBulkMode
+                                stores={stores}
+                                setOpen={setShowBulkdModeModal}
+                                open={showBulkModeModal === 'edit'}
                                 subUsers={selectedDays}
                             />
                             <div className="flex flex-row gap-2">

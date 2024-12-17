@@ -220,7 +220,7 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
     return (
         <>
             <Dialog
-                header="Массовое добавление смен"
+                header="Добавление смен"
                 visible={open}
                 onHide={() => setOpen(false)}
                 className="bg-white p-6 rounded-lg shadow-lg min-w-[400px] max-w-4xl w-full overflow-y-auto"
@@ -288,6 +288,7 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                             timeOnly
                                             hourFormat="24"
                                             showIcon
+                                            mask="99:99"
                                             locale="ru"
                                             placeholder="Выберите время начала"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
@@ -305,6 +306,7 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                             timeOnly
                                             hourFormat="24"
                                             showIcon
+                                            mask="99:99"
                                             locale="ru"
                                             placeholder="Выберите время окончания"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
