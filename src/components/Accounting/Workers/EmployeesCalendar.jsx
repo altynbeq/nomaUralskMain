@@ -45,8 +45,8 @@ export const EmployeesCalendar = () => {
     const [showAddShiftModal, setShowAddShiftModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const modeOptions = [
-        { label: 'Добавление', value: 'add' },
-        { label: 'Редактирование', value: 'edit' },
+        { label: 'Добавить', value: 'add' },
+        { label: 'Редактировать', value: 'edit' },
     ];
     const [bulkMode, setBulkMode] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
@@ -574,14 +574,15 @@ export const EmployeesCalendar = () => {
                                     label={getBulkButtonLabel()}
                                 />
                             ) : (
-                                <Dropdown
-                                    value={bulkMode}
-                                    onChange={(e) => setBulkMode(e.value)}
-                                    options={modeOptions}
-                                    placeholder="Режим"
-                                    className="w-full border-blue-500 border-2 rounded-lg"
-                                    showClear
-                                />
+                                <div className="flex gap-2">
+                                    <Dropdown
+                                        value={bulkMode}
+                                        onChange={(e) => setBulkMode(e.value)}
+                                        options={modeOptions}
+                                        placeholder="Режим"
+                                        className="w-full border-blue-500 border-2 rounded-lg"
+                                    />
+                                </div>
                             )}
                             <AddBulkMode
                                 stores={stores}

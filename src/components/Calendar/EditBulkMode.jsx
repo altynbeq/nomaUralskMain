@@ -5,7 +5,6 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { toast } from 'react-toastify';
-import { Loader } from '../../components/Loader';
 import { axiosInstance } from '../../api/axiosInstance';
 import { addLocale } from 'primereact/api';
 import { DateTime } from 'luxon';
@@ -336,11 +335,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 className="bg-white p-6 rounded-lg shadow-lg min-w-[600px] max-w-4xl w-full overflow-y-auto"
             >
                 <div className="relative">
-                    {isLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
-                            <Loader />
-                        </div>
-                    )}
                     <div className={`flex flex-col gap-4 ${isLoading ? 'opacity-50' : ''}`}>
                         {shiftsData.length > 0 ? (
                             <>
@@ -449,8 +443,14 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                 <div className="flex justify-end mt-4">
                                     <Button
                                         onClick={handleSaveAll}
-                                        className="p-button-success bg-green-500 rounded-full p-2 text-white"
-                                        label="Сохранить все изменения"
+                                        className={`flex-1 bg-blue-500 text-white py-2 px-4 rounded ${
+                                            isLoading
+                                                ? 'opacity-50 cursor-not-allowed'
+                                                : 'hover:bg-blue-600'
+                                        } transition duration-200`}
+                                        label={
+                                            isLoading ? 'Сохранение...' : 'Сохранить все изменения'
+                                        }
                                         disabled={isLoading}
                                     />
                                 </div>
