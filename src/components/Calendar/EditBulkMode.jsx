@@ -3,14 +3,13 @@ import { Dialog } from 'primereact/dialog';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { toast } from 'react-toastify';
 import { Loader } from '../../components/Loader';
 import { axiosInstance } from '../../api/axiosInstance';
 import { addLocale } from 'primereact/api';
 import { DateTime } from 'luxon';
-import { FaTimes } from 'react-icons/fa';
 
-// Устанавливаем русскую локализацию для Calendar
 addLocale('ru', {
     firstDayOfWeek: 1,
     dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
@@ -93,7 +92,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     date: dateOnly, // Добавляем отдельное поле даты
                     startTime: shiftStart,
                     endTime: shiftEnd,
-                    selectedStore: store, // Устанавливаем полный объект магазина или null
+                    selectedStore: store || defaultStore, // Устанавливаем полный объект магазина или дефолтный
                     id: shift._id, // Устанавливаем id для корректного рендера
                     isEdited: false, // Флаг для отслеживания изменений
                 });
@@ -102,7 +101,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
 
         console.log('Transformed Shifts:', transformed); // Для отладки
         setShiftsData(transformed);
-    }, [subUsers, stores]);
+    }, [subUsers, stores, defaultStore]);
 
     // Обработчик изменения поля
     const handleFieldChange = (index, field, value) => {
@@ -139,7 +138,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 }
             } else if (field === 'selectedStore') {
                 // value уже содержит полный объект магазина или null
-                shift.selectedStore = value || null;
+                shift.selectedStore = value || defaultStore; // Устанавливаем дефолтный магазин, если value null
             } else {
                 // Для остальных полей просто обновляем значение
                 shift[field] = value;
@@ -284,7 +283,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                             date: newDate,
                             startTime: newStartTime,
                             endTime: newEndTime,
-                            selectedStore: updatedStore, // Устанавливаем полный объект магазина
+                            selectedStore: updatedStore || defaultStore, // Устанавливаем полный объект магазина или дефолтный
                             isEdited: false,
                         };
                     }
@@ -301,19 +300,26 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         }
     };
 
-    // Обработчик удаления смены
-    const handleDelete = async (shiftId) => {
-        if (!window.confirm('Вы уверены, что хотите удалить эту смену?')) {
-            return;
-        }
+    const handleDelete = (shiftId) => {
+        confirmDialog({
+            className: 'custom-confirm-dialog',
+            message: 'Вы уверены, что хотите удалить эту смену?',
+            header: 'Подтверждение удаления',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Да',
+            rejectLabel: 'Нет',
+            accept: () => deleteShift(shiftId),
+            reject: () => toast.info('Удаление отменено'),
+        });
+    };
 
+    const deleteShift = async (shiftId) => {
         setIsLoading(true);
         try {
             await axiosInstance.delete(`/shifts/${shiftId}`);
             setShiftsData((prev) => prev.filter((shift) => shift.id !== shiftId));
             toast.success('Смена успешно удалена');
         } catch (error) {
-            console.error('Ошибка при удалении смены:', error);
             toast.error('Не удалось удалить смену.');
         } finally {
             setIsLoading(false);
@@ -321,128 +327,142 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
     };
 
     return (
-        <Dialog
-            header="Редактирование смен"
-            visible={open}
-            onHide={() => setOpen(false)}
-            className="bg-white p-6 rounded-lg shadow-lg min-w-[600px] max-w-4xl w-full overflow-y-auto"
-        >
-            <div className="relative">
-                {isLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
-                        <Loader />
-                    </div>
-                )}
-                <div className={`flex flex-col gap-4 ${isLoading ? 'opacity-50' : ''}`}>
-                    {shiftsData.length > 0 ? (
-                        <>
-                            {shiftsData.map((shift, index) => (
-                                <div
-                                    key={shift.id}
-                                    className="border p-4 rounded-lg bg-gray-50 relative"
-                                >
-                                    <button
-                                        type="button"
-                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                                        onClick={() => handleDelete(shift.id)}
-                                        title="Удалить смену"
-                                    >
-                                        <FaTimes />
-                                    </button>
-                                    <h3 className="font-bold mb-6">{shift.employeeName}</h3>
+        <>
+            {/* ConfirmDialog Компонент */}
+            <ConfirmDialog />
 
-                                    {/* Поле даты */}
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700 mb-1">
-                                            Дата смены
-                                        </label>
-                                        <Calendar
-                                            value={shift.date}
-                                            onChange={(e) => handleDateChange(index, e.value)}
-                                            dateFormat="dd.mm.yy"
-                                            mask="99.99.9999"
-                                            showIcon
-                                            locale="ru"
-                                            placeholder="Выберите дату смены"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                        />
-                                    </div>
-
-                                    {/* Поле магазина */}
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700 mb-1">Магазин</label>
-                                        <Dropdown
-                                            value={shift.selectedStore}
-                                            onChange={(e) => {
-                                                console.log(`Dropdown changed to:`, e.value); // Для отладки
-                                                handleFieldChange(index, 'selectedStore', e.value);
-                                            }}
-                                            options={stores}
-                                            optionLabel="storeName"
-                                            placeholder="Выберите магазин"
-                                            className="w-full border-2 text-black rounded-lg"
-                                            showClear // Оставьте, если хотите разрешить очистку выбора
-                                        />
-                                    </div>
-
-                                    {/* Поле начала смены */}
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700 mb-1">
-                                            Начало смены
-                                        </label>
-                                        <Calendar
-                                            value={shift.startTime}
-                                            onChange={(e) =>
-                                                handleFieldChange(index, 'startTime', e.value)
-                                            }
-                                            showTime
-                                            timeOnly
-                                            hourFormat="24"
-                                            showIcon
-                                            mask="99:99"
-                                            locale="ru"
-                                            placeholder="Выберите время начала"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                        />
-                                    </div>
-
-                                    {/* Поле конца смены */}
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700 mb-1">
-                                            Конец смены
-                                        </label>
-                                        <Calendar
-                                            value={shift.endTime}
-                                            onChange={(e) =>
-                                                handleFieldChange(index, 'endTime', e.value)
-                                            }
-                                            showTime
-                                            timeOnly
-                                            hourFormat="24"
-                                            showIcon
-                                            mask="99:99"
-                                            locale="ru"
-                                            placeholder="Выберите время окончания"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                            {/* Кнопка сохранения всех изменений */}
-                            <div className="flex justify-end mt-4">
-                                <Button
-                                    onClick={handleSaveAll}
-                                    className="bg-green-500 text-white rounded-md p-2"
-                                    label="Сохранить все изменения"
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <p className="text-gray-500">Нет смен для выбранных дат.</p>
+            <Dialog
+                header="Редактирование смен"
+                visible={open}
+                onHide={() => setOpen(false)}
+                className="bg-white p-6 rounded-lg shadow-lg min-w-[600px] max-w-4xl w-full overflow-y-auto"
+            >
+                <div className="relative">
+                    {isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
+                            <Loader />
+                        </div>
                     )}
+                    <div className={`flex flex-col gap-4 ${isLoading ? 'opacity-50' : ''}`}>
+                        {shiftsData.length > 0 ? (
+                            <>
+                                {shiftsData.map((shift, index) => (
+                                    <div
+                                        key={shift.id}
+                                        className="border p-4 rounded-lg bg-gray-50"
+                                    >
+                                        <h3 className="font-bold mb-6">{shift.employeeName}</h3>
+
+                                        {/* Поле даты */}
+                                        <div className="mb-4">
+                                            <label className="block text-gray-700 mb-1">
+                                                Дата смены
+                                            </label>
+                                            <Calendar
+                                                value={shift.date}
+                                                onChange={(e) => handleDateChange(index, e.value)}
+                                                dateFormat="dd.mm.yy"
+                                                mask="99.99.9999"
+                                                showIcon
+                                                locale="ru"
+                                                placeholder="Выберите дату смены"
+                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            />
+                                        </div>
+
+                                        {/* Поле магазина */}
+                                        <div className="mb-4">
+                                            <label className="block text-gray-700 mb-1">
+                                                Магазин
+                                            </label>
+                                            <Dropdown
+                                                value={shift.selectedStore}
+                                                onChange={(e) => {
+                                                    console.log(`Dropdown changed to:`, e.value); // Для отладки
+                                                    handleFieldChange(
+                                                        index,
+                                                        'selectedStore',
+                                                        e.value,
+                                                    );
+                                                }}
+                                                options={stores}
+                                                optionLabel="storeName"
+                                                placeholder="Выберите магазин"
+                                                className="w-full border-2 text-black rounded-lg"
+                                                showClear
+                                            />
+                                        </div>
+
+                                        {/* Поле начала смены */}
+                                        <div className="mb-4">
+                                            <label className="block text-gray-700 mb-1">
+                                                Начало смены
+                                            </label>
+                                            <Calendar
+                                                value={shift.startTime}
+                                                onChange={(e) =>
+                                                    handleFieldChange(index, 'startTime', e.value)
+                                                }
+                                                showTime
+                                                timeOnly
+                                                hourFormat="24"
+                                                showIcon
+                                                mask="99:99"
+                                                locale="ru"
+                                                placeholder="Выберите время начала"
+                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            />
+                                        </div>
+
+                                        {/* Поле конца смены */}
+                                        <div className="mb-4">
+                                            <label className="block text-gray-700 mb-1">
+                                                Конец смены
+                                            </label>
+                                            <Calendar
+                                                value={shift.endTime}
+                                                onChange={(e) =>
+                                                    handleFieldChange(index, 'endTime', e.value)
+                                                }
+                                                showTime
+                                                timeOnly
+                                                hourFormat="24"
+                                                showIcon
+                                                mask="99:99"
+                                                locale="ru"
+                                                placeholder="Выберите время окончания"
+                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            />
+                                        </div>
+
+                                        {/* Кнопка удаления на низу карточки */}
+                                        <div className="flex justify-end">
+                                            <Button
+                                                type="button"
+                                                label="Удалить смену"
+                                                icon="pi pi-trash"
+                                                className="p-button-danger bg-red-400 rounded-full p-2 text-white"
+                                                onClick={() => handleDelete(shift.id)}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                                {/* Кнопка сохранения всех изменений */}
+                                <div className="flex justify-end mt-4">
+                                    <Button
+                                        onClick={handleSaveAll}
+                                        className="p-button-success bg-green-500 rounded-full p-2 text-white"
+                                        label="Сохранить все изменения"
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-gray-500">Нет смен для выбранных дат.</p>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </Dialog>
+            </Dialog>
+        </>
     );
 };
