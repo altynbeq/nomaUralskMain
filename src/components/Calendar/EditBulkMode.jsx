@@ -79,6 +79,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     endTime: shiftEnd,
                     selectedStore: shift.selectedStore || null,
                     id: shift._id, // Устанавливаем id для корректного рендера
+                    isEdited: false, // Флаг для отслеживания изменений
                 });
             });
         });
@@ -86,53 +87,85 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         setShiftsData(transformed);
     }, [subUsers]);
 
-    const handleSave = async (shiftId, index) => {
+    // Обработчик изменения времени или магазина
+    const handleFieldChange = (index, field, value) => {
+        setShiftsData((prev) => {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], [field]: value, isEdited: true };
+            return updated;
+        });
+    };
+
+    // Обработчик сохранения всех изменений
+    const handleSaveAll = async () => {
+        const editedShifts = shiftsData.filter((shift) => shift.isEdited);
+
+        if (editedShifts.length === 0) {
+            toast.info('Нет изменений для сохранения.');
+            return;
+        }
+
         setIsLoading(true);
+
         try {
-            const shift = shiftsData[index];
+            // Создаем массив промисов для обновления всех измененных смен
+            const updatePromises = editedShifts.map((shift) => {
+                let newStart = DateTime.fromJSDate(shift.startTime)
+                    .setZone('UTC+5')
+                    .toUTC()
+                    .toISO();
+                let newEnd = DateTime.fromJSDate(shift.endTime).setZone('UTC+5').toUTC().toISO();
 
-            let newStart = DateTime.fromJSDate(shift.startTime).setZone('UTC+5').toUTC().toISO();
-            let newEnd = DateTime.fromJSDate(shift.endTime).setZone('UTC+5').toUTC().toISO();
+                const startDateTime = DateTime.fromISO(newStart, { zone: 'utc' });
+                const endDateTime = DateTime.fromISO(newEnd, { zone: 'utc' });
+                if (endDateTime <= startDateTime) {
+                    newEnd = endDateTime.plus({ days: 1 }).toISO();
+                }
 
-            const startDateTime = DateTime.fromISO(newStart, { zone: 'utc' });
-            const endDateTime = DateTime.fromISO(newEnd, { zone: 'utc' });
-            if (endDateTime <= startDateTime) {
-                newEnd = endDateTime.plus({ days: 1 }).toISO();
-            }
-
-            const response = await axiosInstance.put(`/shifts/${shiftId}`, {
-                subUserId: shift.subUserId,
-                startTime: newStart,
-                endTime: newEnd,
-                selectedStore: shift.selectedStore._id,
+                return axiosInstance.put(`/shifts/${shift.id}`, {
+                    subUserId: shift.subUserId,
+                    startTime: newStart,
+                    endTime: newEnd,
+                    selectedStore: shift.selectedStore._id,
+                });
             });
 
-            if (response.status === 200) {
-                toast.success('Вы успешно обновили смену');
-                // Обновляем локальное состояние с новыми данными смены
-                setShiftsData((prev) => {
-                    const updated = [...prev];
-                    updated[index] = {
-                        ...updated[index],
-                        startTime: DateTime.fromISO(response.data.startTime, { zone: 'utc' })
-                            .setZone('UTC+5')
-                            .toJSDate(),
-                        endTime: DateTime.fromISO(response.data.endTime, { zone: 'utc' })
-                            .setZone('UTC+5')
-                            .toJSDate(),
-                        selectedStore: response.data.selectedStore || null,
-                    };
-                    return updated;
-                });
-            }
+            // Ждем завершения всех запросов
+            const responses = await Promise.all(updatePromises);
+
+            // Обновляем локальное состояние, отмечая смены как неотредактированные
+            setShiftsData((prev) =>
+                prev.map((shift) => {
+                    const updatedShift = responses.find((res) => res.data.id === shift.id);
+                    if (updatedShift) {
+                        return {
+                            ...shift,
+                            startTime: DateTime.fromISO(updatedShift.data.startTime, {
+                                zone: 'utc',
+                            })
+                                .setZone('UTC+5')
+                                .toJSDate(),
+                            endTime: DateTime.fromISO(updatedShift.data.endTime, { zone: 'utc' })
+                                .setZone('UTC+5')
+                                .toJSDate(),
+                            selectedStore: updatedShift.data.selectedStore || null,
+                            isEdited: false,
+                        };
+                    }
+                    return shift;
+                }),
+            );
+
+            toast.success('Все изменения успешно сохранены.');
         } catch (error) {
-            console.error('Ошибка при обновлении смены:', error);
-            toast.error('Не удалось обновить смену.');
+            console.error('Ошибка при сохранении изменений:', error);
+            toast.error('Не удалось сохранить некоторые изменения.');
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Обработчик удаления смены
     const handleDelete = async (shiftId) => {
         setIsLoading(true);
         try {
@@ -145,22 +178,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleTimeChange = (index, field, value) => {
-        setShiftsData((prev) => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], [field]: value };
-            return updated;
-        });
-    };
-
-    const handleStoreChange = (index, value) => {
-        setShiftsData((prev) => {
-            const updated = [...prev];
-            updated[index].selectedStore = value;
-            return updated;
-        });
     };
 
     return (
@@ -178,81 +195,99 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 )}
                 <div className={`flex flex-col gap-4 ${isLoading ? 'opacity-50' : ''}`}>
                     {shiftsData.length > 0 ? (
-                        shiftsData.map((shift, index) => (
-                            <div
-                                key={shift.id}
-                                className="border p-4 rounded-lg bg-gray-50 relative"
-                            >
-                                <h3 className="font-bold mb-2">{shift.employeeName}</h3>
-                                <p className="text-sm text-gray-600 mb-4">
-                                    Смена ID: {shift.id} | Магазин:{' '}
-                                    {shift.selectedStore?.storeName || 'Не выбран'}
-                                </p>
-
-                                <div className="mb-4">
-                                    <label className="block text-gray-700 mb-1">Магазин</label>
-                                    <Dropdown
-                                        value={shift.selectedStore}
-                                        onChange={(e) => handleStoreChange(index, e.value)}
-                                        options={stores}
-                                        optionLabel="storeName"
-                                        placeholder="Выберите магазин"
-                                        className="w-full border-2 text-black rounded-lg"
-                                        showClear
-                                    />
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block text-gray-700 mb-1">Начало смены</label>
-                                    <Calendar
-                                        value={shift.startTime}
-                                        onChange={(e) =>
-                                            handleTimeChange(index, 'startTime', e.value)
-                                        }
-                                        showTime
-                                        timeOnly
-                                        mask="99:99"
-                                        showIcon
-                                        locale="ru"
-                                        hourFormat="24"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                        placeholder="Выберите время начала"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700 mb-1">Конец смены</label>
-                                    <Calendar
-                                        value={shift.endTime}
-                                        onChange={(e) =>
-                                            handleTimeChange(index, 'endTime', e.value)
-                                        }
-                                        showTime
-                                        timeOnly
-                                        mask="99:99"
-                                        showIcon
-                                        locale="ru"
-                                        hourFormat="24"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                        placeholder="Выберите время окончания"
-                                    />
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <Button
-                                        onClick={() => handleSave(shift.id, index)}
-                                        className="flex-1 bg-blue-400 text-white rounded-md p-2"
-                                        label="Изменить смену"
-                                        disabled={isLoading}
-                                    />
-                                    <Button
-                                        onClick={() => handleDelete(shift.id)}
-                                        className="flex-1 bg-red-400 text-white rounded-md p-2"
-                                        label="Удалить смену"
-                                        disabled={isLoading}
-                                    />
-                                </div>
+                        <>
+                            <div className="flex justify-end">
+                                <Button
+                                    onClick={handleSaveAll}
+                                    className="bg-green-500 text-white rounded-md p-2"
+                                    label="Сохранить все изменения"
+                                    disabled={isLoading}
+                                />
                             </div>
-                        ))
+                            {shiftsData.map((shift, index) => (
+                                <div
+                                    key={shift.id}
+                                    className="border p-4 rounded-lg bg-gray-50 relative"
+                                >
+                                    <h3 className="font-bold mb-2">{shift.employeeName}</h3>
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        Смена ID: {shift.id} | Магазин:{' '}
+                                        {shift.selectedStore?.storeName || 'Не выбран'}
+                                    </p>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">Магазин</label>
+                                        <Dropdown
+                                            value={shift.selectedStore}
+                                            onChange={(e) =>
+                                                handleFieldChange(index, 'selectedStore', e.value)
+                                            }
+                                            options={stores}
+                                            optionLabel="storeName"
+                                            placeholder="Выберите магазин"
+                                            className="w-full border-2 text-black rounded-lg"
+                                            showClear
+                                        />
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">
+                                            Начало смены
+                                        </label>
+                                        <Calendar
+                                            value={shift.startTime}
+                                            onChange={(e) =>
+                                                handleFieldChange(index, 'startTime', e.value)
+                                            }
+                                            showTime
+                                            timeOnly
+                                            mask="99:99"
+                                            showIcon
+                                            locale="ru"
+                                            hourFormat="24"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            placeholder="Выберите время начала"
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">
+                                            Конец смены
+                                        </label>
+                                        <Calendar
+                                            value={shift.endTime}
+                                            onChange={(e) =>
+                                                handleFieldChange(index, 'endTime', e.value)
+                                            }
+                                            showTime
+                                            timeOnly
+                                            mask="99:99"
+                                            showIcon
+                                            locale="ru"
+                                            hourFormat="24"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            placeholder="Выберите время окончания"
+                                        />
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <Button
+                                            onClick={() => handleDelete(shift.id)}
+                                            className="bg-red-400 text-white rounded-md p-2"
+                                            label="Удалить смену"
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                            <div className="flex justify-end mt-4">
+                                <Button
+                                    onClick={handleSaveAll}
+                                    className="bg-green-500 text-white rounded-md p-2"
+                                    label="Сохранить все изменения"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </>
                     ) : (
                         <p className="text-gray-500">Нет смен для выбранных дат.</p>
                     )}
