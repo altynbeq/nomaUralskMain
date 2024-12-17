@@ -157,6 +157,13 @@ body {
     margin-right: 1rem;
 }
 
+.p-dropdown-clear-icon {
+    display: block; /* Обязательно показать иконку */
+    color: #333; /* Цвет кнопки Clear */
+    font-size: 16px; /* Размер */
+    cursor: pointer;
+}
+
 input[type="file"] {
     display: none;
 }

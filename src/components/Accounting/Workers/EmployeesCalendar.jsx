@@ -580,6 +580,7 @@ export const EmployeesCalendar = () => {
                                         onChange={(e) => setBulkMode(e.value)}
                                         options={modeOptions}
                                         placeholder="Режим"
+                                        showClear
                                         className="w-full border-blue-500 border-2 rounded-lg"
                                     />
                                 </div>
