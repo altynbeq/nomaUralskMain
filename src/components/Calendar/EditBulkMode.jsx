@@ -74,13 +74,10 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     shiftEnd = DateTime.fromJSDate(shiftEnd).plus({ days: 1 }).toJSDate();
                 }
 
-                // Извлекаем дату из startTime
-                const dateOnly = DateTime.fromJSDate(shiftStart).startOf('day').toJSDate();
 
                 transformed.push({
                     ...shift,
                     employeeName: employee.name,
-                    date: dateOnly, // Добавляем отдельное поле даты
                     startTime: shiftStart,
                     endTime: shiftEnd,
                     selectedStore: shift.selectedStore || null,
