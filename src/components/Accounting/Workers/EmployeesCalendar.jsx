@@ -600,7 +600,7 @@ export const EmployeesCalendar = () => {
                                     onClick={() => setShowModalAddShift(true)}
                                     className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
                                 >
-                                    <p>Добавить</p>
+                                    <p>Выбор</p>
                                     <FaPlus />
                                 </button>
                                 <AddShift

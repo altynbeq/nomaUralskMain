@@ -99,7 +99,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
             });
         });
 
-        console.log('Transformed Shifts:', transformed); // Для отладки
         setShiftsData(transformed);
     }, [subUsers, stores, defaultStore]);
 
@@ -243,7 +242,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
 
             // Ждём завершения всех запросов
             const responses = await Promise.all(updatePromises);
-            console.log('Server Responses:', responses); // Для отладки
 
             // Обновляем локальное состояние, отмечая смены как неотредактированные
             setShiftsData((prev) =>
