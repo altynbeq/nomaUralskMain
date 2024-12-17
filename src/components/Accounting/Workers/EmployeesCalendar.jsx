@@ -50,7 +50,6 @@ export const EmployeesCalendar = () => {
     ];
     const [bulkMode, setBulkMode] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
-    const [selectedDaysShifts, setSelectedDaysShifts] = useState([]);
     const [showBulkModeModal, setShowBulkdModeModal] = useState('');
 
     useEffect(() => {
