@@ -293,7 +293,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
 
     return (
         <Dialog
-            header="Редактирование смен за выбранные даты"
+            header="Редактирование смен"
             visible={open}
             onHide={() => setOpen(false)}
             className="bg-white p-6 rounded-lg shadow-lg min-w-[600px] max-w-4xl w-full overflow-y-auto"
@@ -320,11 +320,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                     >
                                         <FaTimes />
                                     </button>
-                                    <h3 className="font-bold mb-2">{shift.employeeName}</h3>
-                                    <p className="text-sm text-gray-600 mb-4">
-                                        Смена ID: {shift.id} | Магазин:{' '}
-                                        {shift.selectedStore?.storeName || 'Не выбран'}
-                                    </p>
+                                    <h3 className="font-bold mb-6">{shift.employeeName}</h3>
 
                                     {/* Поле даты */}
                                     <div className="mb-4">
