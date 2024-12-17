@@ -13,6 +13,7 @@ export const CalendarTable = memo(
         isLoading,
         onDayClick,
         selectedDays, // Принимаем selectedDays как пропс
+        bulkMode, // Принимаем bulkMode как пропс
     }) => {
         const handleDayClick = (employee, day, shifts) => {
             onDayClick(employee, day, shifts);
@@ -130,20 +131,40 @@ export const CalendarTable = memo(
                                             selected.day === day,
                                     );
 
+                                    // Определяем, доступен ли выбор этого дня в зависимости от режима и наличия смены
+                                    let isSelectable = true;
+                                    if (bulkMode === 'add') {
+                                        if (shifts.length > 0) {
+                                            isSelectable = false;
+                                        }
+                                    } else if (bulkMode === 'edit') {
+                                        if (shifts.length === 0) {
+                                            isSelectable = false;
+                                        }
+                                    }
+
                                     return (
                                         <td
                                             key={day}
-                                            className="py-1 text-center relative cursor-pointer"
-                                            onClick={() => handleDayClick(employee, day, shifts)}
+                                            className={`py-1 text-center relative cursor-pointer ${
+                                                !isSelectable ? 'opacity-50 cursor-not-allowed' : ''
+                                            }`}
+                                            onClick={() => {
+                                                if (isSelectable) {
+                                                    handleDayClick(employee, day, shifts);
+                                                }
+                                            }}
                                         >
-                                            <div
-                                                className={`w-6 h-6 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
-                                                style={style}
-                                                title={titleText}
-                                            ></div>
-                                            {isSelected && (
+                                            {isSelectable && (
+                                                <div
+                                                    className={`w-6 h-6 flex items-center justify-center rounded-full hover:opacity-75 ${finalClass}`}
+                                                    style={style}
+                                                    title={titleText}
+                                                ></div>
+                                            )}
+                                            {isSelected && isSelectable && (
                                                 <FaCheck
-                                                    className="text-center absolute top-1/2 left-[42%] transform -translate-x-1/2 -translate-y-1/2 text-black text-md"
+                                                    className="text-center absolute top-1/2 left-[43%] transform -translate-x-1/2 -translate-y-1/2 text-white text-xs"
                                                     title="Выбранный день"
                                                 />
                                             )}

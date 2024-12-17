@@ -61,6 +61,7 @@ export const EmployeesCalendar = () => {
                 setSubUsersState(response.data);
             } catch (error) {
                 console.log(error);
+                toast.error('Ошибка при загрузке сотрудников.');
             } finally {
                 setIsLoading(false);
             }
@@ -466,6 +467,18 @@ export const EmployeesCalendar = () => {
     const onDayClick = useCallback(
         (employee, day, shifts) => {
             if (bulkMode) {
+                if (bulkMode === 'add') {
+                    if (shifts.length > 0) {
+                        toast.warn(`У сотрудника ${employee.name} уже есть смена в день ${day}.`);
+                        return;
+                    }
+                } else if (bulkMode === 'edit') {
+                    if (shifts.length === 0) {
+                        toast.warn(`У сотрудника ${employee.name} нет смены в день ${day}.`);
+                        return;
+                    }
+                }
+
                 setSelectedDays((prevSelectedDays) => {
                     const exists = prevSelectedDays.some(
                         (selected) => selected.employeeId === employee._id && selected.day === day,
@@ -501,7 +514,21 @@ export const EmployeesCalendar = () => {
     );
 
     const getBulkButtonLabel = () => {
-        return modeOptions.find((o) => o.value === bulkMode).label;
+        const selectedMode = modeOptions.find((o) => o.value === bulkMode);
+        return selectedMode ? selectedMode.label : 'Режим';
+    };
+
+    const handleBulkAction = () => {
+        if (bulkMode === 'add') {
+            // Логика массового добавления смен
+            // Например, открыть модалку для подтверждения добавления смен
+            toast.info('Массовое добавление смен запущено.');
+            // Реализуйте необходимую логику здесь
+        } else if (bulkMode === 'edit') {
+            // Логика массового редактирования смен
+            toast.info('Массовое редактирование смен запущено.');
+            // Реализуйте необходимую логику здесь
+        }
     };
 
     return (
@@ -528,6 +555,7 @@ export const EmployeesCalendar = () => {
                             {bulkMode ? (
                                 <Button
                                     disabled={selectedDays.length === 0}
+                                    onClick={handleBulkAction}
                                     className={`px-4 py-2 rounded-2xl transition 
                                         ${
                                             selectedDays.length === 0
@@ -593,6 +621,7 @@ export const EmployeesCalendar = () => {
                     getDayColor={getDayColor}
                     onDayClick={onDayClick}
                     selectedDays={selectedDays} // Передаем selectedDays
+                    bulkMode={bulkMode} // Передаем bulkMode
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}
