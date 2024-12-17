@@ -158,6 +158,7 @@ export const AddSingleShift = ({ visible, stores, employee, onHide, selectedDate
                             timeOnly
                             hourFormat="24"
                             showIcon
+                            mask="99:99"
                             locale="ru"
                             placeholder="Выберите время начала"
                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
@@ -171,6 +172,7 @@ export const AddSingleShift = ({ visible, stores, employee, onHide, selectedDate
                             timeOnly
                             hourFormat="24"
                             showIcon
+                            mask="99:99"
                             locale="ru"
                             placeholder="Выберите время окончания"
                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
