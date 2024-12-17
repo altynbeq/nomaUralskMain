@@ -10,6 +10,7 @@ import { addLocale } from 'primereact/api';
 import { DateTime } from 'luxon';
 import { FaTimes } from 'react-icons/fa';
 
+// Устанавливаем русскую локализацию для Calendar
 addLocale('ru', {
     firstDayOfWeek: 1,
     dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
@@ -51,6 +52,9 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Определяем дефолтный магазин (например, первый в списке)
+    const defaultStore = stores.length > 0 ? stores[0] : null;
+
     useEffect(() => {
         const transformed = [];
 
@@ -79,24 +83,31 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     .startOf('day')
                     .toJSDate();
 
+                // Найдите соответствующий магазин из массива stores
+                const store =
+                    stores.find((storeItem) => storeItem._id === shift.selectedStore?._id) || null;
+
                 transformed.push({
                     ...shift,
                     employeeName: employee.name,
                     date: dateOnly, // Добавляем отдельное поле даты
                     startTime: shiftStart,
                     endTime: shiftEnd,
-                    selectedStore: shift.selectedStore || null,
+                    selectedStore: store, // Устанавливаем полный объект магазина или null
                     id: shift._id, // Устанавливаем id для корректного рендера
                     isEdited: false, // Флаг для отслеживания изменений
                 });
             });
         });
 
+        console.log('Transformed Shifts:', transformed); // Для отладки
         setShiftsData(transformed);
-    }, [subUsers]);
+    }, [subUsers, stores]);
 
     // Обработчик изменения поля
     const handleFieldChange = (index, field, value) => {
+        console.log(`Changing field ${field} for shift ${index} to`, value); // Для отладки
+
         setShiftsData((prev) => {
             const updated = [...prev];
             const shift = { ...updated[index], isEdited: true };
@@ -126,6 +137,9 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 } else {
                     shift.startTime = newDateTime.toUTC().toJSDate();
                 }
+            } else if (field === 'selectedStore') {
+                // value уже содержит полный объект магазина или null
+                shift.selectedStore = value || null;
             } else {
                 // Для остальных полей просто обновляем значение
                 shift[field] = value;
@@ -201,6 +215,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
             return;
         }
 
+        // Проверка наличия магазина для всех изменённых смен
+        const invalidShifts = editedShifts.filter((shift) => !shift.selectedStore);
+        if (invalidShifts.length > 0) {
+            toast.error('Все смены должны иметь выбранный магазин.');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -217,12 +238,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     subUserId: shift.subUserId,
                     startTime: newStart,
                     endTime: newEnd,
-                    selectedStore: shift.selectedStore?._id || null,
+                    selectedStore: shift.selectedStore?._id || null, // Отправляем только _id магазина
                 });
             });
 
             // Ждём завершения всех запросов
             const responses = await Promise.all(updatePromises);
+            console.log('Server Responses:', responses); // Для отладки
 
             // Обновляем локальное состояние, отмечая смены как неотредактированные
             setShiftsData((prev) =>
@@ -250,12 +272,19 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                             .setZone('UTC+5')
                             .toJSDate();
 
+                        // Находим соответствующий объект магазина
+                        const updatedStore = updatedShift.data.selectedStore
+                            ? stores.find(
+                                  (store) => store._id === updatedShift.data.selectedStore._id,
+                              ) || null
+                            : null;
+
                         return {
                             ...shift,
                             date: newDate,
                             startTime: newStartTime,
                             endTime: newEndTime,
-                            selectedStore: updatedShift.data.selectedStore || null,
+                            selectedStore: updatedStore, // Устанавливаем полный объект магазина
                             isEdited: false,
                         };
                     }
@@ -344,14 +373,15 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                         <label className="block text-gray-700 mb-1">Магазин</label>
                                         <Dropdown
                                             value={shift.selectedStore}
-                                            onChange={(e) =>
-                                                handleFieldChange(index, 'selectedStore', e.value)
-                                            }
+                                            onChange={(e) => {
+                                                console.log(`Dropdown changed to:`, e.value); // Для отладки
+                                                handleFieldChange(index, 'selectedStore', e.value);
+                                            }}
                                             options={stores}
                                             optionLabel="storeName"
                                             placeholder="Выберите магазин"
                                             className="w-full border-2 text-black rounded-lg"
-                                            showClear
+                                            showClear // Оставьте, если хотите разрешить очистку выбора
                                         />
                                     </div>
 
