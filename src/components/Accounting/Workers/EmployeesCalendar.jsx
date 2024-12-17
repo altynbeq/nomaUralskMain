@@ -578,7 +578,7 @@ export const EmployeesCalendar = () => {
                                     value={bulkMode}
                                     onChange={(e) => setBulkMode(e.value)}
                                     options={modeOptions}
-                                    placeholder="Выберите режим"
+                                    placeholder="Режим"
                                     className="w-full border-blue-500 border-2 rounded-lg"
                                     showClear
                                 />
@@ -600,7 +600,7 @@ export const EmployeesCalendar = () => {
                                     onClick={() => setShowModalAddShift(true)}
                                     className="bg-blue-500 flex items-center gap-2 text-white px-4 py-2 rounded-2xl hover:bg-blue-600 transition"
                                 >
-                                    <p>Выбор</p>
+                                    <p>Добавить</p>
                                     <FaPlus />
                                 </button>
                                 <AddShift
