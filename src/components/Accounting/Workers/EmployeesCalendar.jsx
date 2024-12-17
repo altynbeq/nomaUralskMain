@@ -12,6 +12,7 @@ import { ShiftModal } from './ShiftModal';
 import { CalendarTable } from './CalendarTable';
 import { Filters } from './Filters';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
 import { CheckInCheckOutModal } from './CheckInCheckOutModal';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { DateTime } from 'luxon';
@@ -41,6 +42,11 @@ export const EmployeesCalendar = () => {
     const [selectedEmployeeForNewShift, setSelectedEmployeeForNewShift] = useState(null);
     const [showAddShiftModal, setShowAddShiftModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const modeOptions = [
+        { label: 'Добавление', value: 'add' },
+        { label: 'Редактирование', value: 'edit' },
+    ];
+    const [bulkMode, setBulkMode] = useState(null);
 
     useEffect(() => {
         const companyId = user?.companyId ? user.companyId : user?.id;
@@ -496,6 +502,14 @@ export const EmployeesCalendar = () => {
                     </div>
                     <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
                         <div className="flex flex-row gap-2">
+                            <Dropdown
+                                value={bulkMode}
+                                onChange={(e) => setBulkMode(e.value)}
+                                options={modeOptions}
+                                placeholder="Выберите режим"
+                                className="w-full border-blue-500 border-2 rounded-lg"
+                                showClear
+                            />
                             <div className="flex flex-row gap-2">
                                 <button
                                     onClick={() => setShowModalAddShift(true)}
