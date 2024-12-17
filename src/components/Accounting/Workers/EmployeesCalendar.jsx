@@ -500,6 +500,10 @@ export const EmployeesCalendar = () => {
         [bulkMode, month, year],
     );
 
+    const getBulkButtonLabel = () => {
+        return modeOptions.find((o) => o.value === bulkMode).label;
+    };
+
     return (
         <div>
             <div className="w-[95%] justify-center align-center m-6 mt-5 bg-white p-3 rounded-lg shadow-md subtle-border">
@@ -521,14 +525,27 @@ export const EmployeesCalendar = () => {
                     </div>
                     <div className="flex gap-4 mt-5 md:mt-0 flex-col md:flex-row">
                         <div className="flex flex-row gap-2">
-                            <Dropdown
-                                value={bulkMode}
-                                onChange={(e) => setBulkMode(e.value)}
-                                options={modeOptions}
-                                placeholder="Выберите режим"
-                                className="w-full border-blue-500 border-2 rounded-lg"
-                                showClear
-                            />
+                            {bulkMode ? (
+                                <Button
+                                    disabled={selectedDays.length === 0}
+                                    className={`px-4 py-2 rounded-2xl transition 
+                                        ${
+                                            selectedDays.length === 0
+                                                ? 'bg-gray-400 text-gray-800 cursor-not-allowed'
+                                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                        }`}
+                                    label={getBulkButtonLabel()}
+                                />
+                            ) : (
+                                <Dropdown
+                                    value={bulkMode}
+                                    onChange={(e) => setBulkMode(e.value)}
+                                    options={modeOptions}
+                                    placeholder="Выберите режим"
+                                    className="w-full border-blue-500 border-2 rounded-lg"
+                                    showClear
+                                />
+                            )}
                             <div className="flex flex-row gap-2">
                                 <button
                                     onClick={() => setShowModalAddShift(true)}
