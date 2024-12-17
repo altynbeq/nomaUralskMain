@@ -47,6 +47,7 @@ export const EmployeesCalendar = () => {
         { label: 'Редактирование', value: 'edit' },
     ];
     const [bulkMode, setBulkMode] = useState(null);
+    const [selectedDays, setSelectedDays] = useState([]); // { employeeId, day }
 
     useEffect(() => {
         const companyId = user?.companyId ? user.companyId : user?.id;
@@ -464,21 +465,39 @@ export const EmployeesCalendar = () => {
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {
-            if (shifts.length === 0) {
-                // День без смен, открываем модалку для добавления смены с автоматически выбранным сотрудником
-                setSelectedEmployeeForNewShift(employee);
-                setSelectedDateForNewShift({
-                    day,
-                    month: month + 1, // Luxon использует 1-12 для месяцев
-                    year,
+            if (bulkMode) {
+                setSelectedDays((prevSelectedDays) => {
+                    const exists = prevSelectedDays.some(
+                        (selected) => selected.employeeId === employee._id && selected.day === day,
+                    );
+                    if (exists) {
+                        // Удаляем отметку
+                        return prevSelectedDays.filter(
+                            (selected) =>
+                                !(selected.employeeId === employee._id && selected.day === day),
+                        );
+                    } else {
+                        // Добавляем отметку
+                        return [...prevSelectedDays, { employeeId: employee._id, day }];
+                    }
                 });
-                setShowAddShiftModal(true);
             } else {
-                // День со сменами, открываем модалку с деталями смен
-                setSelectedDayShiftsModal(shifts);
+                if (shifts.length === 0) {
+                    // День без смен, открываем модалку для добавления смены с автоматически выбранным сотрудником
+                    setSelectedEmployeeForNewShift(employee);
+                    setSelectedDateForNewShift({
+                        day,
+                        month: month + 1, // Luxon использует 1-12 для месяцев
+                        year,
+                    });
+                    setShowAddShiftModal(true);
+                } else {
+                    // День со сменами, открываем модалку с деталями смен
+                    setSelectedDayShiftsModal(shifts);
+                }
             }
         },
-        [month, year],
+        [bulkMode, month, year],
     );
 
     return (
@@ -556,6 +575,7 @@ export const EmployeesCalendar = () => {
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
                     onDayClick={onDayClick}
+                    selectedDays={selectedDays} // Передаем selectedDays
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}

@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { Loader } from '../../Loader';
+import { FaCheck } from 'react-icons/fa'; // Импортируем иконку FaCheck
 
 export const CalendarTable = memo(
     ({
@@ -11,6 +12,7 @@ export const CalendarTable = memo(
         getDayColor,
         isLoading,
         onDayClick,
+        selectedDays, // Принимаем selectedDays как пропс
     }) => {
         const handleDayClick = (employee, day, shifts) => {
             onDayClick(employee, day, shifts);
@@ -121,6 +123,13 @@ export const CalendarTable = memo(
                                             titleText = '';
                                     }
 
+                                    // Проверяем, выбран ли этот день для данного сотрудника в bulkMode
+                                    const isSelected = selectedDays.some(
+                                        (selected) =>
+                                            selected.employeeId === employee._id &&
+                                            selected.day === day,
+                                    );
+
                                     return (
                                         <td
                                             key={day}
@@ -132,6 +141,12 @@ export const CalendarTable = memo(
                                                 style={style}
                                                 title={titleText}
                                             ></div>
+                                            {isSelected && (
+                                                <FaCheck
+                                                    className="text-center absolute top-1/2 left-[42%] transform -translate-x-1/2 -translate-y-1/2 text-black text-md"
+                                                    title="Выбранный день"
+                                                />
+                                            )}
                                         </td>
                                     );
                                 })}
