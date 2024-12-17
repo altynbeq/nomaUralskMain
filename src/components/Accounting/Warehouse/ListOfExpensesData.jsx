@@ -19,42 +19,6 @@ function getDaysInMonth(month, year) {
     return days;
 }
 
-function renderSparklineCell(params) {
-    const data = getDaysInMonth(4, 2024);
-    const { value, colDef } = params;
-
-    if (!value || value.length === 0) {
-        return null;
-    }
-
-    return (
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <SparkLineChart
-                data={value}
-                width={colDef.computedWidth || 100}
-                height={32}
-                plotType="bar"
-                showHighlight
-                showTooltip
-                colors={['hsl(210, 98%, 42%)']}
-                xAxis={{
-                    scaleType: 'band',
-                    data,
-                }}
-            />
-        </div>
-    );
-}
-
-function renderStatus(status) {
-    const colors = {
-        Online: 'success',
-        Offline: 'default',
-    };
-
-    return <Chip label={status} color={colors[status]} size="small" />;
-}
-
 export function renderAvatar(params) {
     if (params.value == null) {
         return '';
