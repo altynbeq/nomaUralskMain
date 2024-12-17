@@ -188,7 +188,7 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 );
 
                 if (response.status === 201 || response.status === 201) {
-                    setOpen(false);
+                    setOpen('');
                     toast.success('Все смены успешно добавлены');
                 }
             }
@@ -220,7 +220,7 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
             <Dialog
                 header="Добавить новые смены"
                 visible={open}
-                onHide={() => setOpen(false)}
+                onHide={() => setOpen('')}
                 className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto"
             >
                 <form onSubmit={handleSubmit}>

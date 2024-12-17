@@ -48,7 +48,9 @@ export const EmployeesCalendar = () => {
         { label: 'Редактирование', value: 'edit' },
     ];
     const [bulkMode, setBulkMode] = useState(null);
-    const [selectedDays, setSelectedDays] = useState([]); // { employeeId, day }
+    const [selectedDays, setSelectedDays] = useState([]);
+    const [selectedDaysShifts, setSelectedDaysShifts] = useState([]);
+    const [showBulkModeModal, setShowBulkdModeModal] = useState('');
 
     useEffect(() => {
         const companyId = user?.companyId ? user.companyId : user?.id;
@@ -521,14 +523,9 @@ export const EmployeesCalendar = () => {
 
     const handleBulkAction = () => {
         if (bulkMode === 'add') {
-            // Логика массового добавления смен
-            // Например, открыть модалку для подтверждения добавления смен
-            toast.info('Массовое добавление смен запущено.');
-            // Реализуйте необходимую логику здесь
+            setShowBulkdModeModal('add');
         } else if (bulkMode === 'edit') {
-            // Логика массового редактирования смен
-            toast.info('Массовое редактирование смен запущено.');
-            // Реализуйте необходимую логику здесь
+            setShowBulkdModeModal('edit');
         }
     };
 
@@ -575,7 +572,16 @@ export const EmployeesCalendar = () => {
                                     showClear
                                 />
                             )}
-                            {/* <AddBulkMode stores={stores}  /> */}
+                            <AddBulkMode
+                                stores={stores}
+                                setOpen={setShowBulkdModeModal}
+                                open={showBulkModeModal === 'add'}
+                                subUsers={Array.from(
+                                    new Map(
+                                        selectedDays.map((d) => [d.employee._id, d.employee]),
+                                    ).values(),
+                                )}
+                            />
                             <div className="flex flex-row gap-2">
                                 <button
                                     onClick={() => setShowModalAddShift(true)}
