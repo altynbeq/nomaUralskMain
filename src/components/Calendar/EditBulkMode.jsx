@@ -8,7 +8,8 @@ import { toast } from 'react-toastify';
 import { axiosInstance } from '../../api/axiosInstance';
 import { addLocale } from 'primereact/api';
 import { DateTime } from 'luxon';
-import { CheckInCheckOutModal } from '../Accounting/Workers/CheckInCheckOutModal'; // Убедитесь, что путь корректен
+import { CheckInCheckOutModal } from '../Accounting/Workers/CheckInCheckOutModal';
+import { formatOnlyTimeDate } from '../../methods/dataFormatter';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -361,7 +362,9 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 <CheckInCheckOutModal
                     visible={modalVisible}
                     type={modalType}
-                    time={modalType === 'checkIn' ? currentShift.startTime : currentShift.endTime}
+                    time={
+                        modalType === 'checkIn' ? currentShift.scanTime : currentShift.endScanTime
+                    }
                     clearCheckInCheckoutProps={closeModal}
                     shift={currentShift}
                     onUpdate={handleCheckInCheckOutUpdate} // Передаём callback для обновления
@@ -450,12 +453,20 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                                 />
                                             </div>
-                                            <Button
-                                                onClick={() => openModal(shift, 'checkIn')}
-                                                className=" mt-6 text-white bg-blue-400 rounded-lg border p-1"
-                                                label="Изменить"
-                                                icon="pi pi-user-edit"
-                                            />
+                                            <div className="flex gap-2 items-center mt-8">
+                                                <p>
+                                                    <span className="text-gray-700">
+                                                        Фактический приход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.scanTime)}
+                                                </p>
+                                                <Button
+                                                    onClick={() => openModal(shift, 'checkIn')}
+                                                    className=" text-white bg-blue-400 rounded-lg border p-1"
+                                                    label="Изменить"
+                                                    icon="pi pi-user-edit"
+                                                />
+                                            </div>
                                         </div>
 
                                         {/* Поле конца смены и кнопка изменения ухода */}
@@ -479,12 +490,20 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                                 />
                                             </div>
-                                            <Button
-                                                onClick={() => openModal(shift, 'checkOut')}
-                                                className=" mt-6 text-white bg-blue-400 rounded-lg border p-1"
-                                                label="Изменить"
-                                                icon="pi pi-user-edit"
-                                            />
+                                            <div className="flex gap-2 items-center mt-8">
+                                                <p>
+                                                    <span className="text-gray-700">
+                                                        Фактический уход:
+                                                    </span>{' '}
+                                                    {formatOnlyTimeDate(shift.endScanTime)}
+                                                </p>
+                                                <Button
+                                                    onClick={() => openModal(shift, 'checkOut')}
+                                                    className=" text-white bg-blue-400 rounded-lg border p-1"
+                                                    label="Изменить"
+                                                    icon="pi pi-user-edit"
+                                                />
+                                            </div>
                                         </div>
 
                                         {/* Кнопка удаления на низу карточки */}
