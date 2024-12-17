@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { axiosInstance } from '../../api/axiosInstance';
 import { addLocale } from 'primereact/api';
 import { DateTime } from 'luxon';
+import { CheckInCheckOutModal } from '../Accounting/Workers/CheckInCheckOutModal'; // Убедитесь, что путь корректен
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -49,6 +50,11 @@ addLocale('ru', {
 export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Состояния для модального окна CheckInCheckOut
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalType, setModalType] = useState('checkIn'); // 'checkIn' или 'checkOut'
+    const [currentShift, setCurrentShift] = useState(null);
 
     // Определяем дефолтный магазин (например, первый в списке)
     const defaultStore = stores.length > 0 ? stores[0] : null;
@@ -323,10 +329,44 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         }
     };
 
+    // Обработчики для модального окна CheckInCheckOut
+    const openModal = (shift, type) => {
+        setCurrentShift(shift);
+        setModalType(type);
+        setModalVisible(true);
+    };
+
+    const closeModal = () => {
+        setCurrentShift(null);
+        setModalVisible(false);
+    };
+
+    const handleCheckInCheckOutUpdate = (updatedShift) => {
+        setShiftsData((prev) =>
+            prev.map((shift) =>
+                shift.id === updatedShift.id
+                    ? { ...shift, ...updatedShift, isEdited: true }
+                    : shift,
+            ),
+        );
+    };
+
     return (
         <>
             {/* ConfirmDialog Компонент */}
             <ConfirmDialog />
+
+            {/* Модальное окно для изменения прихода/ухода */}
+            {currentShift && (
+                <CheckInCheckOutModal
+                    visible={modalVisible}
+                    type={modalType}
+                    time={modalType === 'checkIn' ? currentShift.startTime : currentShift.endTime}
+                    clearCheckInCheckoutProps={closeModal}
+                    shift={currentShift}
+                    onUpdate={handleCheckInCheckOutUpdate} // Передаём callback для обновления
+                />
+            )}
 
             <Dialog
                 header="Редактирование смен"
@@ -385,45 +425,65 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                             />
                                         </div>
 
-                                        {/* Поле начала смены */}
-                                        <div className="mb-4">
-                                            <label className="block text-gray-700 mb-1">
-                                                Начало смены
-                                            </label>
-                                            <Calendar
-                                                value={shift.startTime}
-                                                onChange={(e) =>
-                                                    handleFieldChange(index, 'startTime', e.value)
-                                                }
-                                                showTime
-                                                timeOnly
-                                                hourFormat="24"
-                                                showIcon
-                                                mask="99:99"
-                                                locale="ru"
-                                                placeholder="Выберите время начала"
-                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        {/* Поле начала смены и кнопка изменения прихода */}
+                                        <div className="mb-4 flex items-center justify-between">
+                                            <div className="w-1/2 mr-2">
+                                                <label className="block text-gray-700 mb-1">
+                                                    Начало смены
+                                                </label>
+                                                <Calendar
+                                                    value={shift.startTime}
+                                                    onChange={(e) =>
+                                                        handleFieldChange(
+                                                            index,
+                                                            'startTime',
+                                                            e.value,
+                                                        )
+                                                    }
+                                                    showTime
+                                                    timeOnly
+                                                    hourFormat="24"
+                                                    showIcon
+                                                    mask="99:99"
+                                                    locale="ru"
+                                                    placeholder="Выберите время начала"
+                                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={() => openModal(shift, 'checkIn')}
+                                                className=" mt-6 text-white bg-blue-400 rounded-lg border p-1"
+                                                label="Изменить"
+                                                icon="pi pi-user-edit"
                                             />
                                         </div>
 
-                                        {/* Поле конца смены */}
-                                        <div className="mb-4">
-                                            <label className="block text-gray-700 mb-1">
-                                                Конец смены
-                                            </label>
-                                            <Calendar
-                                                value={shift.endTime}
-                                                onChange={(e) =>
-                                                    handleFieldChange(index, 'endTime', e.value)
-                                                }
-                                                showTime
-                                                timeOnly
-                                                hourFormat="24"
-                                                showIcon
-                                                mask="99:99"
-                                                locale="ru"
-                                                placeholder="Выберите время окончания"
-                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        {/* Поле конца смены и кнопка изменения ухода */}
+                                        <div className="mb-4 flex items-center justify-between">
+                                            <div className="w-1/2 mr-2">
+                                                <label className="block text-gray-700 mb-1">
+                                                    Конец смены
+                                                </label>
+                                                <Calendar
+                                                    value={shift.endTime}
+                                                    onChange={(e) =>
+                                                        handleFieldChange(index, 'endTime', e.value)
+                                                    }
+                                                    showTime
+                                                    timeOnly
+                                                    hourFormat="24"
+                                                    showIcon
+                                                    mask="99:99"
+                                                    locale="ru"
+                                                    placeholder="Выберите время окончания"
+                                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={() => openModal(shift, 'checkOut')}
+                                                className=" mt-6 text-white bg-blue-400 rounded-lg border p-1"
+                                                label="Изменить"
+                                                icon="pi pi-user-edit"
                                             />
                                         </div>
 

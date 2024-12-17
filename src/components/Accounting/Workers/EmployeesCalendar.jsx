@@ -574,7 +574,7 @@ export const EmployeesCalendar = () => {
                                     label={getBulkButtonLabel()}
                                 />
                             ) : (
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 min-w-[170px] ">
                                     <Dropdown
                                         value={bulkMode}
                                         onChange={(e) => setBulkMode(e.value)}
