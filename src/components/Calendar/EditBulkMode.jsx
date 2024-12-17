@@ -8,6 +8,8 @@ import { Loader } from '../../components/Loader';
 import { axiosInstance } from '../../api/axiosInstance';
 import { addLocale } from 'primereact/api';
 import { DateTime } from 'luxon';
+import { FaTimes } from 'react-icons/fa';
+import avatar from '../../data/avatar.jpg';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -53,7 +55,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
     useEffect(() => {
         const transformed = [];
 
-        subUsers.forEach(({ employee, shifts, date }) => {
+        subUsers.forEach(({ employee, shifts }) => {
             if (!employee || !shifts) return;
 
             shifts.forEach((shift) => {
@@ -72,9 +74,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     shiftEnd = DateTime.fromJSDate(shiftEnd).plus({ days: 1 }).toJSDate();
                 }
 
+                // Извлекаем дату из startTime
+                const dateOnly = DateTime.fromJSDate(shiftStart).startOf('day').toJSDate();
+
                 transformed.push({
                     ...shift,
                     employeeName: employee.name,
+                    date: dateOnly, // Добавляем отдельное поле даты
                     startTime: shiftStart,
                     endTime: shiftEnd,
                     selectedStore: shift.selectedStore || null,
@@ -87,11 +93,53 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         setShiftsData(transformed);
     }, [subUsers]);
 
-    // Обработчик изменения времени или магазина
+    // Обработчик изменения поля
     const handleFieldChange = (index, field, value) => {
         setShiftsData((prev) => {
             const updated = [...prev];
             updated[index] = { ...updated[index], [field]: value, isEdited: true };
+            return updated;
+        });
+    };
+
+    // Обработчик изменения даты
+    const handleDateChange = (index, value) => {
+        setShiftsData((prev) => {
+            const updated = [...prev];
+            const shift = { ...updated[index], date: value, isEdited: true };
+
+            // Объединяем новую дату с существующим временем начала
+            const newStartDateTime = DateTime.fromJSDate(value)
+                .set({
+                    hour: DateTime.fromJSDate(shift.startTime).hour,
+                    minute: DateTime.fromJSDate(shift.startTime).minute,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .setZone('UTC+5')
+                .toUTC()
+                .toISO();
+
+            // Объединяем новую дату с существующим временем конца
+            let newEndDateTime = DateTime.fromJSDate(value)
+                .set({
+                    hour: DateTime.fromJSDate(shift.endTime).hour,
+                    minute: DateTime.fromJSDate(shift.endTime).minute,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .setZone('UTC+5')
+                .toUTC();
+
+            // Если время конца меньше или равно времени начала, добавляем день
+            if (newEndDateTime <= DateTime.fromISO(newStartDateTime)) {
+                newEndDateTime = newEndDateTime.plus({ days: 1 });
+            }
+
+            shift.startTime = DateTime.fromISO(newStartDateTime).toJSDate();
+            shift.endTime = newEndDateTime.toJSDate();
+
+            updated[index] = shift;
             return updated;
         });
     };
@@ -108,19 +156,14 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         setIsLoading(true);
 
         try {
-            // Создаем массив промисов для обновления всех измененных смен
+            // Создаём массив промисов для обновления всех изменённых смен
             const updatePromises = editedShifts.map((shift) => {
-                let newStart = DateTime.fromJSDate(shift.startTime)
+                const newStart = DateTime.fromJSDate(shift.startTime)
                     .setZone('UTC+5')
                     .toUTC()
                     .toISO();
-                let newEnd = DateTime.fromJSDate(shift.endTime).setZone('UTC+5').toUTC().toISO();
 
-                const startDateTime = DateTime.fromISO(newStart, { zone: 'utc' });
-                const endDateTime = DateTime.fromISO(newEnd, { zone: 'utc' });
-                if (endDateTime <= startDateTime) {
-                    newEnd = endDateTime.plus({ days: 1 }).toISO();
-                }
+                const newEnd = DateTime.fromJSDate(shift.endTime).setZone('UTC+5').toUTC().toISO();
 
                 return axiosInstance.put(`/shifts/${shift.id}`, {
                     subUserId: shift.subUserId,
@@ -130,7 +173,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 });
             });
 
-            // Ждем завершения всех запросов
+            // Ждём завершения всех запросов
             const responses = await Promise.all(updatePromises);
 
             // Обновляем локальное состояние, отмечая смены как неотредактированные
@@ -138,16 +181,23 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 prev.map((shift) => {
                     const updatedShift = responses.find((res) => res.data.id === shift.id);
                     if (updatedShift) {
+                        // Обновляем startTime и endTime
+                        const newStartTime = DateTime.fromISO(updatedShift.data.startTime, {
+                            zone: 'utc',
+                        })
+                            .setZone('UTC+5')
+                            .toJSDate();
+
+                        const newEndTime = DateTime.fromISO(updatedShift.data.endTime, {
+                            zone: 'utc',
+                        })
+                            .setZone('UTC+5')
+                            .toJSDate();
+
                         return {
                             ...shift,
-                            startTime: DateTime.fromISO(updatedShift.data.startTime, {
-                                zone: 'utc',
-                            })
-                                .setZone('UTC+5')
-                                .toJSDate(),
-                            endTime: DateTime.fromISO(updatedShift.data.endTime, { zone: 'utc' })
-                                .setZone('UTC+5')
-                                .toJSDate(),
+                            startTime: newStartTime,
+                            endTime: newEndTime,
                             selectedStore: updatedShift.data.selectedStore || null,
                             isEdited: false,
                         };
@@ -207,6 +257,24 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                         {shift.selectedStore?.storeName || 'Не выбран'}
                                     </p>
 
+                                    {/* Поле даты */}
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 mb-1">
+                                            Дата смены
+                                        </label>
+                                        <Calendar
+                                            value={shift.date}
+                                            onChange={(e) => handleDateChange(index, e.value)}
+                                            dateFormat="dd.mm.yy"
+                                            mask="99.99.9999"
+                                            showIcon
+                                            locale="ru"
+                                            placeholder="Выберите дату смены"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        />
+                                    </div>
+
+                                    {/* Поле магазина */}
                                     <div className="mb-4">
                                         <label className="block text-gray-700 mb-1">Магазин</label>
                                         <Dropdown
@@ -222,6 +290,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                         />
                                     </div>
 
+                                    {/* Поле начала смены */}
                                     <div className="mb-4">
                                         <label className="block text-gray-700 mb-1">
                                             Начало смены
@@ -233,14 +302,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                             }
                                             showTime
                                             timeOnly
-                                            mask="99:99"
-                                            showIcon
-                                            locale="ru"
                                             hourFormat="24"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            showIcon
+                                            mask="99:99"
+                                            locale="ru"
                                             placeholder="Выберите время начала"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                         />
                                     </div>
+
+                                    {/* Поле конца смены */}
                                     <div className="mb-4">
                                         <label className="block text-gray-700 mb-1">
                                             Конец смены
@@ -252,15 +323,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                             }
                                             showTime
                                             timeOnly
-                                            mask="99:99"
-                                            showIcon
-                                            locale="ru"
                                             hourFormat="24"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            showIcon
+                                            mask="99:99"
+                                            locale="ru"
                                             placeholder="Выберите время окончания"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                         />
                                     </div>
 
+                                    {/* Кнопка удаления смены */}
                                     <div className="flex justify-end">
                                         <Button
                                             onClick={() => handleDelete(shift.id)}
@@ -271,6 +343,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                                     </div>
                                 </div>
                             ))}
+                            {/* Кнопка сохранения всех изменений */}
                             <div className="flex justify-end mt-4">
                                 <Button
                                     onClick={handleSaveAll}
