@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
@@ -8,7 +8,7 @@ import avatar from '../../data/avatar.jpg';
 import { axiosInstance } from '../../api/axiosInstance';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
-import { DateTime } from 'luxon'; // Импортируем DateTime из Luxon
+import { DateTime } from 'luxon';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -48,89 +48,93 @@ addLocale('ru', {
 });
 
 export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
-    const [selectedSubUsers, setSelectedSubUsers] = useState([]);
-    const [dateRange, setDateRange] = useState(null);
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
+    const [entries, setEntries] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedStore, setSelectedStore] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]);
 
     useEffect(() => {
-        setSelectedSubUsers(subUsers);
+        if (subUsers && subUsers.length > 0) {
+            const initialEntries = subUsers.map(({ employee, date }) => ({
+                employee,
+                date, // Убедитесь, что date передается как строка ISO или объект Date
+                selectedStore: employee.departmentId.storeId, // Предполагаем, что storeId содержит информацию о магазине
+                startTime: null,
+                endTime: null,
+            }));
+            setEntries(initialEntries);
+        } else {
+            setEntries([]);
+        }
     }, [subUsers]);
 
-    // Размер чанка для отправки смен
-    const CHUNK_SIZE = 50;
+    const handleChangeEntry = (index, field, value) => {
+        setEntries((prevEntries) => {
+            const updatedEntries = [...prevEntries];
+            updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+            return updatedEntries;
+        });
+    };
+
+    const handleRemoveEntry = (index) => {
+        setEntries((prevEntries) => prevEntries.filter((_, i) => i !== index));
+    };
 
     const generateShifts = useCallback(() => {
         const shifts = [];
-        if (!dateRange || !startTime || !endTime || !selectedSubUsers.length || !selectedStore) {
-            return shifts;
-        }
+        entries.forEach(({ employee, date, selectedStore, startTime, endTime }) => {
+            if (!employee || !date || !selectedStore || !startTime || !endTime) {
+                // Пропускаем неполные записи
+                return;
+            }
 
-        // Генерация всех дат в выбранном диапазоне
-        const dates = [];
-        let currentDate = DateTime.fromJSDate(dateRange[0]).startOf('day');
-        const endDate = DateTime.fromJSDate(dateRange[1]).startOf('day');
-
-        while (currentDate <= endDate) {
-            dates.push(currentDate);
-            currentDate = currentDate.plus({ days: 1 });
-        }
-
-        const shiftStartTime = DateTime.fromJSDate(startTime);
-        const shiftEndTime = DateTime.fromJSDate(endTime);
-
-        // Если конец смены раньше или равен началу — значит следующий день
-        let adjustedEnd = shiftEndTime;
-        if (adjustedEnd <= shiftStartTime) {
-            adjustedEnd = adjustedEnd.plus({ days: 1 });
-        }
-
-        dates.forEach((date) => {
-            // Создаём DateTime в временной зоне магазина
-            const shiftStartLocal = date
+            // Создаём DateTime объекты для начала и конца смены, прикрепляя дату
+            const shiftStart = DateTime.fromJSDate(date)
                 .set({
-                    hour: shiftStartTime.hour,
-                    minute: shiftStartTime.minute,
+                    hour: startTime.getHours(),
+                    minute: startTime.getMinutes(),
                     second: 0,
                     millisecond: 0,
                 })
                 .setZone('UTC+5', { keepLocalTime: true });
 
-            const shiftEndLocal = date
+            let shiftEnd = DateTime.fromJSDate(date)
                 .set({
-                    hour: adjustedEnd.hour,
-                    minute: adjustedEnd.minute,
+                    hour: endTime.getHours(),
+                    minute: endTime.getMinutes(),
                     second: 0,
                     millisecond: 0,
                 })
                 .setZone('UTC+5', { keepLocalTime: true });
 
-            // Конвертируем локальное время магазина в UTC
-            const shiftStartUtc = shiftStartLocal.toUTC();
-            const shiftEndUtc = shiftEndLocal.toUTC();
+            // Если время окончания раньше или равно времени начала, добавляем день
+            if (shiftEnd <= shiftStart) {
+                shiftEnd = shiftEnd.plus({ days: 1 });
+            }
 
-            selectedSubUsers.forEach((user) => {
-                shifts.push({
-                    subUserId: user._id,
-                    startTime: shiftStartUtc.toISO(),
-                    endTime: shiftEndUtc.toISO(),
-                    selectedStore: selectedStore._id,
-                });
+            // Конвертируем в UTC
+            const shiftStartUtc = shiftStart.toUTC();
+            const shiftEndUtc = shiftEnd.toUTC();
+
+            shifts.push({
+                subUserId: employee._id,
+                startTime: shiftStartUtc.toISO(),
+                endTime: shiftEndUtc.toISO(),
+                selectedStore: selectedStore._id,
             });
         });
-
         return shifts;
-    }, [dateRange, startTime, endTime, selectedSubUsers, selectedStore]);
+    }, [entries]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSubUsers.length || !dateRange || !startTime || !endTime || !selectedStore) {
-            toast.error('Пожалуйста, заполните все обязательные поля.');
-            return;
+
+        // Проверяем, заполнены ли все необходимые поля
+        for (const entry of entries) {
+            if (!entry.selectedStore || !entry.startTime || !entry.endTime) {
+                toast.error('Пожалуйста, заполните все обязательные поля.');
+                return;
+            }
         }
 
         const shifts = generateShifts();
@@ -141,16 +145,16 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
 
         setIsLoading(true);
         try {
-            // Сначала проверяем конфликты
+            // Проверяем конфликты
             const checkResponse = await axiosInstance.post('/shifts/check-conflicts', { shifts });
             if (checkResponse.status === 200) {
                 const { conflict } = checkResponse.data;
                 if (conflict) {
-                    // Если есть конфликт — показать модальное окно подтверждения
+                    // Если есть конфликт, показываем модальное окно подтверждения
                     setPendingShifts(shifts);
                     setShowConfirmModal(true);
                 } else {
-                    // Нет конфликта — сразу отправляем
+                    // Нет конфликтов, отправляем смены
                     await sendShiftsInChunks(shifts);
                 }
             }
@@ -171,6 +175,7 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
     };
 
     const sendShiftsInChunks = async (shifts) => {
+        const CHUNK_SIZE = 50;
         const chunks = chunkArray(shifts, CHUNK_SIZE);
         let currentChunk = 0;
         setIsLoading(true);
@@ -180,16 +185,17 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 const response = await axiosInstance.post(
                     '/shifts',
                     { shifts: chunk },
-                    {
-                        timeout: 90000, // 90 секунд
-                    },
+                    { timeout: 90000 }, // 90 секунд
                 );
 
-                if (response.status === 201 || response.status === 201) {
-                    setOpen('');
-                    toast.success('Все смены успешно добавлены');
+                if (response.status === 201 || response.status === 200) {
+                    // Продолжаем до конца
+                } else {
+                    throw new Error(`Ошибка при добавлении смен в чанке ${currentChunk}`);
                 }
             }
+            toast.success('Все смены успешно добавлены');
+            setOpen(false);
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
             toast.error(
@@ -202,13 +208,11 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
     };
 
     const confirmChanges = async () => {
-        // Пользователь подтвердил перезапись смен
         setShowConfirmModal(false);
         await sendShiftsInChunks(pendingShifts);
     };
 
     const cancelChanges = () => {
-        // Отмена — просто закрываем модалку, ничего не отправляем
         setShowConfirmModal(false);
         toast.info('Вы отменили добавление смен');
     };
@@ -216,111 +220,114 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
     return (
         <>
             <Dialog
-                header="Добавить новые смены"
+                header="Массовое добавление смен"
                 visible={open}
-                onHide={() => setOpen('')}
-                className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-full overflow-y-auto"
+                onHide={() => setOpen(false)}
+                className="bg-white p-6 rounded-lg shadow-lg min-w-[400px] max-w-4xl w-full overflow-y-auto"
             >
                 <form onSubmit={handleSubmit}>
-                    {/* Горизонтальный список выбранных сотрудников */}
-                    {selectedSubUsers.length > 0 && (
-                        <div className="mb-6">
-                            <label className="block text-gray-700 mb-2">
-                                Выбранные сотрудники:
-                            </label>
-                            <div className="flex flex-col sm:flex-row flex-wrap gap-4 max-h-40 overflow-y-auto">
-                                {selectedSubUsers.map((user) => (
-                                    <div
-                                        key={user._id}
-                                        className="flex items-center bg-gray-100 p-2 rounded-lg"
+                    {entries.length > 0 ? (
+                        <div className="flex flex-col gap-4 max-h-96 overflow-y-auto">
+                            {entries.map((entry, index) => (
+                                <div
+                                    key={index}
+                                    className="border p-4 rounded-lg relative bg-gray-50 flex flex-col gap-4"
+                                >
+                                    <button
+                                        type="button"
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                        onClick={() => handleRemoveEntry(index)}
                                     >
+                                        <FaTimes />
+                                    </button>
+                                    <div className="flex items-center gap-3">
                                         <img
                                             src={
-                                                user.image
-                                                    ? `https://nomalytica-back.onrender.com${user.image}`
+                                                entry.employee.image
+                                                    ? `https://nomalytica-back.onrender.com${entry.employee.image}`
                                                     : avatar
                                             }
-                                            alt={user.name}
-                                            className="w-8 h-8 rounded-full mr-2"
+                                            alt={entry.employee.name}
+                                            className="w-10 h-10 rounded-full"
                                         />
-                                        <span className="text-gray-800 mr-2">{user.name}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setSelectedSubUsers((prev) =>
-                                                    prev.filter((u) => u._id !== user._id),
-                                                )
-                                            }
-                                            className="text-black hover:text-red-700"
-                                        >
-                                            <FaTimes />
-                                        </button>
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-gray-800">
+                                                {entry.employee.name}
+                                            </span>
+                                            <span className="text-gray-600">
+                                                Дата:{' '}
+                                                {DateTime.fromJSDate(entry.date).toFormat(
+                                                    'dd.MM.yyyy',
+                                                )}
+                                            </span>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <div>
+                                        <label className="block text-gray-700 mb-2">Магазин:</label>
+                                        <Dropdown
+                                            value={entry.selectedStore}
+                                            onChange={(e) =>
+                                                handleChangeEntry(index, 'selectedStore', e.value)
+                                            }
+                                            options={stores}
+                                            optionLabel="storeName"
+                                            placeholder="Выберите магазин"
+                                            className="w-full border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
+                                            showClear
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 mb-2">
+                                            Время начала смены:
+                                        </label>
+                                        <Calendar
+                                            value={entry.startTime}
+                                            onChange={(e) =>
+                                                handleChangeEntry(index, 'startTime', e.value)
+                                            }
+                                            timeOnly
+                                            hourFormat="24"
+                                            showIcon
+                                            locale="ru"
+                                            placeholder="Выберите время начала"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 mb-2">
+                                            Время окончания смены:
+                                        </label>
+                                        <Calendar
+                                            value={entry.endTime}
+                                            onChange={(e) =>
+                                                handleChangeEntry(index, 'endTime', e.value)
+                                            }
+                                            timeOnly
+                                            hourFormat="24"
+                                            showIcon
+                                            locale="ru"
+                                            placeholder="Выберите время окончания"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
+                    ) : (
+                        <p className="text-gray-500">Нет выбранных сотрудников или дат.</p>
                     )}
-                    <div className="mb-6">
-                        <Dropdown
-                            value={selectedStore}
-                            onChange={(e) => setSelectedStore(e.value)}
-                            options={stores}
-                            optionLabel="storeName"
-                            placeholder="Выберите магазин"
-                            className="w-full border-2 text-black rounded-lg focus:ring-2 focus:ring-blue-300"
-                            showClear
-                        />
-                    </div>
-                    {/* Выбор периода смены */}
-                    <div className="mb-6">
-                        <label className="block text-gray-700 mb-2">Период смены:</label>
-                        <Calendar
-                            value={dateRange}
-                            onChange={(e) => setDateRange(e.value)}
-                            selectionMode="range"
-                            showIcon
-                            locale="ru"
-                            placeholder="Выберите период"
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                        />
-                    </div>
-                    {/* Выбор времени начала смены */}
-                    <div className="mb-6">
-                        <label className="block text-gray-700 mb-2">Время начала смены:</label>
-                        <Calendar
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.value)}
-                            timeOnly
-                            hourFormat="24"
-                            showIcon
-                            locale="ru"
-                            placeholder="Выберите время начала"
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                        />
-                    </div>
-                    {/* Выбор времени окончания смены */}
-                    <div className="mb-6">
-                        <label className="block text-gray-700 mb-2">Время окончания смены:</label>
-                        <Calendar
-                            value={endTime}
-                            onChange={(e) => setEndTime(e.value)}
-                            timeOnly
-                            hourFormat="24"
-                            showIcon
-                            locale="ru"
-                            placeholder="Выберите время окончания"
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className={`w-full bg-blue-500 text-white py-2 px-4 rounded ${
-                            isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
-                        } transition duration-200`}
-                    >
-                        {isLoading ? 'Проверка...' : 'Добавить'}
-                    </button>
+
+                    {entries.length > 0 && (
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className={`w-full bg-blue-500 text-white py-2 px-4 rounded mt-6 ${
+                                isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+                            } transition duration-200`}
+                        >
+                            {isLoading ? 'Проверка...' : 'Добавить'}
+                        </button>
+                    )}
                 </form>
             </Dialog>
 
@@ -332,14 +339,14 @@ export const AddBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 footer={
                     <div className="flex gap-2 justify-center">
                         <Button
-                            className="flex-1 cursor-pointer bg-black text-white px2 px-4 rounded"
+                            className="flex-1 bg-black text-white px-4 py-2 rounded"
                             label="Отмена"
                             onClick={cancelChanges}
                             disabled={isLoading}
                         />
                         <Button
                             label="Подтвердить"
-                            className={`flex-1 cursor-pointer bg-blue-500 text-white py-2 px-4 rounded ${
+                            className={`flex-1 bg-blue-500 text-white py-2 px-4 rounded ${
                                 isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
                             } transition duration-200`}
                             onClick={confirmChanges}
