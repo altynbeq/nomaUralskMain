@@ -469,15 +469,21 @@ export const EmployeesCalendar = () => {
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {
+            const date = new Date(year, month, day); // Создаем полноценную дату
+
             if (bulkMode) {
                 if (bulkMode === 'add') {
                     if (shifts.length > 0) {
-                        toast.warn(`У сотрудника ${employee.name} уже есть смена в день ${day}.`);
+                        toast.warn(
+                            `У сотрудника ${employee.name} уже есть смена на ${date.toLocaleDateString('ru-RU')}.`,
+                        );
                         return;
                     }
                 } else if (bulkMode === 'edit') {
                     if (shifts.length === 0) {
-                        toast.warn(`У сотрудника ${employee.name} нет смены в день ${day}.`);
+                        toast.warn(
+                            `У сотрудника ${employee.name} нет смены на ${date.toLocaleDateString('ru-RU')}.`,
+                        );
                         return;
                     }
                 }
@@ -485,31 +491,35 @@ export const EmployeesCalendar = () => {
                 setSelectedDays((prevSelectedDays) => {
                     const exists = prevSelectedDays.some(
                         (selected) =>
-                            selected.employee._id === employee._id && selected.day === day,
+                            selected.employee._id === employee._id &&
+                            selected.date.getTime() === date.getTime(),
                     );
                     if (exists) {
-                        // Удаляем отметку
+                        // Если запись уже есть, удаляем ее
                         return prevSelectedDays.filter(
                             (selected) =>
-                                !(selected.employee._id === employee._id && selected.day === day),
+                                !(
+                                    selected.employee._id === employee._id &&
+                                    selected.date.getTime() === date.getTime()
+                                ),
                         );
                     } else {
-                        // Добавляем отметку с включением shifts
-                        return [...prevSelectedDays, { employee, day, shifts }];
+                        // Добавляем новую запись с полноценной датой
+                        return [...prevSelectedDays, { employee, date, day, shifts }];
                     }
                 });
             } else {
                 if (shifts.length === 0) {
-                    // День без смен, открываем модалку для добавления смены с автоматически выбранным сотрудником
+                    // День без смен
                     setSelectedEmployeeForNewShift(employee);
                     setSelectedDateForNewShift({
-                        day,
-                        month: month + 1, // Luxon использует 1-12 для месяцев
-                        year,
+                        day: date.getDate(),
+                        month: date.getMonth() + 1,
+                        year: date.getFullYear(),
                     });
                     setShowAddShiftModal(true);
                 } else {
-                    // День со сменами, открываем модалку с деталями смен
+                    // День со сменами
                     setSelectedDayShiftsModal(shifts);
                 }
             }
