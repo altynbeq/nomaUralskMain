@@ -5,9 +5,8 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
-import { ProgressBar } from 'primereact/progressbar';
 import { axiosInstance } from '../../api/axiosInstance';
-import { useAuthStore } from '../../store';
+import { useAuthStore, useCompanyStructureStore } from '../../store';
 import { Loader } from '../Loader';
 
 export const WorkersShiftsStats = () => {
@@ -20,6 +19,8 @@ export const WorkersShiftsStats = () => {
     const [isFilterDialogVisible, setIsFilterDialogVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(0); // Стейт для текущей страницы
     const user = useAuthStore((state) => state.user);
+    const stores = useCompanyStructureStore((state) => state.stores);
+    const departments = useCompanyStructureStore((state) => state.departments);
 
     useEffect(() => {
         (async () => {
@@ -70,19 +71,17 @@ export const WorkersShiftsStats = () => {
     }, [storeFilter, departmentFilter, globalFilter, subUserShiftsStats]);
 
     // Получаем уникальные магазины и отделы для фильтров
-    const storeOptions = Array.from(new Set(subUserShiftsStats.map((item) => item.storeName))).map(
-        (store) => ({
-            label: store,
-            value: store,
+    const storeOptions = Array.from(new Set(stores.map((item) => item.storeName))).map((store) => ({
+        label: store,
+        value: store,
+    }));
+
+    const departmentOptions = Array.from(new Set(departments.map((item) => item.name))).map(
+        (department) => ({
+            label: department,
+            value: department,
         }),
     );
-
-    const departmentOptions = Array.from(
-        new Set(subUserShiftsStats.map((item) => item.departmentName)),
-    ).map((department) => ({
-        label: department,
-        value: department,
-    }));
 
     const openFilterDialog = () => {
         setIsFilterDialogVisible(true);
