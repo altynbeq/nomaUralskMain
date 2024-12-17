@@ -196,14 +196,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 <div className={`flex flex-col gap-4 ${isLoading ? 'opacity-50' : ''}`}>
                     {shiftsData.length > 0 ? (
                         <>
-                            <div className="flex justify-end">
-                                <Button
-                                    onClick={handleSaveAll}
-                                    className="bg-green-500 text-white rounded-md p-2"
-                                    label="Сохранить все изменения"
-                                    disabled={isLoading}
-                                />
-                            </div>
                             {shiftsData.map((shift, index) => (
                                 <div
                                     key={shift.id}
