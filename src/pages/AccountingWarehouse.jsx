@@ -5,6 +5,7 @@ import { AddWarehouse } from '../components/Accounting/Warehouse/AddWarehouse';
 import { Loader } from '../components/Loader';
 import SkladBoxStats from '../components/Sklad/SkladBoxStats';
 import MoveItemsSklad from '../components/Accounting/Warehouse/MoveItemsSklad';
+import InventoryRevision from '../components/Accounting/Warehouse/InventoryRevision';
 
 const InternalTabs = () => {
     const [activeTab, setActiveTab] = useState('sklad');
@@ -37,8 +38,10 @@ const InternalTabs = () => {
         actions: (
             <div className="flex flex-col gap-3 justify-center">
                 <div className="flex flex-row mb-10 p-2">
-                    {/* <AddWarehouse /> */}
                     <MoveItemsSklad />
+                </div>
+                <div className="flex flex-row mb-10 p-2">
+                    <InventoryRevision />
                 </div>
             </div>
         ),
