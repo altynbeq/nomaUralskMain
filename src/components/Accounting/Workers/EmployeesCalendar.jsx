@@ -662,8 +662,8 @@ export const EmployeesCalendar = () => {
                     getShiftsForDay={getShiftsForDay}
                     getDayColor={getDayColor}
                     onDayClick={onDayClick}
-                    selectedDays={selectedDays} // Передаем selectedDays
-                    bulkMode={bulkMode} // Передаем bulkMode
+                    selectedDays={selectedDays}
+                    bulkMode={bulkMode}
                 />
                 <ShiftModal
                     selectedDayShiftsModal={selectedDayShiftsModal}

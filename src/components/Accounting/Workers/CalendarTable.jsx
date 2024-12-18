@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Loader } from '../../Loader';
-import { FaCheck } from 'react-icons/fa'; // Импортируем иконку FaCheck
+import { FaCheck } from 'react-icons/fa';
 
 export const CalendarTable = memo(
     ({
@@ -12,8 +12,8 @@ export const CalendarTable = memo(
         getDayColor,
         isLoading,
         onDayClick,
-        selectedDays, // Принимаем selectedDays как пропс
-        bulkMode, // Принимаем bulkMode как пропс
+        selectedDays,
+        bulkMode,
     }) => {
         const handleDayClick = (employee, day, shifts) => {
             onDayClick(employee, day, shifts);
@@ -80,12 +80,12 @@ export const CalendarTable = memo(
                                     } else if (dayColor.type === 'split') {
                                         style = {
                                             background:
-                                                'linear-gradient(to right, #ef4444 50%, green 50%)',
+                                                'linear-gradient(to right, #ef4444 50%, #22c55e 50%)',
                                         };
                                     } else if (dayColor.type === 'split-green-red') {
                                         style = {
                                             background:
-                                                'linear-gradient(to right, #ef4444 50%, green 50%)',
+                                                'linear-gradient(to right, #ef4444 50%, #22c55e 50%)',
                                         };
                                     } else {
                                         switch (dayColor.type) {
