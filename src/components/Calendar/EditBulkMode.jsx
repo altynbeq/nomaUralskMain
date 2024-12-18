@@ -364,11 +364,43 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
 
     const handleCheckInCheckOutUpdate = (updatedShift) => {
         setShiftsData((prev) =>
-            prev.map((shift) =>
-                shift.id === updatedShift.id
-                    ? { ...shift, ...updatedShift, isEdited: true }
-                    : shift,
-            ),
+            prev.map((shift) => {
+                if (shift.id === updatedShift.id) {
+                    // Повторяем логику преобразования дат, аналогичную той, что в useEffect
+
+                    const shiftStart = DateTime.fromISO(updatedShift.startTime, { zone: 'utc' })
+                        .setZone('UTC+5')
+                        .toJSDate();
+                    let shiftEnd = DateTime.fromISO(updatedShift.endTime, { zone: 'utc' })
+                        .setZone('UTC+5')
+                        .toJSDate();
+
+                    if (shiftEnd <= shiftStart) {
+                        shiftEnd = DateTime.fromJSDate(shiftEnd).plus({ days: 1 }).toJSDate();
+                    }
+
+                    const dateOnly = DateTime.fromISO(updatedShift.startTime, { zone: 'utc' })
+                        .setZone('UTC+5')
+                        .startOf('day')
+                        .toJSDate();
+
+                    const updatedStore = updatedShift.selectedStore
+                        ? stores.find((store) => store._id === updatedShift.selectedStore._id) ||
+                          defaultStore
+                        : defaultStore;
+
+                    return {
+                        ...shift,
+                        ...updatedShift,
+                        date: dateOnly,
+                        startTime: shiftStart,
+                        endTime: shiftEnd,
+                        selectedStore: updatedStore,
+                        isEdited: true,
+                    };
+                }
+                return shift;
+            }),
         );
     };
 
