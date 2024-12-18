@@ -204,7 +204,8 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
             const endTimeISO = DateTime.fromJSDate(shift.endTime).setZone('UTC+5').toUTC().toISO();
 
             return {
-                subUserId: shift.subUserId,
+                subUserId:
+                    typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
                 startTime: startTimeISO,
                 endTime: endTimeISO,
                 selectedStore: shift.selectedStore?._id || null,
@@ -229,7 +230,8 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 const newEnd = DateTime.fromJSDate(shift.endTime).setZone('UTC+5').toUTC().toISO();
 
                 return axiosInstance.put(`/shifts/${shift.id}`, {
-                    subUserId: shift.subUserId,
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
                     startTime: newStart,
                     endTime: newEnd,
                     selectedStore: shift.selectedStore?._id || null,
