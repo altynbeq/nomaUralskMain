@@ -225,7 +225,6 @@ export const EmployeesCalendar = () => {
 
     const getDayColor = useCallback((shifts) => {
         if (shifts.length === 0) {
-            // No shifts in the day
             return { type: 'gray' };
         }
 
@@ -244,24 +243,20 @@ export const EmployeesCalendar = () => {
                 (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
             const isFullyWorked = workedMinutes >= shiftDurationMinutes;
 
-            // If the shift has no scan in and scan out, mark it as shift without any attendance
             if (!hasScanIn && !hasScanOut) {
                 hasShiftsWithoutCheckInOrOut = true;
             } else {
                 hasShiftsWithoutCheckInOrOut = false;
             }
 
-            // Check if any shift in the day is not fully worked
             if (!isFullyWorked) {
                 hasAnyIncompleteShifts = true;
             }
 
-            // Check if any shift has lateness
             if (isLate) {
                 hasAnyLateShifts = true;
             }
 
-            // If there's any shift that wasn't fully worked, then it's not a fully worked day
             if (!hasScanIn || !hasScanOut || !isFullyWorked) {
                 hasFullWorkedShifts = false;
             }
@@ -469,7 +464,7 @@ export const EmployeesCalendar = () => {
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {
-            const date = new Date(year, month, day); // Создаем полноценную дату
+            const date = new Date(year, month, day);
 
             if (bulkMode) {
                 if (bulkMode === 'add') {
@@ -495,7 +490,6 @@ export const EmployeesCalendar = () => {
                             selected.date.getTime() === date.getTime(),
                     );
                     if (exists) {
-                        // Если запись уже есть, удаляем ее
                         return prevSelectedDays.filter(
                             (selected) =>
                                 !(
@@ -504,13 +498,11 @@ export const EmployeesCalendar = () => {
                                 ),
                         );
                     } else {
-                        // Добавляем новую запись с полноценной датой
                         return [...prevSelectedDays, { employee, date, day, shifts }];
                     }
                 });
             } else {
                 if (shifts.length === 0) {
-                    // День без смен
                     setSelectedEmployeeForNewShift(employee);
                     setSelectedDateForNewShift({
                         day: date.getDate(),
@@ -519,7 +511,6 @@ export const EmployeesCalendar = () => {
                     });
                     setShowAddShiftModal(true);
                 } else {
-                    // День со сменами
                     setSelectedDayShiftsModal(shifts);
                 }
             }
