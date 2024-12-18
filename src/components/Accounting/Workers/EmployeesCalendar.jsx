@@ -75,29 +75,24 @@ export const EmployeesCalendar = () => {
     useEffect(() => {
         socket.on('new-shift', (newShifts) => {
             setSubUsersState((prevSubUsers) => {
-                const updatedUsers = [...prevSubUsers];
-
-                newShifts.forEach((shift) => {
-                    const userIndex = updatedUsers.findIndex(
-                        (user) => user._id === shift.subUserId._id,
+                return prevSubUsers.map((user) => {
+                    // Находим все новые смены для этого пользователя, которых ещё нет
+                    const userNewShifts = newShifts.filter(
+                        (shift) =>
+                            shift.subUserId._id === user._id &&
+                            !user.shifts.some((existingShift) => existingShift._id === shift._id),
                     );
 
-                    if (userIndex !== -1) {
-                        const user = updatedUsers[userIndex];
-
-                        if (!user.shifts) user.shifts = [];
-
-                        const shiftExists = user.shifts.some(
-                            (existingShift) => existingShift._id === shift._id,
-                        );
-
-                        if (!shiftExists) {
-                            user.shifts.push(shift);
-                        }
+                    if (userNewShifts.length > 0) {
+                        // Возвращаем новый объект пользователя
+                        return {
+                            ...user,
+                            shifts: [...user.shifts, ...userNewShifts],
+                        };
                     }
-                });
 
-                return updatedUsers;
+                    return user;
+                });
             });
         });
 
