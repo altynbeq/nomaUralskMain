@@ -6,7 +6,7 @@ import { axiosInstance } from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
 
 export const CheckInCheckOutModal = memo(
-    ({ visible, type, time, clearCheckInCheckoutProps, shift }) => {
+    ({ visible, type, time, clearCheckInCheckoutProps, shift, onUpdate }) => {
         const [date, setDate] = useState(null);
         const [isLoading, setIsLoading] = useState(false);
 
@@ -71,7 +71,11 @@ export const CheckInCheckOutModal = memo(
                               scanTime: shift.scanTime,
                           };
 
-                await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const updatedShift = response.data;
+                if (onUpdate) {
+                    onUpdate(updatedShift);
+                }
 
                 clearCheckInCheckoutProps();
                 toast.success(`Вы успешно обновили ${type === 'checkIn' ? 'приход' : 'уход'}`);
