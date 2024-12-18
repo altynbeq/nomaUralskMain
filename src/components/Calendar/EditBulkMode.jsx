@@ -52,16 +52,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Состояния для модального окна CheckInCheckOut
     const [modalVisible, setModalVisible] = useState(false);
-    const [modalType, setModalType] = useState('checkIn'); // 'checkIn' или 'checkOut'
+    const [modalType, setModalType] = useState('checkIn');
     const [currentShift, setCurrentShift] = useState(null);
 
-    // Состояния для конфликта
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]);
 
-    // Определяем дефолтный магазин (например, первый в списке)
     const defaultStore = stores.length > 0 ? stores[0] : null;
 
     useEffect(() => {
@@ -71,9 +68,8 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
             if (!employee || !shifts) return;
 
             shifts.forEach((shift) => {
-                if (!shift) return; // Пропускаем null
+                if (!shift) return;
 
-                // Преобразуем время начала и конца смены
                 const shiftStart = DateTime.fromISO(shift.startTime, { zone: 'utc' })
                     .setZone('UTC+5')
                     .toJSDate();
@@ -86,25 +82,23 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                     shiftEnd = DateTime.fromJSDate(shiftEnd).plus({ days: 1 }).toJSDate();
                 }
 
-                // Извлекаем дату из startTime
                 const dateOnly = DateTime.fromISO(shift.startTime, { zone: 'utc' })
                     .setZone('UTC+5')
                     .startOf('day')
                     .toJSDate();
 
-                // Найдите соответствующий магазин из массива stores
                 const store =
                     stores.find((storeItem) => storeItem._id === shift.selectedStore?._id) || null;
 
                 transformed.push({
                     ...shift,
                     employeeName: employee.name,
-                    date: dateOnly, // Добавляем отдельное поле даты
+                    date: dateOnly,
                     startTime: shiftStart,
                     endTime: shiftEnd,
-                    selectedStore: store || defaultStore, // Устанавливаем полный объект магазина или дефолтный
-                    id: shift._id, // Устанавливаем id для корректного рендера
-                    isEdited: false, // Флаг для отслеживания изменений
+                    selectedStore: store || defaultStore,
+                    id: shift._id,
+                    isEdited: false,
                 });
             });
         });
@@ -112,20 +106,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         setShiftsData(transformed);
     }, [subUsers, stores, defaultStore]);
 
-    // Обработчик изменения поля
     const handleFieldChange = (index, field, value) => {
         setShiftsData((prev) => {
             const updated = [...prev];
             const shift = { ...updated[index], isEdited: true };
 
             if (field === 'startTime' || field === 'endTime') {
-                // Получаем существующую дату смены
                 const existingDate = DateTime.fromJSDate(shift.date).setZone('UTC+5');
 
-                // Создаём объект DateTime для нового времени
                 const newTime = DateTime.fromJSDate(value).setZone('UTC+5');
 
-                // Объединяем существующую дату с новым временем
                 const newDateTime = existingDate.set({
                     hour: newTime.hour,
                     minute: newTime.minute,
@@ -154,7 +144,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         });
     };
 
-    // Обработчик изменения даты
     const handleDateChange = (index, value) => {
         if (!value) {
             toast.error('Дата не может быть пустой.');
@@ -165,7 +154,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
             const updated = [...prev];
             const shift = { ...updated[index], date: value, isEdited: true };
 
-            // Проверяем корректность времени начала и конца
             if (!(shift.startTime instanceof Date) || isNaN(shift.startTime)) {
                 toast.error('Некорректное время начала смены.');
                 return prev;
@@ -175,7 +163,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 return prev;
             }
 
-            // Объединяем новую дату с существующим временем начала
             const startTimeDT = DateTime.fromJSDate(shift.startTime).setZone('UTC+5');
             const newStartDateTime = DateTime.fromJSDate(value)
                 .set({
@@ -186,7 +173,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 })
                 .setZone('UTC+5');
 
-            // Объединяем новую дату с существующим временем конца
             const endTimeDT = DateTime.fromJSDate(shift.endTime).setZone('UTC+5');
             let newEndDateTime = DateTime.fromJSDate(value)
                 .set({
@@ -197,7 +183,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 })
                 .setZone('UTC+5');
 
-            // Если время окончания меньше или равно времени начала, добавляем день
             if (newEndDateTime <= newStartDateTime) {
                 newEndDateTime = newEndDateTime.plus({ days: 1 });
             }
@@ -210,9 +195,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         });
     };
 
-    // Проверяем конфликты перед сохранением
     const checkConflicts = async (editedShifts) => {
-        // Подготовка данных для проверки конфликтов
         const shiftsForCheck = editedShifts.map((shift) => {
             const startTimeISO = DateTime.fromJSDate(shift.startTime)
                 .setZone('UTC+5')
@@ -235,7 +218,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         return checkResponse.data.conflict ? shiftsForCheck : null;
     };
 
-    // Процедура обновления смен (без проверки)
     const updateShifts = async (editedShifts) => {
         try {
             const updatePromises = editedShifts.map((shift) => {
@@ -256,7 +238,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
 
             const responses = await Promise.all(updatePromises);
 
-            // Обновляем локальное состояние, отмечая смены как неотредактированные
             setShiftsData((prev) =>
                 prev.map((shift) => {
                     const updatedShift = responses.find((res) => res.data.id === shift.id);
@@ -308,7 +289,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         }
     };
 
-    // Обработчик сохранения всех изменений
     const handleSaveAll = async () => {
         const editedShifts = shiftsData.filter((shift) => shift.isEdited);
 
@@ -317,7 +297,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
             return;
         }
 
-        // Проверка наличия магазина
         const invalidShifts = editedShifts.filter((shift) => !shift.selectedStore);
         if (invalidShifts.length > 0) {
             toast.error('Все смены должны иметь выбранный магазин.');
@@ -327,16 +306,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         setIsLoading(true);
 
         try {
-            // Сначала проверяем конфликты
             const conflictShifts = await checkConflicts(editedShifts);
 
             if (conflictShifts) {
-                // Есть конфликты
                 setPendingShifts(editedShifts);
                 setShowConfirmModal(true);
                 setIsLoading(false);
             } else {
-                // Нет конфликтов, сразу обновляем
                 await updateShifts(editedShifts);
             }
         } catch (error) {
@@ -372,7 +348,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         }
     };
 
-    // Обработчики для модального окна CheckInCheckOut
     const openModal = (shift, type) => {
         setCurrentShift(shift);
         setModalType(type);
@@ -394,14 +369,12 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         );
     };
 
-    // Подтверждение изменений при конфликте
     const confirmChanges = async () => {
         setShowConfirmModal(false);
         setIsLoading(true);
         await updateShifts(pendingShifts);
     };
 
-    // Отмена изменений
     const cancelChanges = () => {
         setShowConfirmModal(false);
         toast.info('Вы отменили сохранение изменений.');
