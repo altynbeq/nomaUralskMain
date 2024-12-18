@@ -292,7 +292,7 @@ const LogInForm = ({ isQrRedirect }) => {
             </div>
             <AlertModal
                 open={showSuccessReg}
-                message="Вы успешно зарегистрировались. Нажмите на кнопку чтобы зайти в сервис"
+                message="Вы успешно зарегистрировались. Нажмите на кнопку чтобы войти в сервис."
                 onClose={() => {
                     setShowSuccessReg(false);
                     window.location.href = '/';
