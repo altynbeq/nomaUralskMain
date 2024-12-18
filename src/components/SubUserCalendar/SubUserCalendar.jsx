@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
 import { useSubUserStore } from '../../store/index';
 import avatar from '../../data/avatar.jpg';
 import { DateTime } from 'luxon';
+import { socket } from '../../socket';
 
 export const SubUserCalendar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -118,6 +119,80 @@ export const SubUserCalendar = () => {
     const currentYear = currentDate.year;
     const currentMonth = currentDate.month - 1;
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+
+    const handleSocketShiftUpdate = useCallback((updatedShift) => {
+        setSelectedShifts((prevShifts) => {
+            const updatedShifts = prevShifts.map((shift) =>
+                shift._id === updatedShift._id ? { ...shift, ...updatedShift } : shift,
+            );
+            return updatedShifts;
+        });
+
+        useSubUserStore.setState((state) => {
+            const updatedShifts = state.shifts.map((shift) =>
+                shift._id === updatedShift._id ? { ...shift, ...updatedShift } : shift,
+            );
+            return { shifts: updatedShifts };
+        });
+    }, []);
+
+    const handleSocketNewShifts = useCallback(
+        (newShifts) => {
+            setSelectedShifts((prevShifts) => {
+                if (!Array.isArray(newShifts)) return prevShifts;
+
+                const selectedDate = selectedDay
+                    ? DateTime.fromJSDate(selectedDay).toFormat('yyyy-MM-dd')
+                    : null;
+
+                const newShiftsForSelectedDay = newShifts.filter((newShift) => {
+                    const shiftDate = DateTime.fromISO(newShift.startTime).toFormat('yyyy-MM-dd');
+                    return shiftDate === selectedDate;
+                });
+
+                const updatedShifts = [...prevShifts, ...newShiftsForSelectedDay];
+
+                const uniqueShifts = Array.from(
+                    new Map(updatedShifts.map((shift) => [shift._id, shift])).values(),
+                );
+
+                return uniqueShifts;
+            });
+
+            useSubUserStore.setState((state) => {
+                if (!Array.isArray(newShifts)) return state;
+
+                const updatedShifts = [...state.shifts, ...newShifts];
+
+                const uniqueShifts = Array.from(
+                    new Map(updatedShifts.map((shift) => [shift._id, shift])).values(),
+                );
+
+                return { shifts: uniqueShifts };
+            });
+        },
+        [selectedDay],
+    );
+
+    useEffect(() => {
+        socket.on('update-shift', (data) => {
+            handleSocketShiftUpdate(data.shift);
+        });
+
+        return () => {
+            socket.off('update-shift');
+        };
+    }, [handleSocketShiftUpdate]);
+
+    useEffect(() => {
+        socket.on('new-shift', (newShifts) => {
+            handleSocketNewShifts(newShifts);
+        });
+
+        return () => {
+            socket.off('new-shift');
+        };
+    }, [handleSocketNewShifts]);
 
     return (
         <div className="w-[90%] md:w-[50%] ml-5 bg-white subtle-border rounded-lg shadow-md p-4">
