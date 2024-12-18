@@ -15,9 +15,86 @@ export const CalendarTable = memo(
         selectedDays,
         bulkMode,
     }) => {
-        const handleDayClick = (employee, day, shifts) => {
-            onDayClick(employee, day, shifts);
+        const getCellStyle = (dayColor) => {
+            let style = {};
+            let finalClass = '';
+
+            if (dayColor.type === 'split-red-blue') {
+                style = {
+                    background: 'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)',
+                };
+            } else if (dayColor.type === 'split') {
+                style = {
+                    background: 'linear-gradient(to right, #ef4444 50%, #22c55e 50%)',
+                };
+            } else if (dayColor.type === 'split-green-red') {
+                style = {
+                    background: 'linear-gradient(to right, #22c55e 50%, #ef4444 50%)',
+                };
+            } else {
+                switch (dayColor.type) {
+                    case 'gray':
+                        finalClass = 'bg-gray-200';
+                        break;
+                    case 'blue':
+                        finalClass = 'bg-blue-500';
+                        break;
+                    case 'green':
+                        finalClass = 'bg-green-500';
+                        break;
+                    default:
+                        finalClass = '';
+                }
+            }
+
+            return { style, finalClass };
         };
+
+        const getTitleText = (dayColor) => {
+            switch (dayColor.type) {
+                case 'split-red-blue':
+                    return 'Опоздание и отсутствие отметки ухода';
+                case 'split':
+                    return 'Опоздание или неполная смена';
+                case 'split-green-red':
+                    return 'Отработана частично и с опозданием';
+                case 'gray':
+                    return 'Нет смены';
+                case 'blue':
+                    return 'Смена без отметок прихода и ухода';
+                case 'green':
+                    return 'Отработана полностью';
+                default:
+                    return '';
+            }
+        };
+
+        const isDaySelected = (employeeId, day) => {
+            return selectedDays.some(
+                (selected) => selected.employee._id === employeeId && selected.day === day,
+            );
+        };
+
+        const isDaySelectable = (shifts) => {
+            if (bulkMode === 'add') {
+                return shifts.length === 0;
+            } else if (bulkMode === 'edit') {
+                return shifts.length > 0;
+            }
+            return true;
+        };
+
+        const handleDayClick = (employee, day, shifts) => {
+            if (isDaySelectable(shifts)) {
+                onDayClick(employee, day, shifts);
+            }
+        };
+
+        const getWeekDayName = (year, month, day) => {
+            const date = new Date(year, month, day);
+            return new Intl.DateTimeFormat('ru-RU', { weekday: 'short' }).format(date);
+        };
+
         return (
             <div className="relative overflow-x-auto w-full max-w-full mt-10">
                 {isLoading && (
@@ -39,27 +116,17 @@ export const CalendarTable = memo(
                         </tr>
                         <tr>
                             <th className="px-2 py-1 text-left"></th>
-                            {daysArray.map((day) => {
-                                const date = new Date(year, month, day);
-                                const weekDay = new Intl.DateTimeFormat('ru-RU', {
-                                    weekday: 'short',
-                                }).format(date);
-                                return (
-                                    <th
-                                        key={day}
-                                        className="py-1 text-center text-xs text-gray-500"
-                                    >
-                                        {weekDay}
-                                    </th>
-                                );
-                            })}
+                            {daysArray.map((day) => (
+                                <th key={day} className="py-1 text-center text-xs text-gray-500">
+                                    {getWeekDayName(year, month, day)}
+                                </th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
                         {currentSubusers.map((employee) => (
                             <tr key={employee._id}>
                                 <td className="px-4 py-2 inline-flex items-center gap-2">
-                                    {/* <div className="w-6 h-6 bg-gray-200 rounded-full"></div> */}
                                     <div className="flex flex-col">
                                         <p className="text-sm">{employee?.name}</p>
                                         <p className="text-sm">{employee?.departmentId?.name}</p>
@@ -68,80 +135,10 @@ export const CalendarTable = memo(
                                 {daysArray.map((day) => {
                                     const shifts = getShiftsForDay(employee.shifts, day);
                                     const dayColor = getDayColor(shifts);
-
-                                    let style = {};
-                                    let finalClass = '';
-
-                                    if (dayColor.type === 'split-red-blue') {
-                                        style = {
-                                            background:
-                                                'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)',
-                                        };
-                                    } else if (dayColor.type === 'split') {
-                                        style = {
-                                            background:
-                                                'linear-gradient(to right, #ef4444 50%, #22c55e 50%)',
-                                        };
-                                    } else if (dayColor.type === 'split-green-red') {
-                                        style = {
-                                            background:
-                                                'linear-gradient(to right, #ef4444 50%, #22c55e 50%)',
-                                        };
-                                    } else {
-                                        switch (dayColor.type) {
-                                            case 'gray':
-                                                finalClass = 'bg-gray-200';
-                                                break;
-                                            case 'blue':
-                                                finalClass = 'bg-blue-500';
-                                                break;
-                                            case 'green':
-                                                finalClass = 'bg-green-500';
-                                                break;
-                                            default:
-                                                finalClass = '';
-                                        }
-                                    }
-
-                                    let titleText = '';
-                                    switch (dayColor.type) {
-                                        case 'split-red-blue':
-                                            titleText = 'Опоздание и отсутствие отметки ухода';
-                                            break;
-                                        case 'split':
-                                            titleText = 'Опоздание или неполная смена';
-                                            break;
-                                        case 'gray':
-                                            titleText = 'Нет смены';
-                                            break;
-                                        case 'blue':
-                                            titleText = 'Смена без отметок прихода и ухода';
-                                            break;
-                                        case 'green':
-                                            titleText = 'Отработана полностью';
-                                            break;
-                                        default:
-                                            titleText = '';
-                                    }
-
-                                    // Проверяем, выбран ли этот день для данного сотрудника в bulkMode
-                                    const isSelected = selectedDays.some(
-                                        (selected) =>
-                                            selected.employee._id === employee._id &&
-                                            selected.day === day,
-                                    );
-
-                                    // Определяем, доступен ли выбор этого дня в зависимости от режима и наличия смены
-                                    let isSelectable = true;
-                                    if (bulkMode === 'add') {
-                                        if (shifts.length > 0) {
-                                            isSelectable = false;
-                                        }
-                                    } else if (bulkMode === 'edit') {
-                                        if (shifts.length === 0) {
-                                            isSelectable = false;
-                                        }
-                                    }
+                                    const { style, finalClass } = getCellStyle(dayColor);
+                                    const titleText = getTitleText(dayColor);
+                                    const isSelected = isDaySelected(employee._id, day);
+                                    const isSelectable = isDaySelectable(shifts);
 
                                     return (
                                         <td
@@ -149,11 +146,7 @@ export const CalendarTable = memo(
                                             className={`py-1 text-center relative cursor-pointer ${
                                                 !isSelectable ? 'opacity-50 cursor-not-allowed' : ''
                                             }`}
-                                            onClick={() => {
-                                                if (isSelectable) {
-                                                    handleDayClick(employee, day, shifts);
-                                                }
-                                            }}
+                                            onClick={() => handleDayClick(employee, day, shifts)}
                                         >
                                             {isSelectable && (
                                                 <div
