@@ -280,6 +280,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
                 }),
             );
 
+            setOpen(false);
             toast.success('Все изменения успешно сохранены.');
         } catch (error) {
             console.error('Ошибка при сохранении изменений:', error);
