@@ -48,7 +48,7 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
+export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelete }) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -343,6 +343,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open }) => {
         try {
             await axiosInstance.delete(`/shifts/${shiftId}`);
             setShiftsData((prev) => prev.filter((shift) => shift.id !== shiftId));
+            handleShiftDelete(shiftId);
             toast.success('Смена успешно удалена');
         } catch (error) {
             toast.error('Не удалось удалить смену.');

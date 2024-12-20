@@ -602,6 +602,7 @@ export const EmployeesCalendar = () => {
                                 setOpen={setShowBulkdModeModal}
                                 open={showBulkModeModal === 'edit'}
                                 subUsers={selectedDays}
+                                handleShiftDelete={handleShiftDelete}
                             />
                             <div className="flex flex-row gap-2">
                                 <button
