@@ -84,14 +84,14 @@ const InventoryRevision = () => {
         })),
     ];
 
-    // Filtering for main inventory
+    // Adjust filtering to consider "All" as no-filter
     const filteredItems = React.useMemo(() => {
         return inventoryItems.filter(
             (item) =>
-                (!selectedCategory || item.category === selectedCategory) &&
-                (!selectedWarehouse || item.warehouse === selectedWarehouse) &&
+                (selectedCategory === 'All' || item.category === selectedCategory) &&
+                (selectedWarehouse === 'All' || item.warehouse === selectedWarehouse) &&
                 item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                item.name.toLowerCase().includes(inventorySearchTerm.toLowerCase()), // also filter by inventorySearchTerm
+                item.name.toLowerCase().includes(inventorySearchTerm.toLowerCase()),
         );
     }, [selectedCategory, selectedWarehouse, searchTerm, inventorySearchTerm]);
 
@@ -161,6 +161,8 @@ const InventoryRevision = () => {
         setRevisedCurrentPage((prev) => Math.min(revisedTotalPages, prev + 1));
     };
 
+    const hasSelectedBoth = selectedCategory && selectedWarehouse;
+
     return (
         <div className="bg-white flex flex-col min-w-[100%] subtle-border p-6 rounded-2xl shadow-md max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-4 text-center">Ревизия инвентаря</h2>
@@ -176,7 +178,8 @@ const InventoryRevision = () => {
                     }}
                     className="w-full p-2 border rounded-xl"
                 >
-                    <option value="">Все категории</option>
+                    <option value="">-- Выбрать категорию --</option>
+                    <option value="All">Все</option>
                     {productCategories.map((category) => (
                         <option key={category} value={category}>
                             {category}
@@ -196,7 +199,8 @@ const InventoryRevision = () => {
                     }}
                     className="w-full p-2 border rounded-xl"
                 >
-                    <option value="">Все склады</option>
+                    <option value="">-- Выбрать склад --</option>
+                    <option value="All">Все</option>
                     {warehouses.map((warehouse) => (
                         <option key={warehouse} value={warehouse}>
                             {warehouse}
@@ -205,217 +209,205 @@ const InventoryRevision = () => {
                 </select>
             </div>
 
-            {/* Global Search Input */}
-            {/* <div className="relative mb-4">
-                <input
-                    type="text"
-                    placeholder="Поиск товаров..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                    }}
-                    className="w-full p-2 pl-10 border rounded-xl"
-                />
-                <FaSearch className="absolute left-3 top-3 text-gray-400" size={20} />
-            </div> */}
-
-            <div className="flex flex-col">
-                <div className="flex flex-col gap-4">
-                    {/* Items for Revision Section */}
-                    <div className="bg-gray-100 subtle-border rounded-xl p-2 mb-4">
-                        <div className="flex pr-5 items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold">Товары для ревизии</h3>
-                            <div className="flex items-center gap-2">
-                                <div className="relative w-64">
-                                    <input
-                                        type="text"
-                                        placeholder="Поиск..."
-                                        value={revisedSearchTerm}
-                                        onChange={(e) => {
-                                            setRevisedSearchTerm(e.target.value);
-                                            setRevisedCurrentPage(1);
-                                        }}
-                                        className="w-full p-2 pl-10 border rounded-xl"
-                                    />
-                                    <FaSearch
-                                        className="absolute left-3 top-2.5 text-gray-400"
-                                        size={20}
-                                    />
-                                </div>
-                                <div className="bg-white subtle-border p-2 rounded-2xl">
-                                    <FaFileDownload
-                                        className="text-blue-700   cursor-pointer hover:text-blue-500 transition-colors"
-                                        size={24}
-                                        onClick={() => {
-                                            // Implement download logic
-                                            alert('Download initiated');
-                                        }}
-                                    />
+            {/* Show the rest only if both category and warehouse have been chosen */}
+            {hasSelectedBoth && (
+                <div className="flex flex-col">
+                    <div className="flex flex-col gap-4">
+                        {/* Items for Revision Section */}
+                        <div className="bg-gray-100 subtle-border rounded-xl p-2 mb-4">
+                            <div className="flex pr-5 items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold">Товары для ревизии</h3>
+                                <div className="flex items-center gap-2">
+                                    <div className="relative w-64">
+                                        <input
+                                            type="text"
+                                            placeholder="Поиск..."
+                                            value={revisedSearchTerm}
+                                            onChange={(e) => {
+                                                setRevisedSearchTerm(e.target.value);
+                                                setRevisedCurrentPage(1);
+                                            }}
+                                            className="w-full p-2 pl-10 border rounded-xl"
+                                        />
+                                        <FaSearch
+                                            className="absolute left-3 top-2.5 text-gray-400"
+                                            size={20}
+                                        />
+                                    </div>
+                                    <div className="bg-white subtle-border p-2 rounded-2xl">
+                                        <FaFileDownload
+                                            className="text-blue-500   cursor-pointer hover:text-blue-500 transition-colors"
+                                            size={24}
+                                            onClick={() => {
+                                                // Implement download logic
+                                                alert('Download initiated');
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-4 gap-2 mb-2 font-semibold text-gray-700">
-                            <div>Название</div>
-                            <div>Категория</div>
-                            <div>Количество</div>
-                            {/* <div>Действия</div> */}
-                        </div>
-                        {paginatedRevisedItems.map((item) => (
-                            <div
-                                key={item.id}
-                                className="grid grid-cols-4 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
-                            >
-                                <div className="font-medium">{item.name}</div>
-                                <div className="text-sm">{item.category}</div>
-                                <div>
-                                    <input
-                                        type="number"
-                                        value={item.physicalQuantity}
-                                        onChange={(e) =>
-                                            updateRevisionQuantity(
-                                                item.id,
-                                                parseInt(e.target.value, 10),
-                                            )
-                                        }
-                                        className="w-16 p-1 border rounded"
-                                    />
+                            <div className="grid grid-cols-4 gap-2 mb-2 font-semibold text-gray-700">
+                                <div>Название</div>
+                                <div>Категория</div>
+                                <div>Количество</div>
+                            </div>
+                            {paginatedRevisedItems.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="grid grid-cols-4 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
+                                >
+                                    <div className="font-medium">{item.name}</div>
+                                    <div className="text-sm">{item.category}</div>
+                                    <div>
+                                        <input
+                                            type="number"
+                                            value={item.physicalQuantity}
+                                            onChange={(e) =>
+                                                updateRevisionQuantity(
+                                                    item.id,
+                                                    parseInt(e.target.value, 10),
+                                                )
+                                            }
+                                            className="w-16 p-1 border rounded"
+                                        />
+                                    </div>
+                                    <div>
+                                        <button
+                                            onClick={() => removeFromRevision(item.id)}
+                                            className="bg-red-500 flex flex-row gap-2 items-center text-sm justify-center text-center rounded-2xl text-white px-2 py-1 hover:bg-red-600"
+                                        >
+                                            Удалить <FaRegTrashAlt />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
+                            ))}
+
+                            {/* Pagination for Revised Items */}
+                            {revisedTotalPages > 1 && (
+                                <div className="flex justify-center items-center mt-4">
                                     <button
-                                        onClick={() => removeFromRevision(item.id)}
-                                        className="bg-red-500 flex flex-row gap-2 items-center text-sm justify-center text-center rounded-2xl text-white px-2 py-1 hover:bg-red-600"
+                                        onClick={goToRevisedPreviousPage}
+                                        disabled={revisedCurrentPage === 1}
+                                        className="disabled:opacity-50 mr-2"
                                     >
-                                        Удалить <FaRegTrashAlt />
+                                        <FaChevronLeft />
+                                    </button>
+                                    <span>
+                                        {revisedCurrentPage} / {revisedTotalPages}
+                                    </span>
+                                    <button
+                                        onClick={goToRevisedNextPage}
+                                        disabled={revisedCurrentPage === revisedTotalPages}
+                                        className="disabled:opacity-50 ml-2"
+                                    >
+                                        <FaChevronRight />
                                     </button>
                                 </div>
-                            </div>
-                        ))}
+                            )}
+                        </div>
 
-                        {/* Pagination for Revised Items */}
-                        {revisedTotalPages > 1 && (
-                            <div className="flex justify-center items-center mt-4">
-                                <button
-                                    onClick={goToRevisedPreviousPage}
-                                    disabled={revisedCurrentPage === 1}
-                                    className="disabled:opacity-50 mr-2"
+                        {/* Inventory Items Section */}
+                        <div className="bg-gray-100 subtle-border rounded-xl p-2 mb-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold">Все товары</h3>
+                                <div className="flex pr-5 items-center gap-2">
+                                    <div className="relative w-64">
+                                        <input
+                                            type="text"
+                                            placeholder="Поиск..."
+                                            value={inventorySearchTerm}
+                                            onChange={(e) => {
+                                                setInventorySearchTerm(e.target.value);
+                                                setCurrentPage(1);
+                                            }}
+                                            className="w-full p-2 pl-10 border rounded-xl"
+                                        />
+                                        <FaSearch
+                                            className="absolute left-3 top-2.5 text-gray-400"
+                                            size={20}
+                                        />
+                                    </div>
+                                    <div className="bg-white subtle-border p-2 rounded-2xl">
+                                        <FaFilter
+                                            className="text-blue-500 cursor-pointer hover:text-gray-700 transition-colors"
+                                            size={24}
+                                            onClick={() => {
+                                                // Implement filter logic
+                                                alert('Filter clicked');
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-5 gap-2 mb-2 font-semibold text-gray-700">
+                                <div>Название</div>
+                                <div>Категория</div>
+                                <div>Система</div>
+                                <div>Текущее</div>
+                            </div>
+                            {paginatedItems.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="grid grid-cols-5 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
                                 >
-                                    <FaChevronLeft />
-                                </button>
-                                <span>
-                                    {revisedCurrentPage} / {revisedTotalPages}
-                                </span>
+                                    <div className="font-medium">{item.name}</div>
+                                    <div className="text-sm">{item.category}</div>
+                                    <div className="text-gray-600">{item.systemQuantity}</div>
+                                    <div className="text-gray-600">{item.currentQuantity}</div>
+                                    <div>
+                                        <button
+                                            onClick={() => addToRevision(item)}
+                                            className="bg-blue-500 text-white px-2 py-1 rounded-2xl text-sm hover:bg-blue-600"
+                                        >
+                                            + Ревизия
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Pagination for Inventory Items */}
+                            {totalPages > 1 && (
+                                <div className="flex justify-center items-center mt-4">
+                                    <button
+                                        onClick={goToPreviousPage}
+                                        disabled={currentPage === 1}
+                                        className="disabled:opacity-50 mr-2"
+                                    >
+                                        <FaChevronLeft />
+                                    </button>
+                                    <span>
+                                        {currentPage} / {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={goToNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className="disabled:opacity-50 ml-2"
+                                    >
+                                        <FaChevronRight />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        {revisedItems.length > 0 && (
+                            <div className="text-center mt-4">
                                 <button
-                                    onClick={goToRevisedNextPage}
-                                    disabled={revisedCurrentPage === revisedTotalPages}
-                                    className="disabled:opacity-50 ml-2"
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-2xl hover:bg-blue-600 transition duration-300"
+                                    onClick={() => {
+                                        // Implement revision submission logic
+                                        alert('Ревизия завершена');
+                                    }}
                                 >
-                                    <FaChevronRight />
+                                    Подтвердить ревизию
                                 </button>
                             </div>
                         )}
                     </div>
-
-                    {/* Inventory Items Section */}
-                    <div className="bg-gray-100 subtle-border rounded-xl p-2 mb-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold">Все товары</h3>
-                            <div className="flex pr-5 items-center gap-2">
-                                <div className="relative w-64">
-                                    <input
-                                        type="text"
-                                        placeholder="Поиск..."
-                                        value={inventorySearchTerm}
-                                        onChange={(e) => {
-                                            setInventorySearchTerm(e.target.value);
-                                            setCurrentPage(1);
-                                        }}
-                                        className="w-full p-2 pl-10 border rounded-xl"
-                                    />
-                                    <FaSearch
-                                        className="absolute left-3 top-2.5 text-gray-400"
-                                        size={20}
-                                    />
-                                </div>
-                                <div className="bg-white subtle-border p-2 rounded-2xl">
-                                    <FaFilter
-                                        className="text-blue-700 cursor-pointer hover:text-gray-700 transition-colors"
-                                        size={24}
-                                        onClick={() => {
-                                            // Implement filter logic
-                                            alert('Filter clicked');
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-5 gap-2 mb-2 font-semibold text-gray-700">
-                            <div>Название</div>
-                            <div>Категория</div>
-                            <div>Система</div>
-                            <div>Текущее</div>
-                            {/* <div>Действия</div> */}
-                        </div>
-                        {paginatedItems.map((item) => (
-                            <div
-                                key={item.id}
-                                className="grid grid-cols-5 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
-                            >
-                                <div className="font-medium">{item.name}</div>
-                                <div className="text-sm">{item.category}</div>
-                                <div className="text-gray-600">{item.systemQuantity}</div>
-                                <div className="text-gray-600">{item.currentQuantity}</div>
-                                <div>
-                                    <button
-                                        onClick={() => addToRevision(item)}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded-2xl text-sm hover:bg-blue-600"
-                                    >
-                                        + Ревизия
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Pagination for Inventory Items */}
-                        <div className="flex justify-center items-center mt-4">
-                            <button
-                                onClick={goToPreviousPage}
-                                disabled={currentPage === 1}
-                                className="disabled:opacity-50 mr-2"
-                            >
-                                <FaChevronLeft />
-                            </button>
-                            <span>
-                                {currentPage} / {totalPages}
-                            </span>
-                            <button
-                                onClick={goToNextPage}
-                                disabled={currentPage === totalPages}
-                                className="disabled:opacity-50 ml-2"
-                            >
-                                <FaChevronRight />
-                            </button>
-                        </div>
-                    </div>
                 </div>
-
-                <div>
-                    {revisedItems.length > 0 && (
-                        <div className="text-center mt-4">
-                            <button
-                                className="bg-blue-500 text-white px-6 py-2 rounded-2xl hover:bg-blue-600 transition duration-300"
-                                onClick={() => {
-                                    // Implement revision submission logic
-                                    alert('Ревизия завершена');
-                                }}
-                            >
-                                Подтвердить ревизию
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
+            )}
         </div>
     );
 };
