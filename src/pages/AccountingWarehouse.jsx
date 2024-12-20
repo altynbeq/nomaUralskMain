@@ -10,6 +10,7 @@ import ItemsArrival from '../components/Accounting/Warehouse/ItemsArrival';
 import WarehouseHistory from '../components/Accounting/Warehouse/WarehouseHistory';
 import LatestActionsWarehouse from '../components/Accounting/Warehouse/LatestActionsWarehouse';
 import CurrentActions from '../components/Accounting/Warehouse/CurrentActions';
+import WriteoffsForApproval from '../components/Accounting/Warehouse/WriteoffsForApproval';
 
 const InternalTabs = () => {
     const [activeTab, setActiveTab] = useState('sklad');
@@ -42,6 +43,9 @@ const InternalTabs = () => {
         ),
         actions: (
             <div className="flex flex-col gap-3 justify-center">
+                <div className="flex flex-row mb-10 p-2">
+                    <WriteoffsForApproval />
+                </div>
                 <div className="flex flex-row mb-10 p-2">
                     <CurrentActions />
                 </div>
