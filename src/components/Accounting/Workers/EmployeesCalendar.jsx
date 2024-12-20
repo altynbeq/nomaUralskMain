@@ -53,6 +53,10 @@ export const EmployeesCalendar = () => {
     const [showBulkModeModal, setShowBulkdModeModal] = useState('');
 
     useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedStore, selectedDepartment, searchTerm]);
+
+    useEffect(() => {
         const companyId = user?.companyId ? user.companyId : user?.id;
         if (!companyId) {
             return;
@@ -61,6 +65,7 @@ export const EmployeesCalendar = () => {
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/subusers/company/${companyId}`);
+                console.log(response.data);
                 setSubUsersState(response.data);
             } catch (error) {
                 console.log(error);
@@ -145,17 +150,14 @@ export const EmployeesCalendar = () => {
         return subUsersState?.filter((subuser) => {
             const matchesSearch = subuser.name.toLowerCase().includes(lowerSearch);
             const matchesDepartment = selectedDepartment
-                ? subuser.departmentId === selectedDepartment._id
+                ? subuser.departmentId._id === selectedDepartment._id
                 : true;
 
-            const subuserDepartment = departments.find((dept) => dept._id === subuser.departmentId);
-            const subuserStoreId = subuserDepartment ? subuserDepartment.storeId : null;
-
-            const matchesStore = selectedStore ? subuserStoreId === selectedStore._id : true;
+            const matchesStore = selectedStore ? subuser.storeId === selectedStore._id : true;
 
             return matchesSearch && matchesDepartment && matchesStore;
         });
-    }, [departments, searchTerm, selectedDepartment, selectedStore, subUsersState]);
+    }, [searchTerm, selectedDepartment, selectedStore, subUsersState]);
 
     const daysInMonth = useMemo(() => new Date(year, month + 1, 0).getDate(), [year, month]);
     const daysArray = useMemo(

@@ -23,7 +23,6 @@ const LogInForm = ({ isQrRedirect }) => {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [alertOpen, setAlertOpen] = useState(false);
     const [showAlertMessage, setShowAlertMessage] = useState('');
     const [showLoginAlertMessage, setShowLoginAlertMessage] = useState('');
     const [showReset, setShowReset] = useState(false);
@@ -90,7 +89,8 @@ const LogInForm = ({ isQrRedirect }) => {
     };
 
     // Обработчик сброса пароля
-    const handlePasswordReset = async () => {
+    const handlePasswordReset = async (e) => {
+        if (e) e.preventDefault();
         setIsLoading(true);
         try {
             const { data } = await axiosInstance.post('/auth/reset_password_temporary', { email });
@@ -155,6 +155,7 @@ const LogInForm = ({ isQrRedirect }) => {
 
             <div className="flex items-center justify-center">
                 <Button
+                    type="button"
                     onClick={() => setShowReset(true)}
                     className="font-medium hover:text-gray-600"
                 >
@@ -291,7 +292,7 @@ const LogInForm = ({ isQrRedirect }) => {
             </div>
             <AlertModal
                 open={showSuccessReg}
-                message="Вы успешно зарегистрировались. Нажмите на кнопку чтобы зайти в сервис"
+                message="Вы успешно зарегистрировались. Нажмите на кнопку чтобы войти в сервис."
                 onClose={() => {
                     setShowSuccessReg(false);
                     window.location.href = '/';
