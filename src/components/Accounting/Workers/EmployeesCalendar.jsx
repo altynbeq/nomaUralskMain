@@ -65,7 +65,6 @@ export const EmployeesCalendar = () => {
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/subusers/company/${companyId}`);
-                console.log(response.data);
                 setSubUsersState(response.data);
             } catch (error) {
                 console.log(error);
