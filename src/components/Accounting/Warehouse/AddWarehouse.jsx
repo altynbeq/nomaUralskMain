@@ -97,6 +97,7 @@ export const AddWarehouse = () => {
                         role: formData.responsible.userRole,
                         email: formData.responsible.email,
                         departmentId: formData.responsible.departmentId,
+                        companyId: formData.responsible.companyId,
                     }),
                 );
                 submissionData.append('warehouse', JSON.stringify(formData.warehouse));
