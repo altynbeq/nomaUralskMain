@@ -90,7 +90,16 @@ export const AddWarehouse = () => {
                 submissionData.append('productName', JSON.stringify(formData.productName));
                 submissionData.append('date', new Date().toISOString());
                 submissionData.append('organization', JSON.stringify(formData.organization));
-                submissionData.append('responsible', JSON.stringify(formData.responsible));
+                submissionData.append(
+                    'responsible',
+                    JSON.stringify({
+                        id: formData.responsible._id,
+                        role: formData.responsible.userRole,
+                        email: formData.responsible.email,
+                        departmentId: formData.responsible.departmentId,
+                        companyId: formData.responsible.companyId,
+                    }),
+                );
                 submissionData.append('warehouse', JSON.stringify(formData.warehouse));
                 submissionData.append('reason', formData.reason);
                 submissionData.append('quantity', formData.quantity);
@@ -108,19 +117,21 @@ export const AddWarehouse = () => {
                             },
                         },
                     );
-                    setIsModalOpen(false);
-                    setShowAlertModal(true);
-                    setFormData({
-                        productName: null,
-                        date: null,
-                        organization: null,
-                        responsible: null,
-                        warehouse: null,
-                        reason: '',
-                        quantity: '',
-                        file: null,
-                    });
-                    setErrors({});
+                    if (response.status === 201) {
+                        setIsModalOpen(false);
+                        setShowAlertModal(true);
+                        setFormData({
+                            productName: null,
+                            date: null,
+                            organization: null,
+                            responsible: null,
+                            warehouse: null,
+                            reason: '',
+                            quantity: '',
+                            file: null,
+                        });
+                        setErrors({});
+                    }
                 } catch (error) {
                     console.error(error);
                 } finally {
