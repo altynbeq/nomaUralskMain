@@ -108,19 +108,21 @@ export const AddWarehouse = () => {
                             },
                         },
                     );
-                    setIsModalOpen(false);
-                    setShowAlertModal(true);
-                    setFormData({
-                        productName: null,
-                        date: null,
-                        organization: null,
-                        responsible: null,
-                        warehouse: null,
-                        reason: '',
-                        quantity: '',
-                        file: null,
-                    });
-                    setErrors({});
+                    if (response.status === 201) {
+                        setIsModalOpen(false);
+                        setShowAlertModal(true);
+                        setFormData({
+                            productName: null,
+                            date: null,
+                            organization: null,
+                            responsible: null,
+                            warehouse: null,
+                            reason: '',
+                            quantity: '',
+                            file: null,
+                        });
+                        setErrors({});
+                    }
                 } catch (error) {
                     console.error(error);
                 } finally {
