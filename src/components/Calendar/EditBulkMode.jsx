@@ -55,6 +55,7 @@ export const EditBulkMode = ({
     open,
     handleShiftDelete,
     handleShiftsDelete,
+    onMassScanTimeUpdate,
 }) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -504,6 +505,10 @@ export const EditBulkMode = ({
             if (response.status === 200) {
                 setOpen(false);
                 toast.success('Приход и уход всех смен успешно обновлены.');
+                const updatedShifts = response.data.updatedShifts;
+                if (onMassScanTimeUpdate && updatedShifts) {
+                    onMassScanTimeUpdate(updatedShifts);
+                }
             } else {
                 toast.error('Не удалось обновить смены.');
             }

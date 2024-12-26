@@ -153,7 +153,6 @@ export const EmployeesCalendar = () => {
                     startTime: shift.startTime,
                     endTime: shift.endTime,
                     selectedStore: shift.selectedStore._id,
-                    // Mark actual arrival as shift start
                     scanTime: shift.startTime,
                     endScanTime: shift.endScanTime,
                 };
@@ -161,7 +160,6 @@ export const EmployeesCalendar = () => {
                 const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
                 const updatedShift = response.data;
 
-                // Update local state
                 handleSocketShiftUpdate(updatedShift);
 
                 toast.success('Фактический приход установлен в начало смены');
@@ -170,10 +168,9 @@ export const EmployeesCalendar = () => {
                 toast.error('Не удалось изменить фактический приход');
             }
         },
-        [handleSocketShiftUpdate], // Dependencies: ensure that `handleSocketShiftUpdate` is stable
+        [handleSocketShiftUpdate],
     );
 
-    // Function to mark departure as shift end
     const handleMarkDepartureAsShiftEnd = useCallback(
         async (shift) => {
             try {
@@ -184,14 +181,12 @@ export const EmployeesCalendar = () => {
                     endTime: shift.endTime,
                     selectedStore: shift.selectedStore._id,
                     scanTime: shift.scanTime,
-                    // Mark actual departure as shift end
                     endScanTime: shift.endTime,
                 };
 
                 const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
                 const updatedShift = response.data;
 
-                // Update local state
                 handleSocketShiftUpdate(updatedShift);
 
                 toast.success('Фактический уход установлен в конец смены');
@@ -200,7 +195,7 @@ export const EmployeesCalendar = () => {
                 toast.error('Не удалось изменить фактический уход');
             }
         },
-        [handleSocketShiftUpdate], // Dependencies: ensure that `handleSocketShiftUpdate` is stable
+        [handleSocketShiftUpdate],
     );
 
     const filteredSubusers = useMemo(() => {
@@ -645,6 +640,33 @@ export const EmployeesCalendar = () => {
         setSelectedDays([]);
     };
 
+    const handleMassScanTimeUpdate = useCallback((updatedShifts) => {
+        setSubUsersState((prevSubUsers) => {
+            return prevSubUsers.map((user) => {
+                if (!user.shifts) return user;
+
+                const updatedShiftsMap = new Map(updatedShifts.map((shift) => [shift._id, shift]));
+
+                const newShifts = user.shifts.map((oldShift) => {
+                    if (updatedShiftsMap.has(oldShift._id)) {
+                        const updatedShift = updatedShiftsMap.get(oldShift._id);
+                        return {
+                            ...oldShift,
+                            scanTime: updatedShift.scanTime,
+                            endScanTime: updatedShift.endScanTime,
+                        };
+                    }
+                    return oldShift;
+                });
+
+                return {
+                    ...user,
+                    shifts: newShifts,
+                };
+            });
+        });
+    }, []);
+
     return (
         <div>
             <div className="w-[95%] justify-center align-center m-6 mt-5 bg-white p-3 rounded-lg shadow-md subtle-border">
@@ -712,6 +734,7 @@ export const EmployeesCalendar = () => {
                                 subUsers={selectedDays}
                                 handleShiftDelete={handleShiftDelete}
                                 handleShiftsDelete={handleShiftsDelete}
+                                onMassScanTimeUpdate={handleMassScanTimeUpdate}
                             />
                             <div className="flex flex-row gap-2">
                                 <button
