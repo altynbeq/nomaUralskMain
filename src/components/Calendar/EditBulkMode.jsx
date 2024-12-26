@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
@@ -416,6 +416,121 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
         toast.info('Вы отменили сохранение изменений.');
     };
 
+    // Новые функции для автоматической отметки прихода и ухода
+    const handleMarkArrivalAsShiftStart = useCallback(
+        async (shift) => {
+            try {
+                const payload = {
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                    startTime: shift.startTime.toISOString(), // Преобразуем Date в ISO строку
+                    endTime: shift.endTime.toISOString(),
+                    selectedStore: shift.selectedStore._id,
+                    // Устанавливаем фактический приход равным началу смены
+                    scanTime: shift.startTime.toISOString(),
+                    endScanTime: shift.endScanTime ? shift.endScanTime.toISOString() : null,
+                };
+
+                const response = await axiosInstance.put(`/shifts/${shift.id}`, payload);
+                const updatedShift = response.data;
+
+                // Обновляем локальное состояние
+                setShiftsData((prev) =>
+                    prev.map((s) =>
+                        s.id === updatedShift.id
+                            ? {
+                                  ...s,
+                                  ...updatedShift,
+                                  startTime: DateTime.fromISO(updatedShift.startTime, {
+                                      zone: 'utc',
+                                  })
+                                      .setZone('UTC+5')
+                                      .toJSDate(),
+                                  endTime: DateTime.fromISO(updatedShift.endTime, { zone: 'utc' })
+                                      .setZone('UTC+5')
+                                      .toJSDate(),
+                                  scanTime: updatedShift.scanTime
+                                      ? DateTime.fromISO(updatedShift.scanTime, { zone: 'utc' })
+                                            .setZone('UTC+5')
+                                            .toJSDate()
+                                      : null,
+                                  endScanTime: updatedShift.endScanTime
+                                      ? DateTime.fromISO(updatedShift.endScanTime, { zone: 'utc' })
+                                            .setZone('UTC+5')
+                                            .toJSDate()
+                                      : null,
+                                  isEdited: false,
+                              }
+                            : s,
+                    ),
+                );
+
+                toast.success('Фактический приход установлен в начало смены');
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
+                toast.error('Не удалось изменить фактический приход');
+            }
+        },
+        [], // Нет зависимостей, так как используем setShiftsData напрямую
+    );
+
+    const handleMarkDepartureAsShiftEnd = useCallback(
+        async (shift) => {
+            try {
+                const payload = {
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                    startTime: shift.startTime.toISOString(),
+                    endTime: shift.endTime.toISOString(),
+                    selectedStore: shift.selectedStore._id,
+                    scanTime: shift.scanTime ? shift.scanTime.toISOString() : null,
+                    // Устанавливаем фактический уход равным концу смены
+                    endScanTime: shift.endTime.toISOString(),
+                };
+
+                const response = await axiosInstance.put(`/shifts/${shift.id}`, payload);
+                const updatedShift = response.data;
+
+                // Обновляем локальное состояние
+                setShiftsData((prev) =>
+                    prev.map((s) =>
+                        s.id === updatedShift.id
+                            ? {
+                                  ...s,
+                                  ...updatedShift,
+                                  startTime: DateTime.fromISO(updatedShift.startTime, {
+                                      zone: 'utc',
+                                  })
+                                      .setZone('UTC+5')
+                                      .toJSDate(),
+                                  endTime: DateTime.fromISO(updatedShift.endTime, { zone: 'utc' })
+                                      .setZone('UTC+5')
+                                      .toJSDate(),
+                                  scanTime: updatedShift.scanTime
+                                      ? DateTime.fromISO(updatedShift.scanTime, { zone: 'utc' })
+                                            .setZone('UTC+5')
+                                            .toJSDate()
+                                      : null,
+                                  endScanTime: updatedShift.endScanTime
+                                      ? DateTime.fromISO(updatedShift.endScanTime, { zone: 'utc' })
+                                            .setZone('UTC+5')
+                                            .toJSDate()
+                                      : null,
+                                  isEdited: false,
+                              }
+                            : s,
+                    ),
+                );
+
+                toast.success('Фактический уход установлен в конец смены');
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
+                toast.error('Не удалось изменить фактический уход');
+            }
+        },
+        [], // Нет зависимостей, так как используем setShiftsData напрямую
+    );
+
     return (
         <>
             {/* ConfirmDialog Компонент */}
@@ -552,9 +667,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                                                 </p>
                                                 <Button
                                                     onClick={() => openModal(shift, 'checkIn')}
-                                                    className=" text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
+                                                    className=" text-white bg-blue-400 rounded-lg border h-9 w-9"
                                                     icon="pi pi-user-edit"
+                                                />
+                                                <Button
+                                                    icon="pi pi-check"
+                                                    className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                    onClick={() =>
+                                                        handleMarkArrivalAsShiftStart(shift)
+                                                    }
+                                                    tooltip="Установить фактический приход равным времени начала смены"
                                                 />
                                             </div>
                                         </div>
@@ -589,9 +711,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                                                 </p>
                                                 <Button
                                                     onClick={() => openModal(shift, 'checkOut')}
-                                                    className=" text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
+                                                    className=" text-white bg-blue-400 rounded-lg border w-9 h-9"
                                                     icon="pi pi-user-edit"
+                                                />
+                                                <Button
+                                                    icon="pi pi-check"
+                                                    className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                    onClick={() =>
+                                                        handleMarkArrivalAsShiftStart(shift)
+                                                    }
+                                                    tooltip="Установить фактический уход равным времени конца смены"
                                                 />
                                             </div>
                                         </div>
