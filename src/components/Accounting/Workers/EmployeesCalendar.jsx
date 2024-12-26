@@ -278,61 +278,43 @@ export const EmployeesCalendar = () => {
             return { type: 'gray' };
         }
 
-        let hasFullWorkedShifts = true;
-        let hasAnyIncompleteShifts = false;
-        let hasAnyLateShifts = false;
-        let hasShiftsWithoutCheckInOrOut = true;
+        let hasMissingScan = false;
+        let hasIncompleteShift = false;
+        let hasLateShift = false;
 
         shifts.forEach((shift) => {
-            const hasScanIn = !!shift.scanTime;
-            const hasScanOut = !!shift.endScanTime;
-            const isLate = shift.lateMinutes > 0;
+            if (!shift.scanTime || !shift.endScanTime) {
+                hasMissingScan = true;
+            }
+
             const workedMinutes =
                 (shift.workedTime?.hours || 0) * 60 + (shift.workedTime?.minutes || 0);
             const shiftDurationMinutes =
                 (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
-            const isFullyWorked = workedMinutes >= shiftDurationMinutes;
 
-            if (!hasScanIn && !hasScanOut) {
-                hasShiftsWithoutCheckInOrOut = true;
-            } else {
-                hasShiftsWithoutCheckInOrOut = false;
+            if (workedMinutes < shiftDurationMinutes) {
+                hasIncompleteShift = true;
             }
 
-            if (!isFullyWorked) {
-                hasAnyIncompleteShifts = true;
-            }
-
-            if (isLate) {
-                hasAnyLateShifts = true;
-            }
-
-            if (!hasScanIn || !hasScanOut || !isFullyWorked) {
-                hasFullWorkedShifts = false;
+            if (shift.lateMinutes > 0) {
+                hasLateShift = true;
             }
         });
 
-        if (hasShiftsWithoutCheckInOrOut) {
+        // Приоритет условий
+        if (hasMissingScan) {
             return { type: 'blue' };
         }
 
-        if (hasFullWorkedShifts) {
-            return { type: 'green' };
-        }
-
-        if (hasAnyLateShifts && hasShiftsWithoutCheckInOrOut) {
+        if (hasLateShift) {
             return { type: 'split-red-blue' };
         }
 
-        if (!hasAnyLateShifts && hasAnyIncompleteShifts) {
+        if (hasIncompleteShift) {
             return { type: 'split-green-red' };
         }
 
-        if (hasAnyLateShifts) {
-            return { type: 'split-red-blue' };
-        }
-
-        return { type: 'gray' };
+        return { type: 'green' };
     }, []);
 
     const handleShiftDelete = useCallback((shiftId) => {
@@ -641,6 +623,20 @@ export const EmployeesCalendar = () => {
     };
 
     const handleMassScanTimeUpdate = useCallback((updatedShifts) => {
+        if (!updatedShifts || !Array.isArray(updatedShifts)) {
+            console.error('Invalid updatedShifts data:', updatedShifts);
+            return;
+        }
+
+        const isObjectArray = updatedShifts.every(
+            (shift) => typeof shift === 'object' && '_id' in shift,
+        );
+
+        if (!isObjectArray) {
+            console.error('Updated shifts are not objects:', updatedShifts);
+            return;
+        }
+
         setSubUsersState((prevSubUsers) => {
             return prevSubUsers.map((user) => {
                 if (!user.shifts) return user;
@@ -654,6 +650,8 @@ export const EmployeesCalendar = () => {
                             ...oldShift,
                             scanTime: updatedShift.scanTime,
                             endScanTime: updatedShift.endScanTime,
+                            workedTime: updatedShift.workedTime,
+                            lateMinutes: updatedShift.lateMinutes,
                         };
                     }
                     return oldShift;
