@@ -503,12 +503,32 @@ export const EditBulkMode = ({
             });
 
             if (response.status === 200) {
-                setOpen(false);
                 toast.success('Приход и уход всех смен успешно обновлены.');
+
                 const updatedShifts = response.data.updatedShifts;
-                if (onMassScanTimeUpdate && updatedShifts) {
+
+                if (updatedShifts && Array.isArray(updatedShifts)) {
+                    setShiftsData((prev) =>
+                        prev.map((shift) => {
+                            const updatedShift = updatedShifts.find((us) => us._id === shift.id);
+                            if (updatedShift) {
+                                return {
+                                    ...shift,
+                                    scanTime: updatedShift.scanTime,
+                                    endScanTime: updatedShift.endScanTime,
+                                    isEdited: false,
+                                };
+                            }
+                            return shift;
+                        }),
+                    );
+                }
+
+                if (onMassScanTimeUpdate) {
                     onMassScanTimeUpdate(updatedShifts);
                 }
+
+                setOpen(false);
             } else {
                 toast.error('Не удалось обновить смены.');
             }
@@ -610,21 +630,23 @@ export const EditBulkMode = ({
                 header={
                     <div className="flex justify-between items-center">
                         <h3>Редактирование смен</h3>
-                        <div className="flex gap-2">
-                            <Button
-                                className="p-button-success bg-green-500 rounded-full py-1 px-2 text-white text-sm min-h-[40px]"
-                                label="Отметить все смены"
-                                onClick={handleBulkMarkScanTimes}
-                                tooltip="Установить приход и уход для всех смен"
-                            />
-                            <Button
-                                className="p-button-danger bg-red-400 rounded-full py-1 px-2 text-white text-sm min-h-[40px]"
-                                label="Удалить все смены"
-                                onClick={handleBulkDeleteShifts}
-                                tooltip="Удалить все смены"
-                                disabled={isLoading}
-                            />
-                        </div>
+                        {shiftsData.length !== 0 && (
+                            <div className="flex gap-2">
+                                <Button
+                                    className="p-button-success bg-green-500 rounded-full py-1 px-2 text-white text-sm min-h-[40px]"
+                                    label="Отметить все смены"
+                                    onClick={handleBulkMarkScanTimes}
+                                    tooltip="Установить приход и уход для всех смен"
+                                />
+                                <Button
+                                    className="p-button-danger bg-red-400 rounded-full py-1 px-2 text-white text-sm min-h-[40px]"
+                                    label="Удалить все смены"
+                                    onClick={handleBulkDeleteShifts}
+                                    tooltip="Удалить все смены"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        )}
                     </div>
                 }
                 visible={open}
@@ -642,7 +664,6 @@ export const EditBulkMode = ({
                                     >
                                         <h3 className="font-bold mb-6">{shift.employeeName}</h3>
 
-                                        {/* Поле даты */}
                                         <div className="mb-4">
                                             <label className="block text-gray-700 mb-1">
                                                 Дата смены
@@ -659,7 +680,6 @@ export const EditBulkMode = ({
                                             />
                                         </div>
 
-                                        {/* Поле магазина */}
                                         <div className="mb-4">
                                             <label className="block text-gray-700 mb-1">
                                                 Магазин
@@ -681,7 +701,6 @@ export const EditBulkMode = ({
                                             />
                                         </div>
 
-                                        {/* Поле начала смены и кнопка изменения прихода */}
                                         <div className="mb-4 flex items-center justify-between">
                                             <div className="w-1/2 mr-2">
                                                 <label className="block text-gray-700 mb-1">
