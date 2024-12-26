@@ -48,7 +48,15 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelete }) => {
+export const EditBulkMode = ({
+    setOpen,
+    stores,
+    subUsers,
+    open,
+    handleShiftDelete,
+    handleShiftsDelete,
+    onMassScanTimeUpdate,
+}) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -472,13 +480,85 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                     return s;
                 }),
             );
-
             toast.success('Фактический уход установлен в конец смены');
         } catch (error) {
             console.error('Ошибка при обновлении смены:', error);
             toast.error('Не удалось изменить фактический уход');
         }
     }, []);
+
+    const handleBulkMarkScanTimes = async () => {
+        if (shiftsData.length === 0) {
+            toast.info('Нет смен для обновления.');
+            return;
+        }
+
+        const shiftIds = shiftsData.map((shift) => shift.id);
+
+        setIsLoading(true);
+
+        try {
+            const response = await axiosInstance.post('/shifts/update-shifts-scan-times', {
+                shiftIds,
+            });
+
+            if (response.status === 200) {
+                setOpen(false);
+                toast.success('Приход и уход всех смен успешно обновлены.');
+                const updatedShifts = response.data.updatedShifts;
+                if (onMassScanTimeUpdate && updatedShifts) {
+                    onMassScanTimeUpdate(updatedShifts);
+                }
+            } else {
+                toast.error('Не удалось обновить смены.');
+            }
+        } catch (error) {
+            console.error('Ошибка при массовом обновлении смен:', error);
+            toast.error('Не удалось обновить смены.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleBulkDeleteShifts = async () => {
+        if (shiftsData.length === 0) {
+            toast.info('Нет смен для удаления.');
+            return;
+        }
+
+        const shiftIds = shiftsData.map((shift) => shift.id);
+
+        confirmDialog({
+            className: 'custom-confirm-dialog',
+            message: 'Вы уверены, что хотите удалить все смены?',
+            header: 'Подтверждение удаления',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Да',
+            rejectLabel: 'Нет',
+            accept: async () => {
+                setIsLoading(true);
+                try {
+                    const response = await axiosInstance.post('/shifts/delete-multiple', {
+                        shiftIds,
+                    });
+
+                    if (response.status === 200) {
+                        setOpen(false);
+                        handleShiftsDelete(shiftIds);
+                        setShiftsData([]);
+                    } else {
+                        toast.error('Не удалось удалить смены.');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при массовом удалении смен:', error);
+                    toast.error('Не удалось удалить смены.');
+                } finally {
+                    setIsLoading(false);
+                }
+            },
+            reject: () => toast.info('Удаление отменено.'),
+        });
+    };
 
     return (
         <>
@@ -527,7 +607,26 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
             </Dialog>
 
             <Dialog
-                header="Редактирование смен"
+                header={
+                    <div className="flex justify-between items-center">
+                        <h3>Редактирование смен</h3>
+                        <div className="flex gap-2">
+                            <Button
+                                className="p-button-success bg-green-500 rounded-full py-1 px-2 text-white text-sm min-h-[40px]"
+                                label="Отметить все смены"
+                                onClick={handleBulkMarkScanTimes}
+                                tooltip="Установить приход и уход для всех смен"
+                            />
+                            <Button
+                                className="p-button-danger bg-red-400 rounded-full py-1 px-2 text-white text-sm min-h-[40px]"
+                                label="Удалить все смены"
+                                onClick={handleBulkDeleteShifts}
+                                tooltip="Удалить все смены"
+                                disabled={isLoading}
+                            />
+                        </div>
+                    </div>
+                }
                 visible={open}
                 onHide={() => setOpen(false)}
                 className="bg-white p-6 rounded-lg shadow-lg min-w-[600px] max-w-4xl w-full overflow-y-auto"
