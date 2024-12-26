@@ -429,38 +429,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                     payload,
                 );
                 const updatedShift = response.data;
-
-                // Обновляем локальное состояние
-                setShiftsData((prev) =>
-                    prev.map((s) =>
-                        s.id === updatedShift.id
-                            ? {
-                                  ...s,
-                                  ...updatedShift,
-                                  startTime: DateTime.fromISO(updatedShift.startTime, {
-                                      zone: 'utc',
-                                  })
-                                      .setZone('UTC+5')
-                                      .toJSDate(),
-                                  endTime: DateTime.fromISO(updatedShift.endTime, { zone: 'utc' })
-                                      .setZone('UTC+5')
-                                      .toJSDate(),
-                                  scanTime: updatedShift.scanTime
-                                      ? DateTime.fromISO(updatedShift.scanTime, { zone: 'utc' })
-                                            .setZone('UTC+5')
-                                            .toJSDate()
-                                      : null,
-                                  endScanTime: updatedShift.endScanTime
-                                      ? DateTime.fromISO(updatedShift.endScanTime, { zone: 'utc' })
-                                            .setZone('UTC+5')
-                                            .toJSDate()
-                                      : null,
-                                  isEdited: false,
-                              }
-                            : s,
-                    ),
-                );
-
                 toast.success('Фактический приход установлен в начало смены');
             } catch (error) {
                 console.error('Ошибка при обновлении смены:', error);
@@ -482,38 +450,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                     payload,
                 );
                 const updatedShift = response.data;
-
-                // Обновляем локальное состояние
-                setShiftsData((prev) =>
-                    prev.map((s) =>
-                        s.id === updatedShift.id
-                            ? {
-                                  ...s,
-                                  ...updatedShift,
-                                  startTime: DateTime.fromISO(updatedShift.startTime, {
-                                      zone: 'utc',
-                                  })
-                                      .setZone('UTC+5')
-                                      .toJSDate(),
-                                  endTime: DateTime.fromISO(updatedShift.endTime, { zone: 'utc' })
-                                      .setZone('UTC+5')
-                                      .toJSDate(),
-                                  scanTime: updatedShift.scanTime
-                                      ? DateTime.fromISO(updatedShift.scanTime, { zone: 'utc' })
-                                            .setZone('UTC+5')
-                                            .toJSDate()
-                                      : null,
-                                  endScanTime: updatedShift.endScanTime
-                                      ? DateTime.fromISO(updatedShift.endScanTime, { zone: 'utc' })
-                                            .setZone('UTC+5')
-                                            .toJSDate()
-                                      : null,
-                                  isEdited: false,
-                              }
-                            : s,
-                    ),
-                );
-
                 toast.success('Фактический уход установлен в конец смены');
             } catch (error) {
                 console.error('Ошибка при обновлении смены:', error);
