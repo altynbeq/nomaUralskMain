@@ -451,54 +451,54 @@ export const EmployeesCalendar = () => {
                                         </div>
                                         <div className="flex flex-col">
                                             <div className="flex gap-4 items-center justify-between flex-1">
-                                                <p className="min-w-[256px]">
-                                                    <span className="font-bold text-lg">
-                                                        Фактический приход:
-                                                    </span>{' '}
+                                                <p className="font-bold text-lg flex-1">
+                                                    Фактический приход:{' '}
                                                     {formatOnlyTimeDate(shift.scanTime)}
                                                 </p>
-                                                <Button
-                                                    onClick={() => {
-                                                        handleOpenEditModal(shift, 'checkIn');
-                                                    }}
-                                                    className="text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
-                                                    icon="pi pi-user-edit"
-                                                />
 
-                                                <Button
-                                                    icon="pi pi-check"
-                                                    className="bg-green-500 text-white rounded-full w-7 h-7"
-                                                    onClick={() =>
-                                                        handleMarkArrivalAsShiftStart(shift)
-                                                    }
-                                                    tooltip="Установить фактический приход равным времени начала смены"
-                                                />
+                                                <div className="flex gap-2 items-center">
+                                                    <Button
+                                                        onClick={() => {
+                                                            handleOpenEditModal(shift, 'checkIn');
+                                                        }}
+                                                        className="text-white bg-blue-400 rounded-lg border h-9 w-9"
+                                                        icon="pi pi-user-edit"
+                                                    />
+
+                                                    <Button
+                                                        icon="pi pi-check"
+                                                        className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                        onClick={() =>
+                                                            handleMarkArrivalAsShiftStart(shift)
+                                                        }
+                                                        tooltip="Установить фактический приход равным времени начала смены"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="flex gap-4 items-center justify-between mt-5 flex-1">
-                                                <p className="min-w-[256px]">
-                                                    <span className="font-bold text-lg">
-                                                        Фактический уход:
-                                                    </span>{' '}
+                                                <p className="font-bold text-lg flex-1">
+                                                    Фактический уход:{' '}
                                                     {formatOnlyTimeDate(shift.endScanTime)}
                                                 </p>
-                                                <Button
-                                                    onClick={() => {
-                                                        handleOpenEditModal(shift, 'checkOut');
-                                                    }}
-                                                    className="text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
-                                                    icon="pi pi-user-edit"
-                                                />
 
-                                                <Button
-                                                    icon="pi pi-check"
-                                                    className="bg-green-500 text-white rounded-full w-7 h-7"
-                                                    onClick={() =>
-                                                        handleMarkDepartureAsShiftEnd(shift)
-                                                    }
-                                                    tooltip="Установить фактический уход равным времени конца смены"
-                                                />
+                                                <div className="flex gap-2 items-center">
+                                                    <Button
+                                                        onClick={() => {
+                                                            handleOpenEditModal(shift, 'checkOut');
+                                                        }}
+                                                        className="text-white bg-blue-400 rounded-lg border h-9 w-9"
+                                                        icon="pi pi-user-edit"
+                                                    />
+
+                                                    <Button
+                                                        icon="pi pi-check"
+                                                        className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                        onClick={() =>
+                                                            handleMarkDepartureAsShiftEnd(shift)
+                                                        }
+                                                        tooltip="Установить фактический уход равным времени конца смены"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                         <div>
