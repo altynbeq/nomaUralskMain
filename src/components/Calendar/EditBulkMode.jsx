@@ -718,7 +718,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                                                     icon="pi pi-check"
                                                     className="bg-green-500 text-white rounded-full h-9 w-9"
                                                     onClick={() =>
-                                                        handleMarkArrivalAsShiftStart(shift)
+                                                        handleMarkDepartureAsShiftEnd(shift)
                                                     }
                                                     tooltip="Установить фактический уход равным времени конца смены"
                                                 />
