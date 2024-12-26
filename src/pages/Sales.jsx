@@ -7,6 +7,7 @@ import {
     MonthlyConversion,
 } from '../components/Sales';
 import StatsBoxes from '../components/Sales/StatsBoxes';
+import LatestSalesList from '../components/Sales/LatestSalesList';
 import CardWithBarChart from '../components/demo/CardWithBarChart';
 import TableSort from '../components/demo/TablesList';
 import CarouselCard from '../components/demo/Slider';
@@ -157,6 +158,8 @@ const InternalTabs = ({ urls }) => {
                         rows={productsGridRows}
                         columns={GridProductListCols}
                     />
+
+                    <LatestSalesList />
                 </div>
                 <div className="flex    gap-6 align-center  flex-wrap justify-center   items-center">
                     <CarouselCard

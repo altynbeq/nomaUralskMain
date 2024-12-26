@@ -7,3 +7,4 @@ export { default as WeaklyStatistics } from './WeaklyStatistics';
 export { default as ProductsStats } from './ProductsStats';
 export { default as YearStats } from './YearStats';
 export { default as MonthlyConversion } from './MonthlyConversionChart';
+export { default as LatestSalesList } from './LatestSalesList';

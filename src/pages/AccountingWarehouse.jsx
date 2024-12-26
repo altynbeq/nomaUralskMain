@@ -43,10 +43,10 @@ const InternalTabs = () => {
         ),
         actions: (
             <div className="flex flex-col gap-3 justify-center">
-                <div className="flex flex-row mb-10 p-2">
+                <div className="flex flex-row mb-2 p-2">
                     <WriteoffsForApproval />
                 </div>
-                <div className="flex flex-row mb-10 p-2">
+                <div className="flex flex-row mb-2 p-2">
                     <CurrentActions />
                 </div>
                 <div className="flex flex-row mb-10 p-2">

@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import { FaSearch, FaExchangeAlt, FaTruckLoading } from 'react-icons/fa';
+import {
+    FaSearch,
+    FaExchangeAlt,
+    FaTruckLoading,
+    FaExclamationTriangle,
+    FaAngleDown,
+    FaAngleUp,
+} from 'react-icons/fa';
 
 const MoveItemsSklad = () => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [sourceWarehouse, setSourceWarehouse] = useState('');
     const [destinationWarehouse, setDestinationWarehouse] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     // Mock warehouse list (replace with actual warehouse data)
     const warehouses = [
@@ -75,58 +83,80 @@ const MoveItemsSklad = () => {
         setDestinationWarehouse('');
         alert('Items transferred successfully!');
     };
+    const CardTitle = ({ className = '', children }) => (
+        <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
+    );
     // // Filter items based on search term and source warehouse
     const filteredItems = inventoryItems.filter(
         (item) =>
             item.warehouse === sourceWarehouse &&
             item.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-
+    const pendingCount = 7;
     return (
         <div className="bg-white min-w-[100%] p-6 rounded-2xl subtle-border shadow-md max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4 text-center">Перемещение товаров на складе</h2>
-            {/* Warehouse Selection */}
-            <div className="mb-4">
-                <div className="flex justify-between">
-                    <div className="w-5/12">
-                        <label className="block mb-2 font-medium">Исходный склад</label>
-                        <select
-                            value={sourceWarehouse}
-                            onChange={(e) => setSourceWarehouse(e.target.value)}
-                            className="w-full p-2 border rounded-xl"
-                        >
-                            <option value="">Выберите исходный склад</option>
-                            {warehouses.map((warehouse) => (
-                                <option key={warehouse} value={warehouse}>
-                                    {warehouse}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex items-center self-end">
-                        <FaExchangeAlt className="text-blue-500 mx-2" />
-                    </div>
-
-                    <div className="w-5/12">
-                        <label className="block mb-2 font-medium">Целевой склад</label>
-                        <select
-                            value={destinationWarehouse}
-                            onChange={(e) => setDestinationWarehouse(e.target.value)}
-                            className="w-full p-2 border rounded-xl"
-                        >
-                            <option value="">Выберите целевой склад</option>
-                            {warehouses.map((warehouse) => (
-                                <option key={warehouse} value={warehouse}>
-                                    {warehouse}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+            <div className="flex flex-row justify-between">
+                <div className="flex mb-4 flex-row gap-2">
+                    <CardTitle>Перемещение товаров на складе</CardTitle>
+                    {pendingCount > 0 && (
+                        <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                            <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                            <span className="text-sm text-yellow-800">{pendingCount} действия</span>
+                        </div>
+                    )}
+                </div>
+                <div
+                    className="mr-4 cursor-pointer text-2xl"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                    {isCollapsed ? <FaAngleDown /> : <FaAngleUp />}
                 </div>
             </div>
 
+            {/* Warehouse Selection */}
+            {!isCollapsed && (
+                <div className="mb-4">
+                    <div className="flex justify-between">
+                        <div className="w-5/12">
+                            <label className="block mb-2 font-medium">Исходный склад</label>
+                            <select
+                                value={sourceWarehouse}
+                                onChange={(e) => setSourceWarehouse(e.target.value)}
+                                className="w-full p-2 border rounded-xl"
+                            >
+                                <option value="">Выберите исходный склад</option>
+                                {warehouses.map((warehouse) => (
+                                    <option key={warehouse} value={warehouse}>
+                                        {warehouse}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex items-center self-end">
+                            <FaExchangeAlt className="text-blue-500 mx-2" />
+                        </div>
+
+                        <div className="w-5/12">
+                            <label className="block mb-2 font-medium">Целевой склад</label>
+                            <select
+                                value={destinationWarehouse}
+                                onChange={(e) => setDestinationWarehouse(e.target.value)}
+                                className="w-full p-2 border rounded-xl"
+                            >
+                                <option value="">Выберите целевой склад</option>
+                                {warehouses.map((warehouse) => (
+                                    <option key={warehouse} value={warehouse}>
+                                        {warehouse}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Pick Items Section */}
-            {sourceWarehouse && destinationWarehouse && (
+            {!isCollapsed && sourceWarehouse && destinationWarehouse && (
                 <div>
                     <h3 className="text-lg font-semibold mb-2">Выберите товары</h3>
 

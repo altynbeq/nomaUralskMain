@@ -6,6 +6,9 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaFileDownload,
+    FaExclamationTriangle,
+    FaAngleDown,
+    FaAngleUp,
 } from 'react-icons/fa';
 
 const InventoryRevision = () => {
@@ -15,6 +18,7 @@ const InventoryRevision = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [revisedItems, setRevisedItems] = useState([]);
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     // States for revised items filtering & pagination
     const [revisedSearchTerm, setRevisedSearchTerm] = useState('');
@@ -160,57 +164,75 @@ const InventoryRevision = () => {
     const goToRevisedNextPage = () => {
         setRevisedCurrentPage((prev) => Math.min(revisedTotalPages, prev + 1));
     };
+    const CardTitle = ({ className = '', children }) => (
+        <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
+    );
 
     const hasSelectedBoth = selectedCategory && selectedWarehouse;
-
+    const pendingCount = 13;
     return (
         <div className="bg-white flex flex-col min-w-[100%] subtle-border p-6 rounded-2xl shadow-md max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4 text-center">Ревизия инвентаря</h2>
-
-            {/* Category Selection */}
-            <div className="mb-4">
-                <label className="block mb-2 font-medium">Выберите категорию товаров</label>
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => {
-                        setSelectedCategory(e.target.value);
-                        setCurrentPage(1); // Reset to first page when category changes
-                    }}
-                    className="w-full p-2 border rounded-xl"
+            <div className="flex flex-row justify-between">
+                <div className="flex mb-4 flex-row gap-2">
+                    <CardTitle>Ревизия инвентаря</CardTitle>
+                    {pendingCount > 0 && (
+                        <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                            <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                            <span className="text-sm text-yellow-800">{pendingCount} действия</span>
+                        </div>
+                    )}
+                </div>
+                <div
+                    className="mr-4 cursor-pointer text-2xl"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
                 >
-                    <option value="">-- Выбрать категорию --</option>
-                    <option value="All">Все</option>
-                    {productCategories.map((category) => (
-                        <option key={category} value={category}>
-                            {category}
-                        </option>
-                    ))}
-                </select>
+                    {isCollapsed ? <FaAngleDown /> : <FaAngleUp />}
+                </div>
             </div>
-
-            {/* Warehouse Selection */}
-            <div className="mb-4">
-                <label className="block mb-2 font-medium">Выберите склад</label>
-                <select
-                    value={selectedWarehouse}
-                    onChange={(e) => {
-                        setSelectedWarehouse(e.target.value);
-                        setCurrentPage(1); // Reset to first page when warehouse changes
-                    }}
-                    className="w-full p-2 border rounded-xl"
-                >
-                    <option value="">-- Выбрать склад --</option>
-                    <option value="All">Все</option>
-                    {warehouses.map((warehouse) => (
-                        <option key={warehouse} value={warehouse}>
-                            {warehouse}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
+            {!isCollapsed && (
+                <div className="mb-4">
+                    <label className="block mb-2 font-medium">Выберите категорию товаров</label>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => {
+                            setSelectedCategory(e.target.value);
+                            setCurrentPage(1); // Reset to first page when category changes
+                        }}
+                        className="w-full p-2 border rounded-xl"
+                    >
+                        <option value="">-- Выбрать категорию --</option>
+                        <option value="All">Все</option>
+                        {productCategories.map((category) => (
+                            <option key={category} value={category}>
+                                {category}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+            {!isCollapsed && (
+                <div className="mb-4">
+                    <label className="block mb-2 font-medium">Выберите склад</label>
+                    <select
+                        value={selectedWarehouse}
+                        onChange={(e) => {
+                            setSelectedWarehouse(e.target.value);
+                            setCurrentPage(1); // Reset to first page when warehouse changes
+                        }}
+                        className="w-full p-2 border rounded-xl"
+                    >
+                        <option value="">-- Выбрать склад --</option>
+                        <option value="All">Все</option>
+                        {warehouses.map((warehouse) => (
+                            <option key={warehouse} value={warehouse}>
+                                {warehouse}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
             {/* Show the rest only if both category and warehouse have been chosen */}
-            {hasSelectedBoth && (
+            {!isCollapsed && hasSelectedBoth && (
                 <div className="flex flex-col">
                     <div className="flex flex-col gap-4">
                         {/* Items for Revision Section */}

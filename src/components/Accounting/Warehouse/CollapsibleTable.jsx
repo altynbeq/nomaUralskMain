@@ -7,6 +7,7 @@ import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { useAuthStore } from '../../../store/authStore';
+import { FaSearch, FaRegCalendarAlt, FaFilter } from 'react-icons/fa';
 
 export default function CollapsibleTableWithDetails({ title }) {
     const clientId = useAuthStore((state) => state.user.id);
@@ -153,20 +154,33 @@ export default function CollapsibleTableWithDetails({ title }) {
             <div className="flex flex-col sm:flex-row justify-between items-center">
                 <h3 className="text-md mb-4 sm:mb-0">{title ? title : 'Список списаний'}</h3>
                 <div className="flex flex-col sm:flex-row justify-end gap-6 mb-3 w-full sm:w-auto">
+                    <div className="relative flex-1">
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <input
+                            type="text"
+                            placeholder="Поиск списаний"
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <button className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                        <FaFilter className="h-5 w-5 text-gray-600" />
+                        <span>Фильтр</span>
+                    </button>
+                    <button className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                        <FaRegCalendarAlt className="h-5 w-5 text-gray-600" />
+                        <span>Дата</span>
+                    </button>
+
                     <Calendar
                         value={dateRange}
                         selectionMode="range"
                         onChange={(e) => setDateRange(e.value)}
-                        className="border-blue-500 border-2 rounded-lg p-2 w-full sm:w-auto"
+                        className="hidden"
                         placeholder="Выберите период"
                         locale="ru"
                         inputStyle={{ width: '100%' }}
-                    />
-                    <InputText
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Поиск"
-                        className="border-blue-500 border-2 rounded-lg p-2 w-full sm:w-auto"
                     />
                 </div>
             </div>

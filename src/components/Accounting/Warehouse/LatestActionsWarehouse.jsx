@@ -10,6 +10,9 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaExchangeAlt,
+    FaExclamationTriangle,
+    FaAngleDown,
+    FaAngleUp,
 } from 'react-icons/fa';
 
 const getActionIcon = (type) => {
@@ -60,7 +63,9 @@ const mockActions = Array.from({ length: 25 }, (_, index) => ({
     operator: ['John Doe', 'Jane Smith', 'Mike Johnson'][index % 3],
     notes: 'Regular operation completed',
 }));
-
+const CardTitle = ({ className = '', children }) => (
+    <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
+);
 const ITEMS_PER_PAGE = 10;
 
 const HistoryList = ({ actions, onActionClick }) => {
@@ -137,16 +142,32 @@ const LatestActionsWarehouse = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedAction, setSelectedAction] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const handleActionClick = (action) => {
         setSelectedAction(action);
         setIsModalOpen(true);
     };
-
+    const pendingCount = 12;
     return (
         <div className="max-w-4xl min-w-[100%] subtle-border mx-auto p-4 bg-white rounded-lg shadow-lg">
             {/* Header */}
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">История действий</h2>
+            <div className="flex flex-row justify-between">
+                <div className="flex mb-4 flex-row gap-2">
+                    <CardTitle>История действий</CardTitle>
+                    {pendingCount > 0 && (
+                        <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                            <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                            <span className="text-sm text-yellow-800">{pendingCount} действия</span>
+                        </div>
+                    )}
+                </div>
+                <div
+                    className="mr-4 cursor-pointer text-2xl"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                    {isCollapsed ? <FaAngleDown /> : <FaAngleUp />}
+                </div>
+            </div>
 
             {/* Search and Filter Bar */}
             <div className="flex gap-4 mb-6">
@@ -171,9 +192,9 @@ const LatestActionsWarehouse = () => {
                     <span>Фильтр</span>
                 </button>
             </div>
-
-            {/* History List Component */}
-            <HistoryList actions={mockActions} onActionClick={handleActionClick} />
+            {!isCollapsed && (
+                <HistoryList actions={mockActions} onActionClick={handleActionClick} />
+            )}
 
             {/* Details Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

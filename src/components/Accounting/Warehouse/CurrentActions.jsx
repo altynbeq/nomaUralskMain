@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { FaClipboardList, FaTruck, FaBoxOpen } from 'react-icons/fa';
+import {
+    FaClipboardList,
+    FaTruck,
+    FaBoxOpen,
+    FaAngleDown,
+    FaAngleUp,
+    FaExclamationTriangle,
+} from 'react-icons/fa';
 
 const mockCurrentActions = [
     {
@@ -57,6 +64,10 @@ const getActionIcon = (type) => {
     }
 };
 
+const CardTitle = ({ className = '', children }) => (
+    <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
+);
+
 const getActionTitle = (type) => {
     switch (type) {
         case 'revision':
@@ -75,6 +86,7 @@ const CurrentActions = () => {
     const [revisionItems, setRevisionItems] = useState(mockRevisionItems.map((i) => ({ ...i })));
     const [movementItems, setMovementItems] = useState(mockMovementItems.map((i) => ({ ...i })));
     const [arrivalItems] = useState(mockArrivalItems.map((i) => ({ ...i })));
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     const handleBoxClick = (action) => {
         setSelectedAction(action);
@@ -211,45 +223,62 @@ const CurrentActions = () => {
 
         return null;
     };
-
+    const pendingCount = 5;
     return (
         <div className="p-6 bg-white min-w-[100%] subtle-border">
-            <h2 className="text-2xl text-center font-bold text-gray-800 mb-6">Текущие действия</h2>
-            <div className="grid grid-cols-3 gap-6">
-                {mockCurrentActions.map((action) => (
-                    <div
-                        key={action.id}
-                        onClick={() => handleBoxClick(action)}
-                        className={`flex flex-col p-6 rounded-lg bg-white border cursor-pointer transition-colors ${
-                            selectedAction && selectedAction.id === action.id
-                                ? 'border-blue-700'
-                                : 'border-gray-200 hover:border-blue-700'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="text-blue-700">{getActionIcon(action.type)}</div>
-                            <h3 className="font-medium text-blue-700">
-                                {getActionTitle(action.type)}
-                            </h3>
+            <div className="flex flex-row justify-between">
+                <div className="flex mb-4 flex-row gap-2">
+                    <CardTitle>Текущие действия</CardTitle>
+                    {pendingCount > 0 && (
+                        <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                            <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                            <span className="text-sm text-yellow-800">{pendingCount} действия</span>
                         </div>
-                        <div className="text-sm text-gray-700 space-y-2">
-                            <p>
-                                <span className="font-semibold">Склад:</span> {action.warehouse}
-                            </p>
-                            <p>
-                                <span className="font-semibold">Категория:</span> {action.category}
-                            </p>
-                            <p>
-                                <span className="font-semibold">Даты:</span> {action.startDate} -{' '}
-                                {action.endDate}
-                            </p>
-                        </div>
-                    </div>
-                ))}
+                    )}
+                </div>
+                <div
+                    className="mr-4 cursor-pointer text-2xl"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                    {isCollapsed ? <FaAngleDown /> : <FaAngleUp />}
+                </div>
             </div>
-
-            {/* Selected Items List (no modal, inline rendering) */}
-            {renderSelectedItems()}
+            {!isCollapsed && (
+                <div className="grid grid-cols-3 gap-6">
+                    {mockCurrentActions.map((action) => (
+                        <div
+                            key={action.id}
+                            onClick={() => handleBoxClick(action)}
+                            className={`flex flex-col p-6 rounded-lg bg-white border cursor-pointer transition-colors ${
+                                selectedAction && selectedAction.id === action.id
+                                    ? 'border-blue-700'
+                                    : 'border-gray-200 hover:border-blue-700'
+                            }`}
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="text-blue-700">{getActionIcon(action.type)}</div>
+                                <h3 className="font-medium text-blue-700">
+                                    {getActionTitle(action.type)}
+                                </h3>
+                            </div>
+                            <div className="text-sm text-gray-700 space-y-2">
+                                <p>
+                                    <span className="font-semibold">Склад:</span> {action.warehouse}
+                                </p>
+                                <p>
+                                    <span className="font-semibold">Категория:</span>{' '}
+                                    {action.category}
+                                </p>
+                                <p>
+                                    <span className="font-semibold">Даты:</span> {action.startDate}{' '}
+                                    - {action.endDate}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            {!isCollapsed && renderSelectedItems()}
         </div>
     );
 };
