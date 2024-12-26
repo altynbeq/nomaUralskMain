@@ -417,47 +417,68 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
     };
 
     // Новые функции для автоматической отметки прихода и ухода
-    const handleMarkArrivalAsShiftStart = useCallback(
-        async (shift) => {
-            try {
-                const payload = {
-                    scanTime: shift.startTime.toISOString(),
-                };
+    const handleMarkArrivalAsShiftStart = useCallback(async (shift) => {
+        try {
+            const payload = {
+                // ставим фактический приход = startTime (ISO-строка)
+                scanTime: shift.startTime.toISOString(),
+            };
 
-                const response = await axiosInstance.put(
-                    `/shifts/update-scan-time/${shift.id}`,
-                    payload,
-                );
-                const updatedShift = response.data;
-                toast.success('Фактический приход установлен в начало смены');
-            } catch (error) {
-                console.error('Ошибка при обновлении смены:', error);
-                toast.error('Не удалось изменить фактический приход');
-            }
-        },
-        [], // Нет зависимостей, так как используем setShiftsData напрямую
-    );
+            const response = await axiosInstance.put(
+                `/shifts/update-scan-time/${shift.id}`,
+                payload,
+            );
+            const updatedShift = response.data;
 
-    const handleMarkDepartureAsShiftEnd = useCallback(
-        async (shift) => {
-            try {
-                const payload = {
-                    endScanTime: shift.endTime.toISOString(),
-                };
+            setShiftsData((prev) =>
+                prev.map((s) => {
+                    if (s.id === updatedShift.id) {
+                        return {
+                            ...s,
+                            scanTime: updatedShift.scanTime,
+                        };
+                    }
+                    return s;
+                }),
+            );
 
-                const response = await axiosInstance.put(
-                    `/shifts/update-end-scan-time/${shift.id}`,
-                    payload,
-                );
-                const updatedShift = response.data;
-                toast.success('Фактический уход установлен в конец смены');
-            } catch (error) {
-                console.error('Ошибка при обновлении смены:', error);
-                toast.error('Не удалось изменить фактический уход');
-            }
-        },
-        [], // Нет зависимостей, так как используем setShiftsData напрямую
-    );
+            toast.success('Фактический приход установлен в начало смены');
+        } catch (error) {
+            console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось изменить фактический приход');
+        }
+    }, []);
+
+    const handleMarkDepartureAsShiftEnd = useCallback(async (shift) => {
+        try {
+            const payload = {
+                endScanTime: shift.endTime.toISOString(),
+            };
+
+            const response = await axiosInstance.put(
+                `/shifts/update-end-scan-time/${shift.id}`,
+                payload,
+            );
+            const updatedShift = response.data;
+
+            setShiftsData((prev) =>
+                prev.map((s) => {
+                    if (s.id === updatedShift.id) {
+                        return {
+                            ...s,
+                            endScanTime: updatedShift.endScanTime,
+                        };
+                    }
+                    return s;
+                }),
+            );
+
+            toast.success('Фактический уход установлен в конец смены');
+        } catch (error) {
+            console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось изменить фактический уход');
+        }
+    }, []);
 
     return (
         <>
