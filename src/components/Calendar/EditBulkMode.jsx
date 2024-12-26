@@ -503,12 +503,32 @@ export const EditBulkMode = ({
             });
 
             if (response.status === 200) {
-                setOpen(false);
                 toast.success('Приход и уход всех смен успешно обновлены.');
+
                 const updatedShifts = response.data.updatedShifts;
-                if (onMassScanTimeUpdate && updatedShifts) {
+
+                if (updatedShifts && Array.isArray(updatedShifts)) {
+                    setShiftsData((prev) =>
+                        prev.map((shift) => {
+                            const updatedShift = updatedShifts.find((us) => us._id === shift.id);
+                            if (updatedShift) {
+                                return {
+                                    ...shift,
+                                    scanTime: updatedShift.scanTime,
+                                    endScanTime: updatedShift.endScanTime,
+                                    isEdited: false,
+                                };
+                            }
+                            return shift;
+                        }),
+                    );
+                }
+
+                if (onMassScanTimeUpdate) {
                     onMassScanTimeUpdate(updatedShifts);
                 }
+
+                setOpen(false);
             } else {
                 toast.error('Не удалось обновить смены.');
             }
