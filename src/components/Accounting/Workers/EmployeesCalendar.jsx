@@ -391,7 +391,7 @@ export const EmployeesCalendar = () => {
                                             </p>
                                         </div>
                                         <div className="flex flex-col">
-                                            <div className="flex gap-4 items-center justify-between">
+                                            <div className="flex gap-4 items-center justify-between flex-1">
                                                 <p>
                                                     <span className="font-bold text-lg">
                                                         Фактический приход:
@@ -406,8 +406,17 @@ export const EmployeesCalendar = () => {
                                                     label="Изменить"
                                                     icon="pi pi-user-edit"
                                                 />
+
+                                                <Button
+                                                    icon="pi pi-check"
+                                                    className="bg-green-500 text-white rounded-full w-7 h-7"
+                                                    onClick={() =>
+                                                        handleMarkArrivalAsShiftStart(shift)
+                                                    }
+                                                    tooltip="Установить фактический приход равным времени начала смены"
+                                                />
                                             </div>
-                                            <div className="flex gap-4 items-center justify-between mt-5">
+                                            <div className="flex gap-4 items-center justify-between mt-5 flex-1">
                                                 <p>
                                                     <span className="font-bold text-lg">
                                                         Фактический уход:
@@ -421,6 +430,15 @@ export const EmployeesCalendar = () => {
                                                     className="text-white bg-blue-400 rounded-lg border p-1"
                                                     label="Изменить"
                                                     icon="pi pi-user-edit"
+                                                />
+
+                                                <Button
+                                                    icon="pi pi-check"
+                                                    className="bg-green-500 text-white rounded-full w-7 h-7"
+                                                    onClick={() =>
+                                                        handleMarkDepartureAsShiftEnd(shift)
+                                                    }
+                                                    tooltip="Установить фактический уход равным времени конца смены"
                                                 />
                                             </div>
                                         </div>
@@ -535,6 +553,60 @@ export const EmployeesCalendar = () => {
     const handleClearBulkMode = () => {
         setBulkMode(null);
         setSelectedDays([]);
+    };
+
+    // Функция, устанавливающая фактический приход равным началу смены
+    const handleMarkArrivalAsShiftStart = async (shift) => {
+        try {
+            const payload = {
+                subUserId:
+                    typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                startTime: shift.startTime,
+                endTime: shift.endTime,
+                selectedStore: shift.selectedStore._id,
+                // Фактический приход совпадает с началом
+                scanTime: shift.startTime,
+                endScanTime: shift.endScanTime,
+            };
+
+            const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+            const updatedShift = response.data;
+
+            // Обновляем локальное состояние через уже существующую логику
+            handleSocketShiftUpdate(updatedShift);
+
+            toast.success('Фактический приход установлен в начало смены');
+        } catch (error) {
+            console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось изменить фактический приход');
+        }
+    };
+
+    // Функция, устанавливающая фактический уход равным концу смены
+    const handleMarkDepartureAsShiftEnd = async (shift) => {
+        try {
+            const payload = {
+                subUserId:
+                    typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                startTime: shift.startTime,
+                endTime: shift.endTime,
+                selectedStore: shift.selectedStore._id,
+                scanTime: shift.scanTime,
+                // Фактический уход совпадает с концом
+                endScanTime: shift.endTime,
+            };
+
+            const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+            const updatedShift = response.data;
+
+            // Обновляем локальное состояние через уже существующую логику
+            handleSocketShiftUpdate(updatedShift);
+
+            toast.success('Фактический уход установлен в конец смены');
+        } catch (error) {
+            console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось изменить фактический уход');
+        }
     };
 
     return (
