@@ -144,6 +144,65 @@ export const EmployeesCalendar = () => {
         }
     }, [selectedStore, departments]);
 
+    const handleMarkArrivalAsShiftStart = useCallback(
+        async (shift) => {
+            try {
+                const payload = {
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                    startTime: shift.startTime,
+                    endTime: shift.endTime,
+                    selectedStore: shift.selectedStore._id,
+                    // Mark actual arrival as shift start
+                    scanTime: shift.startTime,
+                    endScanTime: shift.endScanTime,
+                };
+
+                const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const updatedShift = response.data;
+
+                // Update local state
+                handleSocketShiftUpdate(updatedShift);
+
+                toast.success('Фактический приход установлен в начало смены');
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
+                toast.error('Не удалось изменить фактический приход');
+            }
+        },
+        [handleSocketShiftUpdate], // Dependencies: ensure that `handleSocketShiftUpdate` is stable
+    );
+
+    // Function to mark departure as shift end
+    const handleMarkDepartureAsShiftEnd = useCallback(
+        async (shift) => {
+            try {
+                const payload = {
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                    startTime: shift.startTime,
+                    endTime: shift.endTime,
+                    selectedStore: shift.selectedStore._id,
+                    scanTime: shift.scanTime,
+                    // Mark actual departure as shift end
+                    endScanTime: shift.endTime,
+                };
+
+                const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const updatedShift = response.data;
+
+                // Update local state
+                handleSocketShiftUpdate(updatedShift);
+
+                toast.success('Фактический уход установлен в конец смены');
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
+                toast.error('Не удалось изменить фактический уход');
+            }
+        },
+        [handleSocketShiftUpdate], // Dependencies: ensure that `handleSocketShiftUpdate` is stable
+    );
+
     const filteredSubusers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
         return subUsersState?.filter((subuser) => {
@@ -391,37 +450,55 @@ export const EmployeesCalendar = () => {
                                             </p>
                                         </div>
                                         <div className="flex flex-col">
-                                            <div className="flex gap-4 items-center justify-between">
-                                                <p>
-                                                    <span className="font-bold text-lg">
-                                                        Фактический приход:
-                                                    </span>{' '}
+                                            <div className="flex gap-4 items-center justify-between flex-1">
+                                                <p className="font-bold text-lg flex-1">
+                                                    Фактический приход:{' '}
                                                     {formatOnlyTimeDate(shift.scanTime)}
                                                 </p>
-                                                <Button
-                                                    onClick={() => {
-                                                        handleOpenEditModal(shift, 'checkIn');
-                                                    }}
-                                                    className="text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
-                                                    icon="pi pi-user-edit"
-                                                />
+
+                                                <div className="flex gap-2 items-center">
+                                                    <Button
+                                                        onClick={() => {
+                                                            handleOpenEditModal(shift, 'checkIn');
+                                                        }}
+                                                        className="text-white bg-blue-400 rounded-lg border h-9 w-9"
+                                                        icon="pi pi-user-edit"
+                                                    />
+
+                                                    <Button
+                                                        icon="pi pi-check"
+                                                        className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                        onClick={() =>
+                                                            handleMarkArrivalAsShiftStart(shift)
+                                                        }
+                                                        tooltip="Установить фактический приход равным времени начала смены"
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="flex gap-4 items-center justify-between mt-5">
-                                                <p>
-                                                    <span className="font-bold text-lg">
-                                                        Фактический уход:
-                                                    </span>{' '}
+                                            <div className="flex gap-4 items-center justify-between mt-5 flex-1">
+                                                <p className="font-bold text-lg flex-1">
+                                                    Фактический уход:{' '}
                                                     {formatOnlyTimeDate(shift.endScanTime)}
                                                 </p>
-                                                <Button
-                                                    onClick={() => {
-                                                        handleOpenEditModal(shift, 'checkOut');
-                                                    }}
-                                                    className="text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
-                                                    icon="pi pi-user-edit"
-                                                />
+
+                                                <div className="flex gap-2 items-center">
+                                                    <Button
+                                                        onClick={() => {
+                                                            handleOpenEditModal(shift, 'checkOut');
+                                                        }}
+                                                        className="text-white bg-blue-400 rounded-lg border h-9 w-9"
+                                                        icon="pi pi-user-edit"
+                                                    />
+
+                                                    <Button
+                                                        icon="pi pi-check"
+                                                        className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                        onClick={() =>
+                                                            handleMarkDepartureAsShiftEnd(shift)
+                                                        }
+                                                        tooltip="Установить фактический уход равным времени конца смены"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                         <div>
@@ -456,7 +533,13 @@ export const EmployeesCalendar = () => {
         } else {
             return <p>Нет смен</p>;
         }
-    }, [selectedDayShiftsModal, handleShiftDelete, handleOpenEditModal]);
+    }, [
+        selectedDayShiftsModal,
+        handleShiftDelete,
+        handleOpenEditModal,
+        handleMarkArrivalAsShiftStart,
+        handleMarkDepartureAsShiftEnd,
+    ]);
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {
