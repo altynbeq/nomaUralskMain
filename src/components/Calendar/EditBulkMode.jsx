@@ -502,15 +502,6 @@ export const EditBulkMode = ({
             });
 
             if (response.status === 200) {
-                // Обновляем локальное состояние: устанавливаем scanTime = startTime и endScanTime = endTime
-                setShiftsData((prev) =>
-                    prev.map((shift) => ({
-                        ...shift,
-                        scanTime: shift.startTime,
-                        endScanTime: shift.endTime,
-                        isEdited: true, // помечаем как изменённые
-                    })),
-                );
                 setOpen(false);
                 toast.success('Приход и уход всех смен успешно обновлены.');
             } else {
