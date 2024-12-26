@@ -144,6 +144,65 @@ export const EmployeesCalendar = () => {
         }
     }, [selectedStore, departments]);
 
+    const handleMarkArrivalAsShiftStart = useCallback(
+        async (shift) => {
+            try {
+                const payload = {
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                    startTime: shift.startTime,
+                    endTime: shift.endTime,
+                    selectedStore: shift.selectedStore._id,
+                    // Mark actual arrival as shift start
+                    scanTime: shift.startTime,
+                    endScanTime: shift.endScanTime,
+                };
+
+                const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const updatedShift = response.data;
+
+                // Update local state
+                handleSocketShiftUpdate(updatedShift);
+
+                toast.success('Фактический приход установлен в начало смены');
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
+                toast.error('Не удалось изменить фактический приход');
+            }
+        },
+        [handleSocketShiftUpdate], // Dependencies: ensure that `handleSocketShiftUpdate` is stable
+    );
+
+    // Function to mark departure as shift end
+    const handleMarkDepartureAsShiftEnd = useCallback(
+        async (shift) => {
+            try {
+                const payload = {
+                    subUserId:
+                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
+                    startTime: shift.startTime,
+                    endTime: shift.endTime,
+                    selectedStore: shift.selectedStore._id,
+                    scanTime: shift.scanTime,
+                    // Mark actual departure as shift end
+                    endScanTime: shift.endTime,
+                };
+
+                const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const updatedShift = response.data;
+
+                // Update local state
+                handleSocketShiftUpdate(updatedShift);
+
+                toast.success('Фактический уход установлен в конец смены');
+            } catch (error) {
+                console.error('Ошибка при обновлении смены:', error);
+                toast.error('Не удалось изменить фактический уход');
+            }
+        },
+        [handleSocketShiftUpdate], // Dependencies: ensure that `handleSocketShiftUpdate` is stable
+    );
+
     const filteredSubusers = useMemo(() => {
         const lowerSearch = searchTerm.toLowerCase();
         return subUsersState?.filter((subuser) => {
@@ -392,7 +451,7 @@ export const EmployeesCalendar = () => {
                                         </div>
                                         <div className="flex flex-col">
                                             <div className="flex gap-4 items-center justify-between flex-1">
-                                                <p>
+                                                <p className="min-w-[256px]">
                                                     <span className="font-bold text-lg">
                                                         Фактический приход:
                                                     </span>{' '}
@@ -417,7 +476,7 @@ export const EmployeesCalendar = () => {
                                                 />
                                             </div>
                                             <div className="flex gap-4 items-center justify-between mt-5 flex-1">
-                                                <p>
+                                                <p className="min-w-[256px]">
                                                     <span className="font-bold text-lg">
                                                         Фактический уход:
                                                     </span>{' '}
@@ -474,7 +533,13 @@ export const EmployeesCalendar = () => {
         } else {
             return <p>Нет смен</p>;
         }
-    }, [selectedDayShiftsModal, handleShiftDelete, handleOpenEditModal]);
+    }, [
+        selectedDayShiftsModal,
+        handleShiftDelete,
+        handleOpenEditModal,
+        handleMarkArrivalAsShiftStart,
+        handleMarkDepartureAsShiftEnd,
+    ]);
 
     const onDayClick = useCallback(
         (employee, day, shifts) => {
@@ -553,60 +618,6 @@ export const EmployeesCalendar = () => {
     const handleClearBulkMode = () => {
         setBulkMode(null);
         setSelectedDays([]);
-    };
-
-    // Функция, устанавливающая фактический приход равным началу смены
-    const handleMarkArrivalAsShiftStart = async (shift) => {
-        try {
-            const payload = {
-                subUserId:
-                    typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
-                startTime: shift.startTime,
-                endTime: shift.endTime,
-                selectedStore: shift.selectedStore._id,
-                // Фактический приход совпадает с началом
-                scanTime: shift.startTime,
-                endScanTime: shift.endScanTime,
-            };
-
-            const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
-            const updatedShift = response.data;
-
-            // Обновляем локальное состояние через уже существующую логику
-            handleSocketShiftUpdate(updatedShift);
-
-            toast.success('Фактический приход установлен в начало смены');
-        } catch (error) {
-            console.error('Ошибка при обновлении смены:', error);
-            toast.error('Не удалось изменить фактический приход');
-        }
-    };
-
-    // Функция, устанавливающая фактический уход равным концу смены
-    const handleMarkDepartureAsShiftEnd = async (shift) => {
-        try {
-            const payload = {
-                subUserId:
-                    typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
-                startTime: shift.startTime,
-                endTime: shift.endTime,
-                selectedStore: shift.selectedStore._id,
-                scanTime: shift.scanTime,
-                // Фактический уход совпадает с концом
-                endScanTime: shift.endTime,
-            };
-
-            const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
-            const updatedShift = response.data;
-
-            // Обновляем локальное состояние через уже существующую логику
-            handleSocketShiftUpdate(updatedShift);
-
-            toast.success('Фактический уход установлен в конец смены');
-        } catch (error) {
-            console.error('Ошибка при обновлении смены:', error);
-            toast.error('Не удалось изменить фактический уход');
-        }
     };
 
     return (
