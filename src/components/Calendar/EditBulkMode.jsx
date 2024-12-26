@@ -48,7 +48,14 @@ addLocale('ru', {
     clear: 'Очистить',
 });
 
-export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelete }) => {
+export const EditBulkMode = ({
+    setOpen,
+    stores,
+    subUsers,
+    open,
+    handleShiftDelete,
+    handleShiftsDelete,
+}) => {
     const [shiftsData, setShiftsData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -472,7 +479,6 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                     return s;
                 }),
             );
-
             toast.success('Фактический уход установлен в конец смены');
         } catch (error) {
             console.error('Ошибка при обновлении смены:', error);
@@ -505,7 +511,7 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                         isEdited: true, // помечаем как изменённые
                     })),
                 );
-
+                setOpen(false);
                 toast.success('Приход и уход всех смен успешно обновлены.');
             } else {
                 toast.error('Не удалось обновить смены.');
@@ -541,8 +547,9 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                     });
 
                     if (response.status === 200) {
+                        setOpen(false);
+                        handleShiftsDelete(shiftIds);
                         setShiftsData([]);
-                        handleShiftDelete(shiftIds);
                     } else {
                         toast.error('Не удалось удалить смены.');
                     }

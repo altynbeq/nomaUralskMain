@@ -363,6 +363,31 @@ export const EmployeesCalendar = () => {
         toast.success('Вы успешно удалили смену');
     }, []);
 
+    const handleShiftsDelete = useCallback((shiftsIds) => {
+        setSelectedDayShiftsModal((prevShifts) =>
+            prevShifts.filter((shift) => !shiftsIds.includes(shift._id)),
+        );
+
+        setSubUsersState((prevSubUsers) => {
+            return prevSubUsers.map((user) => {
+                if (user.shifts) {
+                    const filteredShifts = user.shifts.filter((s) => !shiftsIds.includes(s._id));
+                    if (filteredShifts.length !== user.shifts.length) {
+                        return {
+                            ...user,
+                            shifts: filteredShifts,
+                        };
+                    }
+                }
+                return user;
+            });
+        });
+
+        toast.success(
+            `Вы успешно удалили ${shiftsIds.length} смен${shiftsIds.length > 1 ? 'ы' : 'у'}`,
+        );
+    }, []);
+
     const handleOpenEditModal = useCallback((shift, action) => {
         const shiftWithDates = {
             ...shift,
@@ -686,6 +711,7 @@ export const EmployeesCalendar = () => {
                                 open={showBulkModeModal === 'edit'}
                                 subUsers={selectedDays}
                                 handleShiftDelete={handleShiftDelete}
+                                handleShiftsDelete={handleShiftsDelete}
                             />
                             <div className="flex flex-row gap-2">
                                 <button
