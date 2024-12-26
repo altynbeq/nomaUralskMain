@@ -421,17 +421,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
         async (shift) => {
             try {
                 const payload = {
-                    subUserId:
-                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
-                    startTime: shift.startTime.toISOString(), // Преобразуем Date в ISO строку
-                    endTime: shift.endTime.toISOString(),
-                    selectedStore: shift.selectedStore._id,
-                    // Устанавливаем фактический приход равным началу смены
                     scanTime: shift.startTime.toISOString(),
-                    endScanTime: shift.endScanTime ? shift.endScanTime.toISOString() : null,
                 };
 
-                const response = await axiosInstance.put(`/shifts/${shift.id}`, payload);
+                const response = await axiosInstance.put(
+                    `/shifts/update-scan-time/${shift.id}`,
+                    payload,
+                );
                 const updatedShift = response.data;
 
                 // Обновляем локальное состояние
@@ -478,17 +474,13 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
         async (shift) => {
             try {
                 const payload = {
-                    subUserId:
-                        typeof shift.subUserId === 'string' ? shift.subUserId : shift.subUserId._id,
-                    startTime: shift.startTime.toISOString(),
-                    endTime: shift.endTime.toISOString(),
-                    selectedStore: shift.selectedStore._id,
-                    scanTime: shift.scanTime ? shift.scanTime.toISOString() : null,
-                    // Устанавливаем фактический уход равным концу смены
                     endScanTime: shift.endTime.toISOString(),
                 };
 
-                const response = await axiosInstance.put(`/shifts/${shift.id}`, payload);
+                const response = await axiosInstance.put(
+                    `/shifts/update-end-scan-time/${shift.id}`,
+                    payload,
+                );
                 const updatedShift = response.data;
 
                 // Обновляем локальное состояние
