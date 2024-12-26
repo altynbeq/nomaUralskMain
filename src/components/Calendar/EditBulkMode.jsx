@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
@@ -416,6 +416,70 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
         toast.info('Вы отменили сохранение изменений.');
     };
 
+    // Новые функции для автоматической отметки прихода и ухода
+    const handleMarkArrivalAsShiftStart = useCallback(async (shift) => {
+        try {
+            const payload = {
+                // ставим фактический приход = startTime (ISO-строка)
+                scanTime: shift.startTime.toISOString(),
+            };
+
+            const response = await axiosInstance.put(
+                `/shifts/update-scan-time/${shift.id}`,
+                payload,
+            );
+            const updatedShift = response.data;
+
+            setShiftsData((prev) =>
+                prev.map((s) => {
+                    if (s.id === updatedShift.id) {
+                        return {
+                            ...s,
+                            scanTime: updatedShift.scanTime,
+                        };
+                    }
+                    return s;
+                }),
+            );
+
+            toast.success('Фактический приход установлен в начало смены');
+        } catch (error) {
+            console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось изменить фактический приход');
+        }
+    }, []);
+
+    const handleMarkDepartureAsShiftEnd = useCallback(async (shift) => {
+        try {
+            const payload = {
+                endScanTime: shift.endTime.toISOString(),
+            };
+
+            const response = await axiosInstance.put(
+                `/shifts/update-end-scan-time/${shift.id}`,
+                payload,
+            );
+            const updatedShift = response.data;
+
+            setShiftsData((prev) =>
+                prev.map((s) => {
+                    if (s.id === updatedShift.id) {
+                        return {
+                            ...s,
+                            endScanTime: updatedShift.endScanTime,
+                        };
+                    }
+                    return s;
+                }),
+            );
+
+            toast.success('Фактический уход установлен в конец смены');
+        } catch (error) {
+            console.error('Ошибка при обновлении смены:', error);
+            toast.error('Не удалось изменить фактический уход');
+        }
+    }, []);
+
     return (
         <>
             {/* ConfirmDialog Компонент */}
@@ -552,9 +616,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                                                 </p>
                                                 <Button
                                                     onClick={() => openModal(shift, 'checkIn')}
-                                                    className=" text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
+                                                    className=" text-white bg-blue-400 rounded-lg border h-9 w-9"
                                                     icon="pi pi-user-edit"
+                                                />
+                                                <Button
+                                                    icon="pi pi-check"
+                                                    className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                    onClick={() =>
+                                                        handleMarkArrivalAsShiftStart(shift)
+                                                    }
+                                                    tooltip="Установить фактический приход равным времени начала смены"
                                                 />
                                             </div>
                                         </div>
@@ -589,9 +660,16 @@ export const EditBulkMode = ({ setOpen, stores, subUsers, open, handleShiftDelet
                                                 </p>
                                                 <Button
                                                     onClick={() => openModal(shift, 'checkOut')}
-                                                    className=" text-white bg-blue-400 rounded-lg border p-1"
-                                                    label="Изменить"
+                                                    className=" text-white bg-blue-400 rounded-lg border w-9 h-9"
                                                     icon="pi pi-user-edit"
+                                                />
+                                                <Button
+                                                    icon="pi pi-check"
+                                                    className="bg-green-500 text-white rounded-full h-9 w-9"
+                                                    onClick={() =>
+                                                        handleMarkDepartureAsShiftEnd(shift)
+                                                    }
+                                                    tooltip="Установить фактический уход равным времени конца смены"
                                                 />
                                             </div>
                                         </div>
