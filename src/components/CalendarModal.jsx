@@ -29,20 +29,10 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShifts }) 
     const { actual, plan, percent } = calculateProgress();
 
     const getDurationText = (shift) => {
-        const startTime = new Date(shift.startTime);
-        let endTime = new Date(shift.endTime);
-
-        if (endTime <= startTime) {
-            endTime.setDate(endTime.getDate() + 1);
-        }
-
-        const durationMs = endTime - startTime;
-        const totalMinutes = Math.floor(durationMs / (1000 * 60));
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-
         const durationText =
-            hours > 0 ? `${hours} ч ${minutes > 0 ? `${minutes} мин` : ''}` : `${minutes} мин`;
+            shift.shiftDuration > 0
+                ? `${shift.shiftDuration.hours} ч ${shift.shiftDuration.minutes > 0 ? `${shift.shiftDuration.minutes} мин` : ''}`
+                : `${shift.shiftDuration.minutes} мин`;
 
         return durationText;
     };
@@ -56,27 +46,6 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShifts }) 
         return diffMinutes > 0 ? diffMinutes : 0;
     }, []);
 
-    const calculateWorkedTime = useCallback((scanTime, endScanTime) => {
-        if (!scanTime || !endScanTime) return { hours: 0, minutes: 0 };
-
-        const start = new Date(scanTime);
-        const end = new Date(endScanTime);
-
-        // Если время окончания меньше времени начала (пересечение полуночи)
-        if (end < start) {
-            end.setDate(end.getDate() + 1);
-        }
-
-        const diffMs = end - start; // Разница в миллисекундах
-        const totalMinutes = diffMs / (1000 * 60); // Общее время в минутах
-
-        const roundedMinutes = Math.ceil(totalMinutes); // Используем Math.ceil для учета долей минут
-        const hours = Math.floor(roundedMinutes / 60);
-        const minutes = roundedMinutes % 60;
-
-        return { hours, minutes };
-    }, []);
-
     const getLateMinutes = (shift) => {
         const lateMinutes =
             shift.startTime && shift.scanTime
@@ -86,16 +55,14 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShifts }) 
     };
 
     const getLateText = (shift) => {
-        const lateMinutes = getLateMinutes(shift);
-        return getLateMinutes(shift) > 0 ? `Опоздал на ${lateMinutes} мин` : 'Не опоздал';
+        return shift.lateMinutes ? `Опоздал на ${shift.lateMinutes} мин` : 'Не опоздал';
     };
 
     const getWorkedTimeText = (shift) => {
-        const workedTime = calculateWorkedTime(shift.scanTime, shift.endScanTime);
         const workedTimeText =
-            workedTime.hours > 0
-                ? `${workedTime.hours} ч ${workedTime.minutes > 0 ? `${workedTime.minutes} мин` : ''}`
-                : `${workedTime.minutes} мин`;
+            shift.workedTime.hours > 0
+                ? `${shift.workedTime.hours} ч ${shift.workedTime.minutes > 0 ? `${shift.workedTime.minutes} мин` : ''}`
+                : `${shift.workedTime.minutes} мин`;
         return workedTimeText;
     };
 

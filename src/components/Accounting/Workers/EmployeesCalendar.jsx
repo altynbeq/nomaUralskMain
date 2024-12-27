@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
-import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
+import { formatDate, formatOnlyTimeDate } from '../../../methods/dataFormatter';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
@@ -19,6 +19,7 @@ import { DateTime } from 'luxon';
 import { AddSingleShift } from '../../Calendar/AddSingleShift';
 import { AddBulkMode } from '../../Calendar/AddBulkMode';
 import { EditBulkMode } from '../../Calendar/EditBulkMode';
+import { getDayColorType } from '../../../methods/shiftColorLogic';
 
 export const EmployeesCalendar = () => {
     const stores = useCompanyStructureStore((state) => state.stores);
@@ -274,47 +275,9 @@ export const EmployeesCalendar = () => {
     }, [month, year]);
 
     const getDayColor = useCallback((shifts) => {
-        if (shifts.length === 0) {
-            return { type: 'gray' };
-        }
+        const colorType = getDayColorType(shifts);
 
-        let hasMissingScan = false;
-        let hasIncompleteShift = false;
-        let hasLateShift = false;
-
-        shifts.forEach((shift) => {
-            if (!shift.scanTime || !shift.endScanTime) {
-                hasMissingScan = true;
-            }
-
-            const workedMinutes =
-                (shift.workedTime?.hours || 0) * 60 + (shift.workedTime?.minutes || 0);
-            const shiftDurationMinutes =
-                (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
-
-            if (workedMinutes < shiftDurationMinutes) {
-                hasIncompleteShift = true;
-            }
-
-            if (shift.lateMinutes > 0) {
-                hasLateShift = true;
-            }
-        });
-
-        // Приоритет условий
-        if (hasMissingScan) {
-            return { type: 'blue' };
-        }
-
-        if (hasLateShift) {
-            return { type: 'split-red-blue' };
-        }
-
-        if (hasIncompleteShift) {
-            return { type: 'split-green-red' };
-        }
-
-        return { type: 'green' };
+        return { type: colorType };
     }, []);
 
     const handleShiftDelete = useCallback((shiftId) => {
@@ -431,19 +394,25 @@ export const EmployeesCalendar = () => {
                             return (
                                 <div key={shift._id} className="rounded-lg shadow-lg p-4">
                                     <li key={shift._id} className="flex flex-col gap-4">
-                                        <div className="flex gap-4">
-                                            <p>
-                                                <span className="font-bold text-lg">
-                                                    Начало смены:
-                                                </span>{' '}
-                                                {formatOnlyTimeDate(shift.startTime)}
-                                            </p>
-                                            <p>
-                                                <span className="font-bold text-lg">
-                                                    Конец смены:
-                                                </span>{' '}
-                                                {formatOnlyTimeDate(shift.endTime)}
-                                            </p>
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex gap-4">
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Начало смены:
+                                                    </span>{' '}
+                                                    <span className="text-nowrap">
+                                                        {formatDate(shift.startTime)}
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Конец смены:
+                                                    </span>{' '}
+                                                    <span className="text-nowrap">
+                                                        {formatDate(shift.endTime)}
+                                                    </span>
+                                                </p>
+                                            </div>
                                             <p>
                                                 <span className="font-bold text-lg">
                                                     Длительность:

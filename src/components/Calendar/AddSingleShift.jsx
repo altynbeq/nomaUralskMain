@@ -72,59 +72,55 @@ export const AddSingleShift = ({ visible, stores, employee, onHide, selectedDate
             return;
         }
 
-        const shiftStartTime = DateTime.fromJSDate(startTime);
-        const shiftEndTime = DateTime.fromJSDate(endTime);
-
-        // Если конец смены раньше или равен началу — значит следующий день
-        let adjustedEnd = shiftEndTime;
-        if (adjustedEnd <= shiftStartTime) {
-            adjustedEnd = adjustedEnd.plus({ days: 1 });
-        }
-
-        const shiftStartLocal = getSelectedDateTime
-            .set({
-                hour: shiftStartTime.hour,
-                minute: shiftStartTime.minute,
-                second: 0,
-                millisecond: 0,
-            })
-            .setZone('UTC+5', { keepLocalTime: true });
-
-        const shiftEndLocal = getSelectedDateTime
-            .set({
-                hour: adjustedEnd.hour,
-                minute: adjustedEnd.minute,
-                second: 0,
-                millisecond: 0,
-            })
-            .setZone('UTC+5', { keepLocalTime: true });
-
-        // Конвертируем локальное время магазина в UTC
-        const shiftStartUtc = shiftStartLocal.toUTC();
-        const shiftEndUtc = shiftEndLocal.toUTC();
-
-        const shifts = [
-            {
-                subUserId: employee._id,
-                startTime: shiftStartUtc.toISO(),
-                endTime: shiftEndUtc.toISO(),
-                selectedStore: selectedStore._id,
-            },
-        ];
-
-        if (shifts.length === 0) {
-            toast.error('Не удалось сгенерировать смены.');
-            return;
-        }
-
-        setIsLoading(true);
         try {
+            const { day, month, year } = selectedDateForNewShift;
+            const selectedDate = DateTime.fromObject({ year, month, day }, { zone: 'UTC+5' });
+
+            let shiftStartLocal = selectedDate.set({
+                hour: startTime.getHours(),
+                minute: startTime.getMinutes(),
+                second: 0,
+                millisecond: 0,
+            });
+
+            // Устанавливаем время окончания смены
+            let shiftEndLocal = selectedDate.set({
+                hour: endTime.getHours(),
+                minute: endTime.getMinutes(),
+                second: 0,
+                millisecond: 0,
+            });
+
+            // Если конец смены раньше или равен началу, переносим на следующий день
+            if (shiftEndLocal <= shiftStartLocal) {
+                shiftEndLocal = shiftEndLocal.plus({ days: 1 });
+            }
+
+            // Конвертируем локальное время в UTC
+            const shiftStartUtc = shiftStartLocal.toUTC();
+            const shiftEndUtc = shiftEndLocal.toUTC();
+
+            const shifts = [
+                {
+                    subUserId: employee._id,
+                    startTime: shiftStartUtc.toISO(),
+                    endTime: shiftEndUtc.toISO(),
+                    selectedStore: selectedStore._id,
+                },
+            ];
+
+            if (shifts.length === 0) {
+                toast.error('Не удалось сгенерировать смены.');
+                return;
+            }
+
+            setIsLoading(true);
             await axiosInstance.post('/shifts', { shifts });
             onHide();
             toast.success('Все смены успешно добавлены');
         } catch (error) {
             console.error('Error adding/updating shifts:', error);
-            toast.error(error.response?.data?.message);
+            toast.error(error.response?.data?.message || 'Произошла ошибка при добавлении смены.');
         } finally {
             setIsLoading(false);
         }

@@ -61,7 +61,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingShifts, setPendingShifts] = useState([]); // тут храним сгенерированные смены перед отправкой
 
-    // Размер чанка для отправки смен
     const CHUNK_SIZE = 50;
 
     const generateShifts = useCallback(() => {
@@ -70,7 +69,6 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
             return shifts;
         }
 
-        // Генерация всех дат в выбранном диапазоне
         const dates = [];
         let currentDate = DateTime.fromJSDate(dateRange[0]).startOf('day');
         const endDate = DateTime.fromJSDate(dateRange[1]).startOf('day');
@@ -83,15 +81,8 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
         const shiftStartTime = DateTime.fromJSDate(startTime);
         const shiftEndTime = DateTime.fromJSDate(endTime);
 
-        // Если конец смены раньше или равен началу — значит следующий день
-        let adjustedEnd = shiftEndTime;
-        if (adjustedEnd <= shiftStartTime) {
-            adjustedEnd = adjustedEnd.plus({ days: 1 });
-        }
-
         dates.forEach((date) => {
-            // Создаём DateTime в временной зоне магазина
-            const shiftStartLocal = date
+            let shiftStartLocal = date
                 .set({
                     hour: shiftStartTime.hour,
                     minute: shiftStartTime.minute,
@@ -100,16 +91,19 @@ export const AddShift = ({ setOpen, stores, subUsers, open }) => {
                 })
                 .setZone('UTC+5', { keepLocalTime: true });
 
-            const shiftEndLocal = date
+            let shiftEndLocal = date
                 .set({
-                    hour: adjustedEnd.hour,
-                    minute: adjustedEnd.minute,
+                    hour: shiftEndTime.hour,
+                    minute: shiftEndTime.minute,
                     second: 0,
                     millisecond: 0,
                 })
                 .setZone('UTC+5', { keepLocalTime: true });
 
-            // Конвертируем локальное время магазина в UTC
+            if (shiftEndLocal <= shiftStartLocal) {
+                shiftEndLocal = shiftEndLocal.plus({ days: 1 });
+            }
+
             const shiftStartUtc = shiftStartLocal.toUTC();
             const shiftEndUtc = shiftEndLocal.toUTC();
 

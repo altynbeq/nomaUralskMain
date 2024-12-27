@@ -15,36 +15,49 @@ export const CalendarTable = memo(
         selectedDays,
         bulkMode,
     }) => {
+        // CalendarTable.js (фрагмент)
         const getCellStyle = (dayColor) => {
             let style = {};
             let finalClass = '';
 
-            if (dayColor.type === 'split-red-blue') {
-                style = {
-                    background: 'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)',
-                };
-            } else if (dayColor.type === 'split') {
-                style = {
-                    background: 'linear-gradient(to right, #ef4444 50%, #22c55e 50%)',
-                };
-            } else if (dayColor.type === 'split-green-red') {
-                style = {
-                    background: 'linear-gradient(to right, #22c55e 50%, #ef4444 50%)',
-                };
-            } else {
-                switch (dayColor.type) {
-                    case 'gray':
-                        finalClass = 'bg-gray-200';
-                        break;
-                    case 'blue':
-                        finalClass = 'bg-blue-500';
-                        break;
-                    case 'green':
-                        finalClass = 'bg-green-500';
-                        break;
-                    default:
-                        finalClass = '';
-                }
+            switch (dayColor.type) {
+                case 'split-late-nostart':
+                    // Левый красный (#ef4444), правый primary (допустим #3b82f6)
+                    style = {
+                        background: 'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)',
+                    };
+                    break;
+
+                case 'late':
+                    // full color = secondary (укажите ваш secondary, допустим #a855f7)
+                    finalClass = 'bg-red-500';
+                    break;
+
+                case 'noStartEnd':
+                    // full color = primaryLight
+                    finalClass = 'bg-blue-500';
+                    break;
+
+                case 'fullWorked':
+                    // success
+                    finalClass = 'bg-green-500';
+                    break;
+
+                case 'split-other':
+                    // left = success (green), right = primaryLight (blue-500)
+                    style = {
+                        background: 'linear-gradient(to right, #22c55e 50%, #3b82f6 50%)',
+                    };
+                    break;
+
+                case 'noShifts':
+                    // Нет смен
+                    finalClass = 'bg-gray-200';
+                    break;
+
+                default:
+                    finalClass = 'bg-gray-200';
+                    break;
             }
 
             return { style, finalClass };
