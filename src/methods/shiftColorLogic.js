@@ -44,3 +44,55 @@ export const getDayColorType = (shifts) => {
         return 'split-other';
     }
 };
+
+export const getDayColorClasses = (colorType) => {
+    switch (colorType) {
+        case 'split-late-nostart':
+            // Левый красный (#ef4444), правый primary (#3b82f6)
+            return {
+                style: {
+                    background: 'linear-gradient(to right, #ef4444 50%, #3b82f6 50%)',
+                },
+                className: 'text-white',
+                tooltip: 'Опоздание и отсутствие отметки ухода',
+            };
+        case 'late':
+            // Цвет = secondary (например, #a855f7)
+            return {
+                style: {},
+                className: 'bg-purple-500 text-white', // Замените на нужный цвет
+                tooltip: 'Опоздал',
+            };
+        case 'noStartEnd':
+            // Цвет = primaryLight (например, #3b82f6)
+            return {
+                style: {},
+                className: 'bg-blue-500 text-white',
+                tooltip: 'Смена без отметок прихода и ухода',
+            };
+        case 'fullWorked':
+            // Цвет = success (например, #22c55e)
+            return {
+                style: {},
+                className: 'bg-green-500 text-white',
+                tooltip: 'Отработана полностью',
+            };
+        case 'split-other':
+            // Левый green (#22c55e), правый blue-500 (#3b82f6)
+            return {
+                style: {
+                    background: 'linear-gradient(to right, #22c55e 50%, #3b82f6 50%)',
+                },
+                className: 'text-white',
+                tooltip: 'Отработана частично',
+            };
+        case 'noShifts':
+        default:
+            // Нет смен — серый цвет
+            return {
+                style: {},
+                className: 'bg-gray-300 text-black',
+                tooltip: 'Нет смены',
+            };
+    }
+};

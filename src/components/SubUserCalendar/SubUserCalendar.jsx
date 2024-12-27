@@ -5,6 +5,7 @@ import { useSubUserStore } from '../../store/index';
 import avatar from '../../data/avatar.jpg';
 import { DateTime } from 'luxon';
 import { socket } from '../../socket';
+import { getDayColorClasses, getDayColorType } from '../../methods/shiftColorLogic';
 
 export const SubUserCalendar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,7 +30,7 @@ export const SubUserCalendar = () => {
     const formatDate = (date) => date.toFormat('yyyy-MM-dd');
 
     const getDayColor = (date) => {
-        const formattedDate = formatDate(date);
+        const formattedDate = date.toFormat('yyyy-MM-dd');
 
         const shifts =
             subUsersShifts?.filter((shift) => {
@@ -37,65 +38,10 @@ export const SubUserCalendar = () => {
                 return shiftDate === formattedDate;
             }) || [];
 
-        if (shifts.length === 0) {
-            return 'bg-gray-300';
-        }
+        const colorType = getDayColorType(shifts);
+        const { style, className, tooltip } = getDayColorClasses(colorType);
 
-        let hasFullWorkedShifts = true;
-        let hasAnyIncompleteShifts = false;
-        let hasAnyLateShifts = false;
-        let hasShiftsWithoutCheckInOrOut = true;
-
-        shifts.forEach((shift) => {
-            const hasScanIn = !!shift.scanTime;
-            const hasScanOut = !!shift.endScanTime;
-            const isLate = shift.lateMinutes > 0;
-            const workedMinutes =
-                (shift.workedTime?.hours || 0) * 60 + (shift.workedTime?.minutes || 0);
-            const shiftDurationMinutes =
-                (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
-            const isFullyWorked = workedMinutes >= shiftDurationMinutes;
-
-            if (!hasScanIn && !hasScanOut) {
-                hasShiftsWithoutCheckInOrOut = true;
-            } else {
-                hasShiftsWithoutCheckInOrOut = false;
-            }
-
-            if (!isFullyWorked) {
-                hasAnyIncompleteShifts = true;
-            }
-
-            if (isLate) {
-                hasAnyLateShifts = true;
-            }
-
-            if (!hasScanIn || !hasScanOut || !isFullyWorked) {
-                hasFullWorkedShifts = false;
-            }
-        });
-
-        if (hasShiftsWithoutCheckInOrOut) {
-            return 'bg-blue-500 text-white';
-        }
-
-        if (hasFullWorkedShifts) {
-            return 'bg-green-500 text-white';
-        }
-
-        if (hasAnyLateShifts && hasShiftsWithoutCheckInOrOut) {
-            return 'bg-red-500 bg-right-1/2 bg-blue-500 bg-left-1/2 text-white';
-        }
-
-        if (!hasAnyLateShifts && hasAnyIncompleteShifts) {
-            return 'bg-green-500 bg-right-1/2 bg-red-500 bg-left-1/2 text-white';
-        }
-
-        if (hasAnyLateShifts) {
-            return 'bg-red-500 bg-right-1/2 bg-blue-500 bg-left-1/2 text-white';
-        }
-
-        return 'bg-gray-300';
+        return { style, className, tooltip };
     };
 
     const openModal = (date) => {
