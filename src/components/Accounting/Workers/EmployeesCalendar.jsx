@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
-import { formatOnlyTimeDate } from '../../../methods/dataFormatter';
+import { formatDate, formatOnlyTimeDate } from '../../../methods/dataFormatter';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import { AddShift } from '../../Calendar/AddShift';
 import { EditShift } from '../../Calendar/EditShift';
@@ -399,13 +399,13 @@ export const EmployeesCalendar = () => {
                                                 <span className="font-bold text-lg">
                                                     Начало смены:
                                                 </span>{' '}
-                                                {formatOnlyTimeDate(shift.startTime)}
+                                                {formatDate(shift.startTime)}
                                             </p>
                                             <p>
                                                 <span className="font-bold text-lg">
                                                     Конец смены:
                                                 </span>{' '}
-                                                {formatOnlyTimeDate(shift.endTime)}
+                                                {formatDate(shift.endTime)}
                                             </p>
                                             <p>
                                                 <span className="font-bold text-lg">
