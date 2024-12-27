@@ -399,13 +399,13 @@ export const EmployeesCalendar = () => {
                                                 <span className="font-bold text-lg">
                                                     Начало смены:
                                                 </span>{' '}
-                                                {formatDate(shift.startTime)}
+                                                {formatOnlyTimeDate(shift.startTime)}
                                             </p>
                                             <p>
                                                 <span className="font-bold text-lg">
                                                     Конец смены:
                                                 </span>{' '}
-                                                {formatDate(shift.endTime)}
+                                                {formatOnlyTimeDate(shift.endTime)}
                                             </p>
                                             <p>
                                                 <span className="font-bold text-lg">
