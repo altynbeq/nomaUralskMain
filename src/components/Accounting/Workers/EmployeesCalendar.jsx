@@ -394,19 +394,25 @@ export const EmployeesCalendar = () => {
                             return (
                                 <div key={shift._id} className="rounded-lg shadow-lg p-4">
                                     <li key={shift._id} className="flex flex-col gap-4">
-                                        <div className="flex gap-4">
-                                            <p>
-                                                <span className="font-bold text-lg">
-                                                    Начало смены:
-                                                </span>{' '}
-                                                {formatOnlyTimeDate(shift.startTime)}
-                                            </p>
-                                            <p>
-                                                <span className="font-bold text-lg">
-                                                    Конец смены:
-                                                </span>{' '}
-                                                {formatOnlyTimeDate(shift.endTime)}
-                                            </p>
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex gap-4">
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Начало смены:
+                                                    </span>{' '}
+                                                    <span className="text-nowrap">
+                                                        {formatDate(shift.startTime)}
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span className="font-bold text-lg">
+                                                        Конец смены:
+                                                    </span>{' '}
+                                                    <span className="text-nowrap">
+                                                        {formatDate(shift.endTime)}
+                                                    </span>
+                                                </p>
+                                            </div>
                                             <p>
                                                 <span className="font-bold text-lg">
                                                     Длительность:
