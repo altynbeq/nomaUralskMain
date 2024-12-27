@@ -60,7 +60,7 @@ export const getDayColorClasses = (colorType) => {
             // Цвет = secondary (например, #a855f7)
             return {
                 style: {},
-                className: 'bg-purple-500 text-white', // Замените на нужный цвет
+                className: 'bg-red-500 text-white', // Замените на нужный цвет
                 tooltip: 'Опоздал',
             };
         case 'noStartEnd':

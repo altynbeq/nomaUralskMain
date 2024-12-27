@@ -5,6 +5,7 @@ import { useSubUserStore } from '../../store/index';
 import avatar from '../../data/avatar.jpg';
 import { DateTime } from 'luxon';
 import { socket } from '../../socket';
+import { getDayColorType, getDayColorClasses } from '../../methods/shiftColorLogic';
 
 export const SubUserCalendar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,74 +29,21 @@ export const SubUserCalendar = () => {
 
     const formatDate = (date) => date.toFormat('yyyy-MM-dd');
 
-    const getDayColor = (date) => {
+    const getDayClasses = (date) => {
+        // 1) Определяем все смены на этот день
         const formattedDate = formatDate(date);
-
-        const shifts =
+        const shiftsThisDay =
             subUsersShifts?.filter((shift) => {
                 const shiftDate = DateTime.fromISO(shift.startTime).toFormat('yyyy-MM-dd');
                 return shiftDate === formattedDate;
             }) || [];
 
-        if (shifts.length === 0) {
-            return 'bg-gray-300';
-        }
+        // 2) Получаем тип окраски
+        const colorType = getDayColorType(shiftsThisDay);
+        // 3) Получаем стили/класс/tooltip
+        const { style, className, tooltip } = getDayColorClasses(colorType);
 
-        let hasFullWorkedShifts = true;
-        let hasAnyIncompleteShifts = false;
-        let hasAnyLateShifts = false;
-        let hasShiftsWithoutCheckInOrOut = true;
-
-        shifts.forEach((shift) => {
-            const hasScanIn = !!shift.scanTime;
-            const hasScanOut = !!shift.endScanTime;
-            const isLate = shift.lateMinutes > 0;
-            const workedMinutes =
-                (shift.workedTime?.hours || 0) * 60 + (shift.workedTime?.minutes || 0);
-            const shiftDurationMinutes =
-                (shift.shiftDuration.hours || 0) * 60 + (shift.shiftDuration.minutes || 0);
-            const isFullyWorked = workedMinutes >= shiftDurationMinutes;
-
-            if (!hasScanIn && !hasScanOut) {
-                hasShiftsWithoutCheckInOrOut = true;
-            } else {
-                hasShiftsWithoutCheckInOrOut = false;
-            }
-
-            if (!isFullyWorked) {
-                hasAnyIncompleteShifts = true;
-            }
-
-            if (isLate) {
-                hasAnyLateShifts = true;
-            }
-
-            if (!hasScanIn || !hasScanOut || !isFullyWorked) {
-                hasFullWorkedShifts = false;
-            }
-        });
-
-        if (hasShiftsWithoutCheckInOrOut) {
-            return 'bg-blue-500 text-white';
-        }
-
-        if (hasFullWorkedShifts) {
-            return 'bg-green-500 text-white';
-        }
-
-        if (hasAnyLateShifts && hasShiftsWithoutCheckInOrOut) {
-            return 'bg-red-500 bg-right-1/2 bg-blue-500 bg-left-1/2 text-white';
-        }
-
-        if (!hasAnyLateShifts && hasAnyIncompleteShifts) {
-            return 'bg-green-500 bg-right-1/2 bg-red-500 bg-left-1/2 text-white';
-        }
-
-        if (hasAnyLateShifts) {
-            return 'bg-red-500 bg-right-1/2 bg-blue-500 bg-left-1/2 text-white';
-        }
-
-        return 'bg-gray-300';
+        return { style, className, tooltip };
     };
 
     const openModal = (date) => {
@@ -240,11 +188,17 @@ export const SubUserCalendar = () => {
                     {[...Array(daysInMonth).keys()].map((dayIndex) => {
                         const day = dayIndex + 1;
                         const date = DateTime.local(currentYear, currentMonth + 1, day);
+
+                        // Получаем класс/стиль/tooltip для окраски дня
+                        const { style, className, tooltip } = getDayClasses(date);
+
                         return (
                             <button
                                 key={day}
                                 onClick={() => openModal(date)}
-                                className={`w-12 h-12 flex items-center justify-center rounded-full border text-sm ${getDayColor(date)}`}
+                                style={style}
+                                title={tooltip}
+                                className={`w-12 h-12 flex items-center justify-center rounded-full border text-sm hover:opacity-75 transition ${className}`}
                             >
                                 {day}
                             </button>
@@ -253,16 +207,22 @@ export const SubUserCalendar = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-7 gap-2">
-                    {getCurrentWeekDates().map((date, index) => (
-                        <button
-                            key={index}
-                            onClick={() => openModal(date)}
-                            className={`w-12 h-12 flex flex-col items-center justify-center rounded-full border text-sm ${getDayColor(date)}`}
-                        >
-                            <span>{weekDays[index]}</span>
-                            <span>{date.day}</span>
-                        </button>
-                    ))}
+                    {getCurrentWeekDates().map((date, index) => {
+                        const { style, className, tooltip } = getDayClasses(date);
+
+                        return (
+                            <button
+                                key={index}
+                                onClick={() => openModal(date)}
+                                style={style}
+                                title={tooltip}
+                                className={`w-12 h-12 flex flex-col items-center justify-center rounded-full border text-sm hover:opacity-75 transition ${className}`}
+                            >
+                                <span>{weekDays[index]}</span>
+                                <span>{date.day}</span>
+                            </button>
+                        );
+                    })}
                 </div>
             )}
             <CalendarModal
