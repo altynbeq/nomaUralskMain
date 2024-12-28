@@ -7,7 +7,7 @@ import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
-import { useAuthStore, useSubUserStore } from './store/index';
+import { useAuthStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 import { DateTime } from 'luxon';
 
@@ -24,7 +24,6 @@ const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 
 export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const user = useAuthStore((state) => state.user);
-    const subUser = useSubUserStore((state) => state.subUser);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -36,19 +35,13 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const [selectedShift, setSelectedShift] = useState(null);
     const [actionText, setActionText] = useState('');
 
-    const fileInput = useRef(null);
     const hasExecuted = useRef(false);
 
     const updateShiftScan = async (shift) => {
         try {
             const scanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
-            await axiosInstance.put(`/shifts/${shift._id}`, {
-                subUserId: shift.subUserId._id,
-                startTime: shift.startTime,
-                endTime: shift.endTime,
-                selectedStore: shift.selectedStore._id,
+            await axiosInstance.put(`/shifts/update-scan-time/${shift._id}`, {
                 scanTime: scanTimeUTC,
-                endScanTime: shift.endScanTime,
             });
 
             setShowMarkShiftResultModal(true);
@@ -63,12 +56,7 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const updateShiftEndScan = async (shift) => {
         try {
             const endScanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
-            await axiosInstance.put(`/shifts/${shift._id}`, {
-                subUserId: shift.subUserId._id,
-                startTime: shift.startTime,
-                endTime: shift.endTime,
-                selectedStore: shift.selectedStore._id,
-                scanTime: shift.scanTime,
+            await axiosInstance.put(`/shifts/update-end-scan-time/${shift._id}`, {
                 endScanTime: endScanTimeUTC,
             });
 
@@ -87,6 +75,8 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
 
         if (!isQr || hasExecuted.current) return;
 
+        hasExecuted.current = true;
+
         // Ищем первую неотмеченную смену
         const firstUnmarkedShift = subUserTodayShifts.find((shift) => {
             const scanTime = shift.scanTime
@@ -101,8 +91,6 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
         });
 
         if (!firstUnmarkedShift) return;
-
-        hasExecuted.current = true;
 
         const scanTime = firstUnmarkedShift.scanTime
             ? DateTime.fromISO(firstUnmarkedShift.scanTime, { zone: 'utc' }).setZone('UTC+5')
