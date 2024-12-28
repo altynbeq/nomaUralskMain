@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
 import { Navbar, Footer } from './components';
@@ -34,8 +34,6 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const [showActionModal, setShowActionModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState(null);
     const [actionText, setActionText] = useState('');
-
-    const hasExecuted = useRef(false);
 
     const updateShiftScan = async (shift) => {
         try {
@@ -73,9 +71,7 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
         const searchParams = new URLSearchParams(location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
 
-        if (!isQr || hasExecuted.current) return;
-
-        hasExecuted.current = true;
+        if (!isQr) return;
 
         // Ищем первую неотмеченную смену
         const firstUnmarkedShift = subUserTodayShifts.find((shift) => {
