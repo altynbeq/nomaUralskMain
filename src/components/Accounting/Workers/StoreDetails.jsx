@@ -21,7 +21,7 @@ export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
             });
             if (response.status === 200) {
                 setShowStoreInfoModal(false);
-                toast.info('Вы успешно обновили гео локацию магазина');
+                toast.success('Вы успешно обновили гео локацию магазина');
             }
         } catch (error) {
             console.error(error);
