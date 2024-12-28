@@ -71,7 +71,7 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
         const searchParams = new URLSearchParams(location.search);
         const isQr = searchParams.get('isQrRedirect') === 'true';
 
-        if (!isQr) return;
+        if (!isQr || user.role === 'user') return;
 
         // Ищем первую неотмеченную смену
         const firstUnmarkedShift = subUserTodayShifts.find((shift) => {

@@ -38,6 +38,8 @@ export const getDayColorType = (shifts) => {
         return 'late';
     } else if (noStartEnd) {
         return 'noStartEnd';
+    } else if (!late && !allFull) {
+        return 'split-no-late-incomplete';
     } else if (allFull) {
         return 'fullWorked';
     } else {
@@ -76,6 +78,15 @@ export const getDayColorClasses = (colorType) => {
                 style: {},
                 className: 'bg-green-500 text-white',
                 tooltip: 'Отработана полностью',
+            };
+
+        case 'split-no-late-incomplete': // Новый тип
+            return {
+                style: {
+                    background: 'linear-gradient(to right, #22c55e 50%, #ef4444 50%)', // Зеленый и красный
+                },
+                className: 'text-white',
+                tooltip: 'Не опоздал и не отработал всю смену',
             };
         case 'split-other':
             // Левый green (#22c55e), правый blue-500 (#3b82f6)
