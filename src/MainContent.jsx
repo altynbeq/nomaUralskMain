@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
-import { MdDescription } from 'react-icons/md';
 import { Navbar, Footer } from './components';
 import './App.css';
 import 'primeicons/primeicons.css';
@@ -26,8 +25,6 @@ const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
 export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const user = useAuthStore((state) => state.user);
     const subUser = useSubUserStore((state) => state.subUser);
-    const [showUploadImageModal, setShowUploadImageModal] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -149,37 +146,6 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
             );
         }
     }, [location.pathname, location.search]);
-
-    useEffect(() => {
-        if (user.role === 'subUser' && subUser && !subUser.image) {
-            setShowUploadImageModal(true);
-        }
-    }, [subUser, user.role]);
-
-    const handleModalClose = () => {
-        setShowUploadImageModal(false);
-    };
-
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (file.name) {
-            const formData = new FormData();
-            formData.append('avatar', file);
-            setIsUploading(true);
-            try {
-                await axiosInstance.post(`/subusers/subusers/${user.id}/avatar`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                setShowUploadImageModal(false);
-            } catch (error) {
-                console.error('Error uploading avatar:', error);
-            } finally {
-                setIsUploading(false);
-            }
-        }
-    };
 
     const handleAction = () => {
         if (!selectedShift) return;
@@ -341,35 +307,6 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                             Отмена
                         </button>
                     </div>
-                </div>
-            </Dialog>
-
-            <Dialog
-                visible={showUploadImageModal}
-                onHide={handleModalClose}
-                className="mx-auto my-4 max-w-lg w-full sm:max-w-sm"
-            >
-                <p className="text-center text-lg mb-4">
-                    Пожалуйста, загрузите аватарку, чтобы продолжить
-                </p>
-                <div className="flex mt-5 p-4 sm:p-6 gap-4 flex-col items-center justify-center w-full border-4 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
-                    <MdDescription size={32} className="text-blue-500" />
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center w-full">
-                        <button
-                            className="py-2 px-4 bg-gray-200 text-black rounded-full hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto"
-                            onClick={() => fileInput.current && fileInput.current.click()}
-                        >
-                            Загрузить аватар
-                        </button>
-                        <input
-                            type="file"
-                            ref={fileInput}
-                            className="hidden"
-                            onChange={handleFileUpload}
-                            accept="image/*"
-                        />
-                    </div>
-                    {isUploading && <p className="text-gray-500 text-sm mt-2">Загрузка...</p>}
                 </div>
             </Dialog>
 
