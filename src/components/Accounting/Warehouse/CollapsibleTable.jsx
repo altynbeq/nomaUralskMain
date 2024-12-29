@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Calendar } from 'primereact/calendar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
 import { axiosInstance } from '../../../api/axiosInstance';
@@ -15,7 +14,7 @@ export default function CollapsibleTableWithDetails({ title }) {
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [dateRange, setDateRange] = useState(null); // Раньше: const [dates, setDates] = useState(null);
+    const [dateRange, setDateRange] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
 
@@ -86,7 +85,6 @@ export default function CollapsibleTableWithDetails({ title }) {
                     breakpoint="960px"
                     paginator
                     rows={5}
-                    rowsPerPageOptions={[5, 10, 20]}
                 >
                     <Column
                         field="productName.НоменклатураНаименование"
@@ -194,7 +192,6 @@ export default function CollapsibleTableWithDetails({ title }) {
                 breakpoint="960px"
                 paginator
                 rows={10}
-                rowsPerPageOptions={[5, 10, 20]}
             >
                 <Column expander style={{ width: '3em', textAlign: 'center' }} />
                 <Column
