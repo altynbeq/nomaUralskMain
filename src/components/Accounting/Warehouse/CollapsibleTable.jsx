@@ -150,7 +150,9 @@ export default function CollapsibleTableWithDetails({ title }) {
     return (
         <div className="mx-auto w-[100%] mt-5 sm:w-[90%] flex flex-col subtle-border p-4">
             <div className="flex flex-col sm:flex-row justify-between items-center">
-                <h3 className="text-md mb-4 sm:mb-0">{title ? title : 'Список списаний'}</h3>
+                <h3 className="text-lg font-bold ml-2 mb-4 sm:mb-0">
+                    {title ? title : 'Список списаний'}
+                </h3>
                 <div className="flex flex-col sm:flex-row justify-end gap-6 mb-3 w-full sm:w-auto">
                     <div className="relative flex-1">
                         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
