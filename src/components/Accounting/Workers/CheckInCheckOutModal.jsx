@@ -89,6 +89,7 @@ export const CheckInCheckOutModal = memo(
 
         const handleTimeChange = (e) => {
             const newTime = e.value;
+            if (!newTime) return;
             const updatedDate = new Date(date);
             updatedDate.setHours(newTime.getHours(), newTime.getMinutes(), 0, 0);
             setDate(updatedDate);
