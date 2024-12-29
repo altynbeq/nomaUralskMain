@@ -3,6 +3,7 @@ import { MapPicker } from '../../../components/MapPicker';
 import QRCode from 'react-qr-code';
 import { Button } from 'primereact/button';
 import { axiosInstance } from '../../../api/axiosInstance';
+import { toast } from 'react-toastify';
 
 export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
     const qrRef = useRef(null);
@@ -16,10 +17,11 @@ export const StoreDetails = ({ selectedStore, setShowStoreInfoModal }) => {
         setIsLoading(true);
         try {
             const response = await axiosInstance.put(`/stores/update-store/${selectedStore?._id}`, {
-                location: selectedLocation, // Передаем координаты в формате lat/lng
+                location: selectedLocation,
             });
             if (response.status === 200) {
-                setShowStoreInfoModal(true);
+                setShowStoreInfoModal(false);
+                toast.success('Вы успешно обновили гео локацию магазина');
             }
         } catch (error) {
             console.error(error);

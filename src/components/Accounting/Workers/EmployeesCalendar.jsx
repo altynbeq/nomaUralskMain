@@ -308,6 +308,19 @@ export const EmployeesCalendar = () => {
             prevShifts.filter((shift) => !shiftsIds.includes(shift._id)),
         );
 
+        setSelectedDays((prevSelectedDays) =>
+            prevSelectedDays.map((day) => ({
+                ...day,
+                employee: {
+                    ...day.employee,
+                    shifts: day.employee.shifts.filter(
+                        (shift) => shift && !shiftsIds.includes(shift._id),
+                    ),
+                },
+                shifts: day.shifts.filter((shift) => shift && !shiftsIds.includes(shift._id)),
+            })),
+        );
+
         setSubUsersState((prevSubUsers) => {
             return prevSubUsers.map((user) => {
                 if (user.shifts) {
