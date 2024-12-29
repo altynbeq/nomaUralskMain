@@ -57,8 +57,8 @@ export const CheckInCheckOutModal = memo(
 
                 const url =
                     type === 'checkIn'
-                        ? `/shifts/update-scan-time/${shift.id}`
-                        : `/shifts/update-end-scan-time/${shift.id}`;
+                        ? `shifts/editing/update-scan-time/${shift.id}`
+                        : `shifts/editing/update-end-scan-time/${shift.id}`;
                 const response = await axiosInstance.put(url, payload);
                 const updatedShift = response.data;
                 if (onUpdate) {

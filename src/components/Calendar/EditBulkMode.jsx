@@ -433,7 +433,7 @@ export const EditBulkMode = ({
             };
 
             const response = await axiosInstance.put(
-                `/shifts/update-scan-time/${shift.id}`,
+                `/shifts/editing/update-scan-time/${shift.id}`,
                 payload,
             );
             const updatedShift = response.data;
@@ -464,7 +464,7 @@ export const EditBulkMode = ({
             };
 
             const response = await axiosInstance.put(
-                `/shifts/update-end-scan-time/${shift.id}`,
+                `/shifts/editing/update-end-scan-time/${shift.id}`,
                 payload,
             );
             const updatedShift = response.data;
