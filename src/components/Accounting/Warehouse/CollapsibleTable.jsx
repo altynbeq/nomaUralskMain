@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Calendar } from 'primereact/calendar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
 import { axiosInstance } from '../../../api/axiosInstance';
@@ -15,7 +14,7 @@ export default function CollapsibleTableWithDetails({ title }) {
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [dateRange, setDateRange] = useState(null); // Раньше: const [dates, setDates] = useState(null);
+    const [dateRange, setDateRange] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
 
@@ -86,7 +85,6 @@ export default function CollapsibleTableWithDetails({ title }) {
                     breakpoint="960px"
                     paginator
                     rows={5}
-                    rowsPerPageOptions={[5, 10, 20]}
                 >
                     <Column
                         field="productName.НоменклатураНаименование"
@@ -152,7 +150,9 @@ export default function CollapsibleTableWithDetails({ title }) {
     return (
         <div className="mx-auto w-[100%] mt-5 sm:w-[90%] flex flex-col subtle-border p-4">
             <div className="flex flex-col sm:flex-row justify-between items-center">
-                <h3 className="text-md mb-4 sm:mb-0">{title ? title : 'Список списаний'}</h3>
+                <h3 className="text-lg font-bold ml-2 mb-4 sm:mb-0">
+                    {title ? title : 'Список списаний'}
+                </h3>
                 <div className="flex flex-col sm:flex-row justify-end gap-6 mb-3 w-full sm:w-auto">
                     <div className="relative flex-1">
                         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -194,7 +194,6 @@ export default function CollapsibleTableWithDetails({ title }) {
                 breakpoint="960px"
                 paginator
                 rows={10}
-                rowsPerPageOptions={[5, 10, 20]}
             >
                 <Column expander style={{ width: '3em', textAlign: 'center' }} />
                 <Column
