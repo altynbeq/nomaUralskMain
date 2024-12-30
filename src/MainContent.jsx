@@ -1,15 +1,15 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
 import { Navbar, Footer } from './components';
-import './App.css';
-import 'primeicons/primeicons.css';
 import AlertModal from './components/AlertModal';
 import { Loader } from './components/Loader';
 import { NoAccess } from './pages';
 import { useAuthStore } from './store/index';
 import { axiosInstance } from './api/axiosInstance';
 import { DateTime } from 'luxon';
+import { formatDate, formatOnlyTimeDate } from './methods/dataFormatter';
 
 const General = lazy(() => import('./pages/General'));
 const Sales = lazy(() => import('./pages/Sales'));
@@ -33,37 +33,47 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
 
     const [showActionModal, setShowActionModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState(null);
-    const [actionText, setActionText] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const updateShiftScan = async (shift) => {
+        setIsLoading(true);
         try {
             const scanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/update-scan-time/${shift._id}`, {
                 scanTime: scanTimeUTC,
             });
-
+            navigate('/general');
+            setShowActionModal(false);
+            setSelectedShift(null);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Вы успешно отметили начало смены.');
         } catch (error) {
             console.error('Ошибка при отметке начала смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const updateShiftEndScan = async (shift) => {
+        setIsLoading(true);
         try {
             const endScanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/update-end-scan-time/${shift._id}`, {
                 endScanTime: endScanTimeUTC,
             });
-
+            navigate('/general');
+            setShowActionModal(false);
+            setSelectedShift(null);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Вы успешно отметили окончание смены.');
         } catch (error) {
             console.error('Ошибка при отметке окончания смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -73,7 +83,6 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
 
         if (!isQr || user.role === 'user') return;
 
-        // Ищем первую неотмеченную смену
         const firstUnmarkedShift = subUserTodayShifts.find((shift) => {
             const scanTime = shift.scanTime
                 ? DateTime.fromISO(shift.scanTime, { zone: 'utc' }).setZone('UTC+5')
@@ -82,39 +91,15 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                 ? DateTime.fromISO(shift.endScanTime, { zone: 'utc' }).setZone('UTC+5')
                 : null;
 
-            // Условие для поиска первой неотмеченной смены
             return !scanTime || !endScanTime;
         });
 
         if (!firstUnmarkedShift) return;
 
-        const scanTime = firstUnmarkedShift.scanTime
-            ? DateTime.fromISO(firstUnmarkedShift.scanTime, { zone: 'utc' }).setZone('UTC+5')
-            : null;
-        const endScanTime = firstUnmarkedShift.endScanTime
-            ? DateTime.fromISO(firstUnmarkedShift.endScanTime, { zone: 'utc' }).setZone('UTC+5')
-            : null;
-
         setSelectedShift(firstUnmarkedShift);
-
-        if (!scanTime) {
-            setActionText('Отметить приход');
-        } else if (scanTime && !endScanTime) {
-            setActionText('Отметить уход');
-        } else if (scanTime && endScanTime) {
-            setShowMarkShiftResultModal(true);
-            setMarkShiftResultMessage('Вы уже отметили приход и уход для всех смен.');
-        }
 
         setShowActionModal(true);
     }, [user, location.search, subUserTodayShifts]);
-
-    useEffect(() => {
-        if (!showMarkShiftResultModal && markShiftResultMessage.includes('успешно')) {
-            navigate('/general');
-            setMarkShiftResultMessage('');
-        }
-    }, [showMarkShiftResultModal, markShiftResultMessage, navigate]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -131,18 +116,14 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
         }
     }, [location.pathname, location.search]);
 
-    const handleAction = () => {
+    const handleAction = (type) => {
         if (!selectedShift) return;
 
-        if (!selectedShift.scanTime) {
+        if (type === 'checkIn') {
             updateShiftScan(selectedShift);
-        } else if (selectedShift.scanTime && !selectedShift.endScanTime) {
+        } else if (type === 'checkOut') {
             updateShiftEndScan(selectedShift);
         }
-
-        setShowActionModal(false);
-        setSelectedShift(null);
-        setActionText('');
     };
 
     return (
@@ -272,24 +253,63 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                 onHide={() => setShowActionModal(false)}
             >
                 <div className="flex flex-col items-center">
-                    <p className="mb-8 font-bold">
-                        {actionText === 'Отметить приход'
-                            ? 'Вы хотите отметить приход для этой смены?'
-                            : 'Вы хотите отметить уход для этой смены?'}
+                    <p>
+                        Смена на{' '}
+                        <span className="font-bold text-lg">
+                            {formatDate(selectedShift?.startTime)}
+                        </span>
                     </p>
-                    <div className="flex gap-4">
-                        <button
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                            onClick={handleAction}
-                        >
-                            {actionText}
-                        </button>
-                        <button
-                            className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
-                            onClick={() => setShowActionModal(false)}
-                        >
-                            Отмена
-                        </button>
+                    <div className="flex gap-2 mt-2">
+                        <p>
+                            Начало:{' '}
+                            <span className="font-bold text-lg">
+                                {formatDate(selectedShift?.startTime)}
+                            </span>
+                        </p>
+                        <p>
+                            Конец:{' '}
+                            <span className="font-bold text-lg">
+                                {formatDate(selectedShift?.endTime)}
+                            </span>
+                        </p>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                        <p>
+                            Приход:{' '}
+                            <span className="font-bold text-lg">
+                                {selectedShift?.scanTime
+                                    ? formatOnlyTimeDate(selectedShift?.scanTime)
+                                    : 'Отсутствует'}
+                            </span>
+                        </p>
+                        <p>
+                            Уход:{' '}
+                            <span className="font-bold text-lg">
+                                {selectedShift?.endScanTime
+                                    ? formatOnlyTimeDate(selectedShift?.endScanTime)
+                                    : 'Отсутствует'}
+                            </span>
+                        </p>
+                    </div>
+                    <p className="mt-2">
+                        Магазин{' '}
+                        <span className="font-bold text-lg">
+                            {selectedShift?.selectedStore?.storeName}
+                        </span>
+                    </p>
+                    <div className="flex gap-6">
+                        <Button
+                            onClick={() => handleAction('checkIn')}
+                            disabled={selectedShift?.scanTime || isLoading}
+                            label="Начать смену"
+                            className="bg-blue-500 text-white  rounded-2xl p-2 px-3  mt-10 min-w-[175px]"
+                        />
+                        <Button
+                            onClick={() => handleAction('checkOut')}
+                            disabled={selectedShift?.endScanTime || isLoading}
+                            label="Закончить смену"
+                            className="bg-blue-500 text-white  rounded-2xl p-2 px-3  mt-10 min-w-[175px]"
+                        />
                     </div>
                 </div>
             </Dialog>
@@ -299,9 +319,6 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                 open={showMarkShiftResultModal}
                 onClose={() => {
                     setShowMarkShiftResultModal(false);
-                    if (markShiftResultMessage.includes('успешно')) {
-                        navigate('/general');
-                    }
                 }}
             />
 

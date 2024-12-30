@@ -220,11 +220,15 @@ export const EditBulkMode = ({
             };
         });
 
+        // Собираем ID обновляемых смен
+        const excludedShiftIds = editedShifts.map((shift) => shift.id);
+
         const checkResponse = await axiosInstance.post('/shifts/check-conflicts', {
             shifts: shiftsForCheck,
+            excludedShiftIds, // Передаём ID смен для исключения
         });
 
-        return checkResponse.data.conflict ? shiftsForCheck : null;
+        return checkResponse.data.conflict ? checkResponse.data.conflictsList : null;
     };
 
     const updateShifts = async (editedShifts) => {

@@ -2,7 +2,7 @@
 
 import { DateTime } from 'luxon';
 
-export const formatDate = (date, pattern = 'dd MMMM yyyy, HH:mm') => {
+export const formatDate = (date, pattern = 'dd MMMM, HH:mm') => {
     if (!date) return '';
     return DateTime.fromISO(date, { zone: 'utc' })
         .setZone('UTC+5')
