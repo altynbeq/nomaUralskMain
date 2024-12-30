@@ -33,8 +33,10 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
 
     const [showActionModal, setShowActionModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const updateShiftScan = async (shift) => {
+        setIsLoading(true);
         try {
             const scanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/update-scan-time/${shift._id}`, {
@@ -49,10 +51,13 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
             console.error('Ошибка при отметке начала смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const updateShiftEndScan = async (shift) => {
+        setIsLoading(true);
         try {
             const endScanTimeUTC = DateTime.local().setZone('UTC+5').toUTC().toISO();
             await axiosInstance.put(`/shifts/update-end-scan-time/${shift._id}`, {
@@ -67,6 +72,8 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
             console.error('Ошибка при отметке окончания смены:', error);
             setShowMarkShiftResultModal(true);
             setMarkShiftResultMessage('Не удалось отметить смену. Попробуйте снова.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -252,23 +259,17 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                             {formatDate(selectedShift?.startTime)}
                         </span>
                     </p>
-                    <p className="mt-2">
-                        Магазин{' '}
-                        <span className="font-bold text-lg">
-                            {selectedShift?.selectedStore?.storeName}
-                        </span>
-                    </p>
                     <div className="flex gap-2 mt-2">
                         <p>
                             Начало:{' '}
                             <span className="font-bold text-lg">
-                                {formatOnlyTimeDate(selectedShift?.startTime)}
+                                {formatDate(selectedShift?.startTime)}
                             </span>
                         </p>
                         <p>
                             Конец:{' '}
                             <span className="font-bold text-lg">
-                                {formatOnlyTimeDate(selectedShift?.endTime)}
+                                {formatDate(selectedShift?.endTime)}
                             </span>
                         </p>
                     </div>
@@ -290,16 +291,22 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                             </span>
                         </p>
                     </div>
+                    <p className="mt-2">
+                        Магазин{' '}
+                        <span className="font-bold text-lg">
+                            {selectedShift?.selectedStore?.storeName}
+                        </span>
+                    </p>
                     <div className="flex gap-6">
                         <Button
                             onClick={() => handleAction('checkIn')}
-                            disabled={selectedShift?.scanTime}
+                            disabled={selectedShift?.scanTime || isLoading}
                             label="Начать смену"
                             className="bg-blue-500 text-white  rounded-2xl p-2 px-3  mt-10 min-w-[175px]"
                         />
                         <Button
                             onClick={() => handleAction('checkOut')}
-                            disabled={selectedShift?.endScanTime}
+                            disabled={selectedShift?.endScanTime || isLoading}
                             label="Закончить смену"
                             className="bg-blue-500 text-white  rounded-2xl p-2 px-3  mt-10 min-w-[175px]"
                         />
