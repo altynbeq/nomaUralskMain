@@ -4,34 +4,15 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
-import { axiosInstance } from '../../../api/axiosInstance';
-import { useAuthStore } from '../../../store/authStore';
 import { FaSearch, FaRegCalendarAlt, FaFilter } from 'react-icons/fa';
 
-export default function CollapsibleTableWithDetails({ title }) {
-    const clientId = useAuthStore((state) => state.user.id);
-    const [writeOffs, setWriteOffs] = useState([]);
+export default function CollapsibleTableWithDetails({ title, writeOffs }) {
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
     const [dateRange, setDateRange] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
-
-    useEffect(() => {
-        const fetchWriteOffs = async (clientId) => {
-            try {
-                const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
-                setWriteOffs(response.data.writeOffs);
-            } catch (error) {
-                console.error('Ошибка при получении списаний:', error);
-            }
-        };
-
-        if (clientId) {
-            fetchWriteOffs(clientId);
-        }
-    }, [clientId]);
 
     useEffect(() => {
         if (writeOffs?.length) {

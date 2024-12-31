@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ListOfExpenses from '../components/Accounting/Warehouse/ListOfExpenses';
 import CollapsibleTable from '../components/Accounting/Warehouse/CollapsibleTable';
-import { AddWarehouse } from '../components/Accounting/Warehouse/AddWarehouse';
 import { Loader } from '../components/Loader';
+import { axiosInstance } from '../api/axiosInstance';
+import { useAuthStore } from '../store/authStore';
 import SkladBoxStats from '../components/Sklad/SkladBoxStats';
 import MoveItemsSklad from '../components/Accounting/Warehouse/MoveItemsSklad';
 import InventoryRevision from '../components/Accounting/Warehouse/InventoryRevision';
@@ -13,8 +14,29 @@ import CurrentActions from '../components/Accounting/Warehouse/CurrentActions';
 import WriteoffsForApproval from '../components/Accounting/Warehouse/WriteoffsForApproval';
 
 const InternalTabs = () => {
+    const clientId = useAuthStore((state) => state.user.id);
+    const [isLoading, setIsLoading] = useState(false);
+    const [writeOffs, setWriteOffs] = useState([]);
+
+    useEffect(() => {
+        setIsLoading(true);
+        const fetchWriteOffs = async (clientId) => {
+            try {
+                const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
+                setWriteOffs(response.data.writeOffs);
+            } catch (error) {
+                console.error('Ошибка при получении списаний:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (clientId) {
+            fetchWriteOffs(clientId);
+        }
+    }, [clientId]);
+
     const [activeTab, setActiveTab] = useState('sklad');
-    const isLoading = false;
 
     const tabs = [
         { id: 'sklad', label: 'Склад' },
@@ -29,7 +51,10 @@ const InternalTabs = () => {
                 <div className=" mb-10 p-2">
                     <SkladBoxStats />
                     <ListOfExpenses title="Товар близок к мин остатку" />
-                    <CollapsibleTable title="Не подтвержденные списания" />
+                    <CollapsibleTable
+                        title="Не подтвержденные списания"
+                        writeOffs={writeOffs || []}
+                    />
                 </div>
             </div>
         ),
@@ -113,14 +138,6 @@ const InternalTabs = () => {
             </div>
         </div>
     );
-
-    // return (
-    //     <div className="flex flex-col mt-10">
-    //         <AddWarehouse />
-    //         <ListOfExpenses />
-    //         <CollapsibleTable />
-    //     </div>
-    // );
 };
 
 const AccountingWarehouse = () => {
