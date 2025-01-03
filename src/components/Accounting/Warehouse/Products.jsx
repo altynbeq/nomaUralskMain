@@ -89,23 +89,19 @@ export function Products({ title }) {
             <div className="flex flex-col justify-between mb-4">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
                     <div className="flex text-[1rem] font-semibold align-left">
-                        {title ? (
-                            <p>{title}</p>
-                        ) : (
-                            <div className="flex flex-row justify-between">
-                                <div className="flex mb-4 flex-row gap-2">
-                                    <CardTitle>Список товаров</CardTitle>
-                                    {pendingCount > 0 && (
-                                        <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                                            <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
-                                            <span className="text-sm text-yellow-800">
-                                                {pendingCount} действия
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
+                        <div className="flex flex-row justify-between">
+                            <div className="flex mb-4 flex-row gap-2">
+                                <CardTitle>{title}</CardTitle>
+                                {pendingCount > 0 && (
+                                    <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                                        <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                                        <span className="text-sm text-yellow-800">
+                                            {pendingCount} действия
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <button

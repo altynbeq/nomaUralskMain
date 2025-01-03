@@ -59,7 +59,7 @@ const InternalTabs = () => {
         items: (
             <div className="flex flex-col gap-3 justify-center">
                 <div className=" mb-10 p-2">
-                    <Products />
+                    <Products title="Список товаров" />
                     <WriteOffs writeOffs={writeOffs || []} />
                 </div>
             </div>
