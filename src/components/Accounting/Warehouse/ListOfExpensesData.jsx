@@ -40,57 +40,52 @@ export function renderAvatar(params) {
 
 export const columns = [
     {
-        field: 'НоменклатураНаименование',
+        field: 'name',
         headerName: 'Название',
-        flex: 1.5,
+        flex: 2,
         minWidth: 200,
     },
     {
-        field: 'status',
-        headerName: 'Статус',
+        field: 'price',
+        headerName: 'Цена',
+        headerAlign: 'center',
+        align: 'center',
         flex: 0.5,
-        minWidth: 80,
-        renderCell: () => 'Online', // Можете заменить на динамическое значение
-    },
-    {
-        field: 'users',
-        headerName: 'Users',
-        headerAlign: 'right',
-        align: 'right',
-        flex: 1,
-        minWidth: 80,
-    },
-    {
-        field: 'eventCount',
-        headerName: 'Остаток',
-        headerAlign: 'right',
-        align: 'right',
-        flex: 1,
         minWidth: 100,
     },
     {
-        field: 'viewsPerUser',
+        field: 'quantity',
+        headerName: 'Количество',
+        headerAlign: 'center',
+        align: 'center',
+        flex: 0.5,
+        minWidth: 100,
+    },
+    {
+        field: 'currentStock',
+        headerName: 'Остаток',
+        headerAlign: 'center',
+        align: 'center',
+        flex: 0.5,
+        minWidth: 100,
+    },
+    {
+        field: 'minStock',
         headerName: 'Мин. Остаток',
-        headerAlign: 'right',
-        align: 'right',
-        flex: 1,
+        headerAlign: 'center',
+        align: 'center',
+        flex: 0.5,
         minWidth: 120,
     },
-    {
-        field: 'averageTime',
-        headerName: 'Приход/Спис',
-        headerAlign: 'right',
-        align: 'right',
-        flex: 1,
-        minWidth: 100,
-    },
-    {
-        field: 'conversions',
-        headerName: 'Daily Conversions',
-        flex: 1,
-        minWidth: 150,
-        renderCell: () => 'N/A', // Заглушка, можно заменить на реальные данные
-    },
+    // {
+    //     field: 'category',
+    //     headerName: 'Категория',
+    //     headerAlign: 'center',
+    //     align: 'center',
+    //     flex: 0.5,
+    //     minWidth: 150,
+    //     renderCell: () => 'N/A', // Заглушка, можно заменить на реальные данные
+    // },
 ];
 
 export const rows = [

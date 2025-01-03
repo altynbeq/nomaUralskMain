@@ -3,12 +3,12 @@ import { DataGrid } from '@mui/x-data-grid';
 import { columns } from './ListOfExpensesData';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { EditProductModal } from '../../../components/EditProductModal';
+import { EditProductModal } from '../../EditProductModal';
 import { useCompanyStore } from '../../../store';
 import { MdEdit } from 'react-icons/md';
-import { FaFilter, FaTimes, FaExclamationTriangle, FaAngleDown, FaAngleUp } from 'react-icons/fa';
+import { FaFilter, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
 
-export default function ListOfExpenses({ title }) {
+export function Products({ title }) {
     const warehouses = useCompanyStore((state) => state.warehouses);
     const products = useCompanyStore((state) => state.products);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
@@ -17,7 +17,6 @@ export default function ListOfExpenses({ title }) {
     const [productSearch, setProductSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(true);
     const filterRef = useRef(null);
 
     const getWarehouseNameFromProduct = (productName) => {
@@ -27,13 +26,12 @@ export default function ListOfExpenses({ title }) {
 
     const rows = filteredProducts.map((product, index) => ({
         id: product._id || index,
-        НоменклатураНаименование: product.НоменклатураНаименование,
-        status: 'Online',
-        users: Math.floor(Math.random() * 1000),
-        eventCount: Math.floor(Math.random() * 500),
-        viewsPerUser: Math.floor(Math.random() * 50),
-        averageTime: Math.floor(Math.random() * 50),
-        conversions: null,
+        name: product.name,
+        warehuse: product.warehouse,
+        price: `${product.price}₸`,
+        currentStock: product.currentStock,
+        minStock: product.minStock,
+        quantity: product.quantity,
     }));
 
     const handleSelectionChange = (ids) => {
@@ -46,7 +44,7 @@ export default function ListOfExpenses({ title }) {
     useEffect(() => {
         if (products?.length) {
             const filtered = products.filter((product) => {
-                const matchesProductSearch = product.НоменклатураНаименование
+                const matchesProductSearch = product.name
                     .toLowerCase()
                     .includes(productSearch.toLowerCase());
 
@@ -88,25 +86,21 @@ export default function ListOfExpenses({ title }) {
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
-                    <p className="flex text-[1rem] font-semibold align-left">
-                        {title ? (
-                            title
-                        ) : (
-                            <div className="flex flex-row justify-between">
-                                <div className="flex mb-4 flex-row gap-2">
-                                    <CardTitle>Список товаров</CardTitle>
-                                    {pendingCount > 0 && (
-                                        <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                                            <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
-                                            <span className="text-sm text-yellow-800">
-                                                {pendingCount} действия
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
+                    <div className="flex text-[1rem] font-semibold align-left">
+                        <div className="flex flex-row justify-between">
+                            <div className="flex mb-4 flex-row gap-2">
+                                <CardTitle>{title}</CardTitle>
+                                {pendingCount > 0 && (
+                                    <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                                        <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                                        <span className="text-sm text-yellow-800">
+                                            {pendingCount} действия
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </p>
+                        </div>
+                    </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <button
                             className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 flex items-center gap-2"
@@ -131,12 +125,6 @@ export default function ListOfExpenses({ title }) {
                             <FaFilter className="h-5 w-5 text-gray-600" />
                             <span>Фильтр</span>
                         </button>
-                        <div
-                            className="mr-4 cursor-pointer text-2xl"
-                            onClick={() => setIsCollapsed(!isCollapsed)}
-                        >
-                            {isCollapsed ? <FaAngleDown /> : <FaAngleUp />}
-                        </div>
                     </div>
                 </div>
                 {showFilters && (
@@ -167,52 +155,25 @@ export default function ListOfExpenses({ title }) {
                         </button>
                     </div>
                 )}
-                {!isCollapsed && (
-                    <div className="flex flex-wrap border-solid border-1 rounded-xl px-2 gap-1 w-full">
-                        <DataGrid
-                            autoHeight
-                            checkboxSelection
-                            rows={rows}
-                            columns={columns}
-                            getRowClassName={(params) =>
-                                params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-                            }
-                            initialState={{
-                                pagination: { paginationModel: { pageSize: 20 } },
-                            }}
-                            pageSizeOptions={[10, 20, 50]}
-                            disableColumnResize
-                            onRowSelectionModelChange={handleSelectionChange}
-                            density="compact"
-                            slotProps={{
-                                filterPanel: {
-                                    filterFormProps: {
-                                        logicOperatorInputProps: {
-                                            variant: 'outlined',
-                                            size: 'small',
-                                        },
-                                        columnInputProps: {
-                                            variant: 'outlined',
-                                            size: 'small',
-                                            sx: { mt: 'auto' },
-                                        },
-                                        operatorInputProps: {
-                                            variant: 'outlined',
-                                            size: 'small',
-                                            sx: { mt: 'auto' },
-                                        },
-                                        valueInputProps: {
-                                            InputComponentProps: {
-                                                variant: 'outlined',
-                                                size: 'small',
-                                            },
-                                        },
-                                    },
-                                },
-                            }}
-                        />
-                    </div>
-                )}
+
+                <div className="flex flex-wrap border-solid border-1 rounded-xl px-2 gap-1 w-full">
+                    <DataGrid
+                        autoHeight
+                        checkboxSelection
+                        rows={rows}
+                        columns={columns}
+                        getRowClassName={(params) =>
+                            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+                        }
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 20 } },
+                        }}
+                        pageSizeOptions={[10, 20, 50]}
+                        disableColumnResize
+                        onRowSelectionModelChange={handleSelectionChange}
+                        disableColumnMenu
+                    />
+                </div>
             </div>
         </div>
     );
