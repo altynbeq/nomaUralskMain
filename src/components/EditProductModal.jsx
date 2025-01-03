@@ -11,12 +11,19 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const [fromWarehouse, setFromWarehouse] = useState(null);
     const [toWarehouse, setToWarehouse] = useState(null);
     const [transferDate, setTransferDate] = useState(null);
+
+    // Состояние для управления открытием MoreEditProductModal
     const [isMoreEditModalOpen, setIsMoreEditModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
-    const moreEditModalClick = (item) => {
-        setSelectedProduct(item);
-        setIsMoreEditModalOpen((prev) => !prev);
+    const openMoreEditModal = (product) => {
+        setSelectedProduct(product);
+        setIsMoreEditModalOpen(true);
+    };
+
+    const closeMoreEditModal = () => {
+        setSelectedProduct(null);
+        setIsMoreEditModalOpen(false);
     };
 
     const handleTransferClick = () => {
@@ -38,7 +45,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                 label="Перенести"
                 className="p-button-success"
                 onClick={() => {
-                    // Add transfer logic here
+                    // Добавьте логику переноса здесь
                 }}
             />
         </div>
@@ -52,24 +59,19 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
             style={{ width: '25vw' }}
         >
             <div className="flex flex-col gap-4">
-                {/* Item List */}
+                {/* Список товаров */}
                 {items.map((item, index) => (
-                    <div key={index} className="flex items-center gap-4">
+                    <div key={item._id} className="flex items-center gap-4">
                         <span className="flex-1 rounded-md border-2 p-2">{item.name}</span>
                         <Button
                             icon="pi pi-pencil"
                             className="p-button-text"
-                            onClick={() => moreEditModalClick(item)}
-                        />
-                        <MoreEditProductModal
-                            product={selectedProduct}
-                            onClose={() => setIsMoreEditModalOpen(false)}
-                            isOpen={isMoreEditModalOpen}
+                            onClick={() => openMoreEditModal(item)}
                         />
                     </div>
                 ))}
 
-                {/* Transfer Button */}
+                {/* Кнопка переноса */}
                 <Button
                     label="Перенести"
                     className="p-button-primary w-full bg-blue-500 p-2 text-white rounded-md"
@@ -77,7 +79,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                 />
             </div>
 
-            {/* Transfer Dialog */}
+            {/* Модальное окно переноса */}
             <Dialog
                 header="Перенос товара"
                 visible={isTransferModalOpen}
@@ -86,8 +88,9 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                 footer={renderTransferFooter()}
             >
                 <div className="flex flex-col gap-4">
-                    {items.map((item, index) => (
-                        <div key={index} className="flex justify-between items-center gap-4">
+                    {/* Поля переноса */}
+                    {items.map((item) => (
+                        <div key={item._id} className="flex justify-between items-center gap-4">
                             <span>{item.name}</span>
                             <InputNumber
                                 placeholder="Количество"
@@ -125,6 +128,15 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                     />
                 </div>
             </Dialog>
+
+            {/* Модальное окно редактирования отдельного товара */}
+            {selectedProduct && (
+                <MoreEditProductModal
+                    product={selectedProduct}
+                    isOpen={isMoreEditModalOpen}
+                    onClose={closeMoreEditModal}
+                />
+            )}
         </Dialog>
     );
 };

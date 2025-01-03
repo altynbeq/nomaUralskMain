@@ -25,6 +25,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
             );
             if (response.status === 200) {
                 toast.success('Вы успешно обновили товар');
+                // Дополнительно можно обновить список товаров, если необходимо
             }
         } catch (error) {
             toast.error('Ошибка при обновлении товара');
@@ -79,7 +80,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                     />
                 </div>
 
-                {/* Остаток и минимальный остаток */}
+                {/* Цена, Остаток, Мин. Остаток */}
                 <div className="field grid mt-5">
                     <div className="col">
                         <label htmlFor="price text-xs">Цена</label>
