@@ -23,7 +23,6 @@ const InternalTabs = () => {
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
-                console.log(response.data.writeOffs);
                 setWriteOffs(response.data.writeOffs);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
