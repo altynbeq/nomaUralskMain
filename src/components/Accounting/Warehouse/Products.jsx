@@ -29,6 +29,9 @@ export function Products({ title }) {
         name: product.name,
         warehuse: product.warehouse,
         price: `${product.price}₸`,
+        currentStock: product.currentStock,
+        minStock: product.minStock,
+        quantity: product.quantity,
     }));
 
     const handleSelectionChange = (ids) => {

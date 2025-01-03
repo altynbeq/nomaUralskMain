@@ -53,8 +53,16 @@ export const columns = [
         flex: 0.5,
         minWidth: 100,
     },
+    // {
+    //     field: 'warehouse',
+    //     headerName: 'Остаток',
+    //     headerAlign: 'center',
+    //     align: 'center',
+    //     flex: 0.5,
+    //     minWidth: 100,
+    // },
     {
-        field: 'warehouse',
+        field: 'currentStock',
         headerName: 'Остаток',
         headerAlign: 'center',
         align: 'center',
@@ -62,38 +70,30 @@ export const columns = [
         minWidth: 100,
     },
     {
-        field: 'eventCount',
-        headerName: 'Остаток',
-        headerAlign: 'center',
-        align: 'center',
-        flex: 0.5,
-        minWidth: 100,
-    },
-    {
-        field: 'viewsPerUser',
+        field: 'minStock',
         headerName: 'Мин. Остаток',
         headerAlign: 'center',
         align: 'center',
         flex: 0.5,
         minWidth: 120,
     },
-    {
-        field: 'expiredDate',
-        headerName: 'Срок годности',
-        headerAlign: 'center',
-        align: 'center',
-        flex: 0.5,
-        minWidth: 100,
-    },
-    {
-        field: 'category',
-        headerName: 'Категория',
-        headerAlign: 'center',
-        align: 'center',
-        flex: 0.5,
-        minWidth: 150,
-        renderCell: () => 'N/A', // Заглушка, можно заменить на реальные данные
-    },
+    // {
+    //     field: 'expiredDate',
+    //     headerName: 'Срок годности',
+    //     headerAlign: 'center',
+    //     align: 'center',
+    //     flex: 0.5,
+    //     minWidth: 100,
+    // },
+    // {
+    //     field: 'category',
+    //     headerName: 'Категория',
+    //     headerAlign: 'center',
+    //     align: 'center',
+    //     flex: 0.5,
+    //     minWidth: 150,
+    //     renderCell: () => 'N/A', // Заглушка, можно заменить на реальные данные
+    // },
 ];
 
 export const rows = [
