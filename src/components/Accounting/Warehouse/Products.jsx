@@ -1,75 +1,61 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import { columns } from './ListOfExpensesData';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
 import { EditProductModal } from '../../EditProductModal';
-import { useCompanyStore } from '../../../store';
-import { MdEdit } from 'react-icons/md';
-import { FaFilter, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
+import { useCompanyStore, useAuthStore } from '../../../store';
+import { FaFilter, FaTimes } from 'react-icons/fa';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export function Products({ title }) {
+    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
     const warehouses = useCompanyStore((state) => state.warehouses);
-    const products = useCompanyStore((state) => state.products);
+    const [products, setProducts] = useState([]);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [lazyParams, setLazyParams] = useState({ page: 1, rows: 20 });
+    const [loading, setLoading] = useState(false);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
-    const [filteredProducts, setFilteredProducts] = useState([]);
     const [productSearch, setProductSearch] = useState('');
-    const [selectedItems, setSelectedItems] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const filterRef = useRef(null);
 
-    const getWarehouseNameFromProduct = (productName) => {
-        const match = productName.match(/\(([^)]+)\)$/);
-        return match ? match[1] : null;
-    };
-
-    const rows = filteredProducts.map((product, index) => ({
-        id: product._id || index,
-        name: product.name,
-        warehuse: product.warehouse,
-        price: `${product.price}₸`,
-        currentStock: product.currentStock,
-        minStock: product.minStock,
-        quantity: product.quantity,
-    }));
-
-    const handleSelectionChange = (ids) => {
-        const selected = ids.map((id) =>
-            products.find((product) => product._id === id || product.id === id),
-        );
-        setSelectedItems(selected.filter(Boolean));
-    };
+    const fetchProducts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axiosInstance.get(
+                `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
+            );
+            setProducts(response.data.products);
+            setTotalRecords(response.data.total);
+        } catch (error) {
+            console.error('Ошибка при загрузке товаров:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [clientId, lazyParams.page, lazyParams.rows, productSearch]);
 
     useEffect(() => {
-        if (products?.length) {
-            const filtered = products.filter((product) => {
-                const matchesProductSearch = product.name
-                    .toLowerCase()
-                    .includes(productSearch.toLowerCase());
+        fetchProducts();
+    }, [fetchProducts, lazyParams, productSearch]);
 
-                let matchesWarehouse = true;
-                if (selectedWarehouse && selectedWarehouse.warehouseName) {
-                    const productWarehouseName = getWarehouseNameFromProduct(
-                        product.КассаККМНаименование,
-                    );
-                    matchesWarehouse = productWarehouseName === selectedWarehouse.warehouseName;
-                }
+    const handlePageChange = (event) => {
+        setLazyParams({ ...lazyParams, page: event.page + 1 });
+    };
 
-                return matchesProductSearch && matchesWarehouse;
-            });
-            setFilteredProducts(filtered);
-        }
-    }, [productSearch, selectedWarehouse, products]);
+    const handleFilterToggle = () => {
+        setShowFilters(!showFilters);
+    };
 
     const handleOutsideClick = (event) => {
         if (filterRef.current && !filterRef.current.contains(event.target)) {
             setShowFilters(false);
         }
     };
-    const CardTitle = ({ className = '', children }) => (
-        <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
-    );
+
     useEffect(() => {
         if (showFilters) {
             document.addEventListener('mousedown', handleOutsideClick);
@@ -81,52 +67,42 @@ export function Products({ title }) {
             document.removeEventListener('mousedown', handleOutsideClick);
         };
     }, [showFilters]);
-    const pendingCount = 9;
+
+    const CardTitle = ({ children }) => (
+        <h2 className="text-xl font-semibold text-gray-900">{children}</h2>
+    );
+
+    const handleEditClick = () => {
+        if (selectedProducts.length === 0) {
+            alert('Пожалуйста, выберите товар для редактирования.');
+            return;
+        }
+        setEditModalIsVisible(true);
+    };
+
     return (
-        <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
+        <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%] rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
                     <div className="flex text-[1rem] font-semibold align-left">
-                        <div className="flex flex-row justify-between">
-                            <div className="flex mb-4 flex-row gap-2">
-                                <CardTitle>{title}</CardTitle>
-                                {pendingCount > 0 && (
-                                    <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                                        <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
-                                        <span className="text-sm text-yellow-800">
-                                            {pendingCount} действия
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <CardTitle>{title}</CardTitle>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
-                        <button
-                            className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                            onClick={() => setEditModalIsVisible(true)}
-                        >
-                            <MdEdit className="h-5 w-5 text-gray-600" />
-                            <span>Редактировать</span>
-                        </button>
+                        <Button label="Редактировать" onClick={handleEditClick} />
                         <EditProductModal
-                            warehouses={warehouses}
-                            items={selectedItems}
+                            items={selectedProducts}
                             isOpen={editModalIsVisible}
-                            onClose={() => {
-                                if (!editModalIsVisible) return;
-                                setEditModalIsVisible(false);
-                            }}
+                            onClose={() => setEditModalIsVisible(false)}
                         />
-                        <button
-                            className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                            onClick={() => setShowFilters(!showFilters)}
-                        >
-                            <FaFilter className="h-5 w-5 text-gray-600" />
-                            <span>Фильтр</span>
-                        </button>
+                        <Button
+                            label="Фильтр"
+                            icon={<FaFilter />}
+                            className="p-button-secondary"
+                            onClick={handleFilterToggle}
+                        />
                     </div>
                 </div>
+
                 {showFilters && (
                     <div
                         ref={filterRef}
@@ -138,43 +114,43 @@ export function Products({ title }) {
                             options={warehouses}
                             optionLabel="warehouseName"
                             placeholder="Склад"
-                            className="border-blue-500 w-fit border-2 rounded-lg focus:ring-2 focus:ring-blue-300"
                             showClear
                         />
                         <InputText
-                            className="border-blue-500 w-full rounded-lg p-2 border-2"
                             value={productSearch}
                             onChange={(e) => setProductSearch(e.target.value)}
                             placeholder="Поиск товара"
                         />
-                        <button
-                            className="text-red-500 text-xl ml-2"
-                            onClick={() => setShowFilters(false)}
-                        >
-                            <FaTimes />
-                        </button>
+                        <Button
+                            icon={<FaTimes />}
+                            className="p-button-danger"
+                            onClick={handleFilterToggle}
+                        />
                     </div>
                 )}
-
-                <div className="flex flex-wrap border-solid border-1 rounded-xl px-2 gap-1 w-full">
-                    <DataGrid
-                        autoHeight
-                        checkboxSelection
-                        rows={rows}
-                        columns={columns}
-                        getRowClassName={(params) =>
-                            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-                        }
-                        initialState={{
-                            pagination: { paginationModel: { pageSize: 20 } },
-                        }}
-                        pageSizeOptions={[10, 20, 50]}
-                        disableColumnResize
-                        onRowSelectionModelChange={handleSelectionChange}
-                        disableColumnMenu
-                    />
-                </div>
             </div>
+
+            <DataTable
+                value={products}
+                lazy
+                paginator
+                rows={lazyParams.rows}
+                totalRecords={totalRecords}
+                loading={loading}
+                onPage={handlePageChange}
+                dataKey="_id"
+                selection={selectedProducts}
+                onSelectionChange={(e) => setSelectedProducts(e.value)}
+                selectionMode="multiple"
+            >
+                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                <Column field="name" header="Название" />
+                <Column field="warehouse" header="Склад" />
+                <Column field="price" header="Цена" />
+                <Column field="currentStock" header="Остаток" />
+                <Column field="minStock" header="Мин. Остаток" />
+                <Column field="quantity" header="Количество" />
+            </DataTable>
         </div>
     );
 }
