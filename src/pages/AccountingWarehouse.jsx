@@ -50,7 +50,7 @@ const InternalTabs = () => {
             <div className="flex flex-col gap-3 justify-center">
                 <div className=" mb-10 p-2">
                     <SkladBoxStats />
-                    <Products title="Товар близок к мин остатку" />
+                    <Products title="Товар близок к мин остатку" filterExceedMinStock={true} />
                     <WriteOffs title="Не подтвержденные списания" writeOffs={writeOffs || []} />
                 </div>
             </div>

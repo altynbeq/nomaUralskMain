@@ -125,31 +125,31 @@ const App = () => {
         })();
     }, [setSubUserShifts, setSubUserTodayShifts, user, user?.id, user?.role]);
 
-    // useEffect(() => {
-    //     const fetchCompanyProductsAndWarehouses = async () => {
-    //         const companyId = isEmployee() ? user?.companyId : user?.id;
+    useEffect(() => {
+        const fetchCompanyProductsAndWarehouses = async () => {
+            const companyId = isEmployee() ? user?.companyId : user?.id;
 
-    //         if (!companyId) {
-    //             return;
-    //         }
+            if (!companyId) {
+                return;
+            }
 
-    //         try {
-    //             const response = await axiosInstance.get(`/companies/${companyId}`);
-    //             setProducts(response.data.products);
-    //             if (response.data.warehouses) {
-    //                 setWarehouses(
-    //                     response.data.warehouses.map((warehouseName, index) => ({
-    //                         warehouseName,
-    //                         id: index.toString(),
-    //                     })),
-    //                 );
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching company data:', error);
-    //         }
-    //     };
-    //     fetchCompanyProductsAndWarehouses();
-    // }, [isEmployee, setProducts, setWarehouses, user?.companyId, user?.id]);
+            try {
+                const response = await axiosInstance.get(`/companies/${companyId}`);
+                setProducts(response.data.products);
+                if (response.data.warehouses) {
+                    setWarehouses(
+                        response.data.warehouses.map((warehouseName, index) => ({
+                            warehouseName,
+                            id: index.toString(),
+                        })),
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching company data:', error);
+            }
+        };
+        fetchCompanyProductsAndWarehouses();
+    }, [isEmployee, setProducts, setWarehouses, user?.companyId, user?.id]);
 
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>

@@ -56,7 +56,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
             header="Редактирование товаров"
             visible={isOpen}
             onHide={onClose}
-            style={{ width: '25vw' }}
+            style={{ width: '30vw' }}
         >
             <div className="flex flex-col gap-4">
                 {/* Список товаров */}

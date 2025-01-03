@@ -9,7 +9,7 @@ import { useCompanyStore, useAuthStore } from '../../../store';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { axiosInstance } from '../../../api/axiosInstance';
 
-export function Products({ title }) {
+export function Products({ title, filterExceedMinStock }) {
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
     const warehouses = useCompanyStore((state) => state.warehouses);
 
@@ -31,7 +31,9 @@ export function Products({ title }) {
         setLoading(true);
         try {
             const response = await axiosInstance.get(
-                `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
+                filterExceedMinStock
+                    ? `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}&exceedMinStock=true`
+                    : `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
             );
             setProducts(response.data.products);
             setTotalRecords(response.data.total);
@@ -40,7 +42,7 @@ export function Products({ title }) {
         } finally {
             setLoading(false);
         }
-    }, [clientId, lazyParams.page, lazyParams.rows, productSearch]);
+    }, [clientId, filterExceedMinStock, lazyParams.page, lazyParams.rows, productSearch]);
 
     useEffect(() => {
         fetchProducts();
