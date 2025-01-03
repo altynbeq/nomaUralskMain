@@ -97,6 +97,10 @@ body {
     color: black !important;
 }
 
+.p-datatable .p-datatable-loading-overlay {
+    background-color: rgba(255, 255, 255, 0.8); /* Или любой другой цвет */
+}
+
 .progress-container {
     position: relative;
     width: 100%;

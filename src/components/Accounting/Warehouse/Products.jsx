@@ -149,9 +149,7 @@ export function Products({ title }) {
                 rows={lazyParams.rows}
                 totalRecords={totalRecords}
                 loading={loading}
-                // При переходе на другую страницу или смене кол-ва строк срабатывает handlePageChange
                 onPage={handlePageChange}
-                // Переключение количества строк доступно через rowsPerPageOptions
                 rowsPerPageOptions={[10, 20, 50, 100]}
                 dataKey="_id"
                 selection={selectedProducts}
