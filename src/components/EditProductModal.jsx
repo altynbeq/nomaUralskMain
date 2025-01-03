@@ -3,6 +3,7 @@ import { MoreEditProductModal } from '../components/MoreEditProductModal';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+import { Button } from 'primereact/button';
 
 export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -44,7 +45,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                         <div key={index} className="relative flex items-center">
                             <input
                                 type="text"
-                                value={item['НоменклатураНаименование']}
+                                value={item.name}
                                 readOnly
                                 className="border border-gray-300 rounded-md p-4 w-full pr-10"
                             />
@@ -65,15 +66,12 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
 
                 {/* Buttons */}
                 <div className="flex justify-between mt-6">
-                    <button
+                    <Button
                         onClick={() => handleTransferClick()}
-                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full flex justify-center"
                     >
                         Перенести
-                    </button>
-                    <button className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                        Сохранить
-                    </button>
+                    </Button>
                 </div>
 
                 <Dialog
@@ -131,9 +129,9 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                             className=" text-gray-700 rounded-md border-2 focus:ring-2 focus:ring-blue-300 p-2"
                         />
 
-                        <button className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 w-full ">
+                        <Button className="px-6 py-2 ц bg-green-500 text-white rounded-lg hover:bg-green-600 w-full ">
                             Перенести
-                        </button>
+                        </Button>
                     </div>
                 </Dialog>
             </div>

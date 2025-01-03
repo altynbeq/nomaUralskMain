@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { axiosInstance } from '../api/axiosInstance';
 import { useAuthStore } from '../store/authStore';
+import { toast } from 'react-toastify';
+import { Button } from 'primereact/button';
 
 export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
     const [currentStock, setCurrentStock] = useState(product?.currentStock || 0);
     const [minStock, setMinStock] = useState(product?.minStock || 0);
-    const [productData, setProductData] = useState({
-        НоменклатураНаименование: '',
-        Количество: 0,
-    });
+    const [productData, setProductData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setProductData(product);
@@ -17,13 +17,21 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
 
     if (!isOpen) return null;
 
-    const handleSave = () => {
-        // const updatedProduct = {
-        //     ...product,
-        //     currentStock,
-        //     minStock,
-        // };
-        axiosInstance.put(`/companies/products/${clientId}/${product._id}`, productData);
+    const handleSave = async () => {
+        setIsLoading(true);
+        try {
+            const response = axiosInstance.put(
+                `/companies/products/${clientId}/${product._id}`,
+                productData,
+            );
+            if (response.status === 200) {
+                toast.success('Вы успешно обновили товар');
+            }
+        } catch (error) {
+            toast.error(error);
+        } finally {
+            setIsLoading(false);
+        }
         onClose();
     };
 
@@ -58,8 +66,8 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                     <input
                         type="text"
                         id="productName"
-                        value={productData.НоменклатураНаименование}
-                        onChange={(e) => onChange(e, 'НоменклатураНаименование')}
+                        value={productData.name}
+                        onChange={(e) => onChange(e, 'name')}
                         className="border border-gray-300 rounded-md p-2 w-full"
                     />
                 </div>
@@ -103,19 +111,20 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                     <input
                         type="text"
                         id="arrival"
-                        value={productData.Количество}
-                        onChange={(e) => onChange(e, 'Количество')}
+                        value={productData.quantity}
+                        onChange={(e) => onChange(e, 'quantity')}
                         className="border border-gray-300 rounded-md p-2 w-full"
                     />
                 </div>
 
                 {/* Save Button */}
-                <button
+                <Button
+                    disabled={isLoading}
                     onClick={handleSave}
-                    className="w-full mt-4 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+                    className="w-full mt-4 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 flex justify-center"
                 >
                     Сохранить
-                </button>
+                </Button>
             </div>
         </div>
     );
