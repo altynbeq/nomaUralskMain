@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import ListOfExpenses from '../components/Accounting/Warehouse/ListOfExpenses';
-import CollapsibleTable from '../components/Accounting/Warehouse/CollapsibleTable';
+import { Products } from '../components/Accounting/Warehouse/Products';
+import { WriteOffs } from '../components/Accounting/Warehouse/WriteOffs';
 import { Loader } from '../components/Loader';
 import { axiosInstance } from '../api/axiosInstance';
 import { useAuthStore } from '../store/authStore';
@@ -14,23 +14,24 @@ import CurrentActions from '../components/Accounting/Warehouse/CurrentActions';
 import WriteoffsForApproval from '../components/Accounting/Warehouse/WriteoffsForApproval';
 
 const InternalTabs = () => {
-    const clientId = useAuthStore((state) => state.user.id);
+    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
     const [isLoading, setIsLoading] = useState(false);
     const [writeOffs, setWriteOffs] = useState([]);
 
     useEffect(() => {
-        setIsLoading(true);
         const fetchWriteOffs = async (clientId) => {
+            setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
+                console.log(response.data.writeOffs);
                 setWriteOffs(response.data.writeOffs);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
+                return [];
             } finally {
                 setIsLoading(false);
             }
         };
-
         if (clientId) {
             fetchWriteOffs(clientId);
         }
@@ -50,19 +51,16 @@ const InternalTabs = () => {
             <div className="flex flex-col gap-3 justify-center">
                 <div className=" mb-10 p-2">
                     <SkladBoxStats />
-                    <ListOfExpenses title="Товар близок к мин остатку" />
-                    <CollapsibleTable
-                        title="Не подтвержденные списания"
-                        writeOffs={writeOffs || []}
-                    />
+                    <Products title="Товар близок к мин остатку" />
+                    <WriteOffs title="Не подтвержденные списания" writeOffs={writeOffs || []} />
                 </div>
             </div>
         ),
         items: (
             <div className="flex flex-col gap-3 justify-center">
                 <div className=" mb-10 p-2">
-                    <ListOfExpenses />
-                    <CollapsibleTable />
+                    <Products />
+                    <WriteOffs writeOffs={writeOffs || []} />
                 </div>
             </div>
         ),

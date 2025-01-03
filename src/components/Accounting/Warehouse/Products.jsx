@@ -3,12 +3,12 @@ import { DataGrid } from '@mui/x-data-grid';
 import { columns } from './ListOfExpensesData';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { EditProductModal } from '../../../components/EditProductModal';
+import { EditProductModal } from '../../EditProductModal';
 import { useCompanyStore } from '../../../store';
 import { MdEdit } from 'react-icons/md';
 import { FaFilter, FaTimes, FaExclamationTriangle, FaAngleDown, FaAngleUp } from 'react-icons/fa';
 
-export default function ListOfExpenses({ title }) {
+export function Products({ title }) {
     const warehouses = useCompanyStore((state) => state.warehouses);
     const products = useCompanyStore((state) => state.products);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
@@ -88,9 +88,9 @@ export default function ListOfExpenses({ title }) {
         <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%]  rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
-                    <p className="flex text-[1rem] font-semibold align-left">
+                    <div className="flex text-[1rem] font-semibold align-left">
                         {title ? (
-                            title
+                            <p>{title}</p>
                         ) : (
                             <div className="flex flex-row justify-between">
                                 <div className="flex mb-4 flex-row gap-2">
@@ -106,7 +106,7 @@ export default function ListOfExpenses({ title }) {
                                 </div>
                             </div>
                         )}
-                    </p>
+                    </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <button
                             className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 flex items-center gap-2"

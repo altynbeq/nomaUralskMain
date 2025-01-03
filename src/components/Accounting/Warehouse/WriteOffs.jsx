@@ -6,7 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { formatDate } from '../../../methods/dataFormatter';
 import { FaSearch, FaRegCalendarAlt, FaFilter } from 'react-icons/fa';
 
-export default function CollapsibleTableWithDetails({ title, writeOffs }) {
+export function WriteOffs({ title, writeOffs }) {
     const [groupedWriteOffs, setGroupedWriteOffs] = useState([]);
     const [expandedRows, setExpandedRows] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
