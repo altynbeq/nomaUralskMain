@@ -1,21 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { axiosInstance } from '../api/axiosInstance';
+import { useAuthStore } from '../store/authStore';
 
 export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
+    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
     const [currentStock, setCurrentStock] = useState(product?.currentStock || 0);
     const [minStock, setMinStock] = useState(product?.minStock || 0);
-    const [arrival, setArrival] = useState('');
+    const [productData, setProductData] = useState({
+        НоменклатураНаименование: '',
+        Количество: 0,
+    });
+
+    useEffect(() => {
+        setProductData(product);
+    }, [product]);
 
     if (!isOpen) return null;
 
     const handleSave = () => {
-        const updatedProduct = {
-            ...product,
-            currentStock,
-            minStock,
-            arrival,
-        };
-        console.log('Updated product:', updatedProduct);
+        // const updatedProduct = {
+        //     ...product,
+        //     currentStock,
+        //     minStock,
+        // };
+        axiosInstance.put(`/companies/products/${clientId}/${product._id}`, productData);
         onClose();
+    };
+
+    const onChange = (e, field) => {
+        setProductData((prev) => {
+            return {
+                ...prev,
+                [field]: e.target.value,
+            };
+        });
     };
 
     return (
@@ -40,8 +58,8 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                     <input
                         type="text"
                         id="productName"
-                        value={product?.name || ''}
-                        readOnly
+                        value={productData.НоменклатураНаименование}
+                        onChange={(e) => onChange(e, 'НоменклатураНаименование')}
                         className="border border-gray-300 rounded-md p-2 w-full"
                     />
                 </div>
@@ -80,13 +98,13 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                 {/* Arrival */}
                 <div className="mb-4">
                     <label htmlFor="arrival" className="block text-gray-700 font-medium mb-2">
-                        Приход
+                        Количество
                     </label>
                     <input
                         type="text"
                         id="arrival"
-                        value={arrival}
-                        onChange={(e) => setArrival(e.target.value)}
+                        value={productData.Количество}
+                        onChange={(e) => onChange(e, 'Количество')}
                         className="border border-gray-300 rounded-md p-2 w-full"
                     />
                 </div>

@@ -54,12 +54,13 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                             >
                                 ✎
                             </button>
+                            <MoreEditProductModal
+                                product={item}
+                                onClose={moreEditModalClick}
+                                isOpen={isMoreEditModalOpen}
+                            />
                         </div>
                     ))}
-                    <MoreEditProductModal
-                        onClose={moreEditModalClick}
-                        isOpen={isMoreEditModalOpen}
-                    />
                 </div>
 
                 {/* Buttons */}
