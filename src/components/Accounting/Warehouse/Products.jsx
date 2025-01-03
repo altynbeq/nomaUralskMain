@@ -26,10 +26,9 @@ export function Products({ title }) {
 
     const rows = filteredProducts.map((product, index) => ({
         id: product._id || index,
-        НоменклатураНаименование: product.НоменклатураНаименование,
-        status: 'Online',
-        users: Math.floor(Math.random() * 1000),
-        eventCount: Math.floor(Math.random() * 500),
+        name: product.НоменклатураНаименование,
+        count: product.Количество,
+        price: `${product.Цена}₸`,
         viewsPerUser: Math.floor(Math.random() * 50),
         averageTime: Math.floor(Math.random() * 50),
         conversions: null,
