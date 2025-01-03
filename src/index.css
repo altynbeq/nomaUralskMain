@@ -92,6 +92,11 @@ body {
     width: 100%;
 }
 
+.p-checkbox-box {
+    background-color: rgb(30, 64, 175) !important;
+    color: black !important;
+}
+
 .progress-container {
     position: relative;
     width: 100%;

@@ -12,10 +12,14 @@ import { axiosInstance } from '../../../api/axiosInstance';
 export function Products({ title }) {
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
     const warehouses = useCompanyStore((state) => state.warehouses);
+
     const [products, setProducts] = useState([]);
     const [totalRecords, setTotalRecords] = useState(0);
+
+    // page: текущая страница (начиная с 1), rows: количество записей на странице
     const [lazyParams, setLazyParams] = useState({ page: 1, rows: 20 });
     const [loading, setLoading] = useState(false);
+
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [productSearch, setProductSearch] = useState('');
@@ -42,8 +46,14 @@ export function Products({ title }) {
         fetchProducts();
     }, [fetchProducts, lazyParams, productSearch]);
 
+    // Событие при переключении страницы или изменении количества строк
     const handlePageChange = (event) => {
-        setLazyParams({ ...lazyParams, page: event.page + 1 });
+        setLazyParams({
+            ...lazyParams,
+            // PrimeReact использует 0-based нумерацию страниц, поэтому добавляем +1
+            page: event.page + 1,
+            rows: event.rows,
+        });
     };
 
     const handleFilterToggle = () => {
@@ -62,7 +72,6 @@ export function Products({ title }) {
         } else {
             document.removeEventListener('mousedown', handleOutsideClick);
         }
-
         return () => {
             document.removeEventListener('mousedown', handleOutsideClick);
         };
@@ -132,18 +141,24 @@ export function Products({ title }) {
 
             <DataTable
                 value={products}
+                // Включаем режим "ленивой" загрузки (server-side pagination)
                 lazy
                 paginator
+                // Указываем смещение (first) и общее число записей
+                first={(lazyParams.page - 1) * lazyParams.rows}
                 rows={lazyParams.rows}
                 totalRecords={totalRecords}
                 loading={loading}
+                // При переходе на другую страницу или смене кол-ва строк срабатывает handlePageChange
                 onPage={handlePageChange}
+                // Переключение количества строк доступно через rowsPerPageOptions
+                rowsPerPageOptions={[10, 20, 50, 100]}
                 dataKey="_id"
                 selection={selectedProducts}
                 onSelectionChange={(e) => setSelectedProducts(e.value)}
                 selectionMode="multiple"
             >
-                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                 <Column field="name" header="Название" />
                 <Column field="warehouse" header="Склад" />
                 <Column field="price" header="Цена" />
