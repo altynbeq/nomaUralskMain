@@ -53,14 +53,14 @@ export const columns = [
         flex: 0.5,
         minWidth: 100,
     },
-    // {
-    //     field: 'warehouse',
-    //     headerName: 'Остаток',
-    //     headerAlign: 'center',
-    //     align: 'center',
-    //     flex: 0.5,
-    //     minWidth: 100,
-    // },
+    {
+        field: 'quantity',
+        headerName: 'Количество',
+        headerAlign: 'center',
+        align: 'center',
+        flex: 0.5,
+        minWidth: 100,
+    },
     {
         field: 'currentStock',
         headerName: 'Остаток',
@@ -77,14 +77,6 @@ export const columns = [
         flex: 0.5,
         minWidth: 120,
     },
-    // {
-    //     field: 'expiredDate',
-    //     headerName: 'Срок годности',
-    //     headerAlign: 'center',
-    //     align: 'center',
-    //     flex: 0.5,
-    //     minWidth: 100,
-    // },
     // {
     //     field: 'category',
     //     headerName: 'Категория',
