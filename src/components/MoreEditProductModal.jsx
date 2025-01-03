@@ -69,7 +69,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
             <div className="p-fluid">
                 {/* Название товара */}
                 <div className="field">
-                    <label htmlFor="productName">Название товара</label>
+                    <label htmlFor="productName text-xs">Название товара</label>
                     <InputText
                         placeholder="Название товара"
                         id="productName"
@@ -80,41 +80,56 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                 </div>
 
                 {/* Остаток и минимальный остаток */}
-                <div className="field grid">
+                <div className="field grid mt-5">
                     <div className="col">
-                        <label htmlFor="currentStock">Остаток</label>
+                        <label htmlFor="price text-xs">Цена</label>
+                        <InputNumber
+                            id="price"
+                            className="border-2 rounded-md p-2"
+                            value={productData.price || 0}
+                            onValueChange={(e) => onChange(e, 'price')}
+                            mode="decimal"
+                            min={0}
+                            useGrouping={false}
+                        />
+                    </div>
+                    <div className="col mt-5">
+                        <label htmlFor="currentStock text-xs">Остаток</label>
                         <InputNumber
                             id="currentStock"
                             className="border-2 rounded-md p-2"
                             value={productData.currentStock || 0}
                             onValueChange={(e) => onChange(e, 'currentStock')}
                             mode="decimal"
-                            showButtons
+                            min={0}
+                            useGrouping={false}
                         />
                     </div>
-                    <div className="col">
-                        <label htmlFor="minStock">Мин. Остаток</label>
+                    <div className="col mt-5">
+                        <label htmlFor="minStock text-xs">Мин. Остаток</label>
                         <InputNumber
                             className="border-2 rounded-md p-2"
                             id="minStock"
                             value={productData.minStock || 0}
                             onValueChange={(e) => onChange(e, 'minStock')}
                             mode="decimal"
-                            showButtons
+                            min={0}
+                            useGrouping={false}
                         />
                     </div>
                 </div>
 
                 {/* Количество */}
-                <div className="field">
-                    <label htmlFor="quantity">Количество</label>
+                <div className="field mt-5">
+                    <label htmlFor="quantity text-xs">Количество</label>
                     <InputNumber
+                        mode="decimal"
+                        min={0}
+                        useGrouping={false}
                         className="border-2 rounded-md p-2"
                         id="quantity"
                         value={productData.quantity || 0}
                         onValueChange={(e) => onChange(e, 'quantity')}
-                        mode="decimal"
-                        showButtons
                     />
                 </div>
             </div>
