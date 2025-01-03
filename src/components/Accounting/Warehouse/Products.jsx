@@ -26,12 +26,9 @@ export function Products({ title }) {
 
     const rows = filteredProducts.map((product, index) => ({
         id: product._id || index,
-        name: product.НоменклатураНаименование,
-        count: product.Количество,
-        price: `${product.Цена}₸`,
-        viewsPerUser: Math.floor(Math.random() * 50),
-        averageTime: Math.floor(Math.random() * 50),
-        conversions: null,
+        name: product.name,
+        warehuse: product.warehouse,
+        price: `${product.price}₸`,
     }));
 
     const handleSelectionChange = (ids) => {
@@ -44,7 +41,7 @@ export function Products({ title }) {
     useEffect(() => {
         if (products?.length) {
             const filtered = products.filter((product) => {
-                const matchesProductSearch = product.НоменклатураНаименование
+                const matchesProductSearch = product.name
                     .toLowerCase()
                     .includes(productSearch.toLowerCase());
 
@@ -171,33 +168,7 @@ export function Products({ title }) {
                         pageSizeOptions={[10, 20, 50]}
                         disableColumnResize
                         onRowSelectionModelChange={handleSelectionChange}
-                        density="compact"
-                        slotProps={{
-                            filterPanel: {
-                                filterFormProps: {
-                                    logicOperatorInputProps: {
-                                        variant: 'outlined',
-                                        size: 'small',
-                                    },
-                                    columnInputProps: {
-                                        variant: 'outlined',
-                                        size: 'small',
-                                        sx: { mt: 'auto' },
-                                    },
-                                    operatorInputProps: {
-                                        variant: 'outlined',
-                                        size: 'small',
-                                        sx: { mt: 'auto' },
-                                    },
-                                    valueInputProps: {
-                                        InputComponentProps: {
-                                            variant: 'outlined',
-                                            size: 'small',
-                                        },
-                                    },
-                                },
-                            },
-                        }}
+                        disableColumnMenu
                     />
                 </div>
             </div>
