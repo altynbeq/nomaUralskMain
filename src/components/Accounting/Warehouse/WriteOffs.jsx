@@ -29,9 +29,7 @@ export function WriteOffs({ title, writeOffs }) {
 
             if (searchQuery) {
                 filteredWriteOffs = filteredWriteOffs.filter((writeOff) =>
-                    writeOff.productName.НоменклатураНаименование
-                        ?.toLowerCase()
-                        .includes(searchQuery.toLowerCase()),
+                    writeOff.product.name?.toLowerCase().includes(searchQuery.toLowerCase()),
                 );
             }
 
@@ -42,7 +40,7 @@ export function WriteOffs({ title, writeOffs }) {
                     groupedData[date] = { date, writeOffs: [], totalSum: 0, totalQuantity: 0 };
                 }
                 groupedData[date].writeOffs.push(writeOff);
-                groupedData[date].totalSum += writeOff.productName.Сумма;
+                groupedData[date].totalSum += writeOff.product.name;
                 groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
             });
 
@@ -67,10 +65,7 @@ export function WriteOffs({ title, writeOffs }) {
                     paginator
                     rows={5}
                 >
-                    <Column
-                        field="productName.НоменклатураНаименование"
-                        header="Наименование товара"
-                    />
+                    <Column field="product.name" header="Наименование товара" />
                     <Column field="quantity" header="Количество" />
                     <Column field="productName.Сумма" header="Сумма" />
                     <Column
