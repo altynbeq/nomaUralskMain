@@ -99,7 +99,11 @@ export function Products({ title, filterExceedMinStock }) {
                         <CardTitle>{title}</CardTitle>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
-                        <Button label="Редактировать" onClick={handleEditClick} />
+                        <Button
+                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                            label="Редактировать"
+                            onClick={handleEditClick}
+                        />
                         <EditProductModal
                             items={selectedProducts}
                             isOpen={editModalIsVisible}
@@ -109,7 +113,7 @@ export function Products({ title, filterExceedMinStock }) {
                         <Button
                             label="Фильтр"
                             icon={<FaFilter />}
-                            className="p-button-secondary"
+                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                             onClick={handleFilterToggle}
                         />
                     </div>
