@@ -8,6 +8,7 @@ import { EditProductModal } from '../../EditProductModal';
 import { useCompanyStore, useAuthStore } from '../../../store';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { axiosInstance } from '../../../api/axiosInstance';
+import { toast } from 'react-toastify';
 
 export function Products({ title, filterExceedMinStock }) {
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
@@ -85,7 +86,7 @@ export function Products({ title, filterExceedMinStock }) {
 
     const handleEditClick = () => {
         if (selectedProducts.length === 0) {
-            alert('Пожалуйста, выберите товар для редактирования.');
+            toast.error('Пожалуйста, выберите товар для редактирования.');
             return;
         }
         setEditModalIsVisible(true);
