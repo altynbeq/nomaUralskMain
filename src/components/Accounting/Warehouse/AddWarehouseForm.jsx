@@ -46,9 +46,7 @@ export const AddWarehouseForm = ({
     // Функция для поиска товаров
     const searchProducts = (event) => {
         const query = event.query.toLowerCase();
-        const filtered = products?.filter((product) =>
-            product.НоменклатураНаименование.toLowerCase().includes(query),
-        );
+        const filtered = products?.filter((product) => product.name.toLowerCase().includes(query));
         setFilteredProducts(filtered);
     };
 
@@ -58,15 +56,15 @@ export const AddWarehouseForm = ({
                 <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-medium">Название товара</label>
                     <AutoComplete
-                        value={formData.productName}
-                        onChange={(e) => handleDropdownChange(e.value, 'productName')}
+                        value={formData.product}
+                        onChange={(e) => handleDropdownChange(e.value, 'product')}
                         suggestions={filteredProducts}
                         completeMethod={searchProducts}
-                        field="НоменклатураНаименование"
+                        field="name"
                         placeholder="Поиск товара"
-                        className={`border-blue-500 border-2 min-w-[100%] outline-none rounded-lg p-2   max-w-[250px] ${errors.productName ? 'border-red-500' : ''}`}
+                        className={`border-blue-500 border-2 min-w-[100%] outline-none rounded-lg p-2   max-w-[250px] ${errors.product ? 'border-red-500' : ''}`}
                     />
-                    {errors.productName && <small className="p-error">{errors.productName}</small>}
+                    {errors.product && <small className="p-error">{errors.product}</small>}
                 </div>
 
                 <div className="space-y-2 flex flex-col">

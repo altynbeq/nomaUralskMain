@@ -4,16 +4,14 @@ import { MdInsertDriveFile, MdPieChart, MdDescription } from 'react-icons/md';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
-import { useIsSmallScreen } from '../../../methods/useIsSmallScreen';
 import AlertModal from '../../AlertModal';
 import { useAuthStore } from '../../../store';
 
 export const AddWarehouse = () => {
     const user = useAuthStore((state) => state.user);
-    const isSmallScreen = useIsSmallScreen(768);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
-        productName: '',
+        product: null,
         date: new Date(),
         organization: '',
         responsible: user?.name,
@@ -56,7 +54,7 @@ export const AddWarehouse = () => {
 
     const validate = useCallback(() => {
         const newErrors = {};
-        if (!formData.productName) newErrors.productName = 'Название товара обязательно';
+        if (!formData.product) newErrors.product = 'Название товара обязательно';
         // if (!formData.date) newErrors.date = 'Дата обязательна';
         if (!formData.organization) newErrors.organization = 'Организация обязательна';
         if (!formData.responsible) newErrors.responsible = 'Ответственный обязателен';
@@ -73,7 +71,7 @@ export const AddWarehouse = () => {
     }, [
         formData.file,
         formData.organization,
-        formData.productName,
+        formData.product,
         formData.quantity,
         formData.reason,
         formData.responsible,
@@ -87,7 +85,7 @@ export const AddWarehouse = () => {
                 const submissionData = new FormData();
 
                 // Сериализация вложенных объектов
-                submissionData.append('productName', JSON.stringify(formData.productName));
+                submissionData.append('product', JSON.stringify(formData.product));
                 submissionData.append('date', new Date().toISOString());
                 submissionData.append('organization', JSON.stringify(formData.organization));
                 submissionData.append(
@@ -121,7 +119,7 @@ export const AddWarehouse = () => {
                         setIsModalOpen(false);
                         setShowAlertModal(true);
                         setFormData({
-                            productName: null,
+                            product: null,
                             date: null,
                             organization: null,
                             responsible: null,
@@ -143,7 +141,7 @@ export const AddWarehouse = () => {
         },
         [
             validate,
-            formData.productName,
+            formData.product,
             formData.organization,
             formData.responsible,
             formData.warehouse,
