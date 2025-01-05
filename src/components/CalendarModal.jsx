@@ -30,7 +30,7 @@ export const CalendarModal = ({ isOpen, onClose, selectedDay, selectedShifts }) 
 
     const getDurationText = (shift) => {
         const durationText =
-            shift.shiftDuration > 0
+            shift.shiftDuration.hours > 0
                 ? `${shift.shiftDuration.hours} ч ${shift.shiftDuration.minutes > 0 ? `${shift.shiftDuration.minutes} мин` : ''}`
                 : `${shift.shiftDuration.minutes} мин`;
 

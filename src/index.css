@@ -92,6 +92,15 @@ body {
     width: 100%;
 }
 
+.p-checkbox-box {
+    background-color: rgb(30, 64, 175) !important;
+    color: black !important;
+}
+
+.p-datatable .p-datatable-loading-overlay {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
 .progress-container {
     position: relative;
     width: 100%;

@@ -33,6 +33,13 @@ export const CalendarTable = memo(
                     finalClass = 'bg-red-500';
                     break;
 
+                case 'split-no-late-incomplete': // Новый тип
+                    // Левая часть зеленая (#22c55e), правая красная (#ef4444)
+                    style = {
+                        background: 'linear-gradient(to right, #22c55e 50%, #ef4444 50%)',
+                    };
+                    break;
+
                 case 'noStartEnd':
                     // full color = primaryLight
                     finalClass = 'bg-blue-500';
@@ -71,6 +78,8 @@ export const CalendarTable = memo(
                     return 'Опоздание или неполная смена';
                 case 'split-green-red':
                     return 'Отработана частично и с опозданием';
+                case 'split-no-late-incomplete':
+                    return 'Не опоздал и не отработал всю смену';
                 case 'gray':
                     return 'Нет смены';
                 case 'blue':

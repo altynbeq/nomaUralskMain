@@ -220,11 +220,15 @@ export const EditBulkMode = ({
             };
         });
 
+        // Собираем ID обновляемых смен
+        const excludedShiftIds = editedShifts.map((shift) => shift.id);
+
         const checkResponse = await axiosInstance.post('/shifts/check-conflicts', {
             shifts: shiftsForCheck,
+            excludedShiftIds, // Передаём ID смен для исключения
         });
 
-        return checkResponse.data.conflict ? shiftsForCheck : null;
+        return checkResponse.data.conflict ? checkResponse.data.conflictsList : null;
     };
 
     const updateShifts = async (editedShifts) => {
@@ -433,7 +437,7 @@ export const EditBulkMode = ({
             };
 
             const response = await axiosInstance.put(
-                `/shifts/update-scan-time/${shift.id}`,
+                `/shifts/editing/update-scan-time/${shift.id}`,
                 payload,
             );
             const updatedShift = response.data;
@@ -464,7 +468,7 @@ export const EditBulkMode = ({
             };
 
             const response = await axiosInstance.put(
-                `/shifts/update-end-scan-time/${shift.id}`,
+                `/shifts/editing/update-end-scan-time/${shift.id}`,
                 payload,
             );
             const updatedShift = response.data;

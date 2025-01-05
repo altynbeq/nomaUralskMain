@@ -49,29 +49,17 @@ export const CheckInCheckOutModal = memo(
                 const payload =
                     type === 'checkIn'
                         ? {
-                              subUserId:
-                                  typeof shift.subUserId === 'string'
-                                      ? shift.subUserId
-                                      : shift.subUserId._id,
-                              startTime: shift.startTime,
-                              endTime: shift.endTime,
-                              selectedStore: shift.selectedStore._id,
                               scanTime: date,
-                              endScanTime: shift.endScanTime,
                           }
                         : {
-                              subUserId:
-                                  typeof shift.subUserId === 'string'
-                                      ? shift.subUserId
-                                      : shift.subUserId._id,
                               endScanTime: date,
-                              startTime: shift.startTime,
-                              endTime: shift.endTime,
-                              selectedStore: shift.selectedStore._id,
-                              scanTime: shift.scanTime,
                           };
 
-                const response = await axiosInstance.put(`/shifts/${shift._id}`, payload);
+                const url =
+                    type === 'checkIn'
+                        ? `shifts/editing/update-scan-time/${shift.id}`
+                        : `shifts/editing/update-end-scan-time/${shift.id}`;
+                const response = await axiosInstance.put(url, payload);
                 const updatedShift = response.data;
                 if (onUpdate) {
                     onUpdate(updatedShift);
@@ -89,6 +77,7 @@ export const CheckInCheckOutModal = memo(
 
         const handleTimeChange = (e) => {
             const newTime = e.value;
+            if (!newTime) return;
             const updatedDate = new Date(date);
             updatedDate.setHours(newTime.getHours(), newTime.getMinutes(), 0, 0);
             setDate(updatedDate);
