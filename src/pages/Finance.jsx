@@ -13,6 +13,12 @@ import CarouselCard from '../components/demo/Slider';
 import { FinanceShare } from '../data/MainDataSource';
 import { Navigate } from 'react-router-dom';
 import { useCompanyStore } from '../store/companyStore';
+import GeneralExpenses from '../components/Finance/Expenses/GeneralExpenses';
+import OperationalMetrics from '../components/Finance/Expenses/OperationalExpenses';
+import COGS from '../components/Finance/Expenses/COGS';
+import AdminExpenses from '../components/Finance/Expenses/AdminExpenses';
+import WorkerExpenses from '../components/Finance/Expenses/WorkerExpenses';
+import MarketingSalesExpenses from '../components/Finance/Expenses/MarketingSalesExpenses';
 
 function convertUrl(apiUrl) {
     // Replace the base URL with '/api'
@@ -137,9 +143,25 @@ const InternalTabs = ({ urls }) => {
             </div>
         ),
         expenses: (
-            <div>
-                <h2 className="text-2xl font-bold mb-4">Затраты</h2>
-                <p className="text-gray-700">Здесь будет отображаться информация о затратах.</p>
+            <div className="flex w-[100%] flex-col gap-5  justify-center ">
+                <div className="flex min-w-[100%] mb-5 align-center gap-4 flex-wrap md:flex-row justify-center">
+                    <GeneralExpenses />
+                </div>
+                <div className="flex w-[100%]  align-center gap-4 flex-wrap md:flex-row justify-center">
+                    <OperationalMetrics />
+                </div>
+                <div>
+                    <COGS />
+                </div>
+                <div>
+                    <AdminExpenses />
+                </div>
+                <div>
+                    <WorkerExpenses />
+                </div>
+                <div>
+                    <MarketingSalesExpenses />
+                </div>
             </div>
         ),
     };

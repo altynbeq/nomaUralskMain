@@ -21,6 +21,7 @@ const LogInForm = lazy(() => import('./pages/LogInForm'));
 const Shifts = lazy(() => import('./pages/Shifts'));
 const AccountingWarehouse = lazy(() => import('./pages/AccountingWarehouse'));
 const AccountingWorkers = lazy(() => import('./pages/AccountingWorkers'));
+const AccountingExpenses = lazy(() => import('./pages/AccountingExpenses'));
 
 export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
     const user = useAuthStore((state) => state.user);
@@ -162,6 +163,10 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                                     element={<AccountingWarehouse />}
                                 />
                                 <Route path="/accounting-workers" element={<AccountingWorkers />} />
+                                <Route
+                                    path="/accounting-expenses"
+                                    element={<AccountingExpenses />}
+                                />
                             </>
                         ) : (
                             <>
@@ -227,6 +232,16 @@ export const MainContent = ({ urls, activeMenu, subUserTodayShifts }) => {
                                     element={
                                         user?.access?.DataManagement ? (
                                             <AccountingWorkers />
+                                        ) : (
+                                            <NoAccess />
+                                        )
+                                    }
+                                />
+                                <Route
+                                    path="/accounting-expenses"
+                                    element={
+                                        user?.access?.DataManagement ? (
+                                            <AccountingExpenses />
                                         ) : (
                                             <NoAccess />
                                         )
