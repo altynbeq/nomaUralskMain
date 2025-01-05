@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CalendarModal } from '../CalendarModal';
 import { getCurrentMonthYear } from '../../methods/getCurrentMonthYear';
-import { useSubUserStore } from '../../store/index';
+import { useSubUserStore, useAuthStore } from '../../store/index';
 import avatar from '../../data/avatar.jpg';
 import { DateTime } from 'luxon';
 import { socket } from '../../socket';
@@ -14,6 +14,7 @@ export const SubUserCalendar = () => {
     const [selectedShifts, setSelectedShifts] = useState([]);
     const subUsersShifts = useSubUserStore((state) => state.shifts);
     const subUserImage = useSubUserStore((state) => state.subUser?.image);
+    const subUserId = useAuthStore((state) => state.user?.id); // Получаем ID под-пользователя
 
     const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -68,32 +69,45 @@ export const SubUserCalendar = () => {
     const currentMonth = currentDate.month - 1;
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
 
-    const handleSocketShiftUpdate = useCallback((updatedShift) => {
-        setSelectedShifts((prevShifts) => {
-            const updatedShifts = prevShifts.map((shift) =>
-                shift._id === updatedShift._id ? { ...shift, ...updatedShift } : shift,
-            );
-            return updatedShifts;
-        });
+    // Обработчик для обновления существующей смены
+    const handleSocketShiftUpdate = useCallback(
+        (updatedShift) => {
+            // Проверяем, принадлежит ли смена текущему под-пользователю
+            if (updatedShift.subUserId.id !== subUserId) return;
 
-        useSubUserStore.setState((state) => {
-            const updatedShifts = state.shifts.map((shift) =>
-                shift._id === updatedShift._id ? { ...shift, ...updatedShift } : shift,
-            );
-            return { shifts: updatedShifts };
-        });
-    }, []);
+            setSelectedShifts((prevShifts) => {
+                const updatedShifts = prevShifts.map((shift) =>
+                    shift._id === updatedShift._id ? { ...shift, ...updatedShift } : shift,
+                );
+                return updatedShifts;
+            });
 
+            useSubUserStore.setState((state) => {
+                const updatedShifts = state.shifts.map((shift) =>
+                    shift._id === updatedShift._id ? { ...shift, ...updatedShift } : shift,
+                );
+                return { shifts: updatedShifts };
+            });
+        },
+        [subUserId],
+    );
+
+    // Обработчик для добавления новых смен
     const handleSocketNewShifts = useCallback(
         (newShifts) => {
-            setSelectedShifts((prevShifts) => {
-                if (!Array.isArray(newShifts)) return prevShifts;
+            // Фильтруем только те смены, которые относятся к текущему под-пользователю
+            const filteredNewShifts = Array.isArray(newShifts)
+                ? newShifts.filter((shift) => shift.subUserId.id === subUserId)
+                : [];
 
+            if (filteredNewShifts.length === 0) return;
+
+            setSelectedShifts((prevShifts) => {
                 const selectedDate = selectedDay
                     ? DateTime.fromJSDate(selectedDay).toFormat('yyyy-MM-dd')
                     : null;
 
-                const newShiftsForSelectedDay = newShifts.filter((newShift) => {
+                const newShiftsForSelectedDay = filteredNewShifts.filter((newShift) => {
                     const shiftDate = DateTime.fromISO(newShift.startTime).toFormat('yyyy-MM-dd');
                     return shiftDate === selectedDate;
                 });
@@ -108,9 +122,7 @@ export const SubUserCalendar = () => {
             });
 
             useSubUserStore.setState((state) => {
-                if (!Array.isArray(newShifts)) return state;
-
-                const updatedShifts = [...state.shifts, ...newShifts];
+                const updatedShifts = [...state.shifts, ...filteredNewShifts];
 
                 const uniqueShifts = Array.from(
                     new Map(updatedShifts.map((shift) => [shift._id, shift])).values(),
@@ -119,10 +131,11 @@ export const SubUserCalendar = () => {
                 return { shifts: uniqueShifts };
             });
         },
-        [selectedDay],
+        [selectedDay, subUserId],
     );
 
     useEffect(() => {
+        // Обработчик обновления смены
         socket.on('update-shift', (data) => {
             handleSocketShiftUpdate(data.shift);
         });
@@ -133,6 +146,7 @@ export const SubUserCalendar = () => {
     }, [handleSocketShiftUpdate]);
 
     useEffect(() => {
+        // Обработчик новых смен
         socket.on('new-shift', (newShifts) => {
             handleSocketNewShifts(newShifts);
         });
