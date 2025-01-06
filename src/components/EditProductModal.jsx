@@ -60,7 +60,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
         >
             <div className="flex flex-col gap-4">
                 {/* Список товаров */}
-                {items.map((item, index) => (
+                {items.map((item) => (
                     <div key={item._id} className="flex items-center gap-4">
                         <span className="flex-1 rounded-md border-2 p-2">{item.name}</span>
                         <Button
