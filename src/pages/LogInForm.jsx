@@ -20,6 +20,7 @@ const LogInForm = ({ isQrRedirect }) => {
     const setIsLoggedIn = useAuthStore((state) => state.setIsLoggedIn);
 
     const [email, setEmail] = useState('');
+    const [restorePassEmail, setRestorePassEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +30,6 @@ const LogInForm = ({ isQrRedirect }) => {
     const [showSuccessPass, setShowSuccessPass] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [alertModalResultMessage, setAlertModalResultMessage] = useState('');
-    const [resettedPassword, setResettedPassword] = useState('');
     const [showSuccessReg, setShowSuccessReg] = useState(false);
 
     const isRegisterPage = window.location.href.includes('register');
@@ -93,17 +93,23 @@ const LogInForm = ({ isQrRedirect }) => {
         if (e) e.preventDefault();
         setIsLoading(true);
         try {
-            const { data } = await axiosInstance.post('/auth/reset_password_temporary', { email });
-            if (data) {
+            const { status } = await axiosInstance.post('/auth/change-password', {
+                email: restorePassEmail,
+            });
+            if (status === 200) {
                 setShowSuccessPass(true);
                 setShowReset(false);
-                setResettedPassword(data.temporaryPassword);
+                setAlertModalResultMessage('Новый пароль отправлен на указанный email');
+            }
+            if (status === 404) {
+                setShowReset(false);
+                setRestorePassEmail('');
+                setAlertModalResultMessage('Вы ввели неверную почту');
             }
         } catch {
-            setShowSuccessPass(true);
             setShowReset(false);
-            setEmail('');
-            setAlertModalResultMessage('Вы ввели неверную почту');
+            setRestorePassEmail('');
+            setAlertModalResultMessage('Не удалось сбросить пароль');
         } finally {
             setIsLoading(false);
         }
@@ -163,28 +169,24 @@ const LogInForm = ({ isQrRedirect }) => {
                 </Button>
             </div>
 
-            <Dialog
-                visible={showReset}
-                onHide={() => setShowReset(false)}
-                header="Восстановить пароль"
-            >
+            <Dialog visible={showReset} onHide={() => setShowReset(false)} header="Сбросить пароль">
                 <InputText
                     className="mt-5 border-2 p-2 w-full"
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setRestorePassEmail(e.target.value)}
                     placeholder="Введите вашу почту"
-                    value={email}
+                    value={restorePassEmail}
                 />
                 <Button
-                    disabled={isLoading || !email}
-                    className="mt-10 border-blue-500 border-2 p-2 flex justify-center mx-auto"
-                    label="Получить новый пароль"
+                    disabled={isLoading || !restorePassEmail}
+                    className="mt-10 bg-blue-500 border-2 rounded-lg text-white p-2 flex justify-center mx-auto"
+                    label="Сбросить"
                     onClick={handlePasswordReset}
                 />
             </Dialog>
 
             <AlertModal
                 open={showSuccessPass}
-                message={alertModalResultMessage || `Ваш новый пароль - ${resettedPassword}`}
+                message={alertModalResultMessage || 'Новый пароль был отправлен на вашу почту'}
                 onClose={() => setShowSuccessPass(false)}
             />
 
