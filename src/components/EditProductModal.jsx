@@ -5,16 +5,19 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { InputNumber } from 'primereact/inputnumber';
+import { useCompanyStore } from '../store/index';
 
 export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [fromWarehouse, setFromWarehouse] = useState(null);
     const [toWarehouse, setToWarehouse] = useState(null);
     const [transferDate, setTransferDate] = useState(null);
-
+    const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
+    const categories = useCompanyStore((state) => state.categories);
     // Состояние для управления открытием MoreEditProductModal
     const [isMoreEditModalOpen, setIsMoreEditModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     const openMoreEditModal = (product) => {
         setSelectedProduct(product);
@@ -32,6 +35,10 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
 
     const handleTransferModalClose = () => {
         setIsTransferModalOpen(false);
+    };
+
+    const handleCategoryEditClick = () => {
+        setShowCategoriesDropdown(true);
     };
 
     const renderTransferFooter = () => (
@@ -71,12 +78,41 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                     </div>
                 ))}
 
-                {/* Кнопка переноса */}
                 <Button
+                    label="Поменять категорию"
+                    className="mt-10 p-button-primary w-full bg-blue-500 p-2 text-white rounded-md"
+                    onClick={handleCategoryEditClick}
+                />
+
+                {showCategoriesDropdown && (
+                    <div className="flex">
+                        <Dropdown
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.value)}
+                            options={categories || []}
+                            placeholder="Выберите категорию"
+                            showClear
+                            className="w-full border-blue-500 border-2 rounded-lg"
+                        />
+                        <Button
+                            className="ml-5"
+                            icon={
+                                <i
+                                    className="pi pi-arrow-right-arrow-left
+"
+                                    style={{ fontSize: '1rem' }}
+                                ></i>
+                            }
+                        />
+                    </div>
+                )}
+
+                {/* Кнопка переноса */}
+                {/* <Button
                     label="Перенести"
                     className="p-button-primary w-full bg-blue-500 p-2 text-white rounded-md"
                     onClick={handleTransferClick}
-                />
+                /> */}
             </div>
 
             {/* Модальное окно переноса */}

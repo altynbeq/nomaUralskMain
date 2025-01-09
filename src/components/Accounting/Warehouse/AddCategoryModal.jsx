@@ -4,12 +4,14 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
-import { useAuthStore } from '../../../store/index';
+import { useAuthStore, useCompanyStore } from '../../../store/index';
 
 export const AddCategoryModal = ({ visible, onClose }) => {
     const user = useAuthStore((state) => state.user);
     const [category, setCategory] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const setCategories = useCompanyStore((state) => state.setCategories);
+    const categories = useCompanyStore((state) => state.categories);
     const hanleSaveClick = async () => {
         if (!category) {
             toast.error('Заполните категорию');
@@ -26,6 +28,7 @@ export const AddCategoryModal = ({ visible, onClose }) => {
             });
             if (response.status === 200) {
                 toast.success('Категория успешно добавлена');
+                setCategories(categories.push(category));
                 onClose(false);
             }
         } catch {

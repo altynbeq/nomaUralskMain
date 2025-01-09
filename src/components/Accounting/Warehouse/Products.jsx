@@ -18,7 +18,6 @@ export function Products({ title, filterExceedMinStock }) {
     const [products, setProducts] = useState([]);
     const [totalRecords, setTotalRecords] = useState(0);
 
-    // page: текущая страница (начиная с 1), rows: количество записей на странице
     const [lazyParams, setLazyParams] = useState({ page: 1, rows: 20 });
     const [loading, setLoading] = useState(false);
 
