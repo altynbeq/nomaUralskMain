@@ -62,17 +62,18 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
         </div>
     );
 
-    const handleChangeCategory = () => {
+    const handleChangeCategory = async () => {
         const companyId = user?.companyId ? user?.companyId : user?.id;
         setIsLoading(true);
         try {
-            const response = axiosInstance.put(`companies/products/category/${companyId}`, {
+            const response = await axiosInstance.put(`companies/products/category/${companyId}`, {
                 items,
                 category: selectedCategory,
             });
             if (response.status === 200) {
                 toast.success('Вы успешно обновили категорию товаров');
                 setSelectedCategory(null);
+                setShowCategoriesDropdown(false);
             }
         } catch {
             toast.error('Не удалось обновить категорию');
