@@ -5,9 +5,12 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { InputNumber } from 'primereact/inputnumber';
-import { useCompanyStore } from '../store/index';
+import { useCompanyStore, useAuthStore } from '../store/index';
+import { axiosInstance } from '../api/axiosInstance';
+import { toast } from 'react-toastify';
 
 export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
+    const user = useAuthStore((state) => state.user);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [fromWarehouse, setFromWarehouse] = useState(null);
     const [toWarehouse, setToWarehouse] = useState(null);
@@ -18,6 +21,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
     const [isMoreEditModalOpen, setIsMoreEditModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const openMoreEditModal = (product) => {
         setSelectedProduct(product);
@@ -58,6 +62,25 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
         </div>
     );
 
+    const handleChangeCategory = () => {
+        const companyId = user?.companyId ? user?.companyId : user?.id;
+        setIsLoading(true);
+        try {
+            const response = axiosInstance.put(`companies/products/category/${companyId}`, {
+                items,
+                category: selectedCategory,
+            });
+            if (response.status === 200) {
+                toast.success('Вы успешно обновили категорию товаров');
+                setSelectedCategory(null);
+            }
+        } catch {
+            toast.error('Не удалось обновить категорию');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Dialog
             header="Редактирование товаров"
@@ -95,6 +118,8 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                             className="w-full border-blue-500 border-2 rounded-lg"
                         />
                         <Button
+                            disabled={!selectedCategory || isLoading}
+                            onClick={handleChangeCategory}
                             className="ml-5"
                             icon={
                                 <i
