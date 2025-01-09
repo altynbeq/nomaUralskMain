@@ -5,6 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { EditProductModal } from '../../EditProductModal';
+import { AddCategoryModal } from './AddCategoryModal';
 import { useCompanyStore, useAuthStore } from '../../../store';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { axiosInstance } from '../../../api/axiosInstance';
@@ -27,6 +28,7 @@ export function Products({ title, filterExceedMinStock }) {
     const [showFilters, setShowFilters] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState([]);
     const filterRef = useRef(null);
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
 
     const fetchProducts = useCallback(async () => {
         setLoading(true);
@@ -101,6 +103,11 @@ export function Products({ title, filterExceedMinStock }) {
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
                         <Button
+                            onClick={() => setShowAddCategoryModal(true)}
+                            label="Добавить категорию"
+                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                        />
+                        <Button
                             className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                             label="Редактировать"
                             onClick={handleEditClick}
@@ -110,6 +117,10 @@ export function Products({ title, filterExceedMinStock }) {
                             isOpen={editModalIsVisible}
                             onClose={() => setEditModalIsVisible(false)}
                             warehouses={warehouses} // Передаём склады, если нужно
+                        />
+                        <AddCategoryModal
+                            visible={showAddCategoryModal}
+                            onClose={setShowAddCategoryModal}
                         />
                         <Button
                             label="Фильтр"
