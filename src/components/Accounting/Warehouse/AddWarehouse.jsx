@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { AddWarehouseForm } from './AddWarehouseForm';
 import AlertModal from '../../AlertModal';
 import { useAuthStore } from '../../../store';
+import { axiosInstance } from '../../../api/axiosInstance';
 
 export const AddWarehouse = () => {
     const user = useAuthStore((state) => state.user);
@@ -23,7 +24,6 @@ export const AddWarehouse = () => {
     const [errors, setErrors] = useState({});
     const [showAlertModal, setShowAlertModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const authStore = useAuthStore?.getState();
 
     const removeError = (field) => {
         setErrors((prevErrors) => {
@@ -105,15 +105,9 @@ export const AddWarehouse = () => {
                 const companyId = user?.companyId ? user?.companyId : user?.id;
                 setIsLoading(true);
                 try {
-                    const response = await fetch(
-                        `https://nomalytica-back.onrender.com/api/clientsSpisanie/${companyId}/write-off`,
-                        {
-                            method: 'POST',
-                            body: submissionData,
-                            headers: {
-                                Authorization: `Bearer ${authStore.accessToken}`,
-                            },
-                        },
+                    const response = await axiosInstance.post(
+                        `clientsSpisanie/${companyId}/write-off`,
+                        submissionData,
                     );
                     if (response.status === 201) {
                         setIsModalOpen(false);
@@ -150,7 +144,6 @@ export const AddWarehouse = () => {
             formData.file,
             user?.companyId,
             user?.id,
-            authStore.accessToken,
             errors,
         ],
     );
