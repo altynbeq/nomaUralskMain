@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     FaExchangeAlt,
     FaTruckLoading,
@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
 import { useCompanyStore, useAuthStore } from '../../../store/index';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
@@ -20,56 +21,30 @@ const MoveItemsSklad = () => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [sourceWarehouse, setSourceWarehouse] = useState(null);
     const [destinationWarehouse, setDestinationWarehouse] = useState(null);
-    const [filteredSourceWarehouses, setFilteredSourceWarehouses] = useState([]);
-    const [filteredDestinationWarehouses, setFilteredDestinationWarehouses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
+    // Установка дебаунс поискового запроса
     useEffect(() => {
-        setFilteredSourceWarehouses(warehouses);
-        setFilteredDestinationWarehouses(warehouses);
-    }, [warehouses]);
-
-    useEffect(() => {
-        setFilteredSourceWarehouses(warehouses.filter((wh) => wh.id !== destinationWarehouse?.id));
-
-        setFilteredDestinationWarehouses(warehouses.filter((wh) => wh.id !== sourceWarehouse?.id));
-    }, [warehouses, sourceWarehouse, destinationWarehouse]);
-
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
+        const handler = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
+            if (!searchTerm) {
+                setProducts([]);
+            }
         }, 300);
-
-        return () => clearTimeout(delayDebounceFn);
+        return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    const handleItemSelect = (item) => {
-        const existingItemIndex = selectedItems.findIndex((i) => i._id === item._id);
-        if (existingItemIndex > -1) {
-            const newSelectedItems = [...selectedItems];
-            newSelectedItems.splice(existingItemIndex, 1);
-            setSelectedItems(newSelectedItems);
-        } else {
-            setSelectedItems([
-                ...selectedItems,
-                {
-                    ...item,
-                    transferQuantity: 1,
-                },
-            ]);
-        }
-    };
-
+    // Получение товаров
     const fetchProducts = useCallback(async () => {
         if (!debouncedSearchTerm) return;
         setIsLoading(true);
         try {
-            const response = await axiosInstance.get(
+            const { data } = await axiosInstance.get(
                 `/companies/products/${clientId}?&search=${debouncedSearchTerm}`,
             );
-            setProducts(response.data.products);
+            setProducts(data.products);
         } catch (error) {
             console.error('Ошибка при загрузке товаров:', error);
         } finally {
@@ -81,36 +56,70 @@ const MoveItemsSklad = () => {
         fetchProducts();
     }, [debouncedSearchTerm, fetchProducts]);
 
+    // Фильтрация складов с помощью useMemo
+    const filteredSourceWarehouses = useMemo(
+        () => warehouses.filter((wh) => wh.id !== destinationWarehouse?.id),
+        [warehouses, destinationWarehouse],
+    );
+
+    const filteredDestinationWarehouses = useMemo(
+        () => warehouses.filter((wh) => wh.id !== sourceWarehouse?.id),
+        [warehouses, sourceWarehouse],
+    );
+
+    // Фильтрация товаров по выбранному исходному складу и поисковому запросу
+    const filteredItems = useMemo(
+        () =>
+            products.filter(
+                (item) =>
+                    item.warehouse === sourceWarehouse?.warehouseName &&
+                    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+            ),
+        [products, sourceWarehouse, searchTerm],
+    );
+
+    // Обработчик выбора товара
+    const handleItemSelect = (item) => {
+        setSelectedItems((prev) => {
+            const exists = prev.find((i) => i._id === item._id);
+            if (exists) {
+                return prev.filter((i) => i._id !== item._id);
+            }
+            return [...prev, { ...item, transferQuantity: 1 }];
+        });
+    };
+
+    // Обновление количества для перемещения
     const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
             prev.map((item) =>
-                item.id === itemId
+                item._id === itemId
                     ? { ...item, transferQuantity: Math.min(newQuantity, item.quantity) }
                     : item,
             ),
         );
     };
 
+    // Обработка переноса товаров
     const handleTransfer = () => {
-        if (!sourceWarehouse || !destinationWarehouse || selectedItems.length === 0) {
+        if (!sourceWarehouse || !destinationWarehouse || !selectedItems.length) {
             toast.error(
-                'Please select source warehouse, destination warehouse, and items to transfer.',
+                'Пожалуйста, выберите исходный склад, целевой склад и товары для перемещения.',
             );
             return;
         }
 
-        const updatedInventory = products.map((item) => {
-            const selectedItem = selectedItems.find((si) => si._id === item._id);
-            if (selectedItem) {
-                return {
-                    ...item,
-                    quantity: item.quantity - selectedItem.transferQuantity,
-                };
-            }
-            return item;
-        });
-
-        setProducts(updatedInventory);
+        // Обновление локального состояния товаров (симуляция перемещения)
+        setProducts((prevProducts) =>
+            prevProducts.map((prod) => {
+                const selectedItem = selectedItems.find((si) => si._id === prod._id);
+                if (selectedItem) {
+                    return { ...prod, quantity: prod.quantity - selectedItem.transferQuantity };
+                }
+                return prod;
+            }),
+        );
+        // Сброс состояний
         setSelectedItems([]);
         setSourceWarehouse(null);
         setDestinationWarehouse(null);
@@ -120,16 +129,11 @@ const MoveItemsSklad = () => {
         <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
     );
 
-    const filteredItems = products.filter(
-        (item) =>
-            item.warehouse === sourceWarehouse?.warehouseName &&
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-
+    // Пример количества ожидающих действий
     const pendingCount = 7;
 
     return (
-        <div className="bg-white min-w-[100%] p-6 rounded-2xl subtle-border shadow-md max-w-2xl mx-auto">
+        <div className="bg-white min-w-full p-6 rounded-2xl subtle-border shadow-md max-w-2xl mx-auto">
             <div className="flex flex-row justify-between">
                 <div className="flex mb-4 flex-row gap-2">
                     <CardTitle>Перемещение товаров на складе</CardTitle>
@@ -148,7 +152,7 @@ const MoveItemsSklad = () => {
                 </div>
             </div>
 
-            {/* Warehouse Selection */}
+            {/* Секция выбора складов */}
             {!isCollapsed && (
                 <div className="mb-4">
                     <div className="flex justify-between items-center">
@@ -181,12 +185,12 @@ const MoveItemsSklad = () => {
                 </div>
             )}
 
-            {/* Pick Items Section */}
+            {/* Секция выбора товаров */}
             {!isCollapsed && sourceWarehouse && destinationWarehouse && (
                 <div>
                     <h3 className="text-lg font-semibold mb-2">Выберите товары</h3>
 
-                    {/* Search Input */}
+                    {/* Поисковый инпут */}
                     <div className="relative mb-4">
                         <InputText
                             value={searchTerm}
@@ -196,7 +200,7 @@ const MoveItemsSklad = () => {
                         />
                     </div>
 
-                    {/* Item Selection Grid */}
+                    {/* Сетка товаров */}
                     <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
                         {filteredItems.map((item) => (
                             <div
@@ -216,30 +220,38 @@ const MoveItemsSklad = () => {
                         ))}
                     </div>
 
-                    {/* Selected Items List */}
+                    {/* Список выбранных товаров */}
                     {selectedItems.length > 0 && (
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold mb-2">Выбранные товары</h3>
                             <div className="bg-gray-100 rounded-xl p-2 mb-4">
+                                <div className="grid grid-cols-5 gap-2 mb-2 font-semibold text-gray-700">
+                                    <div>Наименование товара</div>
+                                    <div>Количество для перемещения</div>
+                                    <div>Текущее количество</div>
+                                    <div>Оставшееся</div>
+                                    <div>На целевом складе</div>
+                                </div>
                                 {selectedItems.map((item) => (
                                     <div
                                         key={item._id}
                                         className="grid grid-cols-5 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
                                     >
-                                        <div className="font-mediumx">{item.name}</div>
+                                        <div className="font-medium">{item.name}</div>
                                         <div>
-                                            <input
-                                                type="number"
-                                                min="1"
+                                            <InputNumber
+                                                mode="decimal"
+                                                useGrouping={false}
+                                                min={1}
                                                 max={item.quantity}
                                                 value={item.transferQuantity}
-                                                onChange={(e) =>
+                                                onValueChange={(e) =>
                                                     updateTransferQuantity(
                                                         item._id,
                                                         parseInt(e.target.value),
                                                     )
                                                 }
-                                                className="w-16 p-1 border rounded"
+                                                className="p-1 border rounded"
                                             />
                                         </div>
                                         <div className="text-gray-600">{item.quantity}</div>
@@ -255,7 +267,7 @@ const MoveItemsSklad = () => {
                         </div>
                     )}
 
-                    {/* Transfer Button */}
+                    {/* Кнопка переноса */}
                     <div className="text-center mt-4">
                         <button
                             onClick={handleTransfer}
