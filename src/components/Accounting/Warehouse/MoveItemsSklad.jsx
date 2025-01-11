@@ -46,7 +46,7 @@ const MoveItemsSklad = () => {
     }, [searchTerm]);
 
     const handleItemSelect = (item) => {
-        const existingItemIndex = selectedItems.findIndex((i) => i.id === item.id);
+        const existingItemIndex = selectedItems.findIndex((i) => i._id === item._id);
         if (existingItemIndex > -1) {
             const newSelectedItems = [...selectedItems];
             newSelectedItems.splice(existingItemIndex, 1);
@@ -100,7 +100,7 @@ const MoveItemsSklad = () => {
         }
 
         const updatedInventory = products.map((item) => {
-            const selectedItem = selectedItems.find((si) => si.id === item.id);
+            const selectedItem = selectedItems.find((si) => si._id === item._id);
             if (selectedItem) {
                 return {
                     ...item,
@@ -202,7 +202,7 @@ const MoveItemsSklad = () => {
                             <div
                                 key={item._id}
                                 className={`p-2 border rounded-xl cursor-pointer ${
-                                    selectedItems.some((si) => si.id === item.id)
+                                    selectedItems.some((si) => si._id === item._id)
                                         ? 'bg-blue-100 border-blue-300'
                                         : 'hover:bg-gray-100'
                                 }`}
