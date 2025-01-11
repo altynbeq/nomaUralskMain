@@ -106,11 +106,11 @@ const WriteoffsForApproval = () => {
                 const params = new URLSearchParams();
                 // Всегда хотим статус "pending" (можно изменить по логике)
                 params.set('status', 'pending');
-                if (searchTerm) {
-                    params.set('search', searchTerm);
-                }
-                if (dateRange) {
-                    params.set('date', dateRange);
+
+                if (dateRange && dateRange.length === 2) {
+                    const startDate = new Date(dateRange[0]).toISOString();
+                    const endDate = new Date(dateRange[1]).toISOString();
+                    params.set('dateRange', JSON.stringify([startDate, endDate]));
                 }
                 if (selectedWarehouse) {
                     params.set('warehouseName', selectedWarehouse);
@@ -250,7 +250,6 @@ const WriteoffsForApproval = () => {
                         loading={isLoading}
                         paginator
                         rows={10}
-                        rowsPerPageOptions={[5, 10, 20]}
                         removableSort
                         sortMode="single"
                         className="w-full"
