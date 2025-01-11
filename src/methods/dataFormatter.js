@@ -22,3 +22,10 @@ export const formatOnlyDate = (date) => {
         .setZone('UTC+5')
         .toFormat('dd MMMM yyyy', { locale: 'ru' });
 };
+
+export const formatSlashDate = (date) => {
+    if (!date) return '';
+    return DateTime.fromISO(date, { zone: 'utc' })
+        .setZone('UTC+5')
+        .toFormat('dd/MM/yyyy', { locale: 'ru' });
+};

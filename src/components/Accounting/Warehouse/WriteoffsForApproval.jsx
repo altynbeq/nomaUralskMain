@@ -17,6 +17,7 @@ import { Dropdown } from 'primereact/dropdown';
 
 import { useAuthStore, useCompanyStore } from '../../../store/index';
 import { axiosInstance } from '../../../api/axiosInstance';
+import { formatSlashDate } from '../../../methods/dataFormatter';
 
 function getStatusBadge(status) {
     switch (status) {
@@ -145,7 +146,7 @@ const WriteoffsForApproval = () => {
     // 3) Дата (форматируем)
     const dateBodyTemplate = (rowData) => {
         if (!rowData.date) return '';
-        return new Date(rowData.date).toLocaleDateString();
+        return formatSlashDate(rowData.date);
     };
 
     return (
@@ -226,7 +227,7 @@ const WriteoffsForApproval = () => {
                     >
                         <Column
                             field="_id"
-                            header="ID списания"
+                            header="Номер заявки"
                             sortable
                             style={{ minWidth: '160px' }}
                         />
@@ -237,15 +238,8 @@ const WriteoffsForApproval = () => {
                             style={{ minWidth: '160px' }}
                         />
                         <Column
-                            header="Наименование товара"
-                            field="product.name"
-                            sortable
-                            style={{ minWidth: '200px' }}
-                        />
-                        <Column
-                            header="Кем создано"
-                            // В вашем примере нет "requestedBy", поэтому выводим email ответственного
-                            body={(rowData) => rowData.responsible?.email ?? '—'}
+                            header="Запросил"
+                            body={(rowData) => rowData.responsible?.name ?? '—'}
                             style={{ minWidth: '180px' }}
                         />
                         <Column
