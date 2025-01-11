@@ -1,19 +1,4 @@
-import { BsCurrencyDollar } from 'react-icons/bs';
-import {
-    FaWarehouse,
-    FaArrowDown,
-    FaArrowUp,
-    FaBalanceScaleRight,
-    FaFileSignature,
-    FaBoxes,
-} from 'react-icons/fa';
-
-const icons = {
-    user: BsCurrencyDollar,
-    discount: BsCurrencyDollar,
-    receipt: BsCurrencyDollar,
-    coin: BsCurrencyDollar,
-};
+import { FaWarehouse, FaBalanceScaleRight, FaFileSignature, FaBoxes } from 'react-icons/fa';
 
 const data = [
     { title: 'Алматы', icon: 'receipt', value: '13,456', diff: 34 },
@@ -32,11 +17,8 @@ const totalValue = numericValues.reduce((acc, curr) => acc + curr, 0);
 // For demonstration, let's just sum up diffs.
 const totalDiff = data.reduce((acc, curr) => acc + curr.diff, 0);
 
-const SkladBoxStats = () => {
+const SkladBoxStats = ({ totalProducts, totalWriteOffs }) => {
     const stats = data.map((stat) => {
-        const Icon = icons[stat.icon];
-        const DiffIcon = stat.diff > 0 ? FaArrowUp : FaArrowDown;
-
         return (
             <div className="border rounded-xl p-4 shadow-md bg-white" key={stat.title}>
                 <div className="flex flex-row justify-between">
@@ -102,7 +84,7 @@ const SkladBoxStats = () => {
                     <div>
                         <div className="flex items-center gap-2 mt-6">
                             <FaBoxes className="text-blue-500" size={20} />
-                            <p className="text-3xl">{totalValue.toLocaleString()}</p>
+                            <p className="text-3xl">{totalProducts}</p>
                             <p
                                 className={`text-sm font-medium ${
                                     totalDiff > 0 ? 'text-teal-500' : 'text-red-500'
@@ -118,7 +100,7 @@ const SkladBoxStats = () => {
                     <div>
                         <div className="flex items-center gap-2 mt-6">
                             <FaFileSignature className="text-blue-500" size={20} />
-                            <p className="text-3xl">{totalValue.toLocaleString()}</p>
+                            <p className="text-3xl">{totalWriteOffs}</p>
                         </div>
                         <p className="text-xs text-gray-500 mt-2">Списаний</p>
                     </div>

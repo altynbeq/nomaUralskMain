@@ -34,7 +34,7 @@ export function Products({ title, filterExceedMinStock }) {
         try {
             const response = await axiosInstance.get(
                 filterExceedMinStock
-                    ? `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}&exceedMinStock=true`
+                    ? `/companies/products/${clientId}/exceedMinStock/?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`
                     : `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
             );
             setProducts(response.data.products);
@@ -101,11 +101,14 @@ export function Products({ title, filterExceedMinStock }) {
                         <CardTitle>{title}</CardTitle>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
-                        <Button
-                            onClick={() => setShowAddCategoryModal(true)}
-                            label="Добавить категорию"
-                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
-                        />
+                        {!filterExceedMinStock && (
+                            <Button
+                                onClick={() => setShowAddCategoryModal(true)}
+                                label="Добавить категорию"
+                                className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                            />
+                        )}
+
                         <Button
                             className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                             label="Редактировать"

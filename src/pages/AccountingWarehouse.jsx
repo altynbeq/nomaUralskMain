@@ -3,7 +3,7 @@ import { Products } from '../components/Accounting/Warehouse/Products';
 import { WriteOffs } from '../components/Accounting/Warehouse/WriteOffs';
 import { Loader } from '../components/Loader';
 import { axiosInstance } from '../api/axiosInstance';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, useCompanyStore } from '../store/index';
 import SkladBoxStats from '../components/Sklad/SkladBoxStats';
 import MoveItemsSklad from '../components/Accounting/Warehouse/MoveItemsSklad';
 import InventoryRevision from '../components/Accounting/Warehouse/InventoryRevision';
@@ -14,29 +14,27 @@ import CurrentActions from '../components/Accounting/Warehouse/CurrentActions';
 import WriteoffsForApproval from '../components/Accounting/Warehouse/WriteoffsForApproval';
 
 const InternalTabs = () => {
-    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
+    const clientId = useAuthStore((state) => state.user.companyId);
+    const totalProducts = useCompanyStore((state) => state.products).length;
     const [isLoading, setIsLoading] = useState(false);
     const [writeOffs, setWriteOffs] = useState([]);
+    const [activeTab, setActiveTab] = useState('sklad');
 
     useEffect(() => {
-        const fetchWriteOffs = async (clientId) => {
+        (async () => {
+            if (!clientId) return;
             setIsLoading(true);
             try {
                 const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
-                setWriteOffs(response.data.writeOffs);
+                setWriteOffs(response.data);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
                 return [];
             } finally {
                 setIsLoading(false);
             }
-        };
-        if (clientId) {
-            fetchWriteOffs(clientId);
-        }
+        })();
     }, [clientId]);
-
-    const [activeTab, setActiveTab] = useState('sklad');
 
     const tabs = [
         { id: 'sklad', label: 'Склад' },
@@ -49,7 +47,10 @@ const InternalTabs = () => {
         sklad: (
             <div className="flex flex-col gap-3 justify-center">
                 <div className=" mb-10 p-2">
-                    <SkladBoxStats />
+                    <SkladBoxStats
+                        totalProducts={totalProducts}
+                        totalWriteOffs={writeOffs.length}
+                    />
                     <Products title="Товар близок к мин остатку" filterExceedMinStock={true} />
                     <WriteOffs title="Не подтвержденные списания" writeOffs={writeOffs || []} />
                 </div>
