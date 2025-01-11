@@ -25,7 +25,6 @@ const MoveItemsSklad = () => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-    // Установка дебаунс поискового запроса
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
@@ -36,7 +35,6 @@ const MoveItemsSklad = () => {
         return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    // Получение товаров
     const fetchProducts = useCallback(async () => {
         if (!debouncedSearchTerm) return;
         setIsLoading(true);
@@ -56,7 +54,6 @@ const MoveItemsSklad = () => {
         fetchProducts();
     }, [debouncedSearchTerm, fetchProducts]);
 
-    // Фильтрация складов с помощью useMemo
     const filteredSourceWarehouses = useMemo(
         () => warehouses.filter((wh) => wh.id !== destinationWarehouse?.id),
         [warehouses, destinationWarehouse],
@@ -67,7 +64,6 @@ const MoveItemsSklad = () => {
         [warehouses, sourceWarehouse],
     );
 
-    // Фильтрация товаров по выбранному исходному складу и поисковому запросу
     const filteredItems = useMemo(
         () =>
             products.filter(
@@ -78,7 +74,6 @@ const MoveItemsSklad = () => {
         [products, sourceWarehouse, searchTerm],
     );
 
-    // Обработчик выбора товара
     const handleItemSelect = (item) => {
         setSelectedItems((prev) => {
             const exists = prev.find((i) => i._id === item._id);
@@ -89,7 +84,6 @@ const MoveItemsSklad = () => {
         });
     };
 
-    // Обновление количества для перемещения
     const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
             prev.map((item) =>
@@ -100,7 +94,6 @@ const MoveItemsSklad = () => {
         );
     };
 
-    // Обработка переноса товаров
     const handleTransfer = () => {
         if (!sourceWarehouse || !destinationWarehouse || !selectedItems.length) {
             toast.error(
@@ -109,7 +102,6 @@ const MoveItemsSklad = () => {
             return;
         }
 
-        // Обновление локального состояния товаров (симуляция перемещения)
         setProducts((prevProducts) =>
             prevProducts.map((prod) => {
                 const selectedItem = selectedItems.find((si) => si._id === prod._id);
@@ -119,7 +111,6 @@ const MoveItemsSklad = () => {
                 return prod;
             }),
         );
-        // Сброс состояний
         setSelectedItems([]);
         setSourceWarehouse(null);
         setDestinationWarehouse(null);
@@ -129,7 +120,6 @@ const MoveItemsSklad = () => {
         <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
     );
 
-    // Пример количества ожидающих действий
     const pendingCount = 7;
 
     return (
@@ -152,7 +142,6 @@ const MoveItemsSklad = () => {
                 </div>
             </div>
 
-            {/* Секция выбора складов */}
             {!isCollapsed && (
                 <div className="mb-4">
                     <div className="flex justify-between items-center">
@@ -185,12 +174,10 @@ const MoveItemsSklad = () => {
                 </div>
             )}
 
-            {/* Секция выбора товаров */}
             {!isCollapsed && sourceWarehouse && destinationWarehouse && (
                 <div>
                     <h3 className="text-lg font-semibold mb-2">Выберите товары</h3>
 
-                    {/* Поисковый инпут */}
                     <div className="relative mb-4">
                         <InputText
                             value={searchTerm}
@@ -200,7 +187,6 @@ const MoveItemsSklad = () => {
                         />
                     </div>
 
-                    {/* Сетка товаров */}
                     <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
                         {filteredItems.map((item) => (
                             <div
@@ -220,7 +206,6 @@ const MoveItemsSklad = () => {
                         ))}
                     </div>
 
-                    {/* Список выбранных товаров */}
                     {selectedItems.length > 0 && (
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold mb-2">Выбранные товары</h3>
@@ -245,10 +230,10 @@ const MoveItemsSklad = () => {
                                                 min={1}
                                                 max={item.quantity}
                                                 value={item.transferQuantity}
-                                                onValueChange={(e) =>
+                                                onChange={(e) =>
                                                     updateTransferQuantity(
                                                         item._id,
-                                                        parseInt(e.target.value),
+                                                        parseInt(e.value || 1),
                                                     )
                                                 }
                                                 className="p-1 border rounded"
@@ -256,7 +241,7 @@ const MoveItemsSklad = () => {
                                         </div>
                                         <div className="text-gray-600">{item.quantity}</div>
                                         <div className="text-blue-600">
-                                            {item.quantity - item.transferQuantity}
+                                            {Math.max(0, item.quantity - item.transferQuantity)}
                                         </div>
                                         <div className="text-green-600">
                                             {item.transferQuantity}
@@ -267,7 +252,6 @@ const MoveItemsSklad = () => {
                         </div>
                     )}
 
-                    {/* Кнопка переноса */}
                     <div className="text-center mt-4">
                         <button
                             onClick={handleTransfer}
