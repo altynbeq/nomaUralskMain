@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    FaAngleDown,
-    FaAngleUp,
-    FaSearch,
-    FaCalendarAlt,
-    FaExclamationTriangle,
-} from 'react-icons/fa';
+import { FaAngleDown, FaAngleUp, FaExclamationTriangle } from 'react-icons/fa';
 
 // PrimeReact компоненты
 import { DataTable } from 'primereact/datatable';
@@ -14,7 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
-
+import { Calendar } from 'primereact/calendar';
 import { useAuthStore, useCompanyStore } from '../../../store/index';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { formatSlashDate } from '../../../methods/dataFormatter';
@@ -169,10 +163,9 @@ const WriteoffsForApproval = () => {
                         <div className="mt-4 flex flex-wrap gap-4">
                             {/* Поиск */}
                             <div className="flex-1 min-w-[200px] relative">
-                                <FaSearch className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                                 <InputText
                                     placeholder="Поиск..."
-                                    className="pl-10"
+                                    className="pl-10 border-gray-300 border-2 rounded-md min-h-[44px]"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -180,10 +173,10 @@ const WriteoffsForApproval = () => {
 
                             {/* Дата */}
                             <div className="relative">
-                                <FaCalendarAlt className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                <InputText
+                                <Calendar
+                                    placeholder="Выберите дату"
                                     type="date"
-                                    className="pl-10"
+                                    className="pl-10 min-h-[44px] border-gray-300 border-2 rounded-md"
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
                                 />
@@ -196,7 +189,7 @@ const WriteoffsForApproval = () => {
                                     onChange={(e) => setSelectedWarehouse(e.value)}
                                     optionLabel="warehouseName"
                                     placeholder="Выберите склад"
-                                    className="w-full"
+                                    className="w-full border-blue-500 border-2 rounded-md text-white"
                                 />
                             </div>
                         </div>
