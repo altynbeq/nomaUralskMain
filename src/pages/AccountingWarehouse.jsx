@@ -67,7 +67,7 @@ const InternalTabs = () => {
         actions: (
             <div className="flex flex-col gap-3 justify-center">
                 <div className="flex flex-row mb-2 p-2">
-                    <WriteoffsForApproval />
+                    <WriteoffsForApproval writeOffs={writeOffs || []} />
                 </div>
                 <div className="flex flex-row mb-2 p-2">
                     <CurrentActions />
