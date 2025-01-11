@@ -12,6 +12,44 @@ import { Calendar } from 'primereact/calendar';
 import { useAuthStore, useCompanyStore } from '../../../store/index';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { formatSlashDate } from '../../../methods/dataFormatter';
+import { addLocale } from 'primereact/api';
+
+addLocale('ru', {
+    firstDayOfWeek: 1,
+    dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    dayNamesShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    monthNames: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+    ],
+    monthNamesShort: [
+        'Янв',
+        'Фев',
+        'Мар',
+        'Апр',
+        'Май',
+        'Июн',
+        'Июл',
+        'Авг',
+        'Сен',
+        'Окт',
+        'Ноя',
+        'Дек',
+    ],
+    today: 'Сегодня',
+    clear: 'Очистить',
+});
 
 function getStatusBadge(status) {
     switch (status) {
@@ -38,7 +76,7 @@ const WriteoffsForApproval = () => {
 
     // Поля для поиска и фильтрации
     const [searchTerm, setSearchTerm] = useState('');
-    const [startDate, setStartDate] = useState('');
+    const [dateRange, setDateRange] = useState(null);
     const [selectedWarehouse, setSelectedWarehouse] = useState('');
     const [warehouseOptions, setWarehouseOptions] = useState([]);
     // Сворачивание/разворачивание панели с фильтрами
@@ -71,8 +109,8 @@ const WriteoffsForApproval = () => {
                 if (searchTerm) {
                     params.set('search', searchTerm);
                 }
-                if (startDate) {
-                    params.set('date', startDate);
+                if (dateRange) {
+                    params.set('date', dateRange);
                 }
                 if (selectedWarehouse) {
                     params.set('warehouseName', selectedWarehouse);
@@ -90,7 +128,7 @@ const WriteoffsForApproval = () => {
         };
 
         fetchWriteOffs();
-    }, [clientId, searchTerm, startDate, selectedWarehouse]);
+    }, [clientId, searchTerm, selectedWarehouse, dateRange]);
 
     const openModalWithSubmission = (submission) => {
         setSelectedSubmission(submission);
@@ -165,7 +203,7 @@ const WriteoffsForApproval = () => {
                             <div className="flex-1 min-w-[200px] relative">
                                 <InputText
                                     placeholder="Поиск..."
-                                    className="pl-10 border-gray-300 border-2 rounded-md min-h-[44px]"
+                                    className="pl-2 border-blue-500 border-2 rounded-md min-h-[44px]"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -174,11 +212,12 @@ const WriteoffsForApproval = () => {
                             {/* Дата */}
                             <div className="relative">
                                 <Calendar
+                                    selectionMode="range"
                                     placeholder="Выберите дату"
                                     type="date"
-                                    className="pl-10 min-h-[44px] border-gray-300 border-2 rounded-md"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="pl-2 min-h-[44px] border-blue-500 border-2 rounded-md"
+                                    value={dateRange}
+                                    onChange={(e) => setDateRange(e.target.value)}
                                 />
                             </div>
 
@@ -218,16 +257,10 @@ const WriteoffsForApproval = () => {
                         emptyMessage="Нет данных для отображения"
                         onRowClick={(e) => openModalWithSubmission(e.data)}
                     >
-                        <Column
-                            field="_id"
-                            header="Номер заявки"
-                            sortable
-                            style={{ minWidth: '160px' }}
-                        />
+                        <Column field="_id" header="Номер заявки" style={{ minWidth: '160px' }} />
                         <Column
                             header="Склад"
                             field="warehouse.warehouseName"
-                            sortable
                             style={{ minWidth: '160px' }}
                         />
                         <Column
@@ -238,7 +271,6 @@ const WriteoffsForApproval = () => {
                         <Column
                             header="Дата"
                             body={dateBodyTemplate}
-                            sortable
                             style={{ minWidth: '120px' }}
                         />
                         <Column
