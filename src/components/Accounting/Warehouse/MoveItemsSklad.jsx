@@ -1,46 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
-    FaSearch,
     FaExchangeAlt,
     FaTruckLoading,
     FaExclamationTriangle,
     FaAngleDown,
     FaAngleUp,
 } from 'react-icons/fa';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { useCompanyStore, useAuthStore } from '../../../store/index';
+import { axiosInstance } from '../../../api/axiosInstance';
+import { toast } from 'react-toastify';
 
 const MoveItemsSklad = () => {
+    const warehouses = useCompanyStore((state) => state.warehouses);
+    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
-    const [sourceWarehouse, setSourceWarehouse] = useState('');
-    const [destinationWarehouse, setDestinationWarehouse] = useState('');
+    const [sourceWarehouse, setSourceWarehouse] = useState(null);
+    const [destinationWarehouse, setDestinationWarehouse] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-    // Mock warehouse list (replace with actual warehouse data)
-    const warehouses = [
-        'Main Warehouse',
-        'North Storage',
-        'South Distribution',
-        'East Logistics',
-        'West Inventory',
-    ];
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300);
 
-    // // Mock inventory items (replace with actual inventory data)
-    const [inventoryItems, setInventoryItems] = useState([
-        { id: 1, name: 'Laptop', quantity: 50, warehouse: 'Main Warehouse' },
-        { id: 2, name: 'Monitor', quantity: 30, warehouse: 'Main Warehouse' },
-        { id: 3, name: 'Keyboard', quantity: 100, warehouse: 'North Storage' },
-        { id: 4, name: 'Mouse', quantity: 75, warehouse: 'North Storage' },
-    ]);
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
+
     const handleItemSelect = (item) => {
         const existingItemIndex = selectedItems.findIndex((i) => i.id === item.id);
-
         if (existingItemIndex > -1) {
-            // If item already selected, remove it
             const newSelectedItems = [...selectedItems];
             newSelectedItems.splice(existingItemIndex, 1);
             setSelectedItems(newSelectedItems);
         } else {
-            // Add new item with transfer quantity
             setSelectedItems([
                 ...selectedItems,
                 {
@@ -50,6 +48,25 @@ const MoveItemsSklad = () => {
             ]);
         }
     };
+
+    const fetchProducts = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await axiosInstance.get(
+                `/companies/products/${clientId}?&search=${debouncedSearchTerm}`,
+            );
+            setProducts(response.data.products);
+        } catch (error) {
+            console.error('Ошибка при загрузке товаров:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [clientId, debouncedSearchTerm]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [debouncedSearchTerm, fetchProducts]);
+
     const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
             prev.map((item) =>
@@ -59,14 +76,16 @@ const MoveItemsSklad = () => {
             ),
         );
     };
+
     const handleTransfer = () => {
         if (!sourceWarehouse || !destinationWarehouse || selectedItems.length === 0) {
-            alert('Please select source warehouse, destination warehouse, and items to transfer.');
+            toast.error(
+                'Please select source warehouse, destination warehouse, and items to transfer.',
+            );
             return;
         }
 
-        // Update inventory (this would typically be a backend API call)
-        const updatedInventory = inventoryItems.map((item) => {
+        const updatedInventory = products.map((item) => {
             const selectedItem = selectedItems.find((si) => si.id === item.id);
             if (selectedItem) {
                 return {
@@ -77,22 +96,25 @@ const MoveItemsSklad = () => {
             return item;
         });
 
-        setInventoryItems(updatedInventory);
+        setProducts(updatedInventory);
         setSelectedItems([]);
-        setSourceWarehouse('');
-        setDestinationWarehouse('');
+        setSourceWarehouse(null);
+        setDestinationWarehouse(null);
         alert('Items transferred successfully!');
     };
+
     const CardTitle = ({ className = '', children }) => (
         <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
     );
-    // // Filter items based on search term and source warehouse
-    const filteredItems = inventoryItems.filter(
+
+    const filteredItems = products.filter(
         (item) =>
-            item.warehouse === sourceWarehouse &&
+            item.warehouse === sourceWarehouse?.warehouseName &&
             item.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
+
     const pendingCount = 7;
+
     return (
         <div className="bg-white min-w-[100%] p-6 rounded-2xl subtle-border shadow-md max-w-2xl mx-auto">
             <div className="flex flex-row justify-between">
@@ -116,40 +138,31 @@ const MoveItemsSklad = () => {
             {/* Warehouse Selection */}
             {!isCollapsed && (
                 <div className="mb-4">
-                    <div className="flex justify-between">
-                        <div className="w-5/12">
+                    <div className="flex justify-between items-center">
+                        <div className="flex-1 min-h-[72px] mr-5">
                             <label className="block mb-2 font-medium">Исходный склад</label>
-                            <select
+                            <Dropdown
                                 value={sourceWarehouse}
-                                onChange={(e) => setSourceWarehouse(e.target.value)}
-                                className="w-full p-2 border rounded-xl"
-                            >
-                                <option value="">Выберите исходный склад</option>
-                                {warehouses.map((warehouse) => (
-                                    <option key={warehouse} value={warehouse}>
-                                        {warehouse}
-                                    </option>
-                                ))}
-                            </select>
+                                options={warehouses}
+                                onChange={(e) => setSourceWarehouse(e.value)}
+                                optionLabel="warehouseName"
+                                placeholder="Выберите исходный склад"
+                                className="w-full border-2 border-blue-500 rounded-md"
+                            />
                         </div>
-                        <div className="flex items-center self-end">
-                            <FaExchangeAlt className="text-blue-500 mx-2" />
+                        <div className="flex items-center min-h-[72px] mb-[-30px]">
+                            <FaExchangeAlt className="text-blue-500" />
                         </div>
-
-                        <div className="w-5/12">
+                        <div className="flex-1 min-h-[72px] ml-5">
                             <label className="block mb-2 font-medium">Целевой склад</label>
-                            <select
+                            <Dropdown
                                 value={destinationWarehouse}
-                                onChange={(e) => setDestinationWarehouse(e.target.value)}
-                                className="w-full p-2 border rounded-xl"
-                            >
-                                <option value="">Выберите целевой склад</option>
-                                {warehouses.map((warehouse) => (
-                                    <option key={warehouse} value={warehouse}>
-                                        {warehouse}
-                                    </option>
-                                ))}
-                            </select>
+                                options={warehouses}
+                                onChange={(e) => setDestinationWarehouse(e.value)}
+                                optionLabel="warehouseName"
+                                placeholder="Выберите целевой склад"
+                                className="w-full border-2 border-blue-500 rounded-md"
+                            />
                         </div>
                     </div>
                 </div>
@@ -162,14 +175,11 @@ const MoveItemsSklad = () => {
 
                     {/* Search Input */}
                     <div className="relative mb-4">
-                        <input
-                            type="text"
-                            placeholder="Поиск товаров..."
+                        <InputText
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full p-2 pl-10 border rounded-xl"
+                            placeholder="Поиск товара"
                         />
-                        <FaSearch className="absolute left-3 top-3 text-gray-400" size={20} />
                     </div>
 
                     {/* Item Selection Grid */}
@@ -195,21 +205,14 @@ const MoveItemsSklad = () => {
                     {/* Selected Items List */}
                     {selectedItems.length > 0 && (
                         <div className="mt-4">
-                            <h3 className="text-lg font-semibold mb-2">Selected Items</h3>
+                            <h3 className="text-lg font-semibold mb-2">Выбранные товары</h3>
                             <div className="bg-gray-100 rounded-xl p-2 mb-4">
-                                <div className="grid grid-cols-5 gap-2 mb-2 font-semibold text-gray-700">
-                                    <div>Наименование товара</div>
-                                    <div>Количество для перемещения</div>
-                                    <div>Текущее количество на исходном складе</div>
-                                    <div>Оставшееся количество на исходном складе</div>
-                                    <div>Количество на целевом складе</div>
-                                </div>
                                 {selectedItems.map((item) => (
                                     <div
                                         key={item.id}
                                         className="grid grid-cols-5 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
                                     >
-                                        <div className="font-medium">{item.name}</div>
+                                        <div className="font-mediumx">{item.name}</div>
                                         <div>
                                             <input
                                                 type="number"
@@ -230,7 +233,6 @@ const MoveItemsSklad = () => {
                                             {item.quantity - item.transferQuantity}
                                         </div>
                                         <div className="text-green-600">
-                                            {/* Assuming destination warehouse starts with 0 */}
                                             {item.transferQuantity}
                                         </div>
                                     </div>
