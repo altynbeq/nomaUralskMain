@@ -82,18 +82,21 @@ const WriteoffsForApproval = () => {
     const [warehouseOptions, setWarehouseOptions] = useState([]);
     // Сворачивание/разворачивание панели с фильтрами
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(''); // Для debounce
 
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300); // 300ms задержка
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
     // Подсчет «в ожидании» (pending)
     const pendingCount = writeOffs.filter((w) => w.status === 'pending').length;
 
     useEffect(() => {
         if (!warehouses || !warehouses.length) return;
-        setWarehouseOptions(
-            warehouses.map((wh) => ({
-                warehouseName: wh.warehouseName,
-                id: wh.id,
-            })),
-        );
+        setWarehouseOptions(warehouses.map((wh) => wh.warehouseName));
     }, [warehouses]);
 
     useEffect(() => {
@@ -122,8 +125,8 @@ const WriteoffsForApproval = () => {
                 }
 
                 // Фильтр поиска
-                if (searchTerm) {
-                    params.set('search', searchTerm.trim());
+                if (debouncedSearchTerm) {
+                    params.set('search', debouncedSearchTerm.trim());
                 }
 
                 // Выполняем запрос
@@ -139,7 +142,7 @@ const WriteoffsForApproval = () => {
         };
 
         fetchWriteOffs();
-    }, [clientId, searchTerm, selectedWarehouse, dateRange]);
+    }, [clientId, debouncedSearchTerm, selectedWarehouse, dateRange]);
 
     const openModalWithSubmission = (submission) => {
         setSelectedSubmission(submission);
@@ -257,6 +260,7 @@ const WriteoffsForApproval = () => {
                                 <Dropdown
                                     value={selectedWarehouse}
                                     options={warehouseOptions}
+                                    showClear
                                     onChange={(e) => setSelectedWarehouse(e.value)}
                                     optionLabel="warehouseName"
                                     placeholder="Выберите склад"
