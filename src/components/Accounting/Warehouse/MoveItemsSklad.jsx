@@ -223,7 +223,7 @@ const MoveItemsSklad = () => {
                             <div className="bg-gray-100 rounded-xl p-2 mb-4">
                                 {selectedItems.map((item) => (
                                     <div
-                                        key={item.id}
+                                        key={item._id}
                                         className="grid grid-cols-5 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
                                     >
                                         <div className="font-mediumx">{item.name}</div>
@@ -235,7 +235,7 @@ const MoveItemsSklad = () => {
                                                 value={item.transferQuantity}
                                                 onChange={(e) =>
                                                     updateTransferQuantity(
-                                                        item.id,
+                                                        item._id,
                                                         parseInt(e.target.value),
                                                     )
                                                 }
