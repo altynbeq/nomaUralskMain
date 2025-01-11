@@ -13,6 +13,7 @@ import { useAuthStore, useCompanyStore } from '../../../store/index';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { formatSlashDate } from '../../../methods/dataFormatter';
 import { addLocale } from 'primereact/api';
+import { toast } from 'react-toastify';
 
 addLocale('ru', {
     firstDayOfWeek: 1,
@@ -95,7 +96,6 @@ const WriteoffsForApproval = () => {
         );
     }, [warehouses]);
 
-    // Подгружаем списания
     useEffect(() => {
         if (!clientId) return;
 
@@ -104,18 +104,29 @@ const WriteoffsForApproval = () => {
             try {
                 // Собираем query-параметры
                 const params = new URLSearchParams();
-                // Всегда хотим статус "pending" (можно изменить по логике)
-                params.set('status', 'pending');
+                params.set('status', 'pending'); // Фильтрация по статусу
 
-                if (dateRange && dateRange.length === 2) {
+                // Фильтрация по диапазону дат
+                if (dateRange && dateRange.length > 0) {
+                    // Если выбрана только одна дата, используем её для начала и конца диапазона
                     const startDate = new Date(dateRange[0]).toISOString();
-                    const endDate = new Date(dateRange[1]).toISOString();
+                    const endDate =
+                        dateRange.length === 2 ? new Date(dateRange[1]).toISOString() : startDate; // Если второй даты нет, используем первую
+
                     params.set('dateRange', JSON.stringify([startDate, endDate]));
                 }
+
+                // Фильтр по складу
                 if (selectedWarehouse) {
                     params.set('warehouseName', selectedWarehouse);
                 }
 
+                // Фильтр поиска
+                if (searchTerm) {
+                    params.set('search', searchTerm.trim());
+                }
+
+                // Выполняем запрос
                 const response = await axiosInstance.get(
                     `/clientsSpisanie/${clientId}?${params.toString()}`,
                 );
@@ -139,20 +150,6 @@ const WriteoffsForApproval = () => {
         setSelectedSubmission(null);
         setIsModalOpen(false);
     };
-
-    const onApprove = () => {
-        // Логика подтверждения (PUT/PATCH на сервер или что-то ещё)
-        console.log('Approved:', selectedSubmission);
-        closeModal();
-    };
-
-    const onDecline = () => {
-        // Логика отклонения (PUT/PATCH на сервер или что-то ещё)
-        console.log('Declined:', selectedSubmission);
-        closeModal();
-    };
-
-    // Рендер колонок DataTable:
 
     // 1) Статус
     const statusBodyTemplate = (rowData) => {
@@ -179,6 +176,39 @@ const WriteoffsForApproval = () => {
     const dateBodyTemplate = (rowData) => {
         if (!rowData.date) return '';
         return formatSlashDate(rowData.date);
+    };
+
+    const updateStatus = async (submissionId, newStatus) => {
+        try {
+            setIsLoading(true);
+
+            await axiosInstance.put(`/clientsSpisanie/${clientId}/status/${submissionId}`, {
+                status: newStatus,
+            });
+
+            setWriteOffs((prevWriteOffs) =>
+                prevWriteOffs.map((item) =>
+                    item._id === submissionId ? { ...item, status: newStatus } : item,
+                ),
+            );
+            toast.success('Вы успешно обновили статус товара');
+            closeModal();
+        } catch (error) {
+            toast.error('Не удалось обновить статус товара');
+            console.error('Ошибка при обновлении статуса:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const onApprove = () => {
+        if (!selectedSubmission) return;
+        updateStatus(selectedSubmission._id, 'approved');
+    };
+
+    const onDecline = () => {
+        if (!selectedSubmission) return;
+        updateStatus(selectedSubmission._id, 'declined');
     };
 
     return (
@@ -212,12 +242,14 @@ const WriteoffsForApproval = () => {
                             {/* Дата */}
                             <div className="relative">
                                 <Calendar
+                                    showIcon
+                                    locale="ru"
                                     selectionMode="range"
                                     placeholder="Выберите дату"
                                     type="date"
                                     className="pl-2 min-h-[44px] border-blue-500 border-2 rounded-md"
                                     value={dateRange}
-                                    onChange={(e) => setDateRange(e.target.value)}
+                                    onChange={(e) => setDateRange(e.target)}
                                 />
                             </div>
 
@@ -296,7 +328,7 @@ const WriteoffsForApproval = () => {
                                 {selectedSubmission?.warehouse?.warehouseName ?? '—'}
                             </p>
                             <p>
-                                <span className="font-medium text-gray-900">ID:</span>{' '}
+                                <span className="font-medium text-gray-900">Номер заявки:</span>{' '}
                                 {selectedSubmission._id}
                             </p>
                             <p>
@@ -313,7 +345,7 @@ const WriteoffsForApproval = () => {
                             </p>
                             <p>
                                 <span className="font-medium text-gray-900">Дата:</span>{' '}
-                                {new Date(selectedSubmission.date).toLocaleString()}
+                                {formatSlashDate(selectedSubmission.date)}
                             </p>
                         </div>
 
@@ -328,15 +360,24 @@ const WriteoffsForApproval = () => {
                                 <span className="font-medium text-gray-900">Цена:</span>{' '}
                                 {selectedSubmission?.product?.price ?? '—'}
                             </p>
+                            <img
+                                src={`https://nomalytica-back.onrender.com${selectedSubmission.file.objectURL}`}
+                            />
                         </div>
 
                         <div className="flex items-center justify-end space-x-2 pt-4 border-t">
                             <Button
                                 label="Отклонить"
-                                className="p-button-outlined p-button-danger"
+                                className="bg-black text-white  p-2"
                                 onClick={onDecline}
+                                disabled={isLoading}
                             />
-                            <Button label="Подтвердить" onClick={onApprove} />
+                            <Button
+                                className="bg-blue-600 text-white hover:bg-blue-700 p-2"
+                                label="Подтвердить"
+                                onClick={onApprove}
+                                disabled={isLoading}
+                            />
                         </div>
                     </div>
                 )}
