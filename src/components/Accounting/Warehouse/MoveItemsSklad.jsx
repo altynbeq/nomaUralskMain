@@ -20,9 +20,22 @@ const MoveItemsSklad = () => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [sourceWarehouse, setSourceWarehouse] = useState(null);
     const [destinationWarehouse, setDestinationWarehouse] = useState(null);
+    const [filteredSourceWarehouses, setFilteredSourceWarehouses] = useState([]);
+    const [filteredDestinationWarehouses, setFilteredDestinationWarehouses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+    useEffect(() => {
+        setFilteredSourceWarehouses(warehouses);
+        setFilteredDestinationWarehouses(warehouses);
+    }, [warehouses]);
+
+    useEffect(() => {
+        setFilteredSourceWarehouses(warehouses.filter((wh) => wh.id !== destinationWarehouse?.id));
+
+        setFilteredDestinationWarehouses(warehouses.filter((wh) => wh.id !== sourceWarehouse?.id));
+    }, [warehouses, sourceWarehouse, destinationWarehouse]);
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -50,6 +63,7 @@ const MoveItemsSklad = () => {
     };
 
     const fetchProducts = useCallback(async () => {
+        if (!debouncedSearchTerm) return;
         setIsLoading(true);
         try {
             const response = await axiosInstance.get(
@@ -100,7 +114,6 @@ const MoveItemsSklad = () => {
         setSelectedItems([]);
         setSourceWarehouse(null);
         setDestinationWarehouse(null);
-        alert('Items transferred successfully!');
     };
 
     const CardTitle = ({ className = '', children }) => (
@@ -143,7 +156,7 @@ const MoveItemsSklad = () => {
                             <label className="block mb-2 font-medium">Исходный склад</label>
                             <Dropdown
                                 value={sourceWarehouse}
-                                options={warehouses}
+                                options={filteredSourceWarehouses}
                                 onChange={(e) => setSourceWarehouse(e.value)}
                                 optionLabel="warehouseName"
                                 placeholder="Выберите исходный склад"
@@ -157,7 +170,7 @@ const MoveItemsSklad = () => {
                             <label className="block mb-2 font-medium">Целевой склад</label>
                             <Dropdown
                                 value={destinationWarehouse}
-                                options={warehouses}
+                                options={filteredDestinationWarehouses}
                                 onChange={(e) => setDestinationWarehouse(e.value)}
                                 optionLabel="warehouseName"
                                 placeholder="Выберите целевой склад"
@@ -179,6 +192,7 @@ const MoveItemsSklad = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Поиск товара"
+                            className="pl-2 border-blue-500 border-2 rounded-md min-h-[44px]"
                         />
                     </div>
 
@@ -186,7 +200,7 @@ const MoveItemsSklad = () => {
                     <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
                         {filteredItems.map((item) => (
                             <div
-                                key={item.id}
+                                key={item._id}
                                 className={`p-2 border rounded-xl cursor-pointer ${
                                     selectedItems.some((si) => si.id === item.id)
                                         ? 'bg-blue-100 border-blue-300'
