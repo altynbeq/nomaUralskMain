@@ -17,6 +17,7 @@ import { useDebounce } from '../../../methods/hooks/useDebounce';
 const MoveItemsSklad = () => {
     const warehouses = useCompanyStore((state) => state.warehouses);
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
+
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
@@ -24,10 +25,11 @@ const MoveItemsSklad = () => {
     const [destinationWarehouse, setDestinationWarehouse] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const [moveCount, setMoveCount] = useState(0);
 
+    // Debounce для оптимизации поиска
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+    // Загружаем товары
     const fetchProducts = useCallback(async () => {
         if (!debouncedSearchTerm) return;
         setIsLoading(true);
@@ -47,6 +49,7 @@ const MoveItemsSklad = () => {
         fetchProducts();
     }, [debouncedSearchTerm, fetchProducts]);
 
+    // Списки складов (не показываем склад назначения в списке исходных, и наоборот)
     const filteredSourceWarehouses = useMemo(
         () => warehouses.filter((wh) => wh._id !== destinationWarehouse?._id),
         [warehouses, destinationWarehouse],
@@ -57,70 +60,111 @@ const MoveItemsSklad = () => {
         [warehouses, sourceWarehouse],
     );
 
-    const filteredItems = useMemo(
-        () =>
-            products.filter(
-                (item) =>
-                    item.warehouse === sourceWarehouse?.name &&
-                    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
-            ),
-        [products, sourceWarehouse, searchTerm],
-    );
+    // Отфильтрованные товары для исходного склада
+    const filteredItems = useMemo(() => {
+        return products.filter(
+            (item) =>
+                item.warehouse === sourceWarehouse?.name &&
+                item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+    }, [products, sourceWarehouse, searchTerm]);
 
+    // Функция для определения, сколько товара сейчас на целевом складе
+    const getTargetWarehouseStock = (item) => {
+        // Ищем такой же товар (по _id или по name — в реальном проекте лучше по _id) в списке продуктов,
+        // но уже для целевого склада
+        const foundItem = products.find(
+            (p) => p.name === item.name && p.warehouse === destinationWarehouse?.name,
+        );
+        return foundItem ? foundItem.currentStock : 0;
+    };
+
+    // Добавляем или убираем товар из выбранных
     const handleItemSelect = (item) => {
+        // Если в исходном складе товара < minStock, уведомляем об этом
+        if (item.currentStock < item.minStock) {
+            toast.warn(
+                `Внимание: товар "${item.name}" в исходном складе уже меньше, чем minStock (${item.minStock}).`,
+            );
+        }
         setSelectedItems((prev) => {
             const exists = prev.find((i) => i._id === item._id);
             if (exists) {
+                // Если товар уже выбран — убираем из списка
                 return prev.filter((i) => i._id !== item._id);
             }
-            return [...prev, { ...item, transferQuantity: 1 }];
+            // Иначе добавляем в список (с полем transferQuantity = 1 по умолчанию)
+            return [
+                ...prev,
+                {
+                    ...item,
+                    transferQuantity: 1, // можно поставить 0 или другое стартовое значение
+                },
+            ];
         });
     };
 
-    const updateTransferQuantity = (itemId, newQuantity, minStock) => {
-        if (minStock && minStock < newQuantity) {
-            return toast.error('Вы превысили минимальный порог количества товара');
-        }
+    // При изменении количества
+    const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
-            prev.map((item) =>
-                item._id === itemId
-                    ? { ...item, transferQuantity: Math.min(newQuantity, item.quantity) }
-                    : item,
-            ),
-        );
-    };
+            prev.map((item) => {
+                if (item._id === itemId) {
+                    const qty = Number(newQuantity) || 0;
 
-    const handleTransfer = () => {
-        if (!sourceWarehouse || !destinationWarehouse || !selectedItems.length) {
-            toast.error(
-                'Пожалуйста, выберите исходный склад, целевой склад и товары для перемещения.',
-            );
-            return;
-        }
+                    // Проверяем, не уходим ли в минус
+                    if (qty > item.currentStock) {
+                        toast.error('Нельзя переместить больше, чем есть на складе.');
+                        return { ...item };
+                    }
 
-        setProducts((prevProducts) =>
-            prevProducts.map((prod) => {
-                const selectedItem = selectedItems.find((si) => si._id === prod._id);
-                if (selectedItem) {
-                    return { ...prod, quantity: prod.quantity - selectedItem.transferQuantity };
+                    // Сколько останется после перемещения
+                    const remainder = item.currentStock - qty;
+
+                    // Если останется меньше, чем minStock, уведомляем
+                    if (remainder < item.minStock) {
+                        toast.warn(
+                            `Внимание: при перемещении ${qty} ед. "${item.name}" остаток (${remainder}) меньше minStock (${item.minStock}).`,
+                        );
+                    }
+
+                    // Возвращаем обновлённый товар
+                    return { ...item, transferQuantity: qty };
                 }
-                return prod;
+                return item;
             }),
         );
-        setSelectedItems([]);
-        setSourceWarehouse(null);
-        setDestinationWarehouse(null);
     };
 
+    // Кнопка "Переместить товары"
+    const handleTransfer = async () => {
+        try {
+            const response = await axiosInstance.post('companies/move-items', {
+                sourceWarehouseId: sourceWarehouse._id,
+                destinationWarehouseId: destinationWarehouse._id,
+                items: selectedItems.map((item) => ({
+                    name: item.name,
+                    transferQuantity: item.transferQuantity,
+                    currentStock: item.currentStock,
+                })),
+                companyId: clientId,
+            });
+            toast.success(response.data.message);
+            // Обновить состояние (например, перезагрузить список товаров)
+        } catch (error) {
+            console.error(error);
+            toast.error(
+                error.response?.data?.error || 'Ошибка при перемещении товаров. Попробуйте снова.',
+            );
+        }
+    };
+
+    // Небольшой под-компонент для заголовка
     const CardTitle = ({ className = '', children }) => (
         <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
     );
 
+    // Пример: количество «подвешенных» перемещений
     const pendingCount = 7;
-
-    const handleMoveCount = () => {
-        console.log('clicked');
-    };
 
     return (
         <div className="bg-white min-w-full p-6 rounded-2xl subtle-border shadow-md max-w-2xl mx-auto">
@@ -145,6 +189,7 @@ const MoveItemsSklad = () => {
             {!isCollapsed && (
                 <div className="mb-4">
                     <div className="flex justify-between items-center">
+                        {/* Исходный склад */}
                         <div className="flex-1 min-h-[72px] mr-5">
                             <label className="block mb-2 font-medium">Исходный склад</label>
                             <Dropdown
@@ -159,9 +204,12 @@ const MoveItemsSklad = () => {
                                 className="w-full border-2 border-blue-500 rounded-md"
                             />
                         </div>
+
                         <div className="flex items-center min-h-[72px] mb-[-30px]">
                             <FaExchangeAlt className="text-blue-500" />
                         </div>
+
+                        {/* Целевой склад */}
                         <div className="flex-1 min-h-[72px] ml-5">
                             <label className="block mb-2 font-medium">Целевой склад</label>
                             <Dropdown
@@ -182,8 +230,8 @@ const MoveItemsSklad = () => {
 
             {!isCollapsed && sourceWarehouse && destinationWarehouse && (
                 <div>
+                    {/* Поиск товаров */}
                     <h3 className="text-lg font-semibold mb-2">Выберите товары</h3>
-
                     <div className="relative mb-4">
                         <InputText
                             value={searchTerm}
@@ -193,6 +241,7 @@ const MoveItemsSklad = () => {
                         />
                     </div>
 
+                    {/* Список товаров на исходном складе */}
                     <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
                         {filteredItems.map((item) => (
                             <div
@@ -206,60 +255,82 @@ const MoveItemsSklad = () => {
                             >
                                 <div className="flex justify-between">
                                     <span>{item.name}</span>
-                                    <span>Кол: {item.quantity}</span>
+                                    <span>Кол: {item.currentStock}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
+                    {/* Секция выбранных товаров */}
                     {selectedItems.length > 0 && (
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold mb-2">Выбранные товары</h3>
                             <div className="bg-gray-100 rounded-xl p-2 mb-4">
-                                <div className="grid grid-cols-5 gap-2 mb-2 font-semibold text-gray-700">
-                                    <div>Наименование товара</div>
-                                    <div>Количество для перемещения</div>
-                                    <div>Текущее количество</div>
-                                    <div>Оставшееся</div>
-                                    <div>На целевом складе</div>
+                                {/* Шапка */}
+                                <div className="grid grid-cols-6 gap-2 mb-2 font-semibold text-gray-700">
+                                    <div>Товар</div>
+                                    <div>Минимальный остаток</div>
+                                    <div>Перенос</div>
+                                    <div>Исходный остаток</div>
+                                    <div>Останется</div>
+                                    <div>На целевом складе (будет)</div>
                                 </div>
-                                {selectedItems.map((item) => (
-                                    <div
-                                        key={item._id}
-                                        className="grid grid-cols-5 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
-                                    >
-                                        <div className="font-medium">{item.name}</div>
-                                        <div>
-                                            <InputNumber
-                                                mode="decimal"
-                                                useGrouping={false}
-                                                min={1}
-                                                max={item.currentStock}
-                                                value={moveCount}
-                                                onChange={(e) => {
-                                                    console.log(item);
-                                                    updateTransferQuantity(
-                                                        item._id,
-                                                        parseInt(e.value || 1),
-                                                        item.minStock,
-                                                    );
-                                                }}
-                                                className="p-1 border rounded"
-                                            />
+
+                                {selectedItems.map((item) => {
+                                    const targetStock = getTargetWarehouseStock(item);
+                                    const remainder =
+                                        item.currentStock - (item.transferQuantity || 0);
+                                    const newTarget = targetStock + (item.transferQuantity || 0);
+
+                                    return (
+                                        <div
+                                            key={item._id}
+                                            className="grid grid-cols-6 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
+                                        >
+                                            {/* Наименование */}
+                                            <div className="font-medium">{item.name}</div>
+
+                                            {/* minStock */}
+                                            <div className="text-red-600">{item.minStock}</div>
+
+                                            {/* Количество для переноса */}
+                                            <div>
+                                                <InputNumber
+                                                    mode="decimal"
+                                                    useGrouping={false}
+                                                    min={0}
+                                                    max={item.currentStock}
+                                                    value={item.transferQuantity}
+                                                    onChange={(e) => {
+                                                        updateTransferQuantity(
+                                                            item._id,
+                                                            parseInt(e.value || 0),
+                                                        );
+                                                    }}
+                                                    className="border rounded inline-flex"
+                                                />
+                                            </div>
+
+                                            {/* Текущее количество (currentStock) */}
+                                            <div className="text-gray-600">{item.currentStock}</div>
+
+                                            {/* Останется (остаток на исходном) */}
+                                            <div className="text-blue-600 font-semibold">
+                                                {remainder < 0 ? 0 : remainder}
+                                            </div>
+
+                                            {/* Будет на целевом складе */}
+                                            <div className="text-green-600 font-semibold">
+                                                {newTarget}
+                                            </div>
                                         </div>
-                                        <div className="text-gray-600">{item.quantity}</div>
-                                        <div className="text-blue-600">
-                                            {Math.max(0, item.quantity - item.transferQuantity)}
-                                        </div>
-                                        <div className="text-green-600">
-                                            {item.transferQuantity}
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
 
+                    {/* Кнопка перемещения */}
                     <div className="text-center mt-4">
                         <button
                             onClick={handleTransfer}
