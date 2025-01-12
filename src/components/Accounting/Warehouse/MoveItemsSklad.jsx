@@ -12,6 +12,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { useCompanyStore, useAuthStore } from '../../../store/index';
 import { axiosInstance } from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
+import { useDebounce } from '../../../methods/hooks/useDebounce';
 
 const MoveItemsSklad = () => {
     const warehouses = useCompanyStore((state) => state.warehouses);
@@ -23,17 +24,8 @@ const MoveItemsSklad = () => {
     const [destinationWarehouse, setDestinationWarehouse] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-            if (!searchTerm) {
-                setProducts([]);
-            }
-        }, 300);
-        return () => clearTimeout(handler);
-    }, [searchTerm]);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const fetchProducts = useCallback(async () => {
         if (!debouncedSearchTerm) return;
@@ -84,7 +76,10 @@ const MoveItemsSklad = () => {
         });
     };
 
-    const updateTransferQuantity = (itemId, newQuantity) => {
+    const updateTransferQuantity = (itemId, newQuantity, minStock) => {
+        if (minStock < newQuantity) {
+            return toast.error('Вы превысили минимальный порог количества товара');
+        }
         setSelectedItems((prev) =>
             prev.map((item) =>
                 item._id === itemId
@@ -229,11 +224,12 @@ const MoveItemsSklad = () => {
                                                 useGrouping={false}
                                                 min={1}
                                                 max={item.quantity}
-                                                value={item.transferQuantity}
+                                                // value={item.transferQuantity}
                                                 onChange={(e) =>
                                                     updateTransferQuantity(
                                                         item._id,
                                                         parseInt(e.value || 1),
+                                                        item.minStock,
                                                     )
                                                 }
                                                 className="p-1 border rounded"
