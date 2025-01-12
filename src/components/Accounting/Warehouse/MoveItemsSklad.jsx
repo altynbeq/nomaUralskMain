@@ -47,12 +47,12 @@ const MoveItemsSklad = () => {
     }, [debouncedSearchTerm, fetchProducts]);
 
     const filteredSourceWarehouses = useMemo(
-        () => warehouses.filter((wh) => wh.id !== destinationWarehouse?.id),
+        () => warehouses.filter((wh) => wh._id !== destinationWarehouse?._id),
         [warehouses, destinationWarehouse],
     );
 
     const filteredDestinationWarehouses = useMemo(
-        () => warehouses.filter((wh) => wh.id !== sourceWarehouse?.id),
+        () => warehouses.filter((wh) => wh._id !== sourceWarehouse?._id),
         [warehouses, sourceWarehouse],
     );
 
