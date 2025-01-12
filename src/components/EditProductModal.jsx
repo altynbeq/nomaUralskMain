@@ -166,7 +166,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                     <div className="flex gap-4">
                         <Dropdown
                             value={fromWarehouse}
-                            optionLabel="warehouseName"
+                            optionLabel="name"
                             options={warehouses}
                             onChange={(e) => setFromWarehouse(e.value)}
                             placeholder="Отправка с"
@@ -174,7 +174,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                         />
                         <Dropdown
                             value={toWarehouse}
-                            optionLabel="warehouseName"
+                            optionLabel="name"
                             options={warehouses}
                             onChange={(e) => setToWarehouse(e.value)}
                             placeholder="Отправка в"

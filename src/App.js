@@ -138,14 +138,7 @@ const App = () => {
                 const response = await axiosInstance.get(`/companies/${companyId}`);
                 setCategories(response.data.categories);
                 setProducts(response.data.products);
-                if (response.data.warehouses) {
-                    setWarehouses(
-                        response.data.warehouses.map((warehouseName, index) => ({
-                            warehouseName,
-                            id: index.toString(),
-                        })),
-                    );
-                }
+                setWarehouses(response.data.warehouses);
             } catch (error) {
                 console.error('Error fetching company data:', error);
             }

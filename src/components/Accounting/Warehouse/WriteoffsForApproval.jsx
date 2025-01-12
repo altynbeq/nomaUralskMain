@@ -96,7 +96,7 @@ const WriteoffsForApproval = () => {
 
     useEffect(() => {
         if (!warehouses || !warehouses.length) return;
-        setWarehouseOptions(warehouses.map((wh) => wh.warehouseName));
+        setWarehouseOptions(warehouses.map((wh) => wh.name));
     }, [warehouses]);
 
     useEffect(() => {
@@ -262,7 +262,7 @@ const WriteoffsForApproval = () => {
                                     options={warehouseOptions}
                                     showClear
                                     onChange={(e) => setSelectedWarehouse(e.value)}
-                                    optionLabel="warehouseName"
+                                    optionLabel="name"
                                     placeholder="Выберите склад"
                                     className="w-full border-blue-500 border-2 rounded-md text-white"
                                 />
@@ -295,7 +295,7 @@ const WriteoffsForApproval = () => {
                         <Column field="_id" header="Номер заявки" style={{ minWidth: '160px' }} />
                         <Column
                             header="Склад"
-                            field="warehouse.warehouseName"
+                            field="warehouse.name"
                             style={{ minWidth: '160px' }}
                         />
                         <Column

@@ -60,7 +60,7 @@ const MoveItemsSklad = () => {
         () =>
             products.filter(
                 (item) =>
-                    item.warehouse === sourceWarehouse?.warehouseName &&
+                    item.warehouse === sourceWarehouse?.name &&
                     item.name.toLowerCase().includes(searchTerm.toLowerCase()),
             ),
         [products, sourceWarehouse, searchTerm],
@@ -146,7 +146,7 @@ const MoveItemsSklad = () => {
                                 value={sourceWarehouse}
                                 options={filteredSourceWarehouses}
                                 onChange={(e) => setSourceWarehouse(e.value)}
-                                optionLabel="warehouseName"
+                                optionLabel="name"
                                 placeholder="Выберите исходный склад"
                                 className="w-full border-2 border-blue-500 rounded-md"
                             />
@@ -160,7 +160,7 @@ const MoveItemsSklad = () => {
                                 value={destinationWarehouse}
                                 options={filteredDestinationWarehouses}
                                 onChange={(e) => setDestinationWarehouse(e.value)}
-                                optionLabel="warehouseName"
+                                optionLabel="name"
                                 placeholder="Выберите целевой склад"
                                 className="w-full border-2 border-blue-500 rounded-md"
                             />

@@ -141,8 +141,8 @@ export function Products({ title, filterExceedMinStock }) {
                         <Dropdown
                             value={selectedWarehouse}
                             onChange={(e) => setSelectedWarehouse(e.value)}
-                            options={warehouses}
-                            optionLabel="warehouseName"
+                            options={warehouses.map((w) => w.name)}
+                            optionLabel="name"
                             placeholder="Склад"
                             showClear
                         />

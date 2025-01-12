@@ -107,8 +107,7 @@ export function WriteOffs({ title, writeOffs }) {
                     {selectedRow.organization?.storeName}
                 </p>
                 <p>
-                    <span className="font-bold text-lg">Cклад:</span>{' '}
-                    {selectedRow.warehouse?.warehouseName}
+                    <span className="font-bold text-lg">Cклад:</span> {selectedRow.warehouse?.name}
                 </p>
                 <p>
                     <span className="font-bold text-lg">Причина:</span> {selectedRow.reason}
