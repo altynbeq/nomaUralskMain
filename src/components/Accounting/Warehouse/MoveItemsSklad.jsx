@@ -24,6 +24,7 @@ const MoveItemsSklad = () => {
     const [destinationWarehouse, setDestinationWarehouse] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [moveCount, setMoveCount] = useState(0);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -117,6 +118,10 @@ const MoveItemsSklad = () => {
 
     const pendingCount = 7;
 
+    const handleMoveCount = () => {
+        console.log('clicked');
+    };
+
     return (
         <div className="bg-white min-w-full p-6 rounded-2xl subtle-border shadow-md max-w-2xl mx-auto">
             <div className="flex flex-row justify-between">
@@ -145,7 +150,10 @@ const MoveItemsSklad = () => {
                             <Dropdown
                                 value={sourceWarehouse}
                                 options={filteredSourceWarehouses}
-                                onChange={(e) => setSourceWarehouse(e.value)}
+                                onChange={(e) => {
+                                    setSourceWarehouse(e.value);
+                                    setSelectedItems([]);
+                                }}
                                 optionLabel="name"
                                 placeholder="Выберите исходный склад"
                                 className="w-full border-2 border-blue-500 rounded-md"
@@ -159,7 +167,10 @@ const MoveItemsSklad = () => {
                             <Dropdown
                                 value={destinationWarehouse}
                                 options={filteredDestinationWarehouses}
-                                onChange={(e) => setDestinationWarehouse(e.value)}
+                                onChange={(e) => {
+                                    setDestinationWarehouse(e.value);
+                                    setSelectedItems([]);
+                                }}
                                 optionLabel="name"
                                 placeholder="Выберите целевой склад"
                                 className="w-full border-2 border-blue-500 rounded-md"
@@ -223,15 +234,16 @@ const MoveItemsSklad = () => {
                                                 mode="decimal"
                                                 useGrouping={false}
                                                 min={1}
-                                                max={item.quantity}
-                                                // value={item.transferQuantity}
-                                                onChange={(e) =>
+                                                max={item.currentStock}
+                                                value={moveCount}
+                                                onChange={(e) => {
+                                                    console.log(item);
                                                     updateTransferQuantity(
                                                         item._id,
                                                         parseInt(e.value || 1),
                                                         item.minStock,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                                 className="p-1 border rounded"
                                             />
                                         </div>
