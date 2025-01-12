@@ -20,7 +20,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
         setIsLoading(true);
         try {
             const response = await axiosInstance.put(
-                `/companies/products/${clientId}/${product._id}`,
+                `/companies/${clientId}/${product._id}`,
                 productData,
             );
             if (response.status === 200) {

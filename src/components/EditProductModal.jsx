@@ -67,7 +67,7 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
         setIsLoading(true);
         try {
             const response = await axiosInstance.put(`companies/products/category/${companyId}`, {
-                items,
+                products: items,
                 category: selectedCategory,
             });
             if (response.status === 200) {

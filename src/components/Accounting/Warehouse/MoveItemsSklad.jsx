@@ -77,7 +77,7 @@ const MoveItemsSklad = () => {
     };
 
     const updateTransferQuantity = (itemId, newQuantity, minStock) => {
-        if (minStock < newQuantity) {
+        if (minStock && minStock < newQuantity) {
             return toast.error('Вы превысили минимальный порог количества товара');
         }
         setSelectedItems((prev) =>
