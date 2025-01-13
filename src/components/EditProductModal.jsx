@@ -5,16 +5,23 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { InputNumber } from 'primereact/inputnumber';
+import { useCompanyStore, useAuthStore } from '../store/index';
+import { axiosInstance } from '../api/axiosInstance';
+import { toast } from 'react-toastify';
 
 export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
+    const user = useAuthStore((state) => state.user);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [fromWarehouse, setFromWarehouse] = useState(null);
     const [toWarehouse, setToWarehouse] = useState(null);
     const [transferDate, setTransferDate] = useState(null);
-
+    const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
+    const categories = useCompanyStore((state) => state.categories);
     // Состояние для управления открытием MoreEditProductModal
     const [isMoreEditModalOpen, setIsMoreEditModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const openMoreEditModal = (product) => {
         setSelectedProduct(product);
@@ -34,6 +41,10 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
         setIsTransferModalOpen(false);
     };
 
+    const handleCategoryEditClick = () => {
+        setShowCategoriesDropdown(true);
+    };
+
     const renderTransferFooter = () => (
         <div className="flex justify-between">
             <Button
@@ -50,6 +61,26 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
             />
         </div>
     );
+
+    const handleChangeCategory = async () => {
+        const companyId = user?.companyId ? user?.companyId : user?.id;
+        setIsLoading(true);
+        try {
+            const response = await axiosInstance.put(`companies/products/category/${companyId}`, {
+                items,
+                category: selectedCategory,
+            });
+            if (response.status === 200) {
+                toast.success('Вы успешно обновили категорию товаров');
+                setSelectedCategory(null);
+                setShowCategoriesDropdown(false);
+            }
+        } catch {
+            toast.error('Не удалось обновить категорию');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Dialog
@@ -71,12 +102,43 @@ export const EditProductModal = ({ isOpen, onClose, items, warehouses }) => {
                     </div>
                 ))}
 
-                {/* Кнопка переноса */}
                 <Button
+                    label="Поменять категорию"
+                    className="mt-10 p-button-primary w-full bg-blue-500 p-2 text-white rounded-md"
+                    onClick={handleCategoryEditClick}
+                />
+
+                {showCategoriesDropdown && (
+                    <div className="flex">
+                        <Dropdown
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.value)}
+                            options={categories || []}
+                            placeholder="Выберите категорию"
+                            showClear
+                            className="w-full border-blue-500 border-2 rounded-lg"
+                        />
+                        <Button
+                            disabled={!selectedCategory || isLoading}
+                            onClick={handleChangeCategory}
+                            className="ml-5"
+                            icon={
+                                <i
+                                    className="pi pi-arrow-right-arrow-left
+"
+                                    style={{ fontSize: '1rem' }}
+                                ></i>
+                            }
+                        />
+                    </div>
+                )}
+
+                {/* Кнопка переноса */}
+                {/* <Button
                     label="Перенести"
                     className="p-button-primary w-full bg-blue-500 p-2 text-white rounded-md"
                     onClick={handleTransferClick}
-                />
+                /> */}
             </div>
 
             {/* Модальное окно переноса */}

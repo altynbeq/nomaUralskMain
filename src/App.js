@@ -28,6 +28,7 @@ const App = () => {
     const setReceipts = useCompanyStore((state) => state.setReceipts);
     const setWriteOffs = useCompanyStore((state) => state.setWriteOffs);
     const setProducts = useCompanyStore((state) => state.setProducts);
+    const setCategories = useCompanyStore((state) => state.setCategories);
     const setWarehouses = useCompanyStore((state) => state.setWarehouses);
     const setDeals = useCompanyStore((state) => state.setDeals);
     const setDepartments = useCompanyStructureStore((state) => state.setDepartments);
@@ -135,6 +136,7 @@ const App = () => {
 
             try {
                 const response = await axiosInstance.get(`/companies/${companyId}`);
+                setCategories(response.data.categories);
                 setProducts(response.data.products);
                 if (response.data.warehouses) {
                     setWarehouses(
@@ -149,7 +151,7 @@ const App = () => {
             }
         };
         fetchCompanyProductsAndWarehouses();
-    }, [isEmployee, setProducts, setWarehouses, user?.companyId, user?.id]);
+    }, [isEmployee, setCategories, setProducts, setWarehouses, user?.companyId, user?.id]);
 
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
