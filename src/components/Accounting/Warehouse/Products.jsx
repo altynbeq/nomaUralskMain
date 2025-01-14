@@ -151,6 +151,7 @@ export function Products({ title, filterExceedMinStock }) {
                 {showFilters && (
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center p-4 border border-gray-300 rounded-lg">
                         <Dropdown
+                            className="border-2 rounded-md"
                             value={selectedWarehouse}
                             onChange={(e) => {
                                 setSelectedWarehouse(e.value);
@@ -162,6 +163,7 @@ export function Products({ title, filterExceedMinStock }) {
                             showClear
                         />
                         <InputText
+                            className="border-2 rounded-md p-2"
                             value={productSearch}
                             onChange={(e) => setProductSearch(e.target.value)}
                             placeholder="Поиск товара"
