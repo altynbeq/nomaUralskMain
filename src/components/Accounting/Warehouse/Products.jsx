@@ -32,29 +32,44 @@ export function Products({ title, filterExceedMinStock }) {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
+            const params = new URLSearchParams({
+                page: lazyParams.page,
+                limit: lazyParams.rows,
+                search: productSearch || '',
+            });
+
+            if (selectedWarehouse && selectedWarehouse._id) {
+                params.append('warehouseId', selectedWarehouse._id);
+            }
+
             const response = await axiosInstance.get(
                 filterExceedMinStock
-                    ? `/products/company/${clientId}/exceedMinStock/?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`
-                    : `/products/company/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
+                    ? `/products/company/${clientId}/exceedMinStock?${params.toString()}`
+                    : `/products/company/${clientId}?${params.toString()}`,
             );
-            setProducts(response.data);
-            setTotalRecords(response.data.length);
+            setProducts(response.data.data);
+            setTotalRecords(response.data.total);
         } catch (error) {
             console.error('Ошибка при загрузке товаров:', error);
         } finally {
             setLoading(false);
         }
-    }, [clientId, filterExceedMinStock, lazyParams.page, lazyParams.rows, productSearch]);
+    }, [
+        clientId,
+        filterExceedMinStock,
+        lazyParams.page,
+        lazyParams.rows,
+        productSearch,
+        selectedWarehouse,
+    ]);
 
     useEffect(() => {
         fetchProducts();
-    }, [fetchProducts, lazyParams, productSearch]);
+    }, [fetchProducts, lazyParams, productSearch, selectedWarehouse]);
 
-    // Событие при переключении страницы или изменении количества строк
     const handlePageChange = (event) => {
         setLazyParams({
             ...lazyParams,
-            // PrimeReact использует 0-based нумерацию страниц, поэтому добавляем +1
             page: event.page + 1,
             rows: event.rows,
         });
@@ -118,7 +133,7 @@ export function Products({ title, filterExceedMinStock }) {
                             items={selectedProducts}
                             isOpen={editModalIsVisible}
                             onClose={() => setEditModalIsVisible(false)}
-                            warehouses={warehouses} // Передаём склады, если нужно
+                            warehouses={warehouses}
                         />
                         <AddCategoryModal
                             visible={showAddCategoryModal}
@@ -134,14 +149,14 @@ export function Products({ title, filterExceedMinStock }) {
                 </div>
 
                 {showFilters && (
-                    <div
-                        ref={filterRef}
-                        className="flex flex-col md:flex-row gap-2 md:gap-6 items-center p-4 border border-gray-300 rounded-lg"
-                    >
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center p-4 border border-gray-300 rounded-lg">
                         <Dropdown
                             value={selectedWarehouse}
-                            onChange={(e) => setSelectedWarehouse(e.value)}
-                            options={warehouses.map((w) => w.name)}
+                            onChange={(e) => {
+                                setSelectedWarehouse(e.value);
+                                setLazyParams({ ...lazyParams, page: 1 });
+                            }}
+                            options={warehouses}
                             optionLabel="name"
                             placeholder="Склад"
                             showClear
@@ -162,17 +177,13 @@ export function Products({ title, filterExceedMinStock }) {
 
             <DataTable
                 value={products}
-                // Включаем режим "ленивой" загрузки (server-side pagination)
                 lazy
                 paginator
-                // Указываем смещение (first) и общее число записей
                 first={(lazyParams.page - 1) * lazyParams.rows}
                 rows={lazyParams.rows}
                 totalRecords={totalRecords}
                 loading={loading}
-                // При переходе на другую страницу или смене кол-ва строк срабатывает handlePageChange
                 onPage={handlePageChange}
-                // Переключение количества строк доступно через rowsPerPageOptions
                 rowsPerPageOptions={[10, 20, 50, 100]}
                 dataKey="id"
                 selection={selectedProducts}
