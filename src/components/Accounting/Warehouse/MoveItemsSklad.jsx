@@ -15,7 +15,7 @@ import { toast } from 'react-toastify';
 import { useDebounce } from '../../../methods/hooks/useDebounce';
 
 const MoveItemsSklad = () => {
-    const warehouses = useCompanyStore((state) => state.warehouses);
+    const warehouses = useCompanyStore((state) => state.warehouses) || [];
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
 
     const [products, setProducts] = useState([]);

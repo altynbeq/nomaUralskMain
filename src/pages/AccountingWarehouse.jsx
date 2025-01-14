@@ -15,7 +15,7 @@ import WriteoffsForApproval from '../components/Accounting/Warehouse/WriteoffsFo
 
 const InternalTabs = () => {
     const clientId = useAuthStore((state) => state.user.companyId);
-    const totalProducts = useCompanyStore((state) => state.products).length;
+    const totalProducts = useCompanyStore((state) => state.products)?.length || 0;
     const [isLoading, setIsLoading] = useState(false);
     const [writeOffs, setWriteOffs] = useState([]);
     const [activeTab, setActiveTab] = useState('sklad');

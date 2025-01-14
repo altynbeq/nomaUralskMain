@@ -127,7 +127,7 @@ const App = () => {
     }, [setSubUserShifts, setSubUserTodayShifts, user, user?.id, user?.role]);
 
     useEffect(() => {
-        const fetchCompanyProductsAndWarehouses = async () => {
+        (async () => {
             const companyId = isEmployee() ? user?.companyId : user?.id;
 
             if (!companyId) {
@@ -135,15 +135,29 @@ const App = () => {
             }
 
             try {
-                const response = await axiosInstance.get(`/companies/${companyId}`);
-                setCategories(response.data.categories);
-                setProducts(response.data.products);
-                setWarehouses(response.data.warehouses);
+                const response = await axiosInstance.get(`/warehouses/${companyId}`);
+                setWarehouses(response.data);
             } catch (error) {
                 console.error('Error fetching company data:', error);
             }
-        };
-        fetchCompanyProductsAndWarehouses();
+        })();
+    }, [isEmployee, setCategories, setProducts, setWarehouses, user?.companyId, user?.id]);
+
+    useEffect(() => {
+        (async () => {
+            const companyId = isEmployee() ? user?.companyId : user?.id;
+
+            if (!companyId) {
+                return;
+            }
+
+            try {
+                const response = await axiosInstance.get(`/products/company/${companyId}`);
+                setProducts(response.data);
+            } catch (error) {
+                console.error('Error fetching company data:', error);
+            }
+        })();
     }, [isEmployee, setCategories, setProducts, setWarehouses, user?.companyId, user?.id]);
 
     return (
