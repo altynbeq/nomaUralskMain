@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { axiosInstance } from '../api/axiosInstance';
-import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-toastify';
 
-export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
-    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
+export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) => {
     const [productData, setProductData] = useState(product || {});
     const [isLoading, setIsLoading] = useState(false);
 
@@ -19,10 +18,11 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
     const handleSave = async () => {
         setIsLoading(true);
         try {
-            const response = await axiosInstance.put(
-                `/companies/${clientId}/${product._id}`,
-                productData,
-            );
+            const { warehouse, ...updatedProductData } = productData;
+            const response = await axiosInstance.put(`/products/${product.id}`, {
+                ...updatedProductData,
+                category: updatedProductData.category._id,
+            });
             if (response.status === 200) {
                 toast.success('Вы успешно обновили товар');
                 // Дополнительно можно обновить список товаров, если необходимо
@@ -87,7 +87,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                         <InputNumber
                             id="price"
                             className="border-2 rounded-md p-2"
-                            value={productData.price || 0}
+                            value={productData.price}
                             onValueChange={(e) => onChange(e, 'price')}
                             mode="decimal"
                             min={0}
@@ -97,10 +97,10 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                     <div className="col mt-5">
                         <label htmlFor="currentStock text-xs">Остаток</label>
                         <InputNumber
-                            id="currentStock"
+                            id="quantity"
                             className="border-2 rounded-md p-2"
-                            value={productData.currentStock || 0}
-                            onValueChange={(e) => onChange(e, 'currentStock')}
+                            value={productData.quantity}
+                            onValueChange={(e) => onChange(e, 'quantity')}
                             mode="decimal"
                             min={0}
                             useGrouping={false}
@@ -110,27 +110,24 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                         <label htmlFor="minStock text-xs">Мин. Остаток</label>
                         <InputNumber
                             className="border-2 rounded-md p-2"
-                            id="minStock"
-                            value={productData.minStock || 0}
-                            onValueChange={(e) => onChange(e, 'minStock')}
+                            id="minQuantity"
+                            value={productData.minQuantity}
+                            onValueChange={(e) => onChange(e, 'minQuantity')}
                             mode="decimal"
                             min={0}
                             useGrouping={false}
                         />
                     </div>
                 </div>
-
-                {/* Количество */}
                 <div className="field mt-5">
-                    <label htmlFor="quantity text-xs">Количество</label>
-                    <InputNumber
-                        mode="decimal"
-                        min={0}
-                        useGrouping={false}
-                        className="border-2 rounded-md p-2"
-                        id="quantity"
-                        value={productData.quantity || 0}
-                        onValueChange={(e) => onChange(e, 'quantity')}
+                    <Dropdown
+                        value={productData.category}
+                        onChange={(e) => onChange(e, 'category')}
+                        options={categories || []}
+                        optionLabel="name"
+                        placeholder="Выберите категорию"
+                        showClear
+                        className="w-full border-2 rounded-md"
                     />
                 </div>
             </div>

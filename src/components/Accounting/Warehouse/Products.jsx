@@ -174,7 +174,7 @@ export function Products({ title, filterExceedMinStock }) {
                 onPage={handlePageChange}
                 // Переключение количества строк доступно через rowsPerPageOptions
                 rowsPerPageOptions={[10, 20, 50, 100]}
-                dataKey="_id"
+                dataKey="id"
                 selection={selectedProducts}
                 onSelectionChange={(e) => setSelectedProducts(e.value)}
                 selectionMode="multiple"
@@ -185,6 +185,7 @@ export function Products({ title, filterExceedMinStock }) {
                 <Column field="price" header="Цена" />
                 <Column field="quantity" header="Количество" />
                 <Column field="minQuantity" header="Мин. количество" />
+                <Column field="category.name" header="Категория" />
             </DataTable>
         </div>
     );
