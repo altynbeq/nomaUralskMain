@@ -143,23 +143,6 @@ const App = () => {
         })();
     }, [isEmployee, setCategories, setProducts, setWarehouses, user?.companyId, user?.id]);
 
-    useEffect(() => {
-        (async () => {
-            const companyId = isEmployee() ? user?.companyId : user?.id;
-
-            if (!companyId) {
-                return;
-            }
-
-            try {
-                const response = await axiosInstance.get(`/products/company/${companyId}`);
-                setProducts(response.data);
-            } catch (error) {
-                console.error('Error fetching company data:', error);
-            }
-        })();
-    }, [isEmployee, setCategories, setProducts, setWarehouses, user?.companyId, user?.id]);
-
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
             <BrowserRouter>

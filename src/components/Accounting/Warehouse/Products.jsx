@@ -34,11 +34,11 @@ export function Products({ title, filterExceedMinStock }) {
         try {
             const response = await axiosInstance.get(
                 filterExceedMinStock
-                    ? `/companies/products/${clientId}/exceedMinStock/?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`
-                    : `/companies/products/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
+                    ? `/products/company/${clientId}/exceedMinStock/?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`
+                    : `/products/company/${clientId}?page=${lazyParams.page}&limit=${lazyParams.rows}&search=${productSearch}`,
             );
-            setProducts(response.data.products);
-            setTotalRecords(response.data.total);
+            setProducts(response.data);
+            setTotalRecords(response.data.length);
         } catch (error) {
             console.error('Ошибка при загрузке товаров:', error);
         } finally {
@@ -181,11 +181,10 @@ export function Products({ title, filterExceedMinStock }) {
             >
                 <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                 <Column field="name" header="Название" />
-                <Column field="warehouse" header="Склад" />
+                <Column field="warehouse.name" header="Склад" />
                 <Column field="price" header="Цена" />
-                <Column field="currentStock" header="Остаток" />
-                <Column field="minStock" header="Мин. Остаток" />
                 <Column field="quantity" header="Количество" />
+                <Column field="minQuantity" header="Мин. количество" />
             </DataTable>
         </div>
     );
