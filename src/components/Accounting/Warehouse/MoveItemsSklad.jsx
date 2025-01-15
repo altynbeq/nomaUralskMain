@@ -100,13 +100,10 @@ const MoveItemsSklad = () => {
                 if (item.id === itemId) {
                     const qty = Number(newQuantity) || 0;
 
-                    // Проверяем, не уходим ли в минус (нельзя переносить больше, чем quantity)
                     if (qty > item.quantity) {
-                        toast.error('Нельзя переместить больше, чем есть на складе.');
-                        return item; // возвращаем без изменений
+                        return item;
                     }
 
-                    // Если остаток после переноса меньше minQuantity, предупреждаем
                     const remainder = item.quantity - qty;
                     if (remainder < item.minQuantity) {
                         toast.warn(
