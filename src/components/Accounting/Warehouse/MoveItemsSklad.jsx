@@ -76,9 +76,6 @@ const MoveItemsSklad = () => {
     };
 
     const handleItemSelect = (item) => {
-        if (item.quantity < item.minQuantity) {
-            return;
-        }
         setSelectedItems((prev) => {
             const exists = prev.find((i) => i.id === item.id);
             if (exists) {
