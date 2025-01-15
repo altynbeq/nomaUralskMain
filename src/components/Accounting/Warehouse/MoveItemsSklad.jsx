@@ -15,7 +15,7 @@ import { toast } from 'react-toastify';
 import { useDebounce } from '../../../methods/hooks/useDebounce';
 
 const MoveItemsSklad = () => {
-    const warehouses = useCompanyStore((state) => state.warehouses) || [];
+    const warehouses = useCompanyStore((state) => state.warehouses);
     const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
 
     const [products, setProducts] = useState([]);
@@ -26,12 +26,8 @@ const MoveItemsSklad = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isCollapsed, setIsCollapsed] = useState(true);
 
-    // Debounce для оптимизации поиска
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    /**
-     * Загрузка товаров (поиск + фильтрация по companyId):
-     */
     const fetchProducts = useCallback(async () => {
         if (!debouncedSearchTerm) return;
         setIsLoading(true);
