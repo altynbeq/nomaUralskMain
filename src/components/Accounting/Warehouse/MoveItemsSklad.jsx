@@ -35,9 +35,9 @@ const MoveItemsSklad = () => {
         setIsLoading(true);
         try {
             const { data } = await axiosInstance.get(
-                `/companies/products/${clientId}?&search=${debouncedSearchTerm}`,
+                `/products/company/${clientId}?&search=${debouncedSearchTerm}`,
             );
-            setProducts(data.products);
+            setProducts(data.data);
         } catch (error) {
             console.error('Ошибка при загрузке товаров:', error);
         } finally {
@@ -64,7 +64,7 @@ const MoveItemsSklad = () => {
     const filteredItems = useMemo(() => {
         return products.filter(
             (item) =>
-                item.warehouse === sourceWarehouse?.name &&
+                item.warehouse.name === sourceWarehouse?.name &&
                 item.name.toLowerCase().includes(searchTerm.toLowerCase()),
         );
     }, [products, sourceWarehouse, searchTerm]);
@@ -82,7 +82,7 @@ const MoveItemsSklad = () => {
     // Добавляем или убираем товар из выбранных
     const handleItemSelect = (item) => {
         // Если в исходном складе товара < minStock, уведомляем об этом
-        if (item.currentStock < item.minStock) {
+        if (item.quantity < item.minQuantity) {
             toast.warn(
                 `Внимание: товар "${item.name}" в исходном складе уже меньше, чем minStock (${item.minStock}).`,
             );
@@ -112,16 +112,16 @@ const MoveItemsSklad = () => {
                     const qty = Number(newQuantity) || 0;
 
                     // Проверяем, не уходим ли в минус
-                    if (qty > item.currentStock) {
+                    if (qty > item.quantity) {
                         toast.error('Нельзя переместить больше, чем есть на складе.');
                         return { ...item };
                     }
 
                     // Сколько останется после перемещения
-                    const remainder = item.currentStock - qty;
+                    const remainder = item.quantity - qty;
 
                     // Если останется меньше, чем minStock, уведомляем
-                    if (remainder < item.minStock) {
+                    if (remainder < item.minQuantity) {
                         toast.warn(
                             `Внимание: при перемещении ${qty} ед. "${item.name}" остаток (${remainder}) меньше minStock (${item.minStock}).`,
                         );
@@ -245,9 +245,9 @@ const MoveItemsSklad = () => {
                     <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
                         {filteredItems.map((item) => (
                             <div
-                                key={item._id}
+                                key={item.id}
                                 className={`p-2 border rounded-xl cursor-pointer ${
-                                    selectedItems.some((si) => si._id === item._id)
+                                    selectedItems.some((si) => si.id === item.id)
                                         ? 'bg-blue-100 border-blue-300'
                                         : 'hover:bg-gray-100'
                                 }`}
@@ -255,7 +255,7 @@ const MoveItemsSklad = () => {
                             >
                                 <div className="flex justify-between">
                                     <span>{item.name}</span>
-                                    <span>Кол: {item.currentStock}</span>
+                                    <span>Кол: {item.quantity}</span>
                                 </div>
                             </div>
                         ))}
@@ -291,7 +291,7 @@ const MoveItemsSklad = () => {
                                             <div className="font-medium">{item.name}</div>
 
                                             {/* minStock */}
-                                            <div className="text-red-600">{item.minStock}</div>
+                                            <div className="text-red-600">{item.minQuantity}</div>
 
                                             {/* Количество для переноса */}
                                             <div>
@@ -312,7 +312,7 @@ const MoveItemsSklad = () => {
                                             </div>
 
                                             {/* Текущее количество (currentStock) */}
-                                            <div className="text-gray-600">{item.currentStock}</div>
+                                            <div className="text-gray-600">{item.quantity}</div>
 
                                             {/* Останется (остаток на исходном) */}
                                             <div className="text-blue-600 font-semibold">
