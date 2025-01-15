@@ -131,7 +131,7 @@ const WriteoffsForApproval = () => {
 
                 // Выполняем запрос
                 const response = await axiosInstance.get(
-                    `/clientsSpisanie/${clientId}?${params.toString()}`,
+                    `/writeOff/${clientId}?${params.toString()}`,
                 );
                 setWriteOffs(response.data);
             } catch (error) {
@@ -177,21 +177,21 @@ const WriteoffsForApproval = () => {
 
     // 3) Дата (форматируем)
     const dateBodyTemplate = (rowData) => {
-        if (!rowData.date) return '';
-        return formatSlashDate(rowData.date);
+        if (!rowData.createdAt) return '';
+        return formatSlashDate(rowData.createdAt);
     };
 
     const updateStatus = async (submissionId, newStatus) => {
         try {
             setIsLoading(true);
 
-            await axiosInstance.put(`/clientsSpisanie/${clientId}/status/${submissionId}`, {
+            await axiosInstance.put(`/writeOff/${clientId}/status/${submissionId}`, {
                 status: newStatus,
             });
 
             setWriteOffs((prevWriteOffs) =>
                 prevWriteOffs.map((item) =>
-                    item._id === submissionId ? { ...item, status: newStatus } : item,
+                    item.id === submissionId ? { ...item, status: newStatus } : item,
                 ),
             );
             toast.success('Вы успешно обновили статус товара');
@@ -206,12 +206,12 @@ const WriteoffsForApproval = () => {
 
     const onApprove = () => {
         if (!selectedSubmission) return;
-        updateStatus(selectedSubmission._id, 'approved');
+        updateStatus(selectedSubmission.id, 'approved');
     };
 
     const onDecline = () => {
         if (!selectedSubmission) return;
-        updateStatus(selectedSubmission._id, 'declined');
+        updateStatus(selectedSubmission.id, 'declined');
     };
 
     return (
@@ -292,7 +292,7 @@ const WriteoffsForApproval = () => {
                         emptyMessage="Нет данных для отображения"
                         onRowClick={(e) => openModalWithSubmission(e.data)}
                     >
-                        <Column field="_id" header="Номер заявки" style={{ minWidth: '160px' }} />
+                        <Column field="id" header="Номер заявки" style={{ minWidth: '160px' }} />
                         <Column
                             header="Склад"
                             field="warehouse.name"
@@ -300,7 +300,9 @@ const WriteoffsForApproval = () => {
                         />
                         <Column
                             header="Запросил"
-                            body={(rowData) => rowData.responsible?.name ?? '—'}
+                            body={(rowData) =>
+                                rowData.user?.name + '\n' + rowData.user?.email ?? '—'
+                            }
                             style={{ minWidth: '180px' }}
                         />
                         <Column
@@ -329,11 +331,11 @@ const WriteoffsForApproval = () => {
                         <div className="space-y-2 text-sm text-gray-700">
                             <p>
                                 <span className="font-medium text-gray-900">Склад:</span>{' '}
-                                {selectedSubmission?.warehouse?.warehouseName ?? '—'}
+                                {selectedSubmission?.warehouse?.name ?? '—'}
                             </p>
                             <p>
                                 <span className="font-medium text-gray-900">Номер заявки:</span>{' '}
-                                {selectedSubmission._id}
+                                {selectedSubmission.id}
                             </p>
                             <p>
                                 <span className="font-medium text-gray-900">Статус:</span>{' '}
@@ -345,11 +347,11 @@ const WriteoffsForApproval = () => {
                             </p>
                             <p>
                                 <span className="font-medium text-gray-900">Кол-во:</span>{' '}
-                                {selectedSubmission.quantity ?? '—'}
+                                {selectedSubmission.requestedAmount ?? '—'}
                             </p>
                             <p>
                                 <span className="font-medium text-gray-900">Дата:</span>{' '}
-                                {formatSlashDate(selectedSubmission.date)}
+                                {formatSlashDate(selectedSubmission.createdAt)}
                             </p>
                         </div>
 
@@ -365,7 +367,7 @@ const WriteoffsForApproval = () => {
                                 {selectedSubmission?.product?.price ?? '—'}
                             </p>
                             <img
-                                src={`https://nomalytica-back.onrender.com${selectedSubmission.file.objectURL}`}
+                                src={`https://nomalytica-back.onrender.com${selectedSubmission.imagePath}`}
                             />
                         </div>
 

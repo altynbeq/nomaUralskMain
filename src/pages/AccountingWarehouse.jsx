@@ -25,7 +25,7 @@ const InternalTabs = () => {
             if (!clientId) return;
             setIsLoading(true);
             try {
-                const response = await axiosInstance.get(`/clientsSpisanie/${clientId}`);
+                const response = await axiosInstance.get(`/writeOff/${clientId}?status=approved`);
                 setWriteOffs(response.data);
             } catch (error) {
                 console.error('Ошибка при получении списаний:', error);
@@ -52,7 +52,7 @@ const InternalTabs = () => {
                         totalWriteOffs={writeOffs.length}
                     />
                     <Products title="Товар близок к мин остатку" filterExceedMinStock={true} />
-                    <WriteOffs title="Не подтвержденные списания" writeOffs={writeOffs || []} />
+                    <WriteOffs title="Подтвержденные списания" writeOffs={writeOffs || []} />
                 </div>
             </div>
         ),
@@ -60,7 +60,7 @@ const InternalTabs = () => {
             <div className="flex flex-col gap-3 justify-center">
                 <div className=" mb-10 p-2">
                     <Products title="Список товаров" />
-                    <WriteOffs writeOffs={writeOffs || []} />
+                    {/* <WriteOffs writeOffs={writeOffs || []} /> */}
                 </div>
             </div>
         ),

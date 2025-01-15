@@ -42,10 +42,12 @@ export function Products({ title, filterExceedMinStock }) {
                 params.append('warehouseId', selectedWarehouse._id);
             }
 
+            if (filterExceedMinStock) {
+                params.append('filterExceedMinStock', true);
+            }
+
             const response = await axiosInstance.get(
-                filterExceedMinStock
-                    ? `/products/company/${clientId}/exceedMinStock?${params.toString()}`
-                    : `/products/company/${clientId}?${params.toString()}`,
+                `/products/company/${clientId}?${params.toString()}`,
             );
             setProducts(response.data.data);
             setTotalRecords(response.data.total);
@@ -76,6 +78,9 @@ export function Products({ title, filterExceedMinStock }) {
     };
 
     const handleFilterToggle = () => {
+        setLazyParams({ page: 1, rows: 20 });
+        setSelectedWarehouse(null);
+        setProductSearch('');
         setShowFilters(!showFilters);
     };
 
