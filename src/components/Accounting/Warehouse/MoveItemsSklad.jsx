@@ -91,9 +91,6 @@ const MoveItemsSklad = () => {
         });
     };
 
-    /**
-     * Смена количества для переноса.
-     */
     const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
             prev.map((item) => {
@@ -118,16 +115,12 @@ const MoveItemsSklad = () => {
         );
     };
 
-    /**
-     * "Переместить товары" — отправка запроса на бэкенд.
-     */
     const handleTransfer = async () => {
         if (!sourceWarehouse || !destinationWarehouse) {
             toast.error('Нужно выбрать исходный и целевой склады.');
             return;
         }
         try {
-            // Формируем массив товаров для переноса
             const items = selectedItems.map((item) => ({
                 productId: item.id,
                 quantityToTransfer: item.transferQuantity,
@@ -140,9 +133,7 @@ const MoveItemsSklad = () => {
                 companyId: clientId,
             });
             toast.success(response.data.message || 'Товары успешно перемещены!');
-            // По желанию обновляем список товаров
             fetchProducts();
-            // Сбрасываем выбранные товары
             setSelectedItems([]);
         } catch (error) {
             console.error(error);
@@ -152,12 +143,10 @@ const MoveItemsSklad = () => {
         }
     };
 
-    // Декоративный под-компонент для заголовка
     const CardTitle = ({ className = '', children }) => (
         <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
     );
 
-    // Для примера, количество "подвешенных" перемещений
     const pendingCount = 7;
 
     return (
