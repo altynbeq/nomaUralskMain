@@ -165,7 +165,7 @@ export function WriteOffs({ title, writeOffs }) {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={rowExpansionTemplate}
-                dataKey="createdAt"
+                dataKey="id"
                 breakpoint="960px"
                 paginator
                 rows={10}

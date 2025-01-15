@@ -76,11 +76,8 @@ const MoveItemsSklad = () => {
     };
 
     const handleItemSelect = (item) => {
-        console.log(item, selectedItems);
         if (item.quantity < item.minQuantity) {
-            toast.warn(
-                `Внимание: товар "${item.name}" уже ниже минимального запаса (minQuantity = ${item.minQuantity}).`,
-            );
+            return;
         }
         setSelectedItems((prev) => {
             const exists = prev.find((i) => i.id === item.id);
@@ -295,7 +292,7 @@ const MoveItemsSklad = () => {
                                             return (
                                                 <div
                                                     key={item.id}
-                                                    className="grid grid-cols-6 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
+                                                    className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr,1fr] gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
                                                 >
                                                     {/* Название */}
                                                     <div className="font-medium">{item.name}</div>
@@ -319,7 +316,8 @@ const MoveItemsSklad = () => {
                                                                     parseInt(e.value || 0, 10),
                                                                 );
                                                             }}
-                                                            className="border rounded inline-flex"
+                                                            className="w-full text-center border rounded"
+                                                            style={{ width: '100%' }} // Убедитесь, что ширина инпута равномерная
                                                         />
                                                     </div>
 
