@@ -95,7 +95,6 @@ const MoveItemsSklad = () => {
      * Смена количества для переноса.
      */
     const updateTransferQuantity = (itemId, newQuantity) => {
-        console.log(itemId, newQuantity);
         setSelectedItems((prev) =>
             prev.map((item) => {
                 if (item.id === itemId) {
