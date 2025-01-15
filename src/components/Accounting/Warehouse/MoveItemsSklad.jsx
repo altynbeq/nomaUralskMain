@@ -29,27 +29,30 @@ const MoveItemsSklad = () => {
     // Debounce для оптимизации поиска
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    // Загружаем товары
+    /**
+     * Загрузка товаров (поиск + фильтрация по companyId):
+     */
     const fetchProducts = useCallback(async () => {
         if (!debouncedSearchTerm) return;
         setIsLoading(true);
         try {
-            const { data } = await axiosInstance.get(
-                `/products/company/${clientId}?&search=${debouncedSearchTerm}`,
-            );
+            const warehouseParam = sourceWarehouse?._id
+                ? `&warehouseId=${sourceWarehouse._id}`
+                : '';
+            const url = `/products/company/${clientId}?search=${debouncedSearchTerm}${warehouseParam}`;
+            const { data } = await axiosInstance.get(url);
             setProducts(data.data);
         } catch (error) {
             console.error('Ошибка при загрузке товаров:', error);
         } finally {
             setIsLoading(false);
         }
-    }, [clientId, debouncedSearchTerm]);
+    }, [clientId, debouncedSearchTerm, sourceWarehouse?._id]);
 
     useEffect(() => {
         fetchProducts();
     }, [debouncedSearchTerm, fetchProducts]);
 
-    // Списки складов (не показываем склад назначения в списке исходных, и наоборот)
     const filteredSourceWarehouses = useMemo(
         () => warehouses.filter((wh) => wh._id !== destinationWarehouse?._id),
         [warehouses, destinationWarehouse],
@@ -60,74 +63,67 @@ const MoveItemsSklad = () => {
         [warehouses, sourceWarehouse],
     );
 
-    // Отфильтрованные товары для исходного склада
     const filteredItems = useMemo(() => {
         return products.filter(
             (item) =>
-                item.warehouse.name === sourceWarehouse?.name &&
+                item.warehouse?.id === sourceWarehouse?.id &&
                 item.name.toLowerCase().includes(searchTerm.toLowerCase()),
         );
     }, [products, sourceWarehouse, searchTerm]);
 
-    // Функция для определения, сколько товара сейчас на целевом складе
     const getTargetWarehouseStock = (item) => {
-        // Ищем такой же товар (по _id или по name — в реальном проекте лучше по _id) в списке продуктов,
-        // но уже для целевого склада
+        if (!destinationWarehouse) return 0;
         const foundItem = products.find(
-            (p) => p.name === item.name && p.warehouse === destinationWarehouse?.name,
+            (p) => p.id === item.id && p.warehouse?._id === destinationWarehouse?._id,
         );
-        return foundItem ? foundItem.currentStock : 0;
+        return foundItem ? foundItem.quantity : 0;
     };
 
-    // Добавляем или убираем товар из выбранных
     const handleItemSelect = (item) => {
-        // Если в исходном складе товара < minStock, уведомляем об этом
+        console.log(item, selectedItems);
         if (item.quantity < item.minQuantity) {
             toast.warn(
-                `Внимание: товар "${item.name}" в исходном складе уже меньше, чем minStock (${item.minStock}).`,
+                `Внимание: товар "${item.name}" уже ниже минимального запаса (minQuantity = ${item.minQuantity}).`,
             );
         }
         setSelectedItems((prev) => {
-            const exists = prev.find((i) => i._id === item._id);
+            const exists = prev.find((i) => i.id === item.id);
             if (exists) {
-                // Если товар уже выбран — убираем из списка
-                return prev.filter((i) => i._id !== item._id);
+                return prev.filter((i) => i.id !== item.id);
             }
-            // Иначе добавляем в список (с полем transferQuantity = 1 по умолчанию)
             return [
                 ...prev,
                 {
                     ...item,
-                    transferQuantity: 1, // можно поставить 0 или другое стартовое значение
+                    transferQuantity: 1,
                 },
             ];
         });
     };
 
-    // При изменении количества
+    /**
+     * Смена количества для переноса.
+     */
     const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
             prev.map((item) => {
-                if (item._id === itemId) {
+                if (item.id === itemId) {
                     const qty = Number(newQuantity) || 0;
 
-                    // Проверяем, не уходим ли в минус
+                    // Проверяем, не уходим ли в минус (нельзя переносить больше, чем quantity)
                     if (qty > item.quantity) {
                         toast.error('Нельзя переместить больше, чем есть на складе.');
-                        return { ...item };
+                        return item; // возвращаем без изменений
                     }
 
-                    // Сколько останется после перемещения
+                    // Если остаток после переноса меньше minQuantity, предупреждаем
                     const remainder = item.quantity - qty;
-
-                    // Если останется меньше, чем minStock, уведомляем
                     if (remainder < item.minQuantity) {
                         toast.warn(
-                            `Внимание: при перемещении ${qty} ед. "${item.name}" остаток (${remainder}) меньше minStock (${item.minStock}).`,
+                            `Внимание: после переноса ${qty} ед. "${item.name}", остаток (${remainder}) будет меньше minQuantity (${item.minQuantity}).`,
                         );
                     }
 
-                    // Возвращаем обновлённый товар
                     return { ...item, transferQuantity: qty };
                 }
                 return item;
@@ -135,21 +131,32 @@ const MoveItemsSklad = () => {
         );
     };
 
-    // Кнопка "Переместить товары"
+    /**
+     * "Переместить товары" — отправка запроса на бэкенд.
+     */
     const handleTransfer = async () => {
+        if (!sourceWarehouse || !destinationWarehouse) {
+            toast.error('Нужно выбрать исходный и целевой склады.');
+            return;
+        }
         try {
+            // Формируем массив товаров для переноса
+            const items = selectedItems.map((item) => ({
+                productId: item.id,
+                quantityToTransfer: item.transferQuantity,
+            }));
+
             const response = await axiosInstance.post('companies/move-items', {
-                sourceWarehouseId: sourceWarehouse._id,
-                destinationWarehouseId: destinationWarehouse._id,
-                items: selectedItems.map((item) => ({
-                    name: item.name,
-                    transferQuantity: item.transferQuantity,
-                    currentStock: item.currentStock,
-                })),
+                sourceWarehouseId: sourceWarehouse.id,
+                destinationWarehouseId: destinationWarehouse.id,
+                items,
                 companyId: clientId,
             });
-            toast.success(response.data.message);
-            // Обновить состояние (например, перезагрузить список товаров)
+            toast.success(response.data.message || 'Товары успешно перемещены!');
+            // По желанию обновляем список товаров
+            fetchProducts();
+            // Сбрасываем выбранные товары
+            setSelectedItems([]);
         } catch (error) {
             console.error(error);
             toast.error(
@@ -158,12 +165,12 @@ const MoveItemsSklad = () => {
         }
     };
 
-    // Небольшой под-компонент для заголовка
+    // Декоративный под-компонент для заголовка
     const CardTitle = ({ className = '', children }) => (
         <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
     );
 
-    // Пример: количество «подвешенных» перемещений
+    // Для примера, количество "подвешенных" перемещений
     const pendingCount = 7;
 
     return (
@@ -186,161 +193,174 @@ const MoveItemsSklad = () => {
                 </div>
             </div>
 
+            {/* Если панель открыта */}
             {!isCollapsed && (
-                <div className="mb-4">
-                    <div className="flex justify-between items-center">
-                        {/* Исходный склад */}
-                        <div className="flex-1 min-h-[72px] mr-5">
-                            <label className="block mb-2 font-medium">Исходный склад</label>
-                            <Dropdown
-                                value={sourceWarehouse}
-                                options={filteredSourceWarehouses}
-                                onChange={(e) => {
-                                    setSourceWarehouse(e.value);
-                                    setSelectedItems([]);
-                                }}
-                                optionLabel="name"
-                                placeholder="Выберите исходный склад"
-                                className="w-full border-2 border-blue-500 rounded-md"
-                            />
-                        </div>
-
-                        <div className="flex items-center min-h-[72px] mb-[-30px]">
-                            <FaExchangeAlt className="text-blue-500" />
-                        </div>
-
-                        {/* Целевой склад */}
-                        <div className="flex-1 min-h-[72px] ml-5">
-                            <label className="block mb-2 font-medium">Целевой склад</label>
-                            <Dropdown
-                                value={destinationWarehouse}
-                                options={filteredDestinationWarehouses}
-                                onChange={(e) => {
-                                    setDestinationWarehouse(e.value);
-                                    setSelectedItems([]);
-                                }}
-                                optionLabel="name"
-                                placeholder="Выберите целевой склад"
-                                className="w-full border-2 border-blue-500 rounded-md"
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {!isCollapsed && sourceWarehouse && destinationWarehouse && (
-                <div>
-                    {/* Поиск товаров */}
-                    <h3 className="text-lg font-semibold mb-2">Выберите товары</h3>
-                    <div className="relative mb-4">
-                        <InputText
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Поиск товара"
-                            className="pl-2 border-blue-500 border-2 rounded-md min-h-[44px]"
-                        />
-                    </div>
-
-                    {/* Список товаров на исходном складе */}
-                    <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
-                        {filteredItems.map((item) => (
-                            <div
-                                key={item.id}
-                                className={`p-2 border rounded-xl cursor-pointer ${
-                                    selectedItems.some((si) => si.id === item.id)
-                                        ? 'bg-blue-100 border-blue-300'
-                                        : 'hover:bg-gray-100'
-                                }`}
-                                onClick={() => handleItemSelect(item)}
-                            >
-                                <div className="flex justify-between">
-                                    <span>{item.name}</span>
-                                    <span>Кол: {item.quantity}</span>
-                                </div>
+                <>
+                    {/* Выбор складов */}
+                    <div className="mb-4">
+                        <div className="flex justify-between items-center">
+                            {/* Исходный склад */}
+                            <div className="flex-1 min-h-[72px] mr-5">
+                                <label className="block mb-2 font-medium">Исходный склад</label>
+                                <Dropdown
+                                    value={sourceWarehouse}
+                                    options={filteredSourceWarehouses}
+                                    onChange={(e) => {
+                                        setSourceWarehouse(e.value);
+                                        setSelectedItems([]);
+                                    }}
+                                    optionLabel="name"
+                                    placeholder="Выберите склад-источник"
+                                    className="w-full border-2 border-blue-500 rounded-md"
+                                />
                             </div>
-                        ))}
+
+                            <div className="flex items-center min-h-[72px] mb-[-30px]">
+                                <FaExchangeAlt className="text-blue-500" />
+                            </div>
+
+                            {/* Целевой склад */}
+                            <div className="flex-1 min-h-[72px] ml-5">
+                                <label className="block mb-2 font-medium">Целевой склад</label>
+                                <Dropdown
+                                    value={destinationWarehouse}
+                                    options={filteredDestinationWarehouses}
+                                    onChange={(e) => {
+                                        setDestinationWarehouse(e.value);
+                                        setSelectedItems([]);
+                                    }}
+                                    optionLabel="name"
+                                    placeholder="Выберите склад-получатель"
+                                    className="w-full border-2 border-blue-500 rounded-md"
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Секция выбранных товаров */}
-                    {selectedItems.length > 0 && (
-                        <div className="mt-4">
-                            <h3 className="text-lg font-semibold mb-2">Выбранные товары</h3>
-                            <div className="bg-gray-100 rounded-xl p-2 mb-4">
-                                {/* Шапка */}
-                                <div className="grid grid-cols-6 gap-2 mb-2 font-semibold text-gray-700">
-                                    <div>Товар</div>
-                                    <div>Минимальный остаток</div>
-                                    <div>Перенос</div>
-                                    <div>Исходный остаток</div>
-                                    <div>Останется</div>
-                                    <div>На целевом складе (будет)</div>
-                                </div>
+                    {/* Если выбраны оба склада */}
+                    {sourceWarehouse && destinationWarehouse && (
+                        <>
+                            {/* Поиск товаров */}
+                            <h3 className="text-lg font-semibold mb-2">Выберите товары</h3>
+                            <div className="relative mb-4">
+                                <InputText
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Поиск товара"
+                                    className="pl-2 border-blue-500 border-2 rounded-md min-h-[44px]"
+                                />
+                            </div>
 
-                                {selectedItems.map((item) => {
-                                    const targetStock = getTargetWarehouseStock(item);
-                                    const remainder =
-                                        item.currentStock - (item.transferQuantity || 0);
-                                    const newTarget = targetStock + (item.transferQuantity || 0);
-
-                                    return (
-                                        <div
-                                            key={item._id}
-                                            className="grid grid-cols-6 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
-                                        >
-                                            {/* Наименование */}
-                                            <div className="font-medium">{item.name}</div>
-
-                                            {/* minStock */}
-                                            <div className="text-red-600">{item.minQuantity}</div>
-
-                                            {/* Количество для переноса */}
-                                            <div>
-                                                <InputNumber
-                                                    mode="decimal"
-                                                    useGrouping={false}
-                                                    min={0}
-                                                    max={item.currentStock}
-                                                    value={item.transferQuantity}
-                                                    onChange={(e) => {
-                                                        updateTransferQuantity(
-                                                            item._id,
-                                                            parseInt(e.value || 0),
-                                                        );
-                                                    }}
-                                                    className="border rounded inline-flex"
-                                                />
-                                            </div>
-
-                                            {/* Текущее количество (currentStock) */}
-                                            <div className="text-gray-600">{item.quantity}</div>
-
-                                            {/* Останется (остаток на исходном) */}
-                                            <div className="text-blue-600 font-semibold">
-                                                {remainder < 0 ? 0 : remainder}
-                                            </div>
-
-                                            {/* Будет на целевом складе */}
-                                            <div className="text-green-600 font-semibold">
-                                                {newTarget}
-                                            </div>
+                            {/* Список товаров исходного склада */}
+                            <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
+                                {filteredItems.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className={`p-2 border rounded-xl cursor-pointer ${
+                                            selectedItems.some((si) => si.id === item.id)
+                                                ? 'bg-blue-100 border-blue-300'
+                                                : 'hover:bg-gray-100'
+                                        }`}
+                                        onClick={() => handleItemSelect(item)}
+                                    >
+                                        <div className="flex justify-between">
+                                            <span>{item.name}</span>
+                                            <span>Кол: {item.quantity}</span>
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                    )}
 
-                    {/* Кнопка перемещения */}
-                    <div className="text-center mt-4">
-                        <button
-                            onClick={handleTransfer}
-                            className="bg-blue-500 text-white px-6 py-2 rounded-2xl hover:bg-blue-600 transition duration-300"
-                            disabled={selectedItems.length === 0}
-                        >
-                            Переместить товары <FaTruckLoading className="inline-block ml-2" />
-                        </button>
-                    </div>
-                </div>
+                            {/* Секция выбранных товаров */}
+                            {selectedItems.length > 0 && (
+                                <div className="mt-4">
+                                    <h3 className="text-lg font-semibold mb-2">Выбранные товары</h3>
+                                    <div className="bg-gray-100 rounded-xl p-2 mb-4">
+                                        {/* Шапка */}
+                                        <div className="grid grid-cols-6 gap-2 mb-2 font-semibold text-gray-700">
+                                            <div>Товар</div>
+                                            <div>Минимальный остаток</div>
+                                            <div>Перенос</div>
+                                            <div>Исходный остаток</div>
+                                            <div>Останется</div>
+                                            <div>На целевом складе (будет)</div>
+                                        </div>
+
+                                        {selectedItems.map((item) => {
+                                            // Текущее количество на целевом складе
+                                            const targetStock = getTargetWarehouseStock(item);
+                                            // Сколько останется на исходном (не допускаем отрицательных)
+                                            const remainder =
+                                                item.quantity - (item.transferQuantity || 0);
+                                            const newTarget =
+                                                targetStock + (item.transferQuantity || 0);
+
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className="grid grid-cols-6 gap-2 items-center bg-white rounded-xl p-2 mb-2 shadow-sm"
+                                                >
+                                                    {/* Название */}
+                                                    <div className="font-medium">{item.name}</div>
+
+                                                    {/* minQuantity */}
+                                                    <div className="text-red-600">
+                                                        {item.minQuantity}
+                                                    </div>
+
+                                                    {/* Инпут для переноса */}
+                                                    <div>
+                                                        <InputNumber
+                                                            mode="decimal"
+                                                            useGrouping={false}
+                                                            min={0}
+                                                            max={item.quantity}
+                                                            value={item.transferQuantity}
+                                                            onChange={(e) => {
+                                                                updateTransferQuantity(
+                                                                    item._id,
+                                                                    parseInt(e.value || 0, 10),
+                                                                );
+                                                            }}
+                                                            className="border rounded inline-flex"
+                                                        />
+                                                    </div>
+
+                                                    {/* Исходный остаток */}
+                                                    <div className="text-gray-600">
+                                                        {item.quantity}
+                                                    </div>
+
+                                                    {/* Останется */}
+                                                    <div className="text-blue-600 font-semibold">
+                                                        {remainder < 0 ? 0 : remainder}
+                                                    </div>
+
+                                                    {/* Будет на целевом складе */}
+                                                    <div className="text-green-600 font-semibold">
+                                                        {newTarget}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Кнопка "Переместить товары" */}
+                            <div className="text-center mt-4">
+                                <button
+                                    onClick={handleTransfer}
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-2xl hover:bg-blue-600 transition duration-300"
+                                    disabled={selectedItems.length === 0}
+                                >
+                                    Переместить товары{' '}
+                                    <FaTruckLoading className="inline-block ml-2" />
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </>
             )}
         </div>
     );
