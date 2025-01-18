@@ -126,7 +126,7 @@ const MoveItemsSklad = () => {
                 quantityToTransfer: item.transferQuantity,
             }));
 
-            const response = await axiosInstance.post('inventory/transfer', {
+            const response = await axiosInstance.post('products/transfer', {
                 sourceWarehouseId: sourceWarehouse._id,
                 destinationWarehouseId: destinationWarehouse._id,
                 items,

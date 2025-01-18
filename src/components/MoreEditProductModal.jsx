@@ -19,6 +19,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
         setIsLoading(true);
         try {
             const { warehouse, ...updatedProductData } = productData;
+            console.log(productData);
             const response = await axiosInstance.put(`/products/${product.id}`, {
                 ...updatedProductData,
                 category: updatedProductData?.category?._id || null,
@@ -123,7 +124,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
                 </div>
                 <div className="field mt-5">
                     <Dropdown
-                        value={productData.category}
+                        value={productData.category || null}
                         onChange={(e) => onChange(e, 'category')}
                         options={categories || []}
                         optionLabel="name"
