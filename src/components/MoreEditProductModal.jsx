@@ -21,13 +21,15 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
             const { warehouse, ...updatedProductData } = productData;
             const response = await axiosInstance.put(`/products/${product.id}`, {
                 ...updatedProductData,
-                category: updatedProductData.category._id,
+                category: updatedProductData?.category?._id || null,
+                warehouseId: product.warehouse._id,
             });
             if (response.status === 200) {
                 toast.success('Вы успешно обновили товар');
                 // Дополнительно можно обновить список товаров, если необходимо
             }
         } catch (error) {
+            console.log(error);
             toast.error('Ошибка при обновлении товара');
         } finally {
             setIsLoading(false);
