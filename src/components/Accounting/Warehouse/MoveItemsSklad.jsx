@@ -16,7 +16,8 @@ import { useDebounce } from '../../../methods/hooks/useDebounce';
 
 const MoveItemsSklad = () => {
     const warehouses = useCompanyStore((state) => state.warehouses);
-    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
+    const clientId = useAuthStore((state) => state.user.companyId);
+    const userId = useAuthStore((state) => state.user.id);
 
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -131,6 +132,7 @@ const MoveItemsSklad = () => {
                 destinationWarehouseId: destinationWarehouse._id,
                 items,
                 companyId: clientId,
+                subUserId: userId,
             });
             toast.success(response.data.message || 'Товары успешно перемещены!');
             fetchProducts();
