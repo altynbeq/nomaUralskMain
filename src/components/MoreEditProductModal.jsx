@@ -8,29 +8,26 @@ import { axiosInstance } from '../api/axiosInstance';
 import { toast } from 'react-toastify';
 
 export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) => {
-    const [productData, setProductData] = useState(product || {});
+    const [productData, setProductData] = useState(product || null);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        setProductData(product || {});
+        setProductData(product || null);
     }, [product]);
 
     const handleSave = async () => {
         setIsLoading(true);
         try {
             const { warehouse, ...updatedProductData } = productData;
-            console.log(productData);
             const response = await axiosInstance.put(`/products/${product.id}`, {
                 ...updatedProductData,
-                category: updatedProductData?.category?._id || null,
+                // Передаем id категории, если категория выбрана
+                category: updatedProductData?.category ? updatedProductData.category._id : null,
                 warehouseId: product.warehouse._id,
             });
-            if (response.status === 200) {
-                toast.success('Вы успешно обновили товар');
-                // Дополнительно можно обновить список товаров, если необходимо
-            }
+            toast.success(response.data.message || 'Вы успешно обновили товар');
         } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error('Ошибка при обновлении товара');
         } finally {
             setIsLoading(false);
@@ -44,6 +41,13 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
             ...prev,
             [field]: value,
         }));
+    };
+
+    // Обработка изменения выбранной категории. Найдем объект категории по его _id.
+    const onCategoryChange = (e) => {
+        const selectedId = e.value;
+        const selectedCategory = categories.find((cat) => cat._id === selectedId) || null;
+        onChange({ value: selectedCategory }, 'category');
     };
 
     const renderFooter = () => (
@@ -78,7 +82,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
                         placeholder="Название товара"
                         id="productName"
                         className="border-2 rounded-md p-2"
-                        value={productData.name || ''}
+                        value={productData?.name || ''}
                         onChange={(e) => onChange(e, 'name')}
                     />
                 </div>
@@ -90,7 +94,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
                         <InputNumber
                             id="price"
                             className="border-2 rounded-md p-2"
-                            value={productData.price}
+                            value={productData?.price}
                             onValueChange={(e) => onChange(e, 'price')}
                             mode="decimal"
                             min={0}
@@ -102,7 +106,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
                         <InputNumber
                             id="quantity"
                             className="border-2 rounded-md p-2"
-                            value={productData.quantity}
+                            value={productData?.quantity}
                             onValueChange={(e) => onChange(e, 'quantity')}
                             mode="decimal"
                             min={0}
@@ -114,7 +118,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
                         <InputNumber
                             className="border-2 rounded-md p-2"
                             id="minQuantity"
-                            value={productData.minQuantity}
+                            value={productData?.minQuantity}
                             onValueChange={(e) => onChange(e, 'minQuantity')}
                             mode="decimal"
                             min={0}
@@ -124,10 +128,11 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
                 </div>
                 <div className="field mt-5">
                     <Dropdown
-                        value={productData.category || null}
-                        onChange={(e) => onChange(e, 'category')}
+                        value={productData?.category ? productData.category._id : null}
+                        onChange={onCategoryChange}
                         options={categories || []}
                         optionLabel="name"
+                        optionValue="_id"
                         placeholder="Выберите категорию"
                         showClear
                         className="w-full border-2 rounded-md"
