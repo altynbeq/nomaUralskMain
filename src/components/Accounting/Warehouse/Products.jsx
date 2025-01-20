@@ -1,9 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { Accordion, AccordionTab } from 'primereact/accordion';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
+import { Paginator } from 'primereact/paginator';
 import { EditProductModal } from '../../EditProductModal';
 import { AddCategoryModal } from './AddCategoryModal';
 import { useCompanyStore, useAuthStore } from '../../../store';
@@ -17,10 +19,8 @@ export function Products({ title, filterExceedMinStock }) {
 
     const [products, setProducts] = useState([]);
     const [totalRecords, setTotalRecords] = useState(0);
-
     const [lazyParams, setLazyParams] = useState({ page: 1, rows: 20 });
     const [loading, setLoading] = useState(false);
-
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [productSearch, setProductSearch] = useState('');
@@ -37,15 +37,13 @@ export function Products({ title, filterExceedMinStock }) {
                 limit: lazyParams.rows,
                 search: productSearch || '',
             });
-
             if (selectedWarehouse && selectedWarehouse._id) {
                 params.append('warehouseId', selectedWarehouse._id);
             }
-
             if (filterExceedMinStock) {
                 params.append('filterExceedMinStock', true);
             }
-
+            // API возвращает товары с полем warehouses (массив объектов: {warehouseId, quantity, minQuantity})
             const response = await axiosInstance.get(
                 `/products/company/${clientId}?${params.toString()}`,
             );
@@ -56,18 +54,11 @@ export function Products({ title, filterExceedMinStock }) {
         } finally {
             setLoading(false);
         }
-    }, [
-        clientId,
-        filterExceedMinStock,
-        lazyParams.page,
-        lazyParams.rows,
-        productSearch,
-        selectedWarehouse,
-    ]);
+    }, [clientId, filterExceedMinStock, lazyParams, productSearch, selectedWarehouse]);
 
     useEffect(() => {
         fetchProducts();
-    }, [fetchProducts, lazyParams, productSearch, selectedWarehouse]);
+    }, [fetchProducts]);
 
     const handlePageChange = (event) => {
         setLazyParams({
@@ -84,22 +75,22 @@ export function Products({ title, filterExceedMinStock }) {
         setShowFilters(!showFilters);
     };
 
-    const handleOutsideClick = (event) => {
-        if (filterRef.current && !filterRef.current.contains(event.target)) {
-            setShowFilters(false);
-        }
-    };
+    // const handleOutsideClick = (event) => {
+    //     if (filterRef.current && !filterRef.current.contains(event.target)) {
+    //         setShowFilters(false);
+    //     }
+    // };
 
-    useEffect(() => {
-        if (showFilters) {
-            document.addEventListener('mousedown', handleOutsideClick);
-        } else {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        };
-    }, [showFilters]);
+    // useEffect(() => {
+    //     if (showFilters) {
+    //         document.addEventListener('mousedown', handleOutsideClick);
+    //     } else {
+    //         document.removeEventListener('mousedown', handleOutsideClick);
+    //     }
+    //     return () => {
+    //         document.removeEventListener('mousedown', handleOutsideClick);
+    //     };
+    // }, [showFilters]);
 
     const CardTitle = ({ children }) => (
         <h2 className="text-xl font-semibold text-gray-900">{children}</h2>
@@ -113,22 +104,78 @@ export function Products({ title, filterExceedMinStock }) {
         setEditModalIsVisible(true);
     };
 
+    // Возвращает объект склада из списка warehouses по warehouseId
+    const getWarehouseById = (warehouseId) => {
+        return warehouses.find((wh) => wh._id === warehouseId);
+    };
+
+    // Заголовок для каждой вкладки аккордеона: отображает название товара и общий остаток (сумма по всем складам)
+    const headerTemplate = (product) => {
+        const totalQuantity = product.warehouses
+            ? product.warehouses.reduce((sum, wh) => sum + wh.quantity, 0)
+            : product.quantity || 0;
+        const totalMinQuantity = product.warehouses
+            ? product.warehouses.reduce((sum, wh) => sum + wh.minQuantity, 0)
+            : product.minQuantity || 0;
+        return (
+            <div className="flex justify-between items-center">
+                <span className="font-medium">{product.name}</span>
+                <span className="text-sm text-gray-600">
+                    Остаток: {totalQuantity} / Мин: {totalMinQuantity}
+                </span>
+            </div>
+        );
+    };
+
+    // Рендер таблицы складских данных для товара
+    const renderWarehouseData = (warehouseArray) => {
+        if (!warehouseArray || warehouseArray.length === 0) {
+            return <div>Нет складских данных</div>;
+        }
+        return (
+            <table className="min-w-full border-collapse border border-gray-200">
+                <thead>
+                    <tr>
+                        <th className="border border-gray-200 p-2 text-left">Склад</th>
+                        <th className="border border-gray-200 p-2 text-center">Количество</th>
+                        <th className="border border-gray-200 p-2 text-center">Мин. количество</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {warehouseArray.map((whData, index) => {
+                        const whObj = getWarehouseById(whData.warehouseId);
+                        return (
+                            <tr key={index}>
+                                <td className="border border-gray-200 p-2">
+                                    {whObj ? whObj.name : whData.warehouseId}
+                                </td>
+                                <td className="border border-gray-200 p-2 text-center">
+                                    {whData.quantity}
+                                </td>
+                                <td className="border border-gray-200 p-2 text-center">
+                                    {whData.minQuantity}
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        );
+    };
+
     return (
-        <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 text-center justify-center align-center w-[90%] md:w-[90%] rounded-2xl subtle-border">
+        <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
-                    <div className="flex text-[1rem] font-semibold align-left">
+                    <div className="flex text-[1rem] font-semibold">
                         <CardTitle>{title}</CardTitle>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
-                        {!filterExceedMinStock && (
-                            <Button
-                                onClick={() => setShowAddCategoryModal(true)}
-                                label="Добавить категорию"
-                                className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
-                            />
-                        )}
-
+                        <Button
+                            onClick={() => setShowAddCategoryModal(true)}
+                            label="Добавить категорию"
+                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                        />
                         <Button
                             className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                             label="Редактировать"
@@ -154,7 +201,10 @@ export function Products({ title, filterExceedMinStock }) {
                 </div>
 
                 {showFilters && (
-                    <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center p-4 border border-gray-300 rounded-lg">
+                    <div
+                        ref={filterRef}
+                        className="flex flex-col md:flex-row gap-2 md:gap-6 items-center p-4 border border-gray-300 rounded-lg"
+                    >
                         <Dropdown
                             className="border-2 rounded-md"
                             value={selectedWarehouse}
@@ -182,29 +232,51 @@ export function Products({ title, filterExceedMinStock }) {
                 )}
             </div>
 
-            <DataTable
-                value={products}
-                lazy
-                paginator
-                first={(lazyParams.page - 1) * lazyParams.rows}
-                rows={lazyParams.rows}
-                totalRecords={totalRecords}
-                loading={loading}
-                onPage={handlePageChange}
-                rowsPerPageOptions={[10, 20, 50, 100]}
-                dataKey="id"
-                selection={selectedProducts}
-                onSelectionChange={(e) => setSelectedProducts(e.value)}
-                selectionMode="multiple"
-            >
-                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
-                <Column field="name" header="Название" />
-                <Column field="warehouse.name" header="Склад" />
-                <Column field="price" header="Цена" />
-                <Column field="quantity" header="Количество" />
-                <Column field="minQuantity" header="Мин. количество" />
-                <Column field="category.name" header="Категория" />
-            </DataTable>
+            {loading ? (
+                <div>Загрузка...</div>
+            ) : (
+                <>
+                    <Accordion multiple activeIndex={[]} className="mb-4">
+                        {products.map((product) => (
+                            <AccordionTab key={product._id} header={headerTemplate(product)}>
+                                <div className="p-3">
+                                    <div className="mb-2">
+                                        <strong>Цена:</strong> {product.price}
+                                    </div>
+                                    {product.description && (
+                                        <div className="mb-2">
+                                            <strong>Описание:</strong> {product.description}
+                                        </div>
+                                    )}
+                                    {product.category && (
+                                        <div className="mb-2">
+                                            <strong>Категория:</strong> {product.category.name}
+                                        </div>
+                                    )}
+                                    <div>
+                                        <strong>Складские данные:</strong>
+                                        {renderWarehouseData(product.warehouses)}
+                                    </div>
+                                </div>
+                            </AccordionTab>
+                        ))}
+                    </Accordion>
+
+                    {/* Пагинация */}
+                    <Paginator
+                        first={(lazyParams.page - 1) * lazyParams.rows}
+                        rows={lazyParams.rows}
+                        totalRecords={totalRecords}
+                        onPageChange={handlePageChange}
+                        rowsPerPageOptions={[10, 20, 50, 100]}
+                        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Страница {currentPage} из {totalPages}"
+                        className="p-mt-2"
+                    />
+                </>
+            )}
         </div>
     );
 }
+
+export default Products;
