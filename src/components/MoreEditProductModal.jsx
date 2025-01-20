@@ -19,11 +19,11 @@ export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) =
         setIsLoading(true);
         try {
             const { warehouse, ...updatedProductData } = productData;
-            const response = await axiosInstance.put(`/products/${product.id}`, {
+            const response = await axiosInstance.put(`/products/${product._id}`, {
                 ...updatedProductData,
                 // Передаем id категории, если категория выбрана
                 category: updatedProductData?.category ? updatedProductData.category._id : null,
-                warehouseId: product.warehouse._id,
+                warehouseId: product.warehouses[0].warehouseId,
             });
             toast.success(response.data.message || 'Вы успешно обновили товар');
         } catch (error) {

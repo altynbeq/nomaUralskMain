@@ -1,7 +1,5 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
@@ -22,10 +20,10 @@ export function Products({ title, filterExceedMinStock }) {
     const [lazyParams, setLazyParams] = useState({ page: 1, rows: 20 });
     const [loading, setLoading] = useState(false);
     const [editModalIsVisible, setEditModalIsVisible] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [productSearch, setProductSearch] = useState('');
     const [showFilters, setShowFilters] = useState(false);
-    const [selectedProducts, setSelectedProducts] = useState([]);
     const filterRef = useRef(null);
     const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
 
@@ -43,7 +41,6 @@ export function Products({ title, filterExceedMinStock }) {
             if (filterExceedMinStock) {
                 params.append('filterExceedMinStock', true);
             }
-            // API возвращает товары с полем warehouses (массив объектов: {warehouseId, quantity, minQuantity})
             const response = await axiosInstance.get(
                 `/products/company/${clientId}?${params.toString()}`,
             );
@@ -96,35 +93,49 @@ export function Products({ title, filterExceedMinStock }) {
         <h2 className="text-xl font-semibold text-gray-900">{children}</h2>
     );
 
-    const handleEditClick = () => {
-        if (selectedProducts.length === 0) {
-            toast.error('Пожалуйста, выберите товар для редактирования.');
-            return;
-        }
+    const handleEdit = (product) => {
+        setSelectedProduct(product);
         setEditModalIsVisible(true);
     };
 
-    // Возвращает объект склада из списка warehouses по warehouseId
-    const getWarehouseById = (warehouseId) => {
-        return warehouses.find((wh) => wh._id === warehouseId);
+    // Функции для вычисления общих количеств:
+    const getTotalQuantity = (product) => {
+        if (product.warehouses && product.warehouses.length > 0) {
+            return product.warehouses.reduce((sum, wh) => sum + wh.quantity, 0);
+        }
+        return product.quantity || 0;
+    };
+    const getTotalMinQuantity = (product) => {
+        if (product.warehouses && product.warehouses.length > 0) {
+            return product.warehouses.reduce((sum, wh) => sum + wh.minQuantity, 0);
+        }
+        return product.minQuantity || 0;
     };
 
-    // Заголовок для каждой вкладки аккордеона: отображает название товара и общий остаток (сумма по всем складам)
+    // Фильтрация на клиенте (если включён filterExceedMinStock) – оставить только товары, у которых общий остаток меньше или равен общему миниму
+    const filteredProducts = filterExceedMinStock
+        ? products.filter((product) => getTotalQuantity(product) <= getTotalMinQuantity(product))
+        : products;
+
+    // Заголовок аккордеона
     const headerTemplate = (product) => {
-        const totalQuantity = product.warehouses
-            ? product.warehouses.reduce((sum, wh) => sum + wh.quantity, 0)
-            : product.quantity || 0;
-        const totalMinQuantity = product.warehouses
-            ? product.warehouses.reduce((sum, wh) => sum + wh.minQuantity, 0)
-            : product.minQuantity || 0;
+        const totalQuantity = getTotalQuantity(product);
+        const totalMinQuantity = getTotalMinQuantity(product);
         return (
-            <div className="flex justify-between items-center">
+            <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => handleEdit(product)}
+            >
                 <span className="font-medium">{product.name}</span>
                 <span className="text-sm text-gray-600">
                     Остаток: {totalQuantity} / Мин: {totalMinQuantity}
                 </span>
             </div>
         );
+    };
+
+    const getWarehouseById = (warehouseId) => {
+        return warehouses.find((wh) => wh._id === warehouseId);
     };
 
     // Рендер таблицы складских данных для товара
@@ -176,15 +187,25 @@ export function Products({ title, filterExceedMinStock }) {
                             label="Добавить категорию"
                             className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                         />
-                        <Button
+                        {/* <Button
                             className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                             label="Редактировать"
-                            onClick={handleEditClick}
-                        />
+                            onClick={() => {
+                                if (!selectedProducts || selectedProducts.length === 0) {
+                                    toast.error('Пожалуйста, выберите товар для редактирования.');
+                                    return;
+                                }
+                                setEditModalIsVisible(true);
+                            }}
+                        /> */}
                         <EditProductModal
-                            items={selectedProducts}
+                            items={selectedProduct ? [selectedProduct] : []}
                             isOpen={editModalIsVisible}
-                            onClose={() => setEditModalIsVisible(false)}
+                            onClose={() => {
+                                setEditModalIsVisible(false);
+                                setSelectedProduct(null);
+                                fetchProducts();
+                            }}
                             warehouses={warehouses}
                         />
                         <AddCategoryModal
@@ -237,7 +258,7 @@ export function Products({ title, filterExceedMinStock }) {
             ) : (
                 <>
                     <Accordion multiple activeIndex={[]} className="mb-4">
-                        {products.map((product) => (
+                        {filteredProducts.map((product) => (
                             <AccordionTab key={product._id} header={headerTemplate(product)}>
                                 <div className="p-3">
                                     <div className="mb-2">

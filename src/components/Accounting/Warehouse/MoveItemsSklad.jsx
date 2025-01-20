@@ -77,10 +77,11 @@ const MoveItemsSklad = () => {
     };
 
     const handleItemSelect = (item) => {
+        console.log(item, selectedItems);
         setSelectedItems((prev) => {
-            const exists = prev.find((i) => i.id === item.id);
+            const exists = prev.find((i) => i._id === item._id);
             if (exists) {
-                return prev.filter((i) => i.id !== item.id);
+                return prev.filter((i) => i._id !== item._id);
             }
             return [
                 ...prev,
@@ -95,7 +96,7 @@ const MoveItemsSklad = () => {
     const updateTransferQuantity = (itemId, newQuantity) => {
         setSelectedItems((prev) =>
             prev.map((item) => {
-                if (item.id === itemId) {
+                if (item._id === itemId) {
                     const qty = Number(newQuantity) || 0;
 
                     if (qty > item.quantity) {
@@ -233,9 +234,9 @@ const MoveItemsSklad = () => {
                             <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto mb-4">
                                 {filteredItems.map((item) => (
                                     <div
-                                        key={item.id}
+                                        key={item._id}
                                         className={`p-2 border rounded-xl cursor-pointer ${
-                                            selectedItems.some((si) => si.id === item.id)
+                                            selectedItems.some((si) => si._id === item._id)
                                                 ? 'bg-blue-100 border-blue-300'
                                                 : 'hover:bg-gray-100'
                                         }`}
@@ -243,7 +244,7 @@ const MoveItemsSklad = () => {
                                     >
                                         <div className="flex justify-between">
                                             <span>{item.name}</span>
-                                            <span>Кол: {item.quantity}</span>
+                                            <span>Кол: {item.warehouses[0]?.quantity}</span>
                                         </div>
                                     </div>
                                 ))}
@@ -269,7 +270,8 @@ const MoveItemsSklad = () => {
                                             const targetStock = getTargetWarehouseStock(item);
                                             // Сколько останется на исходном (не допускаем отрицательных)
                                             const remainder =
-                                                item.quantity - (item.transferQuantity || 0);
+                                                item.warehouses[0]?.quantity -
+                                                (item.transferQuantity || 0);
                                             const newTarget =
                                                 targetStock + (item.transferQuantity || 0);
 
@@ -296,7 +298,7 @@ const MoveItemsSklad = () => {
                                                             value={item.transferQuantity}
                                                             onChange={(e) => {
                                                                 updateTransferQuantity(
-                                                                    item.id,
+                                                                    item._id,
                                                                     parseInt(e.value || 0, 10),
                                                                 );
                                                             }}
@@ -307,7 +309,7 @@ const MoveItemsSklad = () => {
 
                                                     {/* Исходный остаток */}
                                                     <div className="text-gray-600">
-                                                        {item.quantity}
+                                                        {item.warehouses[0]?.quantity}
                                                     </div>
 
                                                     {/* Останется */}
