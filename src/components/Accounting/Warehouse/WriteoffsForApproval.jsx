@@ -92,7 +92,7 @@ const WriteoffsForApproval = () => {
         return () => clearTimeout(delayDebounceFn);
     }, [searchTerm]);
     // Подсчет «в ожидании» (pending)
-    const pendingCount = writeOffs.filter((w) => w.status === 'pending').length;
+    const pendingCount = 5;
 
     useEffect(() => {
         if (!warehouses || !warehouses.length) return;
@@ -218,9 +218,9 @@ const WriteoffsForApproval = () => {
         <div className="w-full bg-white subtle-border ">
             {/* Заголовок и блок фильтрации */}
             <div className="border-b flex flex-row justify-between border-gray-200">
-                <div className="p-4">
+                <div className="p-6">
                     <div className="flex items-center space-x-3">
-                        <h3>Заявки на списание</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">Заявки на списание</h3>
                         {pendingCount > 0 && (
                             <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                                 <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
