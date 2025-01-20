@@ -2,32 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { axiosInstance } from '../api/axiosInstance';
-import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-toastify';
 
-export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
-    const clientId = useAuthStore((state) => state.user.companyId || state.user.id);
-    const [productData, setProductData] = useState(product || {});
+export const MoreEditProductModal = ({ isOpen, onClose, product, categories }) => {
+    const [productData, setProductData] = useState(product || null);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        setProductData(product || {});
+        setProductData(product || null);
     }, [product]);
 
     const handleSave = async () => {
         setIsLoading(true);
         try {
-            const response = await axiosInstance.put(
-                `/companies/products/${clientId}/${product._id}`,
-                productData,
-            );
-            if (response.status === 200) {
-                toast.success('Вы успешно обновили товар');
-                // Дополнительно можно обновить список товаров, если необходимо
-            }
+            const { warehouse, ...updatedProductData } = productData;
+            const response = await axiosInstance.put(`/products/${product._id}`, {
+                ...updatedProductData,
+                // Передаем id категории, если категория выбрана
+                category: updatedProductData?.category ? updatedProductData.category._id : null,
+                warehouseId: product.warehouses[0].warehouseId,
+            });
+            toast.success(response.data.message || 'Вы успешно обновили товар');
         } catch (error) {
+            console.error(error);
             toast.error('Ошибка при обновлении товара');
         } finally {
             setIsLoading(false);
@@ -41,6 +41,13 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
             ...prev,
             [field]: value,
         }));
+    };
+
+    // Обработка изменения выбранной категории. Найдем объект категории по его _id.
+    const onCategoryChange = (e) => {
+        const selectedId = e.value;
+        const selectedCategory = categories.find((cat) => cat._id === selectedId) || null;
+        onChange({ value: selectedCategory }, 'category');
     };
 
     const renderFooter = () => (
@@ -75,7 +82,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                         placeholder="Название товара"
                         id="productName"
                         className="border-2 rounded-md p-2"
-                        value={productData.name || ''}
+                        value={productData?.name || ''}
                         onChange={(e) => onChange(e, 'name')}
                     />
                 </div>
@@ -87,7 +94,7 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                         <InputNumber
                             id="price"
                             className="border-2 rounded-md p-2"
-                            value={productData.price || 0}
+                            value={productData?.price}
                             onValueChange={(e) => onChange(e, 'price')}
                             mode="decimal"
                             min={0}
@@ -97,10 +104,10 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                     <div className="col mt-5">
                         <label htmlFor="currentStock text-xs">Остаток</label>
                         <InputNumber
-                            id="currentStock"
+                            id="quantity"
                             className="border-2 rounded-md p-2"
-                            value={productData.currentStock || 0}
-                            onValueChange={(e) => onChange(e, 'currentStock')}
+                            value={productData?.quantity}
+                            onValueChange={(e) => onChange(e, 'quantity')}
                             mode="decimal"
                             min={0}
                             useGrouping={false}
@@ -110,27 +117,25 @@ export const MoreEditProductModal = ({ isOpen, onClose, product }) => {
                         <label htmlFor="minStock text-xs">Мин. Остаток</label>
                         <InputNumber
                             className="border-2 rounded-md p-2"
-                            id="minStock"
-                            value={productData.minStock || 0}
-                            onValueChange={(e) => onChange(e, 'minStock')}
+                            id="minQuantity"
+                            value={productData?.minQuantity}
+                            onValueChange={(e) => onChange(e, 'minQuantity')}
                             mode="decimal"
                             min={0}
                             useGrouping={false}
                         />
                     </div>
                 </div>
-
-                {/* Количество */}
                 <div className="field mt-5">
-                    <label htmlFor="quantity text-xs">Количество</label>
-                    <InputNumber
-                        mode="decimal"
-                        min={0}
-                        useGrouping={false}
-                        className="border-2 rounded-md p-2"
-                        id="quantity"
-                        value={productData.quantity || 0}
-                        onValueChange={(e) => onChange(e, 'quantity')}
+                    <Dropdown
+                        value={productData?.category ? productData.category._id : null}
+                        onChange={onCategoryChange}
+                        options={categories || []}
+                        optionLabel="name"
+                        optionValue="_id"
+                        placeholder="Выберите категорию"
+                        showClear
+                        className="w-full border-2 rounded-md"
                     />
                 </div>
             </div>

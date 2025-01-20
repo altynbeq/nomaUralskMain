@@ -1,25 +1,64 @@
-import React, { useState } from 'react';
-import {
-    FaCheck,
-    FaTimes,
-    FaAngleDown,
-    FaAngleUp,
-    FaClock,
-    FaChevronRight,
-    FaSearch,
-    FaFilter,
-    FaCalendarAlt,
-    FaExclamationTriangle,
-    FaChevronLeft,
-} from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaAngleDown, FaAngleUp, FaExclamationTriangle } from 'react-icons/fa';
 
-// Mock helper functions/data
+// PrimeReact компоненты
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
+import { Calendar } from 'primereact/calendar';
+import { useAuthStore, useCompanyStore } from '../../../store/index';
+import { axiosInstance } from '../../../api/axiosInstance';
+import { formatSlashDate } from '../../../methods/dataFormatter';
+import { addLocale } from 'primereact/api';
+import { toast } from 'react-toastify';
+
+addLocale('ru', {
+    firstDayOfWeek: 1,
+    dayNames: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    dayNamesShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    monthNames: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+    ],
+    monthNamesShort: [
+        'Янв',
+        'Фев',
+        'Мар',
+        'Апр',
+        'Май',
+        'Июн',
+        'Июл',
+        'Авг',
+        'Сен',
+        'Окт',
+        'Ноя',
+        'Дек',
+    ],
+    today: 'Сегодня',
+    clear: 'Очистить',
+});
+
 function getStatusBadge(status) {
     switch (status) {
         case 'pending':
             return 'Ожидание';
         case 'approved':
             return 'Подтверждено';
+        case 'declined':
         case 'rejected':
             return 'Отклонено';
         default:
@@ -27,439 +66,329 @@ function getStatusBadge(status) {
     }
 }
 
-function handleRowClick(submission) {
-    console.log('Row clicked:', submission);
-}
-
-const initialSubmissions = [
-    {
-        id: 1,
-        warehouseName: 'Склад 1',
-        submissionNumber: 'WO-2024-001',
-        requestedBy: 'Иван Иванов',
-        date: '2024-12-20',
-        status: 'pending',
-        items: [{ id: 1, name: 'Item A', quantity: 10, reason: 'Broken' }],
-    },
-    {
-        id: 2,
-        warehouseName: 'Склад 2',
-        submissionNumber: 'WO-2024-002',
-        requestedBy: 'Петр Петров',
-        date: '2024-12-19',
-        status: 'approved',
-        items: [{ id: 2, name: 'Item B', quantity: 5, reason: 'Expired' }],
-    },
-    {
-        id: 3,
-        warehouseName: 'Склад 3',
-        submissionNumber: 'WO-2024-003',
-        requestedBy: 'Ольга Смирнова',
-        date: '2024-12-18',
-        status: 'rejected',
-        items: [{ id: 3, name: 'Item C', quantity: 2, reason: 'Damaged' }],
-    },
-];
-
-// Custom Components
-
-const Card = ({ className = '', children }) => (
-    <div className={`rounded-lg border border-gray-200 bg-white shadow ${className}`}>
-        {children}
-    </div>
-);
-
-const CardHeader = ({ className = '', children }) => (
-    <div className={`p-6 ${className}`}>{children}</div>
-);
-
-const CardTitle = ({ className = '', children }) => (
-    <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>
-);
-
-const CardContent = ({ className = '', children }) => (
-    <div className={`p-6 ${className}`}>{children}</div>
-);
-
-const Button = ({ variant = 'default', size = 'md', className = '', children, ...props }) => {
-    let baseClasses =
-        'inline-flex items-center justify-center rounded-md border border-transparent font-medium transition-colors focus:outline-none';
-    let variantClasses = '';
-    switch (variant) {
-        case 'outline':
-            variantClasses = 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50';
-            break;
-        case 'default':
-        default:
-            variantClasses = 'bg-blue-600 text-white hover:bg-blue-700';
-            break;
-    }
-    let sizeClasses = '';
-    switch (size) {
-        case 'sm':
-            sizeClasses = 'px-2 py-1 text-sm';
-            break;
-        default:
-            sizeClasses = 'px-4 py-2';
-            break;
-    }
-
-    return (
-        <button
-            className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}
-            {...props}
-        >
-            {children}
-        </button>
-    );
-};
-
-const Input = ({ className = '', ...props }) => (
-    <input
-        className={`block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-700 focus:ring-blue-700 focus:outline-none ${className}`}
-        {...props}
-    />
-);
-
-const Badge = ({ className = '', children }) => (
-    <span
-        className={`inline-flex items-center rounded-full bg-gray-200 px-2 py-1 text-sm font-medium text-gray-800 ${className}`}
-    >
-        {children}
-    </span>
-);
-
-// Custom Modal component
-const Modal = ({ open, onClose, children }) => {
-    if (!open) return null;
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
-            <div className="relative z-50 bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full">
-                {children}
-            </div>
-        </div>
-    );
-};
-
 const WriteoffsForApproval = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const clientId = useAuthStore((state) => state.user.companyId);
+    const warehouses = useCompanyStore((state) => state.warehouses);
+
+    const [writeOffs, setWriteOffs] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
+
+    // Поля для поиска и фильтрации
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [startDate, setStartDate] = useState('');
+    const [dateRange, setDateRange] = useState(null);
+    const [selectedWarehouse, setSelectedWarehouse] = useState('');
+    const [warehouseOptions, setWarehouseOptions] = useState([]);
+    // Сворачивание/разворачивание панели с фильтрами
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const itemsPerPage = 10;
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(''); // Для debounce
 
-    // Sample data with pagination
-    const [submissions] = useState(() => {
-        const list = [...initialSubmissions];
-        for (let i = 4; i <= 25; i++) {
-            list.push({
-                id: i,
-                warehouseName: `Склад ${i}`,
-                submissionNumber: `WO-2024-${String(i).padStart(3, '0')}`,
-                requestedBy: 'Test User',
-                date: '2024-12-20',
-                status: 'pending',
-                items: [{ id: i, name: 'Test Item', quantity: 1, reason: 'Test reason' }],
-            });
-        }
-        return list;
-    });
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300); // 300ms задержка
 
-    const filteredSubmissions = submissions.filter((submission) => {
-        const matchesSearch =
-            submission.warehouseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            submission.submissionNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            submission.requestedBy.toLowerCase().includes(searchTerm.toLowerCase());
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
+    // Подсчет «в ожидании» (pending)
+    const pendingCount = 5;
 
-        const matchesDate = !startDate || submission.date === startDate;
-        return matchesSearch && matchesDate;
-    });
+    useEffect(() => {
+        if (!warehouses || !warehouses.length) return;
+        setWarehouseOptions(warehouses.map((wh) => wh.name));
+    }, [warehouses]);
 
-    const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
-    const currentSubmissions = filteredSubmissions.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage,
-    );
+    useEffect(() => {
+        if (!clientId) return;
 
-    const pendingCount = filteredSubmissions.filter((s) => s.status === 'pending').length;
+        const fetchWriteOffs = async () => {
+            setIsLoading(true);
+            try {
+                // Собираем query-параметры
+                const params = new URLSearchParams();
+                params.set('status', 'pending'); // Фильтрация по статусу
+
+                // Фильтрация по диапазону дат
+                if (dateRange && dateRange.length > 0) {
+                    // Если выбрана только одна дата, используем её для начала и конца диапазона
+                    const startDate = new Date(dateRange[0]).toISOString();
+                    const endDate =
+                        dateRange.length === 2 ? new Date(dateRange[1]).toISOString() : startDate; // Если второй даты нет, используем первую
+
+                    params.set('dateRange', JSON.stringify([startDate, endDate]));
+                }
+
+                // Фильтр по складу
+                if (selectedWarehouse) {
+                    params.set('warehouseName', selectedWarehouse);
+                }
+
+                // Фильтр поиска
+                if (debouncedSearchTerm) {
+                    params.set('search', debouncedSearchTerm.trim());
+                }
+
+                // Выполняем запрос
+                const response = await axiosInstance.get(
+                    `/writeOff/${clientId}?${params.toString()}`,
+                );
+                setWriteOffs(response.data);
+            } catch (error) {
+                console.error('Ошибка при получении списаний:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchWriteOffs();
+    }, [clientId, debouncedSearchTerm, selectedWarehouse, dateRange]);
 
     const openModalWithSubmission = (submission) => {
         setSelectedSubmission(submission);
         setIsModalOpen(true);
     };
 
+    const closeModal = () => {
+        setSelectedSubmission(null);
+        setIsModalOpen(false);
+    };
+
+    // 1) Статус
+    const statusBodyTemplate = (rowData) => {
+        return (
+            <span className="inline-flex items-center rounded-full bg-gray-200 px-2 py-1 text-sm font-medium text-gray-800">
+                {getStatusBadge(rowData.status)}
+            </span>
+        );
+    };
+
+    // 2) Подробности (кнопка, открывающая диалог)
+    const detailsBodyTemplate = (rowData) => {
+        return (
+            <Button
+                label="Просмотреть"
+                icon="pi pi-search"
+                className="p-button-text p-button-sm text-blue-700"
+                onClick={() => openModalWithSubmission(rowData)}
+            />
+        );
+    };
+
+    // 3) Дата (форматируем)
+    const dateBodyTemplate = (rowData) => {
+        if (!rowData.createdAt) return '';
+        return formatSlashDate(rowData.createdAt);
+    };
+
+    const updateStatus = async (submissionId, newStatus) => {
+        try {
+            setIsLoading(true);
+
+            await axiosInstance.put(`/writeOff/${clientId}/status/${submissionId}`, {
+                status: newStatus,
+            });
+
+            setWriteOffs((prevWriteOffs) =>
+                prevWriteOffs.map((item) =>
+                    item.id === submissionId ? { ...item, status: newStatus } : item,
+                ),
+            );
+            toast.success('Вы успешно обновили статус товара');
+            closeModal();
+        } catch (error) {
+            toast.error('Не удалось обновить статус товара');
+            console.error('Ошибка при обновлении статуса:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const onApprove = () => {
+        if (!selectedSubmission) return;
+        updateStatus(selectedSubmission.id, 'approved');
+    };
+
+    const onDecline = () => {
+        if (!selectedSubmission) return;
+        updateStatus(selectedSubmission.id, 'declined');
+    };
+
     return (
-        <Card className="w-full bg-white subtle-border ">
-            <CardHeader className="border-b flex flex-row justify-between border-gray-200">
-                <div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <CardTitle>Заявки на списание</CardTitle>
-                            {pendingCount > 0 && (
-                                <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                                    <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
-                                    <span className="text-sm text-yellow-800">
-                                        {pendingCount} ожидают подтверждения
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+        <div className="w-full bg-white subtle-border ">
+            {/* Заголовок и блок фильтрации */}
+            <div className="border-b flex flex-row justify-between border-gray-200">
+                <div className="p-6">
+                    <div className="flex items-center space-x-3">
+                        <h3 className="text-xl font-semibold text-gray-900">Заявки на списание</h3>
+                        {pendingCount > 0 && (
+                            <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                                <FaExclamationTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+                                <span className="text-sm text-yellow-800">
+                                    {pendingCount} в ожидании
+                                </span>
+                            </div>
+                        )}
                     </div>
                     {!isCollapsed && (
                         <div className="mt-4 flex flex-wrap gap-4">
+                            {/* Поиск */}
                             <div className="flex-1 min-w-[200px] relative">
-                                <FaSearch className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                <Input
-                                    placeholder="Поиск по номеру, складу или сотруднику..."
-                                    className="pl-10"
+                                <InputText
+                                    placeholder="Поиск..."
+                                    className="pl-2 border-blue-500 border-2 rounded-md min-h-[44px]"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
 
-                            <div className="flex gap-2">
-                                <div className="relative">
-                                    <FaCalendarAlt className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                    <Input
-                                        type="date"
-                                        className="pl-10"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                    />
-                                </div>
+                            {/* Дата */}
+                            <div className="relative">
+                                <Calendar
+                                    showIcon
+                                    locale="ru"
+                                    selectionMode="range"
+                                    placeholder="Выберите дату"
+                                    type="date"
+                                    className="pl-2 min-h-[44px] border-blue-500 border-2 rounded-md"
+                                    value={dateRange}
+                                    onChange={(e) => setDateRange(e.target)}
+                                />
+                            </div>
 
-                                <Button
-                                    variant="outline"
-                                    className="flex items-center gap-2 whitespace-nowrap"
-                                >
-                                    <FaFilter className="w-4 h-4" />
-                                    Фильтры
-                                </Button>
+                            <div className="min-w-[200px]">
+                                <Dropdown
+                                    value={selectedWarehouse}
+                                    options={warehouseOptions}
+                                    showClear
+                                    onChange={(e) => setSelectedWarehouse(e.value)}
+                                    optionLabel="name"
+                                    placeholder="Выберите склад"
+                                    className="w-full border-blue-500 border-2 rounded-md text-white"
+                                />
                             </div>
                         </div>
                     )}
                 </div>
                 <div
-                    className="mr-4 cursor-pointer text-2xl"
+                    className="mr-4 cursor-pointer text-2xl flex items-center"
                     onClick={() => setIsCollapsed(!isCollapsed)}
                 >
                     {isCollapsed ? <FaAngleDown /> : <FaAngleUp />}
                 </div>
-            </CardHeader>
+            </div>
+
+            {/* DataTable из PrimeReact */}
             {!isCollapsed && (
-                <CardContent className="p-6">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-200">
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                                        Номер заявки
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                                        Склад
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                                        Запросил
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                                        Дата
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                                        Статус
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                                        Подробности
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentSubmissions.map((submission) => (
-                                    <tr
-                                        key={submission.id}
-                                        className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-                                        onClick={() => {
-                                            handleRowClick(submission);
-                                            openModalWithSubmission(submission);
-                                        }}
-                                    >
-                                        <td className="px-4 py-4 text-sm text-gray-900">
-                                            {submission.submissionNumber}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-gray-900 font-medium">
-                                            {submission.warehouseName}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-gray-900">
-                                            {submission.requestedBy}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-gray-900">
-                                            {new Date(submission.date).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-gray-900">
-                                            <Badge className="font-normal">
-                                                {getStatusBadge(submission.status)}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-blue-700">
-                                            <div className="flex items-center">
-                                                Просмотреть
-                                                <FaChevronRight className="w-4 h-4 ml-1" />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Pagination */}
-                    <div className="mt-4 flex items-center justify-between">
-                        <div className="text-sm text-gray-500">
-                            Показано {(currentPage - 1) * itemsPerPage + 1} -{' '}
-                            {Math.min(currentPage * itemsPerPage, filteredSubmissions.length)} из{' '}
-                            {filteredSubmissions.length} заявок
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="flex items-center"
-                            >
-                                <FaChevronLeft className="w-4 h-4" />
-                            </Button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                .filter((page) => {
-                                    const distance = Math.abs(page - currentPage);
-                                    return (
-                                        distance === 0 ||
-                                        distance === 1 ||
-                                        page === 1 ||
-                                        page === totalPages
-                                    );
-                                })
-                                .map((page, index, array) => {
-                                    const prevPage = array[index - 1];
-                                    const shouldShowEllipsis = prevPage && page - prevPage > 1;
-                                    return (
-                                        <React.Fragment key={page}>
-                                            {shouldShowEllipsis && (
-                                                <span className="px-2">...</span>
-                                            )}
-                                            <Button
-                                                variant={
-                                                    currentPage === page ? 'default' : 'outline'
-                                                }
-                                                size="sm"
-                                                onClick={() => setCurrentPage(page)}
-                                                className="w-8"
-                                            >
-                                                {page}
-                                            </Button>
-                                        </React.Fragment>
-                                    );
-                                })}
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="flex items-center"
-                            >
-                                <FaChevronRight className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Custom Modal for details */}
-                    <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                        {selectedSubmission && (
-                            <div className="space-y-6">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                    Подробности заявки
-                                </h3>
-                                <div className="space-y-2 text-sm text-gray-700">
-                                    <p>
-                                        <span className="font-medium text-gray-900">Склад:</span>{' '}
-                                        {selectedSubmission.warehouseName}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium text-gray-900">Номер:</span>{' '}
-                                        {selectedSubmission.submissionNumber}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium text-gray-900">Статус:</span>{' '}
-                                        {getStatusBadge(selectedSubmission.status)}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
-                                        Товары
-                                    </h4>
-                                    <div className="overflow-x-auto border rounded-md">
-                                        <table className="w-full text-sm text-gray-700">
-                                            <thead>
-                                                <tr className="border-b bg-gray-50">
-                                                    <th className="px-4 py-2 text-left font-medium text-gray-900">
-                                                        Наименование
-                                                    </th>
-                                                    <th className="px-4 py-2 text-left font-medium text-gray-900">
-                                                        Количество
-                                                    </th>
-                                                    <th className="px-4 py-2 text-left font-medium text-gray-900">
-                                                        Причина
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {selectedSubmission.items.map((item) => (
-                                                    <tr
-                                                        key={item.id}
-                                                        className="border-b hover:bg-gray-50"
-                                                    >
-                                                        <td className="px-4 py-2">{item.name}</td>
-                                                        <td className="px-4 py-2">
-                                                            {item.quantity}
-                                                        </td>
-                                                        <td className="px-4 py-2">{item.reason}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-end space-x-2 pt-4 border-t">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            // Implement deny logic
-                                            console.log('Denied');
-                                            setIsModalOpen(false);
-                                        }}
-                                    >
-                                        Отклонить
-                                    </Button>
-                                    <Button
-                                        onClick={() => {
-                                            // Implement approve logic
-                                            console.log('Approved');
-                                            setIsModalOpen(false);
-                                        }}
-                                    >
-                                        Подтвердить
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                    </Modal>
-                </CardContent>
+                <div className="p-4">
+                    <DataTable
+                        value={writeOffs}
+                        loading={isLoading}
+                        paginator
+                        rows={10}
+                        removableSort
+                        sortMode="single"
+                        className="w-full"
+                        emptyMessage="Нет данных для отображения"
+                        onRowClick={(e) => openModalWithSubmission(e.data)}
+                    >
+                        <Column field="id" header="Номер заявки" style={{ minWidth: '160px' }} />
+                        <Column
+                            header="Склад"
+                            field="warehouse.name"
+                            style={{ minWidth: '160px' }}
+                        />
+                        <Column
+                            header="Запросил"
+                            body={(rowData) =>
+                                rowData.user?.name + '\n' + rowData.user?.email ?? '—'
+                            }
+                            style={{ minWidth: '180px' }}
+                        />
+                        <Column
+                            header="Дата"
+                            body={dateBodyTemplate}
+                            style={{ minWidth: '120px' }}
+                        />
+                        <Column
+                            header="Статус"
+                            body={statusBodyTemplate}
+                            style={{ minWidth: '120px' }}
+                        />
+                        <Column
+                            header="Подробности"
+                            body={detailsBodyTemplate}
+                            style={{ minWidth: '150px' }}
+                        />
+                    </DataTable>
+                </div>
             )}
-        </Card>
+
+            {/* Диалоговое окно для просмотра/подтверждения/отклонения */}
+            <Dialog visible={isModalOpen} onHide={closeModal} header="Подробности заявки" modal>
+                {selectedSubmission && (
+                    <div className="space-y-6">
+                        <div className="space-y-2 text-sm text-gray-700">
+                            <p>
+                                <span className="font-medium text-gray-900">Склад:</span>{' '}
+                                {selectedSubmission?.warehouse?.name ?? '—'}
+                            </p>
+                            <p>
+                                <span className="font-medium text-gray-900">Номер заявки:</span>{' '}
+                                {selectedSubmission.id}
+                            </p>
+                            <p>
+                                <span className="font-medium text-gray-900">Статус:</span>{' '}
+                                {getStatusBadge(selectedSubmission.status)}
+                            </p>
+                            <p>
+                                <span className="font-medium text-gray-900">Причина:</span>{' '}
+                                {selectedSubmission.reason ?? '—'}
+                            </p>
+                            <p>
+                                <span className="font-medium text-gray-900">Кол-во:</span>{' '}
+                                {selectedSubmission.requestedAmount ?? '—'}
+                            </p>
+                            <p>
+                                <span className="font-medium text-gray-900">Дата:</span>{' '}
+                                {formatSlashDate(selectedSubmission.createdAt)}
+                            </p>
+                        </div>
+
+                        {/* Можно отобразить дополнительные поля, если необходимо */}
+                        <div className="space-y-2 text-sm text-gray-700">
+                            <h4 className="font-semibold">Товар:</h4>
+                            <p>
+                                <span className="font-medium text-gray-900">Наименование:</span>{' '}
+                                {selectedSubmission?.product?.name ?? '—'}
+                            </p>
+                            <p>
+                                <span className="font-medium text-gray-900">Цена:</span>{' '}
+                                {selectedSubmission?.product?.price ?? '—'}
+                            </p>
+                            <img
+                                src={`https://nomalytica-back.onrender.com${selectedSubmission.imagePath}`}
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-end space-x-2 pt-4 border-t">
+                            <Button
+                                label="Отклонить"
+                                className="bg-black text-white  p-2"
+                                onClick={onDecline}
+                                disabled={isLoading}
+                            />
+                            <Button
+                                className="bg-blue-600 text-white hover:bg-blue-700 p-2"
+                                label="Подтвердить"
+                                onClick={onApprove}
+                                disabled={isLoading}
+                            />
+                        </div>
+                    </div>
+                )}
+            </Dialog>
+        </div>
     );
 };
 

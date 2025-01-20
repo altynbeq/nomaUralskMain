@@ -127,7 +127,7 @@ const App = () => {
     }, [setSubUserShifts, setSubUserTodayShifts, user, user?.id, user?.role]);
 
     useEffect(() => {
-        const fetchCompanyProductsAndWarehouses = async () => {
+        (async () => {
             const companyId = isEmployee() ? user?.companyId : user?.id;
 
             if (!companyId) {
@@ -135,23 +135,30 @@ const App = () => {
             }
 
             try {
-                const response = await axiosInstance.get(`/companies/${companyId}`);
-                setCategories(response.data.categories);
-                setProducts(response.data.products);
-                if (response.data.warehouses) {
-                    setWarehouses(
-                        response.data.warehouses.map((warehouseName, index) => ({
-                            warehouseName,
-                            id: index.toString(),
-                        })),
-                    );
-                }
+                const response = await axiosInstance.get(`/warehouses/${companyId}`);
+                setWarehouses(response.data);
             } catch (error) {
                 console.error('Error fetching company data:', error);
             }
-        };
-        fetchCompanyProductsAndWarehouses();
-    }, [isEmployee, setCategories, setProducts, setWarehouses, user?.companyId, user?.id]);
+        })();
+    }, [isEmployee, setWarehouses, user?.companyId, user?.id]);
+
+    useEffect(() => {
+        (async () => {
+            const companyId = isEmployee() ? user?.companyId : user?.id;
+
+            if (!companyId) {
+                return;
+            }
+
+            try {
+                const response = await axiosInstance.get(`/category/${companyId}`);
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Error fetching company data:', error);
+            }
+        })();
+    }, [isEmployee, setCategories, user?.companyId, user?.id]);
 
     return (
         <div className={currentMode === 'Dark' ? 'dark' : ''}>

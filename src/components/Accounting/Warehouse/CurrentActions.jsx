@@ -227,7 +227,7 @@ const CurrentActions = () => {
     return (
         <div className="p-6 bg-white min-w-[100%] subtle-border">
             <div className="flex flex-row justify-between">
-                <div className="flex mb-4 flex-row gap-2">
+                <div className="flex flex-row gap-2">
                     <CardTitle>Текущие действия</CardTitle>
                     {pendingCount > 0 && (
                         <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">

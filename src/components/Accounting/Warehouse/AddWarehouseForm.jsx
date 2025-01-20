@@ -110,8 +110,8 @@ export const AddWarehouseForm = ({
                     <Dropdown
                         value={formData.warehouse}
                         onChange={(e) => handleDropdownChange(e.value, 'warehouse')}
-                        options={warehouses}
-                        optionLabel="warehouseName"
+                        options={warehouses.map((w) => w.name)}
+                        optionLabel="name"
                         placeholder="Склад"
                         className={`border-blue-500 border-2 min-w-[100%] rounded-lg focus:ring-2 focus:ring-blue-300 max-w-[250px] ${errors.warehouse ? 'border-red-500' : ''}`}
                         showClear

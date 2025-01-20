@@ -3,7 +3,7 @@ import { Calendar } from 'primereact/calendar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
-import { formatDate } from '../../../methods/dataFormatter';
+import { formatSlashDate } from '../../../methods/dataFormatter';
 import { FaSearch, FaRegCalendarAlt, FaFilter } from 'react-icons/fa';
 
 export function WriteOffs({ title, writeOffs }) {
@@ -22,7 +22,7 @@ export function WriteOffs({ title, writeOffs }) {
                 const startDate = new Date(dateRange[0]).setHours(0, 0, 0, 0);
                 const endDate = new Date(dateRange[1]).setHours(23, 59, 59, 999);
                 filteredWriteOffs = filteredWriteOffs.filter((writeOff) => {
-                    const writeOffDate = new Date(writeOff.date).getTime();
+                    const writeOffDate = new Date(writeOff.createdAt).getTime();
                     return writeOffDate >= startDate && writeOffDate <= endDate;
                 });
             }
@@ -35,13 +35,13 @@ export function WriteOffs({ title, writeOffs }) {
 
             const groupedData = {};
             filteredWriteOffs.forEach((writeOff) => {
-                const date = new Date(writeOff.date).toISOString().split('T')[0];
+                const date = new Date(writeOff.createdAt).toISOString().split('T')[0];
                 if (!groupedData[date]) {
                     groupedData[date] = { date, writeOffs: [], totalSum: 0, totalQuantity: 0 };
                 }
                 groupedData[date].writeOffs.push(writeOff);
-                groupedData[date].totalSum += writeOff.product.name;
-                groupedData[date].totalQuantity += parseInt(writeOff.quantity, 10);
+                groupedData[date].totalSum += writeOff.product.price;
+                groupedData[date].totalQuantity += parseInt(writeOff.requestedAmount, 10);
             });
 
             const groupedWriteOffsArray = Object.values(groupedData);
@@ -66,14 +66,14 @@ export function WriteOffs({ title, writeOffs }) {
                     rows={5}
                 >
                     <Column field="product.name" header="Наименование товара" />
-                    <Column field="quantity" header="Количество" />
-                    <Column field="productName.Сумма" header="Сумма" />
+                    <Column field="requestedAmount" header="Количество" />
+                    <Column field="product.price" header="Сумма" />
                     <Column
-                        field="date"
+                        field="createdAt"
                         header="Дата списания"
-                        body={(rowData) => formatDate(rowData.date)}
+                        body={(rowData) => formatSlashDate(rowData.createdAt)}
                     />
-                    <Column field="responsible.name" header="Ответственный" />
+                    <Column field="user.name" header="Ответственный" />
                 </DataTable>
             </div>
         );
@@ -85,30 +85,29 @@ export function WriteOffs({ title, writeOffs }) {
             <div className="flex flex-col gap-2">
                 <p>
                     <span className="font-bold text-lg">Наименование товара:</span>{' '}
-                    {selectedRow.productName?.НоменклатураНаименование}
+                    {selectedRow.product?.name}
                 </p>
                 <p>
-                    <span className="font-bold text-lg">Количество:</span> {selectedRow.quantity}
+                    <span className="font-bold text-lg">Количество:</span>{' '}
+                    {selectedRow.requestedAmount}
                 </p>
                 <p>
-                    <span className="font-bold text-lg">Сумма:</span>{' '}
-                    {selectedRow.productName?.Сумма}₸
+                    <span className="font-bold text-lg">Сумма:</span> {selectedRow.product?.price}
                 </p>
                 <p>
                     <span className="font-bold text-lg">Дата списания:</span>{' '}
-                    {formatDate(selectedRow.date)}
+                    {formatSlashDate(selectedRow.createdAt)}
                 </p>
                 <p>
                     <span className="font-bold text-lg">Ответственный:</span>{' '}
-                    {selectedRow.responsible?.name}
+                    {selectedRow.user?.name}
                 </p>
-                <p>
+                {/* <p>
                     <span className="font-bold text-lg">Магазин:</span>{' '}
                     {selectedRow.organization?.storeName}
-                </p>
+                </p> */}
                 <p>
-                    <span className="font-bold text-lg">Cклад:</span>{' '}
-                    {selectedRow.warehouse?.warehouseName}
+                    <span className="font-bold text-lg">Cклад:</span> {selectedRow.warehouse?.name}
                 </p>
                 <p>
                     <span className="font-bold text-lg">Причина:</span> {selectedRow.reason}
@@ -116,7 +115,7 @@ export function WriteOffs({ title, writeOffs }) {
                 <div className="flex justify-center">
                     <img
                         className="w-full h-auto max-w-md rounded-lg"
-                        src={`https://nomalytica-back.onrender.com${selectedRow?.file?.objectURL}`}
+                        src={`https://nomalytica-back.onrender.com${selectedRow?.imagePath}`}
                     />
                 </div>
             </div>
@@ -166,7 +165,7 @@ export function WriteOffs({ title, writeOffs }) {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={rowExpansionTemplate}
-                dataKey="date"
+                dataKey="id"
                 breakpoint="960px"
                 paginator
                 rows={10}

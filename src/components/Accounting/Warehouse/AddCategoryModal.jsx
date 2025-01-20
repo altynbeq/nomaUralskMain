@@ -22,11 +22,11 @@ export const AddCategoryModal = ({ visible, onClose }) => {
             if (!companyId) {
                 throw Error;
             }
-            const response = await axiosInstance.post('companies/create-category', {
-                category,
+            const response = await axiosInstance.post('category', {
+                name: category,
                 companyId,
             });
-            if (response.status === 200) {
+            if (response.status === 201) {
                 toast.success('Категория успешно добавлена');
                 setCategories(categories.push(category));
                 onClose(false);
