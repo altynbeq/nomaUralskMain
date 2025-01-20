@@ -175,18 +175,20 @@ export function Products({ title, filterExceedMinStock }) {
     };
 
     return (
-        <div className="mx-auto bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 rounded-2xl subtle-border">
+        <div className="mx-6 bg-white dark:text-gray-200 dark:bg-secondary-dark-bg my-3 p-4 rounded-2xl subtle-border">
             <div className="flex flex-col justify-between mb-4">
                 <div className="flex items-center justify-between flex-col md:flex-row mb-5">
                     <div className="flex text-[1rem] font-semibold">
                         <CardTitle>{title}</CardTitle>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-center">
-                        <Button
-                            onClick={() => setShowAddCategoryModal(true)}
-                            label="Добавить категорию"
-                            className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
-                        />
+                        {!filterExceedMinStock && (
+                            <Button
+                                onClick={() => setShowAddCategoryModal(true)}
+                                label="Добавить категорию"
+                                className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
+                            />
+                        )}
                         {/* <Button
                             className="bg-blue-500 text-white flex items-center gap-2 px-4 py-2 rounded-2xl hover:bg-blue-600 focus:ring-2 focus:ring-blue-300"
                             label="Редактировать"
